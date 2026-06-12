@@ -1,0 +1,267 @@
+# Desktop UI Sprint 2 — Template Migration and Member Surface Polish
+
+**Status:** Checkpoint 0 complete — Checkpoint 1 plan ready — implementation not started  
+**Branch:** `desktop-ui-sprint-2-template-migration`  
+**Core principle:** Use Sprint 1 foundation to migrate member-facing surfaces into shared templates. **Not** a functionality, organizer, or mobile redesign sprint.
+
+## Sprint 1 handoff
+
+| Item | Value |
+|------|-------|
+| Final implementation commit | `ed3dcf2` (CP7) |
+| Rollback tag | `desktop-ui-sprint-1-cp7-baseline` |
+| Rollback command | `git reset --hard desktop-ui-sprint-1-cp7-baseline` |
+| Migrated directories (Sprint 1) | `/events`, `/people`, `/explore` |
+| Primitives ready | `DirectoryTemplate`, `DetailTemplate`, `EmptyState`, `MediaSurfaceFallback`, `card-surface`, shell contract |
+
+## Hard rules (all checkpoints)
+
+- No route, auth, API, schema, permission, onboarding, payment, upload, or moderation logic changes
+- No new privacy-sensitive profile fields; no adult-media visibility changes
+- No public landing/login redesign; no organizer/convention operations redesign
+- Desktop changes default to `lg+`; 768–1023px is protected handoff territory
+- Shared template changes affecting mobile must be documented in [`UI_DESKTOP_SPRINT_1_MOBILE_SAFETY_REPORT.md`](UI_DESKTOP_SPRINT_1_MOBILE_SAFETY_REPORT.md)
+
+## Checkpoint progress
+
+| CP | Scope | Status |
+|----|-------|--------|
+| 0 | Sprint 1 verification gate | **Complete** |
+| 1 | DirectoryTemplate migration plan | **Complete** (this doc) |
+| 2 | Low-risk directory migrations (groups, vendors, presenters) | Pending |
+| 3 | Higher-complexity directories (education, media, conventions, places, orgs) | Pending |
+| 4 | DetailTemplate audit + plan | Pending |
+| 5 | Low-risk detail migrations | Pending |
+| 6 | Profile, group, org, event, convention detail refinement | Pending |
+| 7 | Desktop hierarchy polish (`lg+` only) | Pending |
+| 8 | Sprint 2 verification + screenshot matrix | Pending |
+
+---
+
+## Checkpoint 0 — Sprint 1 verification gate
+
+| Check | Result | Notes |
+|-------|--------|-------|
+| CP7 committed | `ed3dcf2` | Copy + media fallbacks |
+| Rollback tag | `desktop-ui-sprint-1-cp7-baseline` | End of Sprint 1 implementation |
+| `npm run typecheck -w web` | Pass | |
+| `npm run build -w web` | Pass | |
+| `npm run test:e2e:smoke` | **76 passed**, 5 failed, 3 skipped | Pre-existing failures (do not fix in Sprint 2 unless regression): landing H1 copy drift; `/groups` and `/orgs` AuthGate on public smoke |
+| `npm run audit:ui-desktop` | Partial | Route/component/design inventories refreshed; screenshot capture blocked (dev server not running). Baseline: 186 desktop screenshots from Sprint 1 audit packet |
+| Responsive screenshot matrix | Deferred | Full matrix scheduled for Sprint 2 CP8 |
+| Sprint 2 branch | `desktop-ui-sprint-2-template-migration` | Created from tagged Sprint 1 baseline |
+
+---
+
+## Checkpoint 1 — DirectoryTemplate migration plan
+
+### Reference implementations
+
+| Route | File | Pattern |
+|-------|------|---------|
+| `/events` | `packages/web/src/app/events/EventsDiscoverPage.tsx` | 3-col, `FilterSheet`, `desktopAsideFrom="xl"` |
+| `/people` | `packages/web/src/app/discovery/FindPeopleDiscoverPage.tsx` | 3-col, custom `header`, `desktopAsideFrom="lg"`, `shellOuterClass` wrapper |
+| `/explore` | `packages/web/src/app/explore/ExploreDashboardPage.tsx` | DirectoryTemplate (hub variant) |
+
+### DirectoryTemplate slot API
+
+| Slot | Use |
+|------|-----|
+| `title` / `description` / `headerActions` | Default `PageHeader` |
+| `header` | Custom header (People, Orgs hero) |
+| `toolbar` | Search + `DirectoryFilterButton` + sort |
+| `resultSummary` | Count line |
+| `desktopSidebar` | Left rail (`hidden lg:block`) |
+| `desktopAside` | Right rail (`lg` or `xl` via `desktopAsideFrom`) |
+| `children` | Main list/grid |
+| `footer` | Below grid |
+
+Shell: `shellDirectoryClass` (no nested `max-w-[1600px]` islands). Parent pages should use `shellOuterClass` like People.
+
+### Optional template extensions (evaluate in CP2, not blockers)
+
+| Extension | Why | Routes affected |
+|-----------|-----|-----------------|
+| `layout="two-column"` | Skip empty left grid track when only `desktopAside` is set | `/orgs`, `/media` |
+| `toolbarBand` or wider `toolbar` | Full-width chip rows above grid | `/vendors`, `/groups`, `/orgs` |
+
+---
+
+### Route assessments
+
+#### `/groups` — `GroupsDiscoverPage.tsx`
+
+| Area | Current |
+|------|---------|
+| Layout | Manual 3-col inside `max-w-[1440px]` |
+| Left rail | `GroupsDiscoverLeftRail` (section nav + filters) |
+| Right rail | `GroupsRightRail` (desktop); duplicated at bottom when sparse results |
+| Filters | Inline mobile drawer (not `FilterSheet`) |
+| Cards | `GroupDiscoverListCard` vertical list |
+| Empty/loading | `GroupSkeleton`, `EmptyState` |
+| Mobile | Filter drawer, scope tabs, sort in main column |
+
+| Migrate? | **Partial** |
+| Batch | CP2 (with vendors, presenters) |
+| Slot plan | `toolbar` (search, sort, `DirectoryFilterButton`), `desktopSidebar`, `desktopAside`, `children` (scope tabs + list) |
+| Risks | FilterSheet swap UX; sparse right-rail-at-bottom; left rail includes nav not just filters; drop 1440px island |
+
+#### `/vendors` — `vendors/page.tsx`
+
+| Area | Current |
+|------|---------|
+| Layout | Manual 3-col inside `max-w-[1600px]`; header above grid |
+| Left rail | `VendorsFiltersPanel` |
+| Right rail | `VendorsRightRail` |
+| Filters | Already `DirectoryFilterButton` + `FilterSheet` |
+| Cards | `VendorCard` grid |
+| Empty/loading | Bone skeleton, `EmptyState` |
+
+| Migrate? | **Partial (closest fit)** |
+| Batch | **CP2 first** (recommended lead) |
+| Slot plan | Custom `header` (title, trust note), `headerActions` (List shop), `toolbar` (search + category chips), sidebars, `children` |
+| Risks | Multi-part header; mobile CTA hide rule; category chips placement |
+
+#### `/presenters` — `presenters/page.tsx`
+
+| Area | Current |
+|------|---------|
+| Layout | Single column `max-w-5xl` |
+| Rails | None |
+| Filters | Search, sort pills, expertise tag chips (always visible) |
+| Cards | `PresenterCard` grid + load more |
+| Empty/loading | `EmptyState`, loading in grid area |
+| Mobile | Hero card, stacked toolbar, tag wrap |
+
+| Migrate? | **High / easy** |
+| Batch | **CP2** |
+| Slot plan | Custom `header` (hero card with CTAs), `toolbar` (search, sort, tags), `children` (grid), `footer` (load more) |
+| Risks | Hero is a bordered card not plain `PageHeader`; tag chips always visible on mobile |
+
+#### `/orgs` — `orgs/page.tsx` (`OrgsListPage`)
+
+| Area | Current |
+|------|---------|
+| Layout | `OrganizationsHero` + manual 2-col `max-w-[1600px]` |
+| Left rail | None |
+| Right rail | `OrganizationsRightRail` |
+| Filters | Search, sort, horizontal chip row (always visible) |
+| Cards | `OrgDirectoryCard` responsive grid (up to 4 cols at 1800px) |
+| Empty/loading | `CardSkeleton`, `EmptyState` |
+
+| Migrate? | **Partial** |
+| Batch | **CP3** |
+| Slot plan | `header` = `OrganizationsHero`, `toolbar` (search, sort, chips), `desktopAside` only |
+| Risks | 2-col vs template 3-track grid; hero marketing block; ultra-wide card breakpoints |
+
+#### `/education` — `EducationDiscoverPage.tsx`
+
+| Area | Current |
+|------|---------|
+| Layout | Manual 3-col `max-w-[1600px]`; multi-view via `?view=` |
+| Left rail | `EducationLeftRail` (nav + topic chips) |
+| Right rail | `EducationRightRail` |
+| Filters | Topics drawer mobile; search inside center column |
+| Cards | Hub carousels, paths, educators, article grid (view-dependent) |
+| Empty/loading | Catalogue skeleton, `EmptyState` |
+
+| Migrate? | **Medium–hard** |
+| Batch | **CP3 last** |
+| Slot plan | Custom `header` or view-specific; `desktopSidebar`, `desktopAside`; center stays rich (not generic card grid) |
+| Risks | Multi-view routing; center hero/search placement; carousel snap scroll; nav+filter hybrid left rail |
+
+#### `/media` — `media/page.tsx`
+
+| Area | Current |
+|------|---------|
+| Layout | Manual 2-col `max-w-[1440px]` |
+| Right rail | `MediaRightRail` (desktop column + **mobile duplicate below list**) |
+| Filters | Format tabs, topic chips, Topics drawer |
+| Cards | `MediaChannelCard` vertical list |
+| Empty/loading | `FeedCardSkeleton`, `MediaEmptyPanel` |
+
+| Migrate? | **Medium** |
+| Batch | **CP3** |
+| Slot plan | `toolbar`, `desktopAsideFrom="lg"`, mobile rail in `children`/`footer` |
+| Risks | Dual right-rail mount; format tabs vs FilterSheet |
+
+#### `/conventions` — `ConventionsDiscoverPage.tsx`
+
+| Area | Current |
+|------|---------|
+| Layout | Manual 2-col `max-w-[1400px]` |
+| Left rail | `ConventionsLeftRail` (nav + filters) |
+| Right rail | None |
+| Filters | Inline mobile drawer |
+| Cards | `ConventionsFeaturedRow` + `ConventionsListRow` |
+| Empty/loading | Pulse skeletons, `EmptyState` |
+
+| Migrate? | **Medium–easy** |
+| Batch | **CP3** (after places) |
+| Slot plan | `title`/`description`, `desktopSidebar`, `headerActions` (submit CTA), `children` |
+| Risks | Sidebar-only empty third column; `mine=1` stub; FilterSheet migration |
+
+#### `/places` — `CommunityPlacesBrowse.tsx` via `places/page.tsx`
+
+| Area | Current |
+|------|---------|
+| Layout | Single column `max-w-7xl` |
+| Rails | None |
+| Filters | Category chips only |
+| Cards | Inline list cards (not shared component) |
+| Empty/loading | Text loading, `EmptyState` |
+
+| Migrate? | **High / easy** |
+| Batch | **CP3 first** (prove sidebar-less path) |
+| Slot plan | `title`, `toolbar` (chips), `children`, `footer` (suggest form + browse links) |
+| Risks | Weak loading UX; URL category sync is read-only today (preserve behavior) |
+
+---
+
+### Recommended migration order
+
+**Checkpoint 2 (low-risk):**
+
+1. `/vendors` — already uses `DirectoryFilterButton` + `FilterSheet`
+2. `/presenters` — sidebar-less, simple grid
+3. `/groups` — 3-col like Events; needs FilterSheet standardization
+
+**Checkpoint 3 (higher complexity):**
+
+1. `/places` — sidebar-less proof
+2. `/conventions` — left-rail list pattern
+3. `/media` — right-rail + mobile duplication
+4. `/orgs` — hero + 2-col
+5. `/education` — richest hub; do last
+
+---
+
+### Sprint 2 checkpoints 4–8 (outline)
+
+**CP4 — DetailTemplate audit** (plan only): `/profile`, `/groups/:id`, `/orgs/:slug`, `/events/:id`, `/vendors/:id`, `/presenters/:username`, `/education/:slug`, `/education/series/:slug`, `/media/:slug`, `/conventions/:slug`. Document hero, tabs, sidebar, CTAs, safety controls, mobile behavior before any code.
+
+**CP5 — Low-risk detail batch:** vendor detail, presenter profile, education article, media show (if structurally simple).
+
+**CP6 — Higher-risk detail batch:** profile, group, org hub, event detail, convention hub (layout via template only; preserve all actions).
+
+**CP7 — Desktop hierarchy polish (`lg+` only):** headers, rail grouping, CTA clarity, duplicate nav removal. No redesign.
+
+**CP8 — Verification:** typecheck, build, full smoke, audit packet with dev server, screenshot matrix per Sprint 2 spec.
+
+---
+
+## Sprint 3 scope (deferred)
+
+Organizer/convention operations: separate shells, program grids, schedule canvases, door mode. **Out of Sprint 2 scope** except public-facing org/event/convention **display** pages in CP6.
+
+## Rollback (Sprint 2)
+
+| Tag | When |
+|-----|------|
+| `desktop-ui-sprint-1-cp7-baseline` | Before any Sprint 2 work |
+| `desktop-ui-sprint-2-cp2-baseline` | TBD after CP2 |
+| `desktop-ui-sprint-2-cp3-baseline` | TBD after CP3 |
+
+```powershell
+git reset --hard desktop-ui-sprint-1-cp7-baseline  # undo all Sprint 2 work
+```
