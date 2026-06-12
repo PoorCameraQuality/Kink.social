@@ -1,0 +1,70 @@
+import { Link } from 'react-router-dom'
+import EventSaveButton from '@/components/events/EventSaveButton'
+import PlaceholderAvatar from '@/components/PlaceholderAvatar'
+import { demoMockImageUrl } from '@/data/mock-data'
+import type { MockEvent } from '@/data/types'
+
+function HighlightCard({ event, compact }: { event: MockEvent; compact?: boolean }) {
+  const heroSrc = event.imageUrl ?? event.bannerUrl ?? demoMockImageUrl(`evt-hi-${String(event.id)}`, 480, 280)
+  const preview = event.connectionRsvpPreview?.slice(0, 3) ?? []
+  const showFeaturedBadge = event.featured === true
+
+  return (
+    <article
+      className={`relative shrink-0 snap-start overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)] ${
+        compact ? 'w-[min(72vw,240px)]' : 'w-[min(82vw,280px)] sm:w-[280px]'
+      }`}
+    >
+      {showFeaturedBadge ?
+        <span className="absolute left-3 top-3 z-10 rounded-md bg-dc-accent px-2 py-0.5 text-[10px] font-bold tracking-wide text-dc-accent-foreground">
+          Featured
+        </span>
+      : null}
+      <Link to={`/events/${event.id}`} className="block">
+        <div className={`w-full bg-dc-surface-muted ${compact ? 'aspect-[2/1]' : 'aspect-[16/10]'}`}>
+          <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
+        </div>
+        <div className="p-2.5 sm:p-3">
+          <h3 className="line-clamp-2 text-sm font-semibold text-dc-text">{event.title}</h3>
+          <p className="mt-0.5 text-xs text-dc-text-muted">{event.date}</p>
+          <div className="mt-1.5 flex items-center gap-2">
+            {preview.length > 0 ?
+              <span className="flex -space-x-1.5" aria-hidden>
+                {preview.map((p, i) =>
+                  p.avatarUrl ?
+                    <img key={p.username} src={p.avatarUrl} alt="" className="h-5 w-5 rounded-full ring-2 ring-dc-elevated-solid" style={{ zIndex: i }} />
+                  : <PlaceholderAvatar key={p.username} size="sm" className="!h-5 !w-5" />,
+                )}
+              </span>
+            : null}
+            <span className="text-[11px] text-dc-muted">
+              {event.rsvpCount > 0 ? `${event.rsvpCount} going` : 'RSVP on event page'}
+            </span>
+          </div>
+        </div>
+      </Link>
+      <div className="absolute right-2 top-2 z-10 rounded-lg bg-dc-elevated-solid/90">
+        <EventSaveButton eventId={event.id} size="sm" />
+      </div>
+    </article>
+  )
+}
+
+export default function EventsFeaturedStrip({ events }: { events: MockEvent[] }) {
+  const featured = events.slice(0, 3)
+  if (featured.length < 2) return null
+
+  return (
+    <section className="mb-4" aria-label="Featured upcoming events">
+      <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-dc-muted">Upcoming highlights</h2>
+      <div className="c2k-snap-carousel">
+        <div className="c2k-snap-carousel__track">
+          {featured.map((event, i) => (
+            <HighlightCard key={String(event.id)} event={event} compact={i > 0} />
+          ))}
+        </div>
+        <div className="c2k-snap-carousel__fade" aria-hidden />
+      </div>
+    </section>
+  )
+}

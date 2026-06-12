@@ -1,0 +1,1116 @@
+{
+  "generatedAt": "2026-06-12T19:19:13.692Z",
+  "serverOk": true,
+  "dbOk": true,
+  "results": [
+    {
+      "path": "/",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "guest",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 5,
+        "fixedNavCount": 0,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "5 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/terms",
+      "tier": "D",
+      "viewport": "360",
+      "persona": "guest",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 59,
+        "fixedNavCount": 0,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "59 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/policies",
+      "tier": "D",
+      "viewport": "360",
+      "persona": "guest",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 34,
+        "fixedNavCount": 0,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "34 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/home",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 19,
+        "fixedNavCount": 2,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "19 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/explore",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 39,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "39 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/people",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 30,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "30 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/events",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 25,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "25 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P3",
+          "problem": "Backend/internal language visible (\\bECKE\\b)",
+          "fix": "copy"
+        }
+      ]
+    },
+    {
+      "path": "/groups",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 23,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "23 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/messaging",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 10,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "10 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/notifications",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 4,
+        "fixedNavCount": 2,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "4 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/profile",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 18,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "18 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        },
+        {
+          "severity": "P3",
+          "problem": "Backend/internal language visible (\\bMODERATOR\\+?\\b)",
+          "fix": "copy"
+        }
+      ]
+    },
+    {
+      "path": "/profile/edit",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 22,
+        "fixedNavCount": 0,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "22 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/onboarding",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 19,
+        "fixedNavCount": 2,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "19 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/settings/account",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 10,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "10 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/settings/privacy",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 36,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "36 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/support",
+      "tier": "A",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 4,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "4 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/conventions",
+      "tier": "B",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 3,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "3 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/conventions/preview-c2k-weekend",
+      "tier": "B",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 22,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "22 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/orgs/demo-east-collective",
+      "tier": "B",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 17,
+        "fixedNavCount": 2,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "17 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P3",
+          "problem": "Backend/internal language visible (\\bMODERATOR\\+?\\b)",
+          "fix": "copy"
+        }
+      ]
+    },
+    {
+      "path": "/education",
+      "tier": "B",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 11,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "11 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/vendors",
+      "tier": "B",
+      "viewport": "360",
+      "persona": "member",
+      "error": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"http://127.0.0.1:5173/vendors\", waiting until \"domcontentloaded\"\n",
+      "issues": [
+        {
+          "severity": "P1",
+          "problem": "Page load failed: page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"http://127.0.0.1:5173/vendors\", waiting until \"domcontentloaded\"\n",
+          "fix": "system"
+        }
+      ]
+    },
+    {
+      "path": "/presenters",
+      "tier": "B",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 18,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "18 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/media",
+      "tier": "B",
+      "viewport": "360",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 3,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "3 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/organizer",
+      "tier": "C",
+      "viewport": "360",
+      "persona": "mod-admin",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 7,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "7 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P3",
+          "problem": "Backend/internal language visible (\\bMODERATOR\\+?\\b)",
+          "fix": "copy"
+        }
+      ]
+    },
+    {
+      "path": "/moderation/dashboard",
+      "tier": "D",
+      "viewport": "360",
+      "persona": "mod-admin",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 10,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "10 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "guest",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 5,
+        "fixedNavCount": 0,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "5 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/terms",
+      "tier": "D",
+      "viewport": "390",
+      "persona": "guest",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 59,
+        "fixedNavCount": 0,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "59 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/policies",
+      "tier": "D",
+      "viewport": "390",
+      "persona": "guest",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 34,
+        "fixedNavCount": 0,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "34 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/home",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 19,
+        "fixedNavCount": 2,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "19 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/explore",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 39,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "39 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/people",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 30,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "30 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/events",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 25,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "25 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P3",
+          "problem": "Backend/internal language visible (\\bECKE\\b)",
+          "fix": "copy"
+        }
+      ]
+    },
+    {
+      "path": "/groups",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 23,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "23 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/messaging",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 10,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "10 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/notifications",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 4,
+        "fixedNavCount": 2,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "4 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/profile",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 18,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "18 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        },
+        {
+          "severity": "P3",
+          "problem": "Backend/internal language visible (\\bMODERATOR\\+?\\b)",
+          "fix": "copy"
+        }
+      ]
+    },
+    {
+      "path": "/profile/edit",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 22,
+        "fixedNavCount": 0,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "22 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/onboarding",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 19,
+        "fixedNavCount": 2,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "19 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/settings/account",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 10,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "10 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/settings/privacy",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 36,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "36 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/support",
+      "tier": "A",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 4,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "4 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/conventions",
+      "tier": "B",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 3,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "3 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/conventions/preview-c2k-weekend",
+      "tier": "B",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 22,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "22 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/orgs/demo-east-collective",
+      "tier": "B",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 17,
+        "fixedNavCount": 2,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "17 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P3",
+          "problem": "Backend/internal language visible (\\bMODERATOR\\+?\\b)",
+          "fix": "copy"
+        }
+      ]
+    },
+    {
+      "path": "/education",
+      "tier": "B",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 12,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "12 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/vendors",
+      "tier": "B",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 21,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "21 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    },
+    {
+      "path": "/presenters",
+      "tier": "B",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 18,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "18 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/media",
+      "tier": "B",
+      "viewport": "390",
+      "persona": "member",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 3,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P3",
+          "problem": "3 touch targets under 44px",
+          "fix": "component"
+        }
+      ]
+    },
+    {
+      "path": "/organizer",
+      "tier": "C",
+      "viewport": "390",
+      "persona": "mod-admin",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 7,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": false
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "7 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P3",
+          "problem": "Backend/internal language visible (\\bMODERATOR\\+?\\b)",
+          "fix": "copy"
+        }
+      ]
+    },
+    {
+      "path": "/moderation/dashboard",
+      "tier": "D",
+      "viewport": "390",
+      "persona": "mod-admin",
+      "analysis": {
+        "horizontalOverflow": false,
+        "smallTargetCount": 10,
+        "fixedNavCount": 1,
+        "hasStickyBottom": true,
+        "dashboardOnMobile": true
+      },
+      "issues": [
+        {
+          "severity": "P2",
+          "problem": "10 touch targets under 44px",
+          "fix": "component"
+        },
+        {
+          "severity": "P2",
+          "problem": "3-column dashboard grid visible on narrow viewport",
+          "fix": "template"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "_comment": "Merge these into the host app's package.json as needed.",
+  "scripts": {
+    "dancecard:smoke": "node scripts/dancecard-smoke.mjs",
+    "dancecard:verify-prod": "node scripts/dancecard-verify-production.mjs",
+    "dancecard:import": "node scripts/dancecard-import-schedule.mjs",
+    "dancecard:import-staff": "node scripts/dancecard-import-staff.mjs",
+    "dancecard:import-paf26-all": "node scripts/dancecard-import-schedule.mjs --slug paf26 --json data/paf26-program-slots.json && node scripts/dancecard-import-staff.mjs --slug paf26 --json data/paf26-staff-volunteer-shifts.json",
+    "dancecard:parse-paf26": "node scripts/paf26-grid-to-json.mjs",
+    "dancecard:parse-staff-paf26": "node scripts/paf26-staff-schedule-to-json.mjs",
+    "dancecard:apply-migrations": "node scripts/apply-dancecard-migrations.mjs",
+    "dancecard:add-organizer": "node scripts/dancecard-add-organizer.mjs"
+  },
+  "dependencies": {
+    "_note": "EastCoast dancecard also relied on the main app stack: next@14, react@18, @supabase/ssr, @supabase/supabase-js, zod, date-fns, date-fns-tz, bcryptjs, nanoid, @dnd-kit/core, @dnd-kit/utilities, tailwind (site styles). Organizer grid uses @dnd-kit. ICS uses no extra package."
+  },
+  "devDependencies": {
+    "_note": "Import scripts use dotenv, xlsx (devDependency in original repo for parsers)."
+  }
+}

@@ -1,0 +1,70 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build
+.next
+out
+build
+dist
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+!.env.development
+.env.production
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.idea
+.vscode
+.cursor/c2k-loop-active.json
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Copied from local machine during db:seed (see C2K_SEED_IMAGE_DIR / Pictures/seed)
+/packages/web/public/seed/paf/
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Visual audit screenshots (generated locally / on VPS)
+/visual-audit-output/
+
+# Visual audit screenshots (run npm run visual:audit locally or against VPS)
+/visual-audit-output/
+
+# Generated docs artifacts (regenerate locally)
+docs/handoff/C2K_PROJECT_CONTEXT_*.txt
+!docs/handoff/C2K_PROJECT_CONTEXT_LATEST.txt
+docs/handoff/docs-index.txt
+docs/handoff/verify-*.log
+docs/audits/**/*.log
+docs/audits/trust-and-safety/verify-trust-safety.log
+docs/audits/ui/screenshots/*.zip
+
+# Local deploy bundles (too large for GitHub; regenerate on machine)
+_deploy-*.tar.gz
+_deploy-*-log.txt
+audit-output/
+
+# VPS mailserver runtime data (never commit)
+docker/mailserver/data/
+docker/mailserver/state/
+docker/mailserver/logs/
+docker/mailserver/config/
+k8s/base/secret.yaml

@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-06-12T19:19:13.816Z",
+  "outputs": [
+    "docs/UI_ROUTE_INVENTORY.md",
+    "docs/UI_COMPONENT_INVENTORY.md",
+    "docs/UI_MOBILE_AUDIT.md",
+    "docs/UI_DESIGN_SYSTEM_AUDIT.md",
+    "docs/UI_REDESIGN_RISK_REPORT.md"
+  ],
+  "skipScreenshots": false,
+  "skipRuntime": false,
+  "skipPreflight": false,
+  "preflightOk": true,
+  "authCaptureCount": 135
+}

@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-06-12T21:12:19.208Z",
+  "base": "http://127.0.0.1:5173",
+  "apiBase": "http://127.0.0.1:5173",
+  "ok": true,
+  "checks": [
+    {
+      "name": "postgres_tcp",
+      "ok": true,
+      "detail": "127.0.0.1:6432"
+    },
+    {
+      "name": "web_server",
+      "ok": true,
+      "detail": "http://127.0.0.1:5173"
+    },
+    {
+      "name": "api_health_ready",
+      "ok": true,
+      "detail": "database ok"
+    },
+    {
+      "name": "seed_login",
+      "ok": true,
+      "detail": "RopeDreamer login ok"
+    },
+    {
+      "name": "admin_login",
+      "ok": true,
+      "detail": "Brax login ok"
+    },
+    {
+      "name": "registration",
+      "ok": true,
+      "detail": "created auditmqbf9zhb"
+    }
+  ]
+}

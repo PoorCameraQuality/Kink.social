@@ -1,0 +1,16 @@
+﻿
+> @c2k/api@0.1.0 db:seed
+> tsx src/db/seed.ts
+
+Kink tags already present; skipping tag seed.
+Events already present; skipping event seed.
+Seeded Demo Virtual Munch (C2K seed)
+Seeded Demo Virtual Class ΓÇö Negotiation mini-lab (C2K seed)
+Vendor profiles already present; skipping vendor seed.
+rope-dreamer-supply already has a banner; skip demo branding backfill.
+rope-dreamer-supply already has native products; skip demo product seed.
+Demo organization already present; skipping org seed.
+Anchored demo convention already present; skipping convention seed.
+Demo org hub content already present; skipping hub demo seed.
+Normalized demo-east-collective community (welcome / modules / FAQ drift).
+Seed complete.

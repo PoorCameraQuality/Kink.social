@@ -1,0 +1,3888 @@
+{
+  "generatedAt": "2026-06-12T21:16:17.462Z",
+  "tokenFamilies": {
+    "dc": [
+      "--dc-surface",
+      "--dc-text",
+      "--dc-border-strong",
+      "--dc-surface-muted",
+      "--dc-tab-shell-shadow",
+      "--dc-tab-active-shadow",
+      "--dc-elevated",
+      "--dc-elevated-solid",
+      "--dc-elevated-muted",
+      "--dc-text-muted",
+      "--dc-text-subtle",
+      "--dc-muted",
+      "--dc-accent",
+      "--dc-accent-hover",
+      "--dc-accent-muted",
+      "--dc-accent-border",
+      "--dc-accent-foreground",
+      "--dc-border-subtle",
+      "--dc-danger",
+      "--dc-danger-muted",
+      "--dc-danger-border",
+      "--dc-success",
+      "--dc-success-muted",
+      "--dc-warning",
+      "--dc-warning-muted",
+      "--dc-slot-published",
+      "--dc-slot-accent-mix",
+      "--dc-shadow-soft",
+      "--dc-shadow-panel",
+      "--dc-compare-mutual",
+      "--dc-compare-busy",
+      "--dc-compare-busy-ring",
+      "--dc-compare-host-only",
+      "--dc-compare-host-only-ring",
+      "--dc-compare-outside",
+      "--dc-compare-selected",
+      "--dc-avail-open-bg",
+      "--dc-avail-open-border",
+      "--dc-avail-open-text",
+      "--dc-avail-busy-bg",
+      "--dc-avail-busy-border",
+      "--dc-avail-busy-text",
+      "--dc-avail-claimed-bg",
+      "--dc-avail-claimed-border",
+      "--dc-avail-claimed-text",
+      "--dc-glass-shadow",
+      "--dc-glass-inset",
+      "--dc-tab-inactive-bg",
+      "--dc-tab-inactive-hover-bg",
+      "--dc-chip-bg",
+      "--dc-chip-hover-bg",
+      "--dc-surface-card",
+      "--dc-elevated-hover",
+      "--dc-input"
+    ],
+    "c2k": [
+      "--c2k-main-mobile-pb",
+      "--c2k-mobile-nav-pb",
+      "--c2k-bottom-nav-total-h",
+      "--c2k-mobile-viewport-fill-h",
+      "--c2k-sticky-below-header",
+      "--c2k-bg",
+      "--c2k-bg-card",
+      "--c2k-bg-elevated",
+      "--c2k-bg-charcoal",
+      "--c2k-accent-primary",
+      "--c2k-accent-primary-hover",
+      "--c2k-accent-secondary",
+      "--c2k-accent-secondary-hover",
+      "--c2k-text-primary",
+      "--c2k-text-secondary",
+      "--c2k-text-muted",
+      "--c2k-border",
+      "--c2k-border-strong",
+      "--c2k-overlay-scrim",
+      "--c2k-focus-ring",
+      "--c2k-danger",
+      "--c2k-success",
+      "--c2k-warning",
+      "--c2k-space-1",
+      "--c2k-space-2",
+      "--c2k-space-3",
+      "--c2k-space-4",
+      "--c2k-space-5",
+      "--c2k-space-6",
+      "--c2k-card-radius",
+      "--c2k-shadow-soft",
+      "--c2k-scrollbar-track",
+      "--c2k-scrollbar-thumb",
+      "--c2k-scrollbar-thumb-hover",
+      "--c2k-header-h",
+      "--c2k-community-nav-h",
+      "--c2k-sticky-below-community-nav",
+      "--c2k-bottom-nav-h",
+      "--c2k-mobile-breathing",
+      "--c2k-bottom-nav-clearance",
+      "--c2k-fab-size",
+      "--c2k-fab-gap",
+      "--c2k-save-bar-h",
+      "--c2k-mobile-action-bar-h",
+      "--c2k-mobile-action-bar-total-h",
+      "--c2k-font-ui",
+      "--c2k-font-display"
+    ],
+    "pub": [
+      "--pub-bg",
+      "--pub-bg-soft",
+      "--pub-panel",
+      "--pub-border",
+      "--pub-border-strong",
+      "--pub-text",
+      "--pub-text-muted",
+      "--pub-text-soft",
+      "--pub-gold",
+      "--pub-gold-bright",
+      "--pub-red",
+      "--pub-purple",
+      "--pub-blue"
+    ],
+    "organizer": [
+      "--organizer-sidebar-width",
+      "--organizer-panel-bg",
+      "--organizer-panel-padding-y",
+      "--organizer-panel-padding-x",
+      "--organizer-status-draft",
+      "--organizer-status-published",
+      "--organizer-status-stale",
+      "--organizer-status-never"
+    ],
+    "ecke": [
+      "--ecke-link",
+      "--ecke-link-visited",
+      "--ecke-focus",
+      "--ecke-focus-ring"
+    ]
+  },
+  "presets": [
+    {
+      "id": "parchment",
+      "mode": "light"
+    },
+    {
+      "id": "midnight-brass",
+      "mode": "dark"
+    },
+    {
+      "id": "lifted-ink",
+      "mode": "dark"
+    },
+    {
+      "id": "coastal-slate",
+      "mode": "light"
+    },
+    {
+      "id": "high-noon",
+      "mode": "light"
+    }
+  ],
+  "scan": {
+    "hex": [
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#949cf7"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#1e1f22"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#1e1f22"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#3f4248"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#34373c"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#3f4248"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#34373c"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#313338"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#5865F2"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#949cf7"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#5865F2"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#949cf7"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#313338"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "#383a40"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "#0b0d12"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/BadgePrintCard.tsx",
+        "value": "#faf8f4"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/IcalBusyPreviewPanel.tsx",
+        "value": "#111a2c"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsAdvancedForm.tsx",
+        "value": "#c6a75e"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#b8860b"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#f2f4f6"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#ffffff"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#b8860b"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#c6a75e"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#12151a"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#1e2430"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#c6a75e"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#ef6c4a"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#fff7f3"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#ffffff"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#ef6c4a"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#5b8c5a"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#1d2a1d"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#243524"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#9bbd84"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#3b82f6"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#0f172a"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#1e293b"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#60a5fa"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#8b6914"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#f4f0e8"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#ffffff"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#8b6914"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#000000"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#c6a75e"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#12151a"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#1e2430"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#c6a75e"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "#000000"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ui/OrganizerConfirmDialog.tsx",
+        "value": "#1a2332"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#a855f7"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#a855f7"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#e9d5ff"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#14b8a6"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#14b8a6"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#99f6e4"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#c47a44"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#c47a44"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#fde68a"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#a855f7"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#7c3aed"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#ddd6fe"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#60a5fa"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#3b82f6"
+      },
+      {
+        "file": "packages/web/src/components/feed/feedPostBadge.ts",
+        "value": "#bfdbfe"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDanceCardMock.tsx",
+        "value": "#0c0d0f"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#060607"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#0b0b0d"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#f6f1e8"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#b9b1a6"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#8f887f"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#d8ad36"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#f0c94d"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#8f2626"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#5b3a8e"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#245c91"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#09090a"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#050506"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#0a0a0b"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#15100a"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#f0c94d"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#c99523"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#f0c94d"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#c99523"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#120f08"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#d9d1c6"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#f2cc55"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#c89625"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#120f08"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#f1cb54"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#c79624"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#120f08"
+      },
+      {
+        "file": "packages/web/src/components/landing/public-auth.css",
+        "value": "#101114"
+      },
+      {
+        "file": "packages/web/src/components/MockDataBanner.tsx",
+        "value": "#0a0a0b"
+      },
+      {
+        "file": "packages/web/src/components/MockDataBanner.tsx",
+        "value": "#8f887f"
+      },
+      {
+        "file": "packages/web/src/components/MockDataBanner.tsx",
+        "value": "#f0c94d"
+      },
+      {
+        "file": "packages/web/src/components/MockDataBanner.tsx",
+        "value": "#f6e08a"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgDiscordEmbedPanel.tsx",
+        "value": "#2f3136"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgDiscordEmbedPanel.tsx",
+        "value": "#5865F2"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgDiscordEmbedPanel.tsx",
+        "value": "#949cf7"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#3b82f6"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#3b82f6"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#8b5cf6"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#8b5cf6"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#b8860b"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#b8860b"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#64748b"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#2d8c78"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#648c32"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#be506e"
+      },
+      {
+        "file": "packages/web/src/lib/dancecard/trackDisplayColors.ts",
+        "value": "#3b82f6"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#fff"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#737373"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#fff"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#737373"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#22d3ee"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#fff"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#a3a3a3"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#fff"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#22d3ee"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#fff"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#22d3ee"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "#22d3ee"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#121212"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#262626"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#1e1e1e"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#ffffff"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#d1d5db"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#d4af37"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#9ca3af"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#d4af37"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#e0c04a"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#121212"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#2b2b2b"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#3f3f3f"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#ef4444"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#10b981"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#f59e0b"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "#d4af37"
+      },
+      {
+        "file": "packages/web/src/styles/mobile-polish.css",
+        "value": "#0f0f0f"
+      }
+    ],
+    "rgba": [
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "rgba(255,255,255,0.12)"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "rgba(255,255,255,0.12)"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "rgba(255,255,255,0.12)"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "rgba(0,0,0,0.2)"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "rgba(255,255,255,0.15)"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "rgba(214,178,59,0.25)"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "rgba(45, 212, 191, 0.95)"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "rgba(45, 212, 191, 0.95)"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "rgba(8, 8, 12, 0.15)"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "rgba(8, 8, 12, 0.55)"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "rgba(8, 8, 12, 0.92)"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "rgba(15, 23, 42, 0.92)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/OrganizerEventDashboard.tsx",
+        "value": "rgb(52 211 153 / 0.6)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ui/EntityPickerModal.tsx",
+        "value": "rgba(45,38,28,0.14)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ui/OrganizerConfirmDialog.tsx",
+        "value": "rgba(45,38,28,0.18)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/ui/Panel.tsx",
+        "value": "rgba(45,38,28,0.12)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/ui/Panel.tsx",
+        "value": "rgba(255,255,255,0.5)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/ui/Panel.tsx",
+        "value": "rgba(45,38,28,0.08)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgb(34 211 238)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgb(250 204 21)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(255,255,255,0.75)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(34, 211, 238, 0.18)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(250, 204, 21, 0.20)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(0, 0, 0, 0.25)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(255, 255, 255, 0.05)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(0,0,0,0.6)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(34,211,238,0.45)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(0,0,0,0.45)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(0,0,0,0.72)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgb(8, 145, 178)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(0,0,0,0.4)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgb(34, 211, 238)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(0,0,0,0.5)"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/MapZoneOverlay.tsx",
+        "value": "rgba(34,211,238,0.85)"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleCard.tsx",
+        "value": "rgba(0,0,0,0.45)"
+      },
+      {
+        "file": "packages/web/src/components/home/ComposerAvatar.tsx",
+        "value": "rgba(214,178,59,0.25)"
+      },
+      {
+        "file": "packages/web/src/components/home/home-dashboard-styles.ts",
+        "value": "rgba(214,178,59,0.18)"
+      },
+      {
+        "file": "packages/web/src/components/home/home-dashboard-styles.ts",
+        "value": "rgba(214,178,59,0.45)"
+      },
+      {
+        "file": "packages/web/src/components/home/home-dashboard-styles.ts",
+        "value": "rgba(214,178,59,0.16)"
+      },
+      {
+        "file": "packages/web/src/components/home/home-dashboard-styles.ts",
+        "value": "rgba(214,178,59,0.4)"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedDiscoverRail.tsx",
+        "value": "rgba(214,178,59,0.2)"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedMockComposer.tsx",
+        "value": "rgba(214,178,59,0.35)"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedShellComposer.tsx",
+        "value": "rgba(214,178,59,0.28)"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeUpcomingEventCard.tsx",
+        "value": "rgba(214,178,59,0.35)"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeWelcomePanel.tsx",
+        "value": "rgba(214,178,59,0.18)"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDanceCardMock.tsx",
+        "value": "rgba(216,173,54,0.7)"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDiscoveryPreview.tsx",
+        "value": "rgba(216,173,54,0.15)"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDiscoveryPreview.tsx",
+        "value": "rgba(216,173,54,0.3)"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingPreviewEducatorRow.tsx",
+        "value": "rgba(216,173,54,0.25)"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingPreviewEducatorRow.tsx",
+        "value": "rgba(216,173,54,0.15)"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingPreviewEducatorRow.tsx",
+        "value": "rgba(216,173,54,0.25)"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingPreviewEducatorRow.tsx",
+        "value": "rgba(240,201,77,0.35)"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingProductPreview.tsx",
+        "value": "rgba(0,0,0,0.35)"
+      },
+      {
+        "file": "packages/web/src/components/LoginCard.tsx",
+        "value": "rgba(0,0,0,0.45)"
+      },
+      {
+        "file": "packages/web/src/components/LoginCard.tsx",
+        "value": "rgba(212,175,55,0.12)"
+      },
+      {
+        "file": "packages/web/src/components/profile/layout/ProfileCoverHeader.tsx",
+        "value": "rgba(0,0,0,0.55)"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileCard.tsx",
+        "value": "rgba(0,0,0,0.7)"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileCard.tsx",
+        "value": "rgba(255,255,255,0.04)"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileHeroCard.tsx",
+        "value": "rgba(0,0,0,0.55)"
+      },
+      {
+        "file": "packages/web/src/components/profile/studio/profile-studio-classes.ts",
+        "value": "rgba(0,0,0,0.28)"
+      },
+      {
+        "file": "packages/web/src/components/TrustRing.tsx",
+        "value": "rgba(255,255,255,0.05)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "rgba(255, 255, 255, 0.1)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-parity.css",
+        "value": "rgba(255, 255, 255, 0.05)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(30, 30, 30, 0.94)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(255, 255, 255, 0.08)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(212, 175, 55, 0.14)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(212, 175, 55, 0.45)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(239, 68, 68, 0.12)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(239, 68, 68, 0.35)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(16, 185, 129, 0.12)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(245, 158, 11, 0.12)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(0, 0, 0, 0.35)"
+      },
+      {
+        "file": "packages/web/src/styles/dancecard-tokens.css",
+        "value": "rgba(0, 0, 0, 0.45)"
+      },
+      {
+        "file": "packages/web/src/styles/forum-thread.css",
+        "value": "rgba(255, 255, 255, 0.12)"
+      },
+      {
+        "file": "packages/web/src/styles/forum-thread.css",
+        "value": "rgba(255, 255, 255, 0.03)"
+      },
+      {
+        "file": "packages/web/src/styles/forum-thread.css",
+        "value": "rgba(255, 255, 255, 0.14)"
+      },
+      {
+        "file": "packages/web/src/styles/mobile-polish.css",
+        "value": "rgba(0, 0, 0, 0.35)"
+      },
+      {
+        "file": "packages/web/src/styles/mobile-polish.css",
+        "value": "rgba(0, 0, 0, 0.25)"
+      },
+      {
+        "file": "packages/web/src/styles/mobile-polish.css",
+        "value": "rgba(0, 0, 0, 0.55)"
+      },
+      {
+        "file": "packages/web/src/styles/site-atmosphere.css",
+        "value": "rgba(214, 178, 59, 0.13)"
+      },
+      {
+        "file": "packages/web/src/styles/site-atmosphere.css",
+        "value": "rgba(124, 58, 237, 0.08)"
+      },
+      {
+        "file": "packages/web/src/styles/site-atmosphere.css",
+        "value": "rgba(45, 212, 166, 0.07)"
+      },
+      {
+        "file": "packages/web/src/styles/site-atmosphere.css",
+        "value": "rgba(214, 178, 59, 0.05)"
+      },
+      {
+        "file": "packages/web/src/styles/site-atmosphere.css",
+        "value": "rgba(0, 0, 0, 0.28)"
+      },
+      {
+        "file": "packages/web/src/styles/site-atmosphere.css",
+        "value": "rgba(214, 178, 59, 0.14)"
+      },
+      {
+        "file": "packages/web/src/styles/site-atmosphere.css",
+        "value": "rgba(91, 58, 142, 0.11)"
+      },
+      {
+        "file": "packages/web/src/styles/site-atmosphere.css",
+        "value": "rgba(20, 184, 166, 0.08)"
+      }
+    ],
+    "px": [
+      {
+        "file": "packages/web/src/app/activity/ActivityPageClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/admin/owner/investigations/users/[userId]/page.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/app/admin/owner/investigations/users/[userId]/page.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/ConventionsDiscoverPage.tsx",
+        "value": "1400px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/ConventionsDiscoverPage.tsx",
+        "value": "260px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/dancecard/s/[token]/page.tsx",
+        "value": "16px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/dancecard/s/[token]/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/dancecard/s/[token]/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/my-offers/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/page.tsx",
+        "value": "120px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/panels/ConventionHubChannelsAdmin.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/panels/ConventionHubChannelsAdmin.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/panels/ConventionProgramSchedulePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/panels/ConventionProgramSchedulePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/panels/ConventionProgramSchedulePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/panels/ConventionProgramSchedulePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/discovery/FindPeopleDiscoverPage.tsx",
+        "value": "1600px"
+      },
+      {
+        "file": "packages/web/src/app/discovery/FindPeopleDiscoverPage.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/app/education/EducationDiscoverPage.tsx",
+        "value": "1600px"
+      },
+      {
+        "file": "packages/web/src/app/education/EducationDiscoverPage.tsx",
+        "value": "240px"
+      },
+      {
+        "file": "packages/web/src/app/education/write/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/education/write/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/education/write/page.tsx",
+        "value": "140px"
+      },
+      {
+        "file": "packages/web/src/app/education/write/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/education/write/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/education/write/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/education/[slug]/page.tsx",
+        "value": "420px"
+      },
+      {
+        "file": "packages/web/src/app/events/EventsPersonalLibraryPage.tsx",
+        "value": "1600px"
+      },
+      {
+        "file": "packages/web/src/app/events/EventsPersonalLibraryPage.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx",
+        "value": "768px"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx",
+        "value": "420px"
+      },
+      {
+        "file": "packages/web/src/app/groups/GroupsDiscoverPage.tsx",
+        "value": "1440px"
+      },
+      {
+        "file": "packages/web/src/app/groups/GroupsDiscoverPage.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/app/groups/GroupsPersonalLibraryPage.tsx",
+        "value": "1440px"
+      },
+      {
+        "file": "packages/web/src/app/groups/GroupsPersonalLibraryPage.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/app/home/HomePageClient.tsx",
+        "value": "156px"
+      },
+      {
+        "file": "packages/web/src/app/home/HomePageClient.tsx",
+        "value": "156px"
+      },
+      {
+        "file": "packages/web/src/app/media/page.tsx",
+        "value": "1440px"
+      },
+      {
+        "file": "packages/web/src/app/messaging/page.tsx",
+        "value": "1600px"
+      },
+      {
+        "file": "packages/web/src/app/messaging/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/messaging/page.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/app/moderation/cases/[caseId]/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/moderation/cases/[caseId]/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/moderation/cases/[caseId]/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/moderation/dashboard/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/moderation/dashboard/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/moderation/dashboard/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/moderation/dmca/page.tsx",
+        "value": "480px"
+      },
+      {
+        "file": "packages/web/src/app/organizer/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/organizer/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/new/page.tsx",
+        "value": "440px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/page.tsx",
+        "value": "1600px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/page.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/page.tsx",
+        "value": "1800px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "160px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "520px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "380px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "140px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "820px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "232px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "13px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "15px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "15px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "15px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/presenters/[username]/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/presenters/[username]/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/presenters/[username]/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/presenters/[username]/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/profile/edit/ProfileEditLayout.tsx",
+        "value": "1280px"
+      },
+      {
+        "file": "packages/web/src/app/profile/edit/ProfileEditLayout.tsx",
+        "value": "0px"
+      },
+      {
+        "file": "packages/web/src/app/profile/edit/ProfileEditLayout.tsx",
+        "value": "220px"
+      },
+      {
+        "file": "packages/web/src/app/tags/[tag]/page.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/app/vendors/page.tsx",
+        "value": "1600px"
+      },
+      {
+        "file": "packages/web/src/app/vendors/page.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/app/vendors/page.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/components/BottomNav.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/cards/EventCard.tsx",
+        "value": "15px"
+      },
+      {
+        "file": "packages/web/src/components/cards/EventCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/cards/EventCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx",
+        "value": "44px"
+      },
+      {
+        "file": "packages/web/src/components/cards/PersonCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/cards/PresenterCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/cards/VendorCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/cards/VendorCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/cards/VendorCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/cards/VendorCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/connections/ConnectionPersonRow.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/connections/ConnectionPersonRow.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/connections/ConnectionsRightRail.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ChannelMessageList.tsx",
+        "value": "520px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ChannelMessageList.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ChannelMessageList.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ChannelMessageList.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionAttendeeComparePanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionAttendeeGroupsPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionAttendeeProfilePanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardCompareGrid.tsx",
+        "value": "1px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardCompareGrid.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionGalleryGrid.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionGalleryGrid.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionGalleryGrid.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionGalleryGrid.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionGetInvolvedPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "360px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx",
+        "value": "15px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionsFeaturedCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionsLeftRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionsListRow.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionWelcomeTab.tsx",
+        "value": "15px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionWelcomeTab.tsx",
+        "value": "720px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/DancecardOpsCard.tsx",
+        "value": "140px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/HostedByCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/RegisterFlow.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/conventions/VenueMapsList.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/create-flow/CreateFlowWizardUi.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/CreateMenuDropdown.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/AssignmentBoardPanel.tsx",
+        "value": "520px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/BadgePrintCard.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/BadgePrintCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/BadgePrintCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/BadgePrintCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/BadgePrintCard.tsx",
+        "value": "7px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/BadgePrintCard.tsx",
+        "value": "8px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/BadgesPrintPanel.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/BadgesPrintPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/DmCoveragePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/DmCoveragePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/DmCoveragePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/DmCoveragePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/door/DoorModePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ExportsHubPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/GoogleSheetsImportSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/IcalBusyPreviewPanel.tsx",
+        "value": "120px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ImportColumnMappingPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ImportColumnMappingPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/integrations/EmbedSkinPreview.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/IntegrationsPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/KitchenMealPanel.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "180px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "140px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "120px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "120px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "88px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "160px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/MapsSettingsSection.tsx",
+        "value": "120px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/MessagingPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/OrganizerEventDashboard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/OrganizerEventDashboard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/PersonDetailDrawer.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/ConflictDock.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/PresenterRequestsPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/PresenterRequestsPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/ProgramListView.tsx",
+        "value": "560px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/ProgramListView.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/ProgramListView.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/ProgramListView.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/programScheduleParts.tsx",
+        "value": "420px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/programScheduleParts.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/program/programScheduleParts.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ProgramScheduleGrid.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ProgramScheduleGrid.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ProgramScheduleGrid.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ProgramScheduleGrid.tsx",
+        "value": "140px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ProgramScheduleGrid.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ProgramScheduleGrid.tsx",
+        "value": "72px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/registrants/RegistrantsMasterDetail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/registrants/RegistrationAttendeePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/registrants/RegistrationCategoryList.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/registrants/RegistrationCategoryList.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/RegistrantsPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/RegistrantsPanel.tsx",
+        "value": "80px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/RegistrantsPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/RegistrantsPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/RegistrantsPanel.tsx",
+        "value": "60px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/RegistrantsPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/RegistrantsPanel.tsx",
+        "value": "100px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/RegistrationSettingsSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ScheduleImportPanel.tsx",
+        "value": "90px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ScheduleImportPanel.tsx",
+        "value": "310px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ScheduleImportPanel.tsx",
+        "value": "760px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ScheduleImportPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ScheduleImportPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/SessionDetailDrawer.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/SessionDetailDrawer.tsx",
+        "value": "100px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/SessionDetailDrawer.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/SessionDetailDrawer.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/SessionDetailDrawer.tsx",
+        "value": "120px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/EventSetupWizard.tsx",
+        "value": "420px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/settings/StaffInviteLinksPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/shell/OrganizerEventHeader.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/shell/OrganizerEventSidebar.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/StaffShiftsPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/TrustedRolesPanel.tsx",
+        "value": "220px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/TrustedRolesPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/TrustedRolesPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/TrustedRolesPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/TrustedRolesPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/TrustedRolesPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/TrustedRoleWorkflowCallout.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ui/DatetimeLocalField.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ui/DatetimeLocalField.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/VenueAvailabilityGrid.tsx",
+        "value": "380px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/VenueAvailabilityGrid.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/VettingQueuePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/venue/VenueMapViewport.tsx",
+        "value": "640px"
+      },
+      {
+        "file": "packages/web/src/components/ecke/EckeEntityPublishStatus.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/ecke/EckeEntityPublishStatus.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/editor/EducatorArticleEditor.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/editor/MarkdownRichEditor.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleCard.tsx",
+        "value": "16px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleStripCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleStripCard.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationArticleStripCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationComingSoonPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationDiscoverHero.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationDiscoverHero.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationDiscoverHero.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationFeaturedEducators.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationFeaturedEducators.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationLearningPaths.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationLeftRail.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationRecentTextCard.tsx",
+        "value": "260px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationRecentTextCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationRecentTextCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationVideoStripCard.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationVideoStripCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationVideoStripCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/events/EventDiscussionPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/events/EventDiscussionPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/events/EventsFeaturedStrip.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/events/EventsFeaturedStrip.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/events/EventsListRow.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/events/EventsListRow.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/events/EventsListRow.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/events/EventsListRow.tsx",
+        "value": "80px"
+      },
+      {
+        "file": "packages/web/src/components/explore/ExploreCompactEventRow.tsx",
+        "value": "3px"
+      },
+      {
+        "file": "packages/web/src/components/explore/ExploreCompactEventRow.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/explore/ExploreCompactEventRow.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/explore/ExploreCompactTrendingRow.tsx",
+        "value": "3px"
+      },
+      {
+        "file": "packages/web/src/components/explore/ExploreCompactTrendingRow.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/explore/ExploreFeaturedTrendingCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/explore/ExploreSuggestedRow.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/feed/FeedPostDiscussion.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/find-people/FindPeopleFiltersPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/find-people/FindPeopleFiltersPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/find-people/FindPeopleFiltersPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/find-people/FindPeopleProfileCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/find-people/FindPeopleProfileCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/find-people/FindPeopleProfileCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/find-people/FindPeopleProfileCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/find-people/FindPeopleRightRail.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/forum/ForumPostList.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/forum/ForumPostRoleBadges.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/forum/ForumPostRoleBadges.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/group/CreateGroupModal.tsx",
+        "value": "720px"
+      },
+      {
+        "file": "packages/web/src/components/group/GroupForumsSection.tsx",
+        "value": "88px"
+      },
+      {
+        "file": "packages/web/src/components/group/GroupForumsSection.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/group/GroupForumsSection.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/group/GroupForumsSection.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/group/GroupPhotosSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/group/GroupPhotosSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/group/GroupPhotosSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/groups/GroupsDiscoverLeftRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/groups/GroupsPersonalLeftRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/groups/GroupsSectionNavLinks.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "420px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "480px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "520px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/home/ActivityFeedCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/home/ActivityFeedCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeDashboardLeftRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeDashboardLeftRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeDashboardLeftRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeDashboardLeftRail.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeDashboardLeftRail.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedMockComposer.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedMockComposer.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedRichComposer.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedRichComposer.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFirstSessionDashboard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeUpcomingEventCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeWelcomePanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/home/MentionList.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/home/PinnedConventionsRail.tsx",
+        "value": "320px"
+      },
+      {
+        "file": "packages/web/src/components/home/PinnedConventionsRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/home/PostComposerModeBar.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/home/VendorListingMiniCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDanceCardMock.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDanceCardMock.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDanceCardMock.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDanceCardMock.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDanceCardMock.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDanceCardMock.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingPreviewEducatorRow.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingPreviewEventRow.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingProductPreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/layout/PersonalUtilityPageShell.tsx",
+        "value": "1440px"
+      },
+      {
+        "file": "packages/web/src/components/layout/PersonalUtilityPageShell.tsx",
+        "value": "240px"
+      },
+      {
+        "file": "packages/web/src/components/LoginCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaChannelCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaChannelCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaChannelCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaEmptyPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaLightbox.tsx",
+        "value": "900px"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaRightRail.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaRightRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaRightRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaRightRail.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/messaging/MessagingFolderTabs.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/MockDataBanner.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationIncidentClusterPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationTrustSummaryPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationTrustSummaryPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationTrustSummaryPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationTrustSummaryPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationTrustSummaryPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationTrustSummaryPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationTrustSummaryPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationTrustSummaryPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/moderation/ModerationTrustSummaryPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/my-posts/MyPostListCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubAboutTab.tsx",
+        "value": "420px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubAboutTab.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubCalendarTab.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubCalendarTab.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubCalendarTab.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubCalendarTab.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubCalendarTab.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubCalendarTab.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubCalendarTab.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubSectionCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgAdminDashboard.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgAdminDashboard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgAdminDashboard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgAdminDashboard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgAdminDashboard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgAdminDashboard.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityModules.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityModules.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityModulesEditor.tsx",
+        "value": "120px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityModulesEditor.tsx",
+        "value": "160px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityModulesEditor.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityModulesEditor.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityModulesEditor.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityModulesEditor.tsx",
+        "value": "140px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgDiscordEmbedPanel.tsx",
+        "value": "520px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgDiscordEmbedPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgRichBioEditor.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgRichBioEditor.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgRichBioEditor.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgVoicePanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/admin/OrgChatModerationPanel.tsx",
+        "value": "100px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/admin/OrgChatModerationPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/admin/OrgGalleryAdminPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/admin/OrgMemberAdminPanel.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/admin/OrgMemberAdminPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/communications/ChatChannelsManager.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/communications/ChatChannelsManager.tsx",
+        "value": "280px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/communications/comms-ui.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/communications/OrganizerOrgCommunicationsPanel.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/moderation/AuditTimeline.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/moderation/moderation-ui.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/moderation/OrganizerOrgModerationPanel.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/moderation/ReportInbox.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/org-console/OrganizationStatusHero.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/org-console/OrganizerOrgHomePanel.tsx",
+        "value": "340px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/MemberRoster.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/MemberRoster.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/MemberRoster.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/MemberRoster.tsx",
+        "value": "800px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/MemberRoster.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/MemberRoster.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/MemberRoster.tsx",
+        "value": "9px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/MemberRoster.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/OrganizerOrgPeoplePanel.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/people/people-ui.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/schedule/OrganizerOrgSchedulePanel.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/schedule/ProgramListSection.tsx",
+        "value": "720px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/schedule/schedule-ui.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/schedule/UpcomingProgramsTimeline.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/settings/settings-ui.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/settings/SettingsBrandingTab.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/settings/SettingsBrandingTab.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/settings/SettingsContentTab.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/settings/SettingsFeaturesTab.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/settings/SettingsGeneralTab.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/settings/SettingsPublishTab.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/tools/OrganizerOrgToolsPanel.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/tools/tools-ui.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/ui/OrganizerAppShell.tsx",
+        "value": "1600px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/ui/OrganizerAppShell.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/organizer/ui/OrganizerSetupCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/orgs/OrganizationsHero.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/orgs/OrganizationsHero.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/orgs/OrgDirectoryCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/orgs/OrgDirectoryCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/orgs/OrgDirectoryCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/orgs/OrgDirectoryCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/AlsoOnC2KStrip.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/edit/AboutPanel.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/profile/edit/CommunityIdentityPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/edit/ProfileBasicsPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/edit/ProfileEditTabNav.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/edit/ProfileEditTabNav.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/edit/ProfileEditTabNav.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/edit/ProfileEditTabNav.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/edit/ProfileEditTabNav.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/layout/ProfileCoverHeader.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/layout/ProfileCoverHeader.tsx",
+        "value": "128px"
+      },
+      {
+        "file": "packages/web/src/components/profile/layout/ProfileMediaTabPanel.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/profile/layout/ProfileMediaTabPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/layout/ProfileMediaTabPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileAttendedEventCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileAttendedEventCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditEcosystemPanel.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileEditLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileExtendedSection.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileGroupCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileIsoEditor.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileIsoEditor.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileIsoEditor.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileIsoEditor.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileIsoEditor.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfilePhotoGallery.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfilePhotoManager.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfilePublicHero.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/social/ProfileSocialRail.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileActivityTimeline.tsx",
+        "value": "17px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileCard.tsx",
+        "value": "17px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileCommunitySnapshotCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileCommunitySnapshotCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileCommunitySnapshotCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileHeroCard.tsx",
+        "value": "176px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileHeroCard.tsx",
+        "value": "176px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileOrganizationsCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileOrganizationsCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileStoryView.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileUpcomingEventsCard.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/profile/studio/ProfileStudioLivePreview.tsx",
+        "value": "70px"
+      },
+      {
+        "file": "packages/web/src/components/profile/studio/ProfileStudioLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/studio/ProfileStudioLivePreview.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/tabs/ProfileWritingTab.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/profile/ZipLocationCandidatePicker.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/settings/NotificationMatrixTable.tsx",
+        "value": "320px"
+      },
+      {
+        "file": "packages/web/src/components/settings/PresenterCatalogSection.tsx",
+        "value": "120px"
+      },
+      {
+        "file": "packages/web/src/components/settings/PresenterCatalogSection.tsx",
+        "value": "180px"
+      },
+      {
+        "file": "packages/web/src/components/settings/PresenterCatalogSection.tsx",
+        "value": "100px"
+      },
+      {
+        "file": "packages/web/src/components/settings/PresenterCatalogSection.tsx",
+        "value": "160px"
+      },
+      {
+        "file": "packages/web/src/components/settings/PresenterCatalogSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/settings/PresenterCatalogSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/settings/PresenterCatalogSection.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/settings/SettingsBlockedSections.tsx",
+        "value": "180px"
+      },
+      {
+        "file": "packages/web/src/components/settings/SettingsStaffSection.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/templates/DirectoryTemplate.tsx",
+        "value": "300px"
+      },
+      {
+        "file": "packages/web/src/components/trust/CommunityTrustCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/trust/CommunityTrustCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/trust/CommunityTrustCard.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/trust/CommunityTrustChip.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/trust/CommunityTrustChip.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/trust/DmTrustContext.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/trust/ScopedMemberStandingPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/trust/ScopedMemberStandingPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/trust/ScopedMemberStandingPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/trust/ScopedMemberStandingPanel.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/trust/TrustBadgeTooltip.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/TrustRing.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/TrustRing.tsx",
+        "value": "200px"
+      },
+      {
+        "file": "packages/web/src/components/ui/Dialog.tsx",
+        "value": "2px"
+      },
+      {
+        "file": "packages/web/src/components/ui/EmptyState.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/ui/TagMultiSelect.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/ui/TagMultiSelect.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/vendors/VendorProductFallback.tsx",
+        "value": "10px"
+      },
+      {
+        "file": "packages/web/src/components/vendors/VendorShopPeople.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/vendors/VendorShopSidebar.tsx",
+        "value": "11px"
+      },
+      {
+        "file": "packages/web/src/components/vendors/VendorShopSidebar.tsx",
+        "value": "11px"
+      }
+    ],
+    "whiteOpacity": [
+      {
+        "file": "packages/web/src/app/calendar/erobay-community/ErobayMirrorTimeline.tsx"
+      },
+      {
+        "file": "packages/web/src/app/calendar/erobay-community/page.tsx"
+      },
+      {
+        "file": "packages/web/src/app/conventions/[slug]/dancecard/s/[token]/page.tsx"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/page.tsx"
+      },
+      {
+        "file": "packages/web/src/app/globals.css"
+      },
+      {
+        "file": "packages/web/src/app/home/page.tsx"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx"
+      },
+      {
+        "file": "packages/web/src/app/profile/page.tsx"
+      },
+      {
+        "file": "packages/web/src/components/cards/LocalPostCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/cards/OrgCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardCompareGrid.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionDancecardPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionHero.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionScheduleAgenda.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/HostedByCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/SchedulePersonChip.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/track-accent.ts"
+      },
+      {
+        "file": "packages/web/src/components/conventions/VenueMapsList.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/GoogleSheetsImportSection.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/IcalBusyPreviewPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/IntegrationsPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/PeopleDirectoryPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/PersonDetailDrawer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ProgramScheduleGrid.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/SessionDetailDrawer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/StaffShiftsPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/TrustedRolesPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ui/EntityPickerModal.tsx"
+      },
+      {
+        "file": "packages/web/src/components/editor/EducatorArticleEditor.tsx"
+      },
+      {
+        "file": "packages/web/src/components/home/home-dashboard-styles.ts"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeDashboardLeftRail.tsx"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedMockComposer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedRichComposer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeFeedShellComposer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeMobileComposer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeUpcomingEventCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/home/HomeWelcomePanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDanceCardMock.tsx"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingDiscoveryPreview.tsx"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingOrganizerSection.tsx"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingPreviewEducatorRow.tsx"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingPreviewEventRow.tsx"
+      },
+      {
+        "file": "packages/web/src/components/landing/LandingValuePillars.tsx"
+      },
+      {
+        "file": "packages/web/src/components/LoginCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaLightbox.tsx"
+      },
+      {
+        "file": "packages/web/src/components/messaging/MessagingEmptyPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/messaging/MessagingSafetyPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/organizer/admin/OrgChatModerationPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/organizer/admin/OrgGalleryAdminPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/organizer/ui/OrganizerDataTable.tsx"
+      },
+      {
+        "file": "packages/web/src/components/orgs/OrgDirectoryCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/layout/ProfileCoverHeader.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileExtendedSection.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileIsoEditor.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileMeHub.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileAboutCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileActivityTimeline.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileCommunitySnapshotCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileEntityAvatar.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileHeroCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileOrganizationsCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfilePill.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/story/ProfileUpcomingEventsCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/settings/PresenterCatalogSection.tsx"
+      },
+      {
+        "file": "packages/web/src/components/templates/DashboardTemplate.tsx"
+      },
+      {
+        "file": "packages/web/src/components/ui/skeleton/C2kSkeleton.tsx"
+      },
+      {
+        "file": "packages/web/src/components/ui/TagSelector.tsx"
+      },
+      {
+        "file": "packages/web/src/components/vendors/VendorProductFallback.tsx"
+      },
+      {
+        "file": "packages/web/src/components/vendors/VendorShopHeader.tsx"
+      }
+    ],
+    "blackOpacity": [
+      {
+        "file": "packages/web/src/app/connections/ConnectionsPageClient.tsx"
+      },
+      {
+        "file": "packages/web/src/app/email/unsubscribe/page.tsx"
+      },
+      {
+        "file": "packages/web/src/app/events/[id]/EventDetailClient.tsx"
+      },
+      {
+        "file": "packages/web/src/app/orgs/[slug]/OrgHubClient.tsx"
+      },
+      {
+        "file": "packages/web/src/app/vendors/[id]/page.tsx"
+      },
+      {
+        "file": "packages/web/src/components/cards/VendorCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ChannelComposer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/ConventionGalleryGrid.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/DancecardOpsCard.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/DancecardScheduleEmbed.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/RegisterFlow.tsx"
+      },
+      {
+        "file": "packages/web/src/components/conventions/VenueMapsList.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ParticipationOfferComposer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/PersonDetailDrawer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/dancecard/organizer/ScheduleChangeImpactModal.tsx"
+      },
+      {
+        "file": "packages/web/src/components/email/ScopeEmailBroadcastPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/email/ScopeEmailSignupForm.tsx"
+      },
+      {
+        "file": "packages/web/src/components/EventMatchmakerPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/forum/ForumThreadReplyComposer.tsx"
+      },
+      {
+        "file": "packages/web/src/components/group/CreateGroupModal.tsx"
+      },
+      {
+        "file": "packages/web/src/components/group/GroupForumsSection.tsx"
+      },
+      {
+        "file": "packages/web/src/components/Header.tsx"
+      },
+      {
+        "file": "packages/web/src/components/media/MediaLightbox.tsx"
+      },
+      {
+        "file": "packages/web/src/components/moderation/AdminStepUpModal.tsx"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubAboutTab.tsx"
+      },
+      {
+        "file": "packages/web/src/components/org/hub/OrgHubCalendarTab.tsx"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityModules.tsx"
+      },
+      {
+        "file": "packages/web/src/components/org/OrgCommunityShell.tsx"
+      },
+      {
+        "file": "packages/web/src/components/organizer/admin/OrgGalleryAdminPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/organizer/EventMatchmakerSettingsSection.tsx"
+      },
+      {
+        "file": "packages/web/src/components/organizer/OrganizerSchedulePanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/organizer/ui/OrganizerCommandPalette.tsx"
+      },
+      {
+        "file": "packages/web/src/components/organizer/ui/OrganizerPublishConfirmDialog.tsx"
+      },
+      {
+        "file": "packages/web/src/components/organizer/ui/OrganizerStatusBar.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileIsoEditor.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfileIsoView.tsx"
+      },
+      {
+        "file": "packages/web/src/components/profile/ProfilePhotoGallery.tsx"
+      },
+      {
+        "file": "packages/web/src/components/settings/PresenterCatalogSection.tsx"
+      },
+      {
+        "file": "packages/web/src/components/shell/CreateSheet.tsx"
+      },
+      {
+        "file": "packages/web/src/components/vendors/VendorProductFallback.tsx"
+      },
+      {
+        "file": "packages/web/src/components/vendors/VendorShopHeader.tsx"
+      }
+    ],
+    "dcClasses": 14322,
+    "c2kClasses": 1,
+    "darkVariant": [
+      {
+        "file": "packages/web/src/components/dancecard/organizer/RegistrantsPanel.tsx"
+      },
+      {
+        "file": "packages/web/src/components/education/EducationDiscoverCenter.tsx"
+      }
+    ]
+  },
+  "tailwind": {
+    "unused": [
+      "c2k-1",
+      "c2k-2",
+      "c2k-3",
+      "c2k-4",
+      "c2k-5",
+      "c2k-6",
+      "rounded-c2k-card",
+      "shadow-c2k-soft"
+    ],
+    "hasDarkMode": false
+  },
+  "staleFiles": [
+    {
+      "path": "tailwind.config.js",
+      "note": "Root config references non-existent src/pages; not used by web package"
+    },
+    {
+      "path": "packages/web/src/globals.css",
+      "note": "Older duplicate; main.tsx imports app/globals.css instead"
+    }
+  ]
+}

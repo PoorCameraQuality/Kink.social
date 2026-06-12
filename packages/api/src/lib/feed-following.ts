@@ -1,0 +1,409 @@
+import { normalizeFeedSettings } from '@c2k/shared'
+import { and, desc, eq, gte, inArray } from 'drizzle-orm'
+import { db, schema } from '../db/index.js'
+import {
+  bucketForActivity,
+  bucketForPost,
+  FOLLOWING_COUNT_WINDOW_MS,
+  matchesFollowingFilter,
+} from './feed-following-filters.js'
+import { followingIds } from './following-ids.js'
+import { enrichPostsWithLikeMeta } from './post-like-meta.js'
+import { extractTagIdsFromMentions, getMutedTagIds, hydrateRepostSourceTagIds, postMatchesMutedTags } from './muted-tags.js'
+import { ensureUserSettingsRow } from './user-settings-row.js'
+
+export type FollowingFeedCursor = {
+  createdAt: string
+  source: 'post' | 'activity'
+  id: string
+}
+
+export type FollowingFeedActor = {
+  id: string
+  username: string
+}
+
+export type FollowingFeedItem = {
+  kind: 'post' | 'activity'
+  verb?: string
+  cursor: string
+  createdAt: string
+  deepLink: string
+  actor: FollowingFeedActor
+  object?: Record<string, unknown>
+  post?: Record<string, unknown>
+}
+
+function encodeCursor(c: FollowingFeedCursor): string {
+  return Buffer.from(`${c.createdAt}|${c.source}|${c.id}`, 'utf8').toString('base64url')
+}
+
+export function decodeFollowingCursor(raw: string | undefined): FollowingFeedCursor | null {
+  if (!raw?.trim()) return null
+  try {
+    const parts = Buffer.from(raw, 'base64url').toString('utf8').split('|')
+    if (parts.length !== 3) return null
+    const [createdAt, source, id] = parts
+    if (!createdAt || !id || (source !== 'post' && source !== 'activity')) return null
+    return { createdAt, source, id }
+  } catch {
+    return null
+  }
+}
+
+function deepLinkForActivity(verb: string, objectType: string, objectId: string, metadata: Record<string, unknown>): string {
+  if (verb === 'post' && objectType === 'feed_post') return `/feed/posts/${objectId}`
+  if ((verb === 'event_created' || verb === 'event_rsvp') && objectType === 'event') return `/events/${objectId}`
+  if (verb === 'connection_accepted') return '/connections'
+  if (verb === 'convention_pin' && objectType === 'convention') {
+    const slug = metadata.conventionSlug ?? metadata.conventionKey
+    if (typeof slug === 'string') return `/conventions/${slug}`
+  }
+  if (verb === 'org_announcement' || verb === 'org_join') {
+    const orgSlug = metadata.orgSlug
+    if (typeof orgSlug === 'string') return `/orgs/${orgSlug}`
+  }
+  if (verb === 'group_join' && objectType === 'group') return `/groups/${objectId}`
+  if (verb === 'presenter_assigned' && objectType === 'schedule_slot') {
+    const conventionKey = metadata.conventionKey ?? metadata.conventionSlug
+    if (typeof conventionKey === 'string') return `/conventions/${conventionKey}`
+  }
+  if (verb === 'vendor_shop_live' && objectType === 'vendor') {
+    const slug = metadata.slug
+    if (typeof slug === 'string') return `/vendors/${slug}`
+  }
+  return '/home'
+}
+
+type MergedRow = {
+  source: 'post' | 'activity'
+  id: string
+  createdAt: Date
+  actorId: string
+  username: string
+  avatarUrl?: string | null
+  verb?: string
+  objectType?: string
+  objectId?: string
+  metadata?: Record<string, unknown>
+  postRow?: {
+    kind: string
+    title: string | null
+    body: string
+    bodyFormat: string
+    attachments: unknown
+    mentions: unknown
+    repostOfId: string | null
+  }
+}
+
+function shapePostItem(row: MergedRow): FollowingFeedItem {
+  const cursor = encodeCursor({ createdAt: row.createdAt.toISOString(), source: 'post', id: row.id })
+  return {
+    kind: 'post',
+    verb: 'post',
+    cursor,
+    createdAt: row.createdAt.toISOString(),
+    deepLink: `/feed/posts/${row.id}`,
+    actor: { id: row.actorId, username: row.username },
+    post: {
+      id: row.id,
+      authorId: row.actorId,
+      authorUsername: row.username,
+      authorAvatarUrl: row.avatarUrl ?? null,
+      kind: row.postRow?.kind,
+      title: row.postRow?.title,
+      body: row.postRow?.body,
+      bodyFormat: row.postRow?.bodyFormat,
+      attachments: row.postRow?.attachments,
+      mentions: row.postRow?.mentions,
+      repostOfId: row.postRow?.repostOfId,
+      createdAt: row.createdAt.toISOString(),
+    },
+  }
+}
+
+function shapeActivityItem(row: MergedRow): FollowingFeedItem {
+  const meta = row.metadata ?? {}
+  const objectType = row.objectType ?? ''
+  const objectId = row.objectId ?? ''
+  const verb = row.verb ?? ''
+  const cursor = encodeCursor({ createdAt: row.createdAt.toISOString(), source: 'activity', id: row.id })
+  return {
+    kind: 'activity',
+    verb,
+    cursor,
+    createdAt: row.createdAt.toISOString(),
+    deepLink: deepLinkForActivity(verb, objectType, objectId, meta),
+    actor: { id: row.actorId, username: row.username },
+    object: {
+      type: objectType,
+      id: objectId,
+      ...meta,
+    },
+  }
+}
+
+function beforeCursor(row: MergedRow, cursor: FollowingFeedCursor): boolean {
+  const rowIso = row.createdAt.toISOString()
+  if (rowIso < cursor.createdAt) return true
+  if (rowIso > cursor.createdAt) return false
+  if (row.source !== cursor.source) return row.source === 'activity' && cursor.source === 'post'
+  return row.id < cursor.id
+}
+
+export async function getFollowingFeed(params: {
+  viewerId: string
+  limit: number
+  cursor?: string
+  filter?: string
+}): Promise<{ items: FollowingFeedItem[]; nextCursor: string | null; connectionCount: number }> {
+  const ids = await followingIds(params.viewerId)
+  const connectionCount = Math.max(0, ids.length - 1)
+  const decoded = decodeFollowingCursor(params.cursor)
+  const settingsRow = await ensureUserSettingsRow(params.viewerId)
+  const feedSettings = normalizeFeedSettings(settingsRow.feedSettings)
+  const hideKinds = new Set<string>(feedSettings.hideStoryTypes)
+  if (!feedSettings.showConnectionShares) hideKinds.add('repost')
+  if (!feedSettings.showConnectionLikes) hideKinds.add('connection_like')
+  const mutedTagIds = await getMutedTagIds(params.viewerId)
+
+  const fetchLimit = Math.min(120, params.limit * 4)
+
+  const postRows = await db
+    .select({
+      id: schema.feedPosts.id,
+      authorId: schema.feedPosts.authorId,
+      kind: schema.feedPosts.kind,
+      title: schema.feedPosts.title,
+      body: schema.feedPosts.body,
+      bodyFormat: schema.feedPosts.bodyFormat,
+      attachments: schema.feedPosts.attachments,
+      mentions: schema.feedPosts.mentions,
+      repostOfId: schema.feedPosts.repostOfId,
+      createdAt: schema.feedPosts.createdAt,
+      username: schema.users.username,
+      avatarUrl: schema.profiles.avatarUrl,
+    })
+    .from(schema.feedPosts)
+    .innerJoin(schema.users, eq(schema.feedPosts.authorId, schema.users.id))
+    .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
+    .where(inArray(schema.feedPosts.authorId, ids))
+    .orderBy(desc(schema.feedPosts.createdAt))
+    .limit(fetchLimit)
+
+  const activityRows = await db
+    .select({
+      id: schema.feedActivities.id,
+      actorId: schema.feedActivities.actorId,
+      verb: schema.feedActivities.verb,
+      objectType: schema.feedActivities.objectType,
+      objectId: schema.feedActivities.objectId,
+      metadata: schema.feedActivities.metadata,
+      createdAt: schema.feedActivities.createdAt,
+      username: schema.users.username,
+    })
+    .from(schema.feedActivities)
+    .innerJoin(schema.users, eq(schema.feedActivities.actorId, schema.users.id))
+    .where(inArray(schema.feedActivities.actorId, ids))
+    .orderBy(desc(schema.feedActivities.createdAt))
+    .limit(fetchLimit)
+
+  const tagIdsByPostId = new Map<string, string[]>()
+  for (const p of postRows) {
+    tagIdsByPostId.set(p.id, extractTagIdsFromMentions(p.mentions))
+  }
+  await hydrateRepostSourceTagIds(
+    tagIdsByPostId,
+    postRows.map((p) => p.repostOfId),
+  )
+
+  const merged: MergedRow[] = []
+
+  for (const p of postRows) {
+    const inheritedTags = p.repostOfId ? tagIdsByPostId.get(p.repostOfId) : undefined
+    if (postMatchesMutedTags(p.mentions, mutedTagIds, inheritedTags)) continue
+    if (
+      !matchesFollowingFilter('post', params.filter ?? 'all', hideKinds, {
+        postKind: p.kind,
+        attachments: p.attachments,
+        body: p.body,
+        bodyFormat: p.bodyFormat,
+      })
+    ) {
+      continue
+    }
+    merged.push({
+      source: 'post',
+      id: p.id,
+      createdAt: p.createdAt,
+      actorId: p.authorId,
+      username: p.username,
+      avatarUrl: p.avatarUrl,
+      verb: 'post',
+      postRow: {
+        kind: p.kind,
+        title: p.title,
+        body: p.body,
+        bodyFormat: p.bodyFormat,
+        attachments: p.attachments,
+        mentions: p.mentions,
+        repostOfId: p.repostOfId,
+      },
+    })
+  }
+
+  for (const a of activityRows) {
+    if (!matchesFollowingFilter('activity', params.filter ?? 'all', hideKinds, {
+      verb: a.verb,
+      objectType: a.objectType,
+    })) {
+      continue
+    }
+    merged.push({
+      source: 'activity',
+      id: a.id,
+      createdAt: a.createdAt,
+      actorId: a.actorId,
+      username: a.username,
+      verb: a.verb,
+      objectType: a.objectType,
+      objectId: a.objectId,
+      metadata: (a.metadata as Record<string, unknown>) ?? {},
+    })
+  }
+
+  merged.sort((a, b) => {
+    const t = b.createdAt.getTime() - a.createdAt.getTime()
+    if (t !== 0) return t
+    if (a.source !== b.source) return a.source === 'activity' ? -1 : 1
+    return b.id.localeCompare(a.id)
+  })
+
+  const filtered = decoded ? merged.filter((row) => beforeCursor(row, decoded)) : merged
+  const page = filtered.slice(0, params.limit)
+  let items = page.map((row) => (row.source === 'post' ? shapePostItem(row) : shapeActivityItem(row)))
+
+  const postIds = items.filter((item) => item.kind === 'post' && item.post?.id).map((item) => String(item.post!.id))
+  if (postIds.length > 0) {
+    const likeMeta = await enrichPostsWithLikeMeta(params.viewerId, postIds, { includeConnectionPreview: true })
+    items = items.map((item) => {
+      if (item.kind !== 'post' || !item.post?.id) return item
+      const meta = likeMeta.get(String(item.post.id))
+      if (!meta) return item
+      return {
+        ...item,
+        post: {
+          ...item.post,
+          likeCount: meta.likeCount,
+          likedByViewer: meta.likedByViewer,
+          reactionCounts: meta.reactionCounts,
+          viewerReaction: meta.viewerReaction,
+          commentCount: meta.commentCount,
+          connectionLikerPreview: meta.connectionLikerPreview,
+        },
+      }
+    })
+  }
+
+  const last = page[page.length - 1]
+  const nextCursor =
+    filtered.length > params.limit && last ?
+      encodeCursor({ createdAt: last.createdAt.toISOString(), source: last.source, id: last.id })
+    : null
+
+  return { items, nextCursor, connectionCount }
+}
+
+export type FollowingFeedCounts = {
+  all: number
+  posts: number
+  photos: number
+  video: number
+  articles: number
+  reactions: number
+  events: number
+  groups: number
+}
+
+/** Count feed items in the last 7 days per filter bucket (same hide/dedup rules as read path). */
+export async function getFollowingFeedCounts(viewerId: string): Promise<FollowingFeedCounts> {
+  const ids = await followingIds(viewerId)
+  const since = new Date(Date.now() - FOLLOWING_COUNT_WINDOW_MS)
+  const settingsRow = await ensureUserSettingsRow(viewerId)
+  const feedSettings = normalizeFeedSettings(settingsRow.feedSettings)
+  const hideKinds = new Set<string>(feedSettings.hideStoryTypes)
+  if (!feedSettings.showConnectionShares) hideKinds.add('repost')
+  if (!feedSettings.showConnectionLikes) hideKinds.add('connection_like')
+  const mutedTagIds = await getMutedTagIds(viewerId)
+
+  const counts: FollowingFeedCounts = {
+    all: 0,
+    posts: 0,
+    photos: 0,
+    video: 0,
+    articles: 0,
+    reactions: 0,
+    events: 0,
+    groups: 0,
+  }
+
+  const postRows = await db
+    .select({
+      id: schema.feedPosts.id,
+      kind: schema.feedPosts.kind,
+      body: schema.feedPosts.body,
+      bodyFormat: schema.feedPosts.bodyFormat,
+      attachments: schema.feedPosts.attachments,
+      mentions: schema.feedPosts.mentions,
+      repostOfId: schema.feedPosts.repostOfId,
+      createdAt: schema.feedPosts.createdAt,
+    })
+    .from(schema.feedPosts)
+    .where(and(inArray(schema.feedPosts.authorId, ids), gte(schema.feedPosts.createdAt, since)))
+
+  const tagIdsByPostId = new Map<string, string[]>()
+  for (const p of postRows) {
+    tagIdsByPostId.set(p.id, extractTagIdsFromMentions(p.mentions))
+  }
+  await hydrateRepostSourceTagIds(
+    tagIdsByPostId,
+    postRows.map((p) => p.repostOfId),
+  )
+
+  for (const p of postRows) {
+    const inheritedTags = p.repostOfId ? tagIdsByPostId.get(p.repostOfId) : undefined
+    if (postMatchesMutedTags(p.mentions, mutedTagIds, inheritedTags)) continue
+    const shape = {
+      postKind: p.kind,
+      attachments: p.attachments,
+      body: p.body,
+      bodyFormat: p.bodyFormat,
+    }
+    if (!matchesFollowingFilter('post', 'all', hideKinds, shape)) continue
+    counts.all++
+    counts.posts++
+    const bucket = bucketForPost(shape)
+    if (bucket === 'photos' || bucket === 'video' || bucket === 'articles') counts[bucket]++
+  }
+
+  const activityRows = await db
+    .select({
+      verb: schema.feedActivities.verb,
+      objectType: schema.feedActivities.objectType,
+      createdAt: schema.feedActivities.createdAt,
+    })
+    .from(schema.feedActivities)
+    .where(and(inArray(schema.feedActivities.actorId, ids), gte(schema.feedActivities.createdAt, since)))
+
+  for (const a of activityRows) {
+    if (!matchesFollowingFilter('activity', 'all', hideKinds, { verb: a.verb, objectType: a.objectType })) {
+      continue
+    }
+    counts.all++
+    const bucket = bucketForActivity(a.verb)
+    if (bucket) counts[bucket]++
+  }
+
+  return counts
+}

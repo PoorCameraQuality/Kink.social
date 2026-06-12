@@ -1,0 +1,2135 @@
+{
+  "generatedAt": "2026-06-12T17:26:38.712Z",
+  "count": 244,
+  "rows": [
+    {
+      "filename": "360-guest-landing-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "360",
+      "type": "top",
+      "note": "Landing signup default",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-guest-landing-full.png",
+      "route": "/",
+      "note": "Landing signup default",
+      "viewport": "360",
+      "persona": "guest",
+      "type": "full"
+    },
+    {
+      "filename": "390-guest-landing-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "390",
+      "type": "top",
+      "note": "Landing signup default",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-guest-landing-full.png",
+      "route": "/",
+      "note": "Landing signup default",
+      "viewport": "390",
+      "persona": "guest",
+      "type": "full"
+    },
+    {
+      "filename": "430-guest-landing-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "430",
+      "type": "top",
+      "note": "Landing signup default",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-guest-landing-full.png",
+      "route": "/",
+      "note": "Landing signup default",
+      "viewport": "430",
+      "persona": "guest",
+      "type": "full"
+    },
+    {
+      "filename": "1440-guest-landing-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "1440",
+      "type": "top",
+      "note": "Landing desktop",
+      "knownIssue": ""
+    },
+    {
+      "filename": "1440-guest-landing-full.png",
+      "route": "/",
+      "note": "Landing desktop",
+      "viewport": "1440",
+      "persona": "guest",
+      "type": "full"
+    },
+    {
+      "filename": "360-guest-landing-login-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "360",
+      "type": "top",
+      "note": "Login tab",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-guest-landing-login-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "390",
+      "type": "top",
+      "note": "Login tab",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-guest-landing-login-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "430",
+      "type": "top",
+      "note": "Login tab",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-guest-landing-register-policies-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "360",
+      "type": "top",
+      "note": "Signup policy + reassurance block",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-guest-landing-register-policies-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "390",
+      "type": "top",
+      "note": "Signup policy + reassurance block",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-guest-landing-register-policies-top.png",
+      "route": "/",
+      "persona": "guest",
+      "viewport": "430",
+      "type": "top",
+      "note": "Signup policy + reassurance block",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-guest-terms-top.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "360",
+      "type": "top",
+      "note": "Terms page",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-guest-terms-top.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "360",
+      "type": "top",
+      "note": "Terms page (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-guest-terms-middle.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "360",
+      "type": "middle",
+      "note": "Terms page mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-guest-terms-bottom.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "360",
+      "type": "bottom",
+      "note": "Terms page bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-guest-terms-top.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "390",
+      "type": "top",
+      "note": "Terms page",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-guest-terms-top.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "390",
+      "type": "top",
+      "note": "Terms page (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-guest-terms-middle.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "390",
+      "type": "middle",
+      "note": "Terms page mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-guest-terms-bottom.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "390",
+      "type": "bottom",
+      "note": "Terms page bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-guest-terms-top.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "430",
+      "type": "top",
+      "note": "Terms page",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-guest-terms-top.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "430",
+      "type": "top",
+      "note": "Terms page (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-guest-terms-middle.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "430",
+      "type": "middle",
+      "note": "Terms page mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-guest-terms-bottom.png",
+      "route": "/terms",
+      "persona": "guest",
+      "viewport": "430",
+      "type": "bottom",
+      "note": "Terms page bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-guest-login-wall-home-top.png",
+      "route": "/home",
+      "persona": "guest",
+      "viewport": "360",
+      "type": "top",
+      "note": "Protected route login wall / redirect",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-guest-login-wall-home-top.png",
+      "route": "/home",
+      "persona": "guest",
+      "viewport": "390",
+      "type": "top",
+      "note": "Protected route login wall / redirect",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-guest-login-wall-home-top.png",
+      "route": "/home",
+      "persona": "guest",
+      "viewport": "430",
+      "type": "top",
+      "note": "Protected route login wall / redirect",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-home-feed-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Home feed with bottom nav + composer",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-home-feed-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Home feed with bottom nav + composer (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-home-feed-middle.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "360",
+      "type": "middle",
+      "note": "Home feed with bottom nav + composer mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-home-feed-bottom.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "360",
+      "type": "bottom",
+      "note": "Home feed with bottom nav + composer bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-home-feed-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Home feed with bottom nav + composer",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-home-feed-full.png",
+      "route": "/home",
+      "note": "Home feed with bottom nav + composer",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-home-feed-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Home feed with bottom nav + composer",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-home-feed-full.png",
+      "route": "/home",
+      "note": "Home feed with bottom nav + composer",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "1440-member-home-feed-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "1440",
+      "type": "top",
+      "note": "Home feed desktop",
+      "knownIssue": ""
+    },
+    {
+      "filename": "1440-member-home-feed-full.png",
+      "route": "/home",
+      "note": "Home feed desktop",
+      "viewport": "1440",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-create-sheet-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Create FAB sheet open",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-create-sheet-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Create FAB sheet open",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-create-sheet-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Create FAB sheet open",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-explore-top.png",
+      "route": "/explore",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Explore directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-explore-full.png",
+      "route": "/explore",
+      "note": "Explore directory",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-explore-top.png",
+      "route": "/explore",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Explore directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-explore-full.png",
+      "route": "/explore",
+      "note": "Explore directory",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-explore-top.png",
+      "route": "/explore",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Explore directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-explore-full.png",
+      "route": "/explore",
+      "note": "Explore directory",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-explore-filter-sheet-top.png",
+      "route": "/explore",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "FilterSheet open",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-explore-filter-sheet-top.png",
+      "route": "/explore",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "FilterSheet open",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-explore-filter-sheet-top.png",
+      "route": "/explore",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "FilterSheet open",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-events-list-top.png",
+      "route": "/events",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Events directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-events-list-full.png",
+      "route": "/events",
+      "note": "Events directory",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-events-list-top.png",
+      "route": "/events",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Events directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-events-list-full.png",
+      "route": "/events",
+      "note": "Events directory",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-events-list-top.png",
+      "route": "/events",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Events directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-events-list-full.png",
+      "route": "/events",
+      "note": "Events directory",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-events-filter-sheet-top.png",
+      "route": "/events",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Events FilterSheet",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-events-filter-sheet-top.png",
+      "route": "/events",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Events FilterSheet",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-events-filter-sheet-top.png",
+      "route": "/events",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Events FilterSheet",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-event-detail-top.png",
+      "route": "/events/1",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Event detail hero + RSVP",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-event-detail-full.png",
+      "route": "/events/1",
+      "note": "Event detail hero + RSVP",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-event-detail-top.png",
+      "route": "/events/1",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Event detail hero + RSVP",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-event-detail-full.png",
+      "route": "/events/1",
+      "note": "Event detail hero + RSVP",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-event-detail-top.png",
+      "route": "/events/1",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Event detail hero + RSVP",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-event-detail-full.png",
+      "route": "/events/1",
+      "note": "Event detail hero + RSVP",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "1440-member-event-detail-top.png",
+      "route": "/events/1",
+      "persona": "member",
+      "viewport": "1440",
+      "type": "top",
+      "note": "Event detail desktop",
+      "knownIssue": ""
+    },
+    {
+      "filename": "1440-member-event-detail-full.png",
+      "route": "/events/1",
+      "note": "Event detail desktop",
+      "viewport": "1440",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-messages-inbox-top.png",
+      "route": "/messaging",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Messages inbox",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-messages-inbox-top.png",
+      "route": "/messaging",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Messages inbox",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-messages-inbox-top.png",
+      "route": "/messaging",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Messages inbox",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-message-thread-top.png",
+      "route": "/messaging",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Message thread with trust context",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-message-thread-top.png",
+      "route": "/messaging",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Message thread with trust context",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-message-thread-top.png",
+      "route": "/messaging",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Message thread with trust context",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-me-profile-hub-top.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Me tab — account hub + profile story",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-me-profile-hub-top.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Me tab — account hub + profile story (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-me-profile-hub-middle.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "360",
+      "type": "middle",
+      "note": "Me tab — account hub + profile story mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-me-profile-hub-bottom.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "360",
+      "type": "bottom",
+      "note": "Me tab — account hub + profile story bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-me-profile-hub-top.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Me tab — account hub + profile story",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-me-profile-hub-top.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Me tab — account hub + profile story (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-me-profile-hub-middle.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "390",
+      "type": "middle",
+      "note": "Me tab — account hub + profile story mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-me-profile-hub-bottom.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "390",
+      "type": "bottom",
+      "note": "Me tab — account hub + profile story bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-me-profile-hub-top.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Me tab — account hub + profile story",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-me-profile-hub-top.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Me tab — account hub + profile story (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-me-profile-hub-middle.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "430",
+      "type": "middle",
+      "note": "Me tab — account hub + profile story mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-me-profile-hub-bottom.png",
+      "route": "/profile",
+      "persona": "member",
+      "viewport": "430",
+      "type": "bottom",
+      "note": "Me tab — account hub + profile story bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-public-profile-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Public profile view",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-public-profile-full.png",
+      "route": "/profile/Brax",
+      "note": "Public profile view",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-public-profile-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Public profile view",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-public-profile-full.png",
+      "route": "/profile/Brax",
+      "note": "Public profile view",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-public-profile-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Public profile view",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-public-profile-full.png",
+      "route": "/profile/Brax",
+      "note": "Public profile view",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-profile-report-menu-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Report profile affordance",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-profile-report-menu-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Report profile affordance",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-profile-report-menu-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Report profile affordance",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-profile-edit-top.png",
+      "route": "/profile/edit",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Profile edit / studio",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-profile-edit-full.png",
+      "route": "/profile/edit",
+      "note": "Profile edit / studio",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-profile-edit-top.png",
+      "route": "/profile/edit",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Profile edit / studio",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-profile-edit-full.png",
+      "route": "/profile/edit",
+      "note": "Profile edit / studio",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-profile-edit-top.png",
+      "route": "/profile/edit",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Profile edit / studio",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-profile-edit-full.png",
+      "route": "/profile/edit",
+      "note": "Profile edit / studio",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-new-member-home-new-member-top.png",
+      "route": "/home",
+      "persona": "new-member",
+      "viewport": "360",
+      "type": "top",
+      "note": "New member home (onboarding incomplete)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-new-member-home-new-member-full.png",
+      "route": "/home",
+      "note": "New member home (onboarding incomplete)",
+      "viewport": "360",
+      "persona": "new-member",
+      "type": "full"
+    },
+    {
+      "filename": "390-new-member-home-new-member-top.png",
+      "route": "/home",
+      "persona": "new-member",
+      "viewport": "390",
+      "type": "top",
+      "note": "New member home (onboarding incomplete)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-new-member-home-new-member-full.png",
+      "route": "/home",
+      "note": "New member home (onboarding incomplete)",
+      "viewport": "390",
+      "persona": "new-member",
+      "type": "full"
+    },
+    {
+      "filename": "430-new-member-home-new-member-top.png",
+      "route": "/home",
+      "persona": "new-member",
+      "viewport": "430",
+      "type": "top",
+      "note": "New member home (onboarding incomplete)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-new-member-home-new-member-full.png",
+      "route": "/home",
+      "note": "New member home (onboarding incomplete)",
+      "viewport": "430",
+      "persona": "new-member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-groups-directory-top.png",
+      "route": "/groups",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Groups directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-groups-directory-full.png",
+      "route": "/groups",
+      "note": "Groups directory",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-groups-directory-top.png",
+      "route": "/groups",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Groups directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-groups-directory-full.png",
+      "route": "/groups",
+      "note": "Groups directory",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-groups-directory-top.png",
+      "route": "/groups",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Groups directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-groups-directory-full.png",
+      "route": "/groups",
+      "note": "Groups directory",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-group-detail-top.png",
+      "route": "/groups/g1",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Group community hub",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-group-detail-full.png",
+      "route": "/groups/g1",
+      "note": "Group community hub",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-group-detail-top.png",
+      "route": "/groups/g1",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Group community hub",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-group-detail-full.png",
+      "route": "/groups/g1",
+      "note": "Group community hub",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-group-detail-top.png",
+      "route": "/groups/g1",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Group community hub",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-group-detail-full.png",
+      "route": "/groups/g1",
+      "note": "Group community hub",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-org-detail-top.png",
+      "route": "/orgs/demo-east-collective",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Organization hub",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-org-detail-full.png",
+      "route": "/orgs/demo-east-collective",
+      "note": "Organization hub",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-org-detail-top.png",
+      "route": "/orgs/demo-east-collective",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Organization hub",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-org-detail-full.png",
+      "route": "/orgs/demo-east-collective",
+      "note": "Organization hub",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-org-detail-top.png",
+      "route": "/orgs/demo-east-collective",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Organization hub",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-org-detail-full.png",
+      "route": "/orgs/demo-east-collective",
+      "note": "Organization hub",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-orgs-directory-top.png",
+      "route": "/orgs",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Organizations directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-orgs-directory-full.png",
+      "route": "/orgs",
+      "note": "Organizations directory",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-orgs-directory-top.png",
+      "route": "/orgs",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Organizations directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-orgs-directory-full.png",
+      "route": "/orgs",
+      "note": "Organizations directory",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-orgs-directory-top.png",
+      "route": "/orgs",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Organizations directory",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-orgs-directory-full.png",
+      "route": "/orgs",
+      "note": "Organizations directory",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-organizer-org-create-top.png",
+      "route": "/orgs/new",
+      "persona": "organizer",
+      "viewport": "360",
+      "type": "top",
+      "note": "Organization creation wizard",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-organizer-org-create-full.png",
+      "route": "/orgs/new",
+      "note": "Organization creation wizard",
+      "viewport": "360",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "390-organizer-org-create-top.png",
+      "route": "/orgs/new",
+      "persona": "organizer",
+      "viewport": "390",
+      "type": "top",
+      "note": "Organization creation wizard",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-organizer-org-create-full.png",
+      "route": "/orgs/new",
+      "note": "Organization creation wizard",
+      "viewport": "390",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "430-organizer-org-create-top.png",
+      "route": "/orgs/new",
+      "persona": "organizer",
+      "viewport": "430",
+      "type": "top",
+      "note": "Organization creation wizard",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-organizer-org-create-full.png",
+      "route": "/orgs/new",
+      "note": "Organization creation wizard",
+      "viewport": "430",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "360-organizer-org-organizer-dashboard-top.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "360",
+      "type": "top",
+      "note": "Org organizer console home",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-organizer-org-organizer-dashboard-full.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "note": "Org organizer console home",
+      "viewport": "360",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "390-organizer-org-organizer-dashboard-top.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "390",
+      "type": "top",
+      "note": "Org organizer console home",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-organizer-org-organizer-dashboard-full.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "note": "Org organizer console home",
+      "viewport": "390",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "430-organizer-org-organizer-dashboard-top.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "430",
+      "type": "top",
+      "note": "Org organizer console home",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-organizer-org-organizer-dashboard-full.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "note": "Org organizer console home",
+      "viewport": "430",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-group-create-step-1-top.png",
+      "route": "/groups?create=group",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Group creation step 1 — basics",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-group-create-step-1-top.png",
+      "route": "/groups?create=group",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Group creation step 1 — basics",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-group-create-step-1-top.png",
+      "route": "/groups?create=group",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Group creation step 1 — basics",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-group-create-step-2-top.png",
+      "route": "/groups?create=group",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Group creation step 2 — community rules",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-group-create-step-2-top.png",
+      "route": "/groups?create=group",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Group creation step 2 — community rules",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-group-create-step-2-top.png",
+      "route": "/groups?create=group",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Group creation step 2 — community rules",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-group-create-step-3-top.png",
+      "route": "/groups?create=group",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Group creation step 3 — review",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-group-create-step-3-top.png",
+      "route": "/groups?create=group",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Group creation step 3 — review",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-group-create-step-3-top.png",
+      "route": "/groups?create=group",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Group creation step 3 — review",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-event-create-step-1-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Event creation step 1",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-event-create-step-1-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Event creation step 1",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-event-create-step-1-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Event creation step 1",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-event-create-step-2-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Event creation step 2",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-event-create-step-2-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Event creation step 2",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-event-create-step-2-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Event creation step 2",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-event-create-step-3-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Event creation step 3",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-event-create-step-3-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Event creation step 3",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-event-create-step-3-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Event creation step 3",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-event-create-step-4-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Event creation review / publish step",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-event-create-step-4-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Event creation review / publish step",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-event-create-step-4-top.png",
+      "route": "/events?create=event",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Event creation review / publish step",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-organizer-organizer-dashboard-top.png",
+      "route": "/organizer",
+      "persona": "organizer",
+      "viewport": "360",
+      "type": "top",
+      "note": "Organizer home dashboard",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-organizer-organizer-dashboard-full.png",
+      "route": "/organizer",
+      "note": "Organizer home dashboard",
+      "viewport": "360",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "390-organizer-organizer-dashboard-top.png",
+      "route": "/organizer",
+      "persona": "organizer",
+      "viewport": "390",
+      "type": "top",
+      "note": "Organizer home dashboard",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-organizer-organizer-dashboard-full.png",
+      "route": "/organizer",
+      "note": "Organizer home dashboard",
+      "viewport": "390",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "430-organizer-organizer-dashboard-top.png",
+      "route": "/organizer",
+      "persona": "organizer",
+      "viewport": "430",
+      "type": "top",
+      "note": "Organizer home dashboard",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-organizer-organizer-dashboard-full.png",
+      "route": "/organizer",
+      "note": "Organizer home dashboard",
+      "viewport": "430",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "1440-organizer-organizer-dashboard-top.png",
+      "route": "/organizer",
+      "persona": "organizer",
+      "viewport": "1440",
+      "type": "top",
+      "note": "Organizer dashboard desktop",
+      "knownIssue": ""
+    },
+    {
+      "filename": "1440-organizer-organizer-dashboard-full.png",
+      "route": "/organizer",
+      "note": "Organizer dashboard desktop",
+      "viewport": "1440",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "360-organizer-convention-organizer-dashboard-top.png",
+      "route": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "persona": "organizer",
+      "viewport": "360",
+      "type": "top",
+      "note": "Convention organizer dashboard",
+      "knownIssue": "May timeout if convention seed missing"
+    },
+    {
+      "filename": "360-organizer-convention-organizer-dashboard-full.png",
+      "route": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "note": "Convention organizer dashboard",
+      "knownIssue": "May timeout if convention seed missing",
+      "viewport": "360",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "390-organizer-convention-organizer-dashboard-top.png",
+      "route": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "persona": "organizer",
+      "viewport": "390",
+      "type": "top",
+      "note": "Convention organizer dashboard",
+      "knownIssue": "May timeout if convention seed missing"
+    },
+    {
+      "filename": "390-organizer-convention-organizer-dashboard-full.png",
+      "route": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "note": "Convention organizer dashboard",
+      "knownIssue": "May timeout if convention seed missing",
+      "viewport": "390",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "430-organizer-convention-organizer-dashboard-top.png",
+      "route": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "persona": "organizer",
+      "viewport": "430",
+      "type": "top",
+      "note": "Convention organizer dashboard",
+      "knownIssue": "May timeout if convention seed missing"
+    },
+    {
+      "filename": "430-organizer-convention-organizer-dashboard-full.png",
+      "route": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "note": "Convention organizer dashboard",
+      "knownIssue": "May timeout if convention seed missing",
+      "viewport": "430",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-report-flow-step-1-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Report modal — reason selection",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-report-flow-step-1-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Report modal — reason selection",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-report-flow-step-1-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Report modal — reason selection",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-report-flow-review-top.png",
+      "route": "/profile/Brax",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Report modal — filled note ready to submit",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-settings-account-top.png",
+      "route": "/settings/account",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Account settings",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-settings-account-full.png",
+      "route": "/settings/account",
+      "note": "Account settings",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-settings-account-top.png",
+      "route": "/settings/account",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Account settings",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-settings-account-full.png",
+      "route": "/settings/account",
+      "note": "Account settings",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-settings-account-top.png",
+      "route": "/settings/account",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Account settings",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-settings-account-full.png",
+      "route": "/settings/account",
+      "note": "Account settings",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-organizer-org-management-top.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "360",
+      "type": "top",
+      "note": "Organization management console",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-organizer-org-management-full.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "note": "Organization management console",
+      "viewport": "360",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "390-organizer-org-management-top.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "390",
+      "type": "top",
+      "note": "Organization management console",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-organizer-org-management-full.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "note": "Organization management console",
+      "viewport": "390",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "430-organizer-org-management-top.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "430",
+      "type": "top",
+      "note": "Organization management console",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-organizer-org-management-full.png",
+      "route": "/organizer/orgs/demo-east-collective",
+      "note": "Organization management console",
+      "viewport": "430",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "360-organizer-group-management-top.png",
+      "route": "/groups/g1",
+      "persona": "organizer",
+      "viewport": "360",
+      "type": "top",
+      "note": "Group page with organizer affordances if member",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-organizer-group-management-full.png",
+      "route": "/groups/g1",
+      "note": "Group page with organizer affordances if member",
+      "viewport": "360",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "390-organizer-group-management-top.png",
+      "route": "/groups/g1",
+      "persona": "organizer",
+      "viewport": "390",
+      "type": "top",
+      "note": "Group page with organizer affordances if member",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-organizer-group-management-full.png",
+      "route": "/groups/g1",
+      "note": "Group page with organizer affordances if member",
+      "viewport": "390",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "430-organizer-group-management-top.png",
+      "route": "/groups/g1",
+      "persona": "organizer",
+      "viewport": "430",
+      "type": "top",
+      "note": "Group page with organizer affordances if member",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-organizer-group-management-full.png",
+      "route": "/groups/g1",
+      "note": "Group page with organizer affordances if member",
+      "viewport": "430",
+      "persona": "organizer",
+      "type": "full"
+    },
+    {
+      "filename": "360-guest-policies-hub-top.png",
+      "route": "/policies",
+      "persona": "guest",
+      "viewport": "360",
+      "type": "top",
+      "note": "Policies hub",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-guest-policies-hub-full.png",
+      "route": "/policies",
+      "note": "Policies hub",
+      "viewport": "360",
+      "persona": "guest",
+      "type": "full"
+    },
+    {
+      "filename": "390-guest-policies-hub-top.png",
+      "route": "/policies",
+      "persona": "guest",
+      "viewport": "390",
+      "type": "top",
+      "note": "Policies hub",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-guest-policies-hub-full.png",
+      "route": "/policies",
+      "note": "Policies hub",
+      "viewport": "390",
+      "persona": "guest",
+      "type": "full"
+    },
+    {
+      "filename": "430-guest-policies-hub-top.png",
+      "route": "/policies",
+      "persona": "guest",
+      "viewport": "430",
+      "type": "top",
+      "note": "Policies hub",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-guest-policies-hub-full.png",
+      "route": "/policies",
+      "note": "Policies hub",
+      "viewport": "430",
+      "persona": "guest",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-privacy-settings-top.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Privacy and visibility settings",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-privacy-settings-top.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Privacy and visibility settings (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-privacy-settings-middle.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "360",
+      "type": "middle",
+      "note": "Privacy and visibility settings mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-privacy-settings-bottom.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "360",
+      "type": "bottom",
+      "note": "Privacy and visibility settings bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-privacy-settings-top.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Privacy and visibility settings",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-privacy-settings-top.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Privacy and visibility settings (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-privacy-settings-middle.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "390",
+      "type": "middle",
+      "note": "Privacy and visibility settings mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-privacy-settings-bottom.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "390",
+      "type": "bottom",
+      "note": "Privacy and visibility settings bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-privacy-settings-top.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Privacy and visibility settings",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-privacy-settings-top.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Privacy and visibility settings (section: top — page too tall for single full capture)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-privacy-settings-middle.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "430",
+      "type": "middle",
+      "note": "Privacy and visibility settings mid-scroll section",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-privacy-settings-bottom.png",
+      "route": "/settings/privacy",
+      "persona": "member",
+      "viewport": "430",
+      "type": "bottom",
+      "note": "Privacy and visibility settings bottom/action area",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-safety-blocked-top.png",
+      "route": "/settings/blocked",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Blocked accounts / safety settings",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-safety-blocked-full.png",
+      "route": "/settings/blocked",
+      "note": "Blocked accounts / safety settings",
+      "viewport": "360",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "390-member-safety-blocked-top.png",
+      "route": "/settings/blocked",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Blocked accounts / safety settings",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-safety-blocked-full.png",
+      "route": "/settings/blocked",
+      "note": "Blocked accounts / safety settings",
+      "viewport": "390",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "430-member-safety-blocked-top.png",
+      "route": "/settings/blocked",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Blocked accounts / safety settings",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-safety-blocked-full.png",
+      "route": "/settings/blocked",
+      "note": "Blocked accounts / safety settings",
+      "viewport": "430",
+      "persona": "member",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-feed-post-report-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "Report on feed post (overflow menu)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-feed-post-report-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "Report on feed post (overflow menu)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-feed-post-report-top.png",
+      "route": "/home",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "Report on feed post (overflow menu)",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-mod-admin-moderation-queue-top.png",
+      "route": "/moderation/dashboard",
+      "persona": "mod-admin",
+      "viewport": "360",
+      "type": "top",
+      "note": "Moderation dashboard",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-mod-admin-moderation-queue-full.png",
+      "route": "/moderation/dashboard",
+      "note": "Moderation dashboard",
+      "viewport": "360",
+      "persona": "mod-admin",
+      "type": "full"
+    },
+    {
+      "filename": "390-mod-admin-moderation-queue-top.png",
+      "route": "/moderation/dashboard",
+      "persona": "mod-admin",
+      "viewport": "390",
+      "type": "top",
+      "note": "Moderation dashboard",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-mod-admin-moderation-queue-full.png",
+      "route": "/moderation/dashboard",
+      "note": "Moderation dashboard",
+      "viewport": "390",
+      "persona": "mod-admin",
+      "type": "full"
+    },
+    {
+      "filename": "430-mod-admin-moderation-queue-top.png",
+      "route": "/moderation/dashboard",
+      "persona": "mod-admin",
+      "viewport": "430",
+      "type": "top",
+      "note": "Moderation dashboard",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-mod-admin-moderation-queue-full.png",
+      "route": "/moderation/dashboard",
+      "note": "Moderation dashboard",
+      "viewport": "430",
+      "persona": "mod-admin",
+      "type": "full"
+    },
+    {
+      "filename": "1440-mod-admin-moderation-queue-top.png",
+      "route": "/moderation/dashboard",
+      "persona": "mod-admin",
+      "viewport": "1440",
+      "type": "top",
+      "note": "Moderation desktop",
+      "knownIssue": ""
+    },
+    {
+      "filename": "1440-mod-admin-moderation-queue-full.png",
+      "route": "/moderation/dashboard",
+      "note": "Moderation desktop",
+      "viewport": "1440",
+      "persona": "mod-admin",
+      "type": "full"
+    },
+    {
+      "filename": "360-member-empty-events-search-top.png",
+      "route": "/events?q=zzzznonexistent999visualreview",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "No events found empty state",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-empty-events-search-top.png",
+      "route": "/events?q=zzzznonexistent999visualreview",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "No events found empty state",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-empty-events-search-top.png",
+      "route": "/events?q=zzzznonexistent999visualreview",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "No events found empty state",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-empty-groups-search-top.png",
+      "route": "/groups?q=zzzznonexistent999visualreview",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "No groups found empty state",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-empty-groups-search-top.png",
+      "route": "/groups?q=zzzznonexistent999visualreview",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "No groups found empty state",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-empty-groups-search-top.png",
+      "route": "/groups?q=zzzznonexistent999visualreview",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "No groups found empty state",
+      "knownIssue": ""
+    },
+    {
+      "filename": "360-member-empty-people-search-top.png",
+      "route": "/people?q=zzzznonexistent999visualreview",
+      "persona": "member",
+      "viewport": "360",
+      "type": "top",
+      "note": "No search results — people",
+      "knownIssue": ""
+    },
+    {
+      "filename": "390-member-empty-people-search-top.png",
+      "route": "/people?q=zzzznonexistent999visualreview",
+      "persona": "member",
+      "viewport": "390",
+      "type": "top",
+      "note": "No search results — people",
+      "knownIssue": ""
+    },
+    {
+      "filename": "430-member-empty-people-search-top.png",
+      "route": "/people?q=zzzznonexistent999visualreview",
+      "persona": "member",
+      "viewport": "430",
+      "type": "top",
+      "note": "No search results — people",
+      "knownIssue": ""
+    }
+  ]
+}

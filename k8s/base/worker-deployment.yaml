@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: c2k-worker
+  namespace: c2k
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: c2k-worker
+  template:
+    metadata:
+      labels:
+        app: c2k-worker
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/your-org/c2k-api:latest
+          command: ['node', 'dist/worker.js']
+          envFrom:
+            - configMapRef:
+                name: c2k-api-config
+            - secretRef:
+                name: c2k-mail-secret

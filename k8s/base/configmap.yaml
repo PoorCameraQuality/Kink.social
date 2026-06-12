@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: c2k-api-config
+  namespace: c2k
+data:
+  NODE_ENV: production
+  HOST: "0.0.0.0"
+  PORT: "3001"
+  USE_DATABASE: "true"
+  # Non-secret mail toggles (secrets hold SMTP credentials)
+  C2K_EVENT_RSVP_EMAIL: "true"

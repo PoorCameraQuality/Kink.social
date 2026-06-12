@@ -1,0 +1,48 @@
+/**
+ * Dancecard / Event Systems organizer tokens.
+ * Presets also apply via inline style from DancecardAppearanceProvider; these are fallbacks.
+ */
+
+.dc-gold-chrome[data-dc-theme='event'] {
+  /* Midnight Brass - matches member app default for embedded organizer console */
+  --dc-surface: #121212;
+  --dc-surface-muted: #262626;
+  --dc-elevated: rgba(30, 30, 30, 0.94);
+  --dc-elevated-solid: #1e1e1e;
+  --dc-elevated-muted: rgba(255, 255, 255, 0.08);
+  --dc-text: #ffffff;
+  --dc-text-muted: #d1d5db;
+  --dc-text-subtle: #d4af37;
+  --dc-muted: #9ca3af;
+  --dc-accent: #d4af37;
+  --dc-accent-hover: #e0c04a;
+  --dc-accent-muted: rgba(212, 175, 55, 0.14);
+  --dc-accent-border: rgba(212, 175, 55, 0.45);
+  --dc-accent-foreground: #121212;
+  --dc-border-subtle: #2b2b2b;
+  --dc-border-strong: #3f3f3f;
+  --dc-danger: #ef4444;
+  --dc-danger-muted: rgba(239, 68, 68, 0.12);
+  --dc-danger-border: rgba(239, 68, 68, 0.35);
+  --dc-success: #10b981;
+  --dc-success-muted: rgba(16, 185, 129, 0.12);
+  --dc-warning: #f59e0b;
+  --dc-warning-muted: rgba(245, 158, 11, 0.12);
+  --dc-slot-published: #d4af37;
+  --dc-slot-accent-mix: 18%;
+  --dc-shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --dc-shadow-panel: 0 20px 48px rgba(0, 0, 0, 0.45);
+  color: var(--dc-text);
+  background-color: var(--dc-surface);
+}
+
+.dc-gold-chrome[data-dc-theme='event'] .dc-session-title {
+  color: var(--dc-text);
+}
+
+/* Embedded organizer / dancecard island - not sitewide member chrome */
+.dc-gold-chrome.dc-gold-chrome--lifted[data-dc-theme='event'] {
+  border-radius: 1rem;
+  box-shadow: var(--dc-shadow-panel);
+  border: 1px solid var(--dc-border-subtle);
+}

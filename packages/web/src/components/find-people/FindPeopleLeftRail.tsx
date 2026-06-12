@@ -1,0 +1,115 @@
+import { Link } from 'react-router-dom'
+
+import DiscoveryBrowseLinks from '@/components/discovery/DiscoveryBrowseLinks'
+
+import FindPeopleFiltersPanel, { type FindPeopleFilterDraft } from '@/components/find-people/FindPeopleFiltersPanel'
+
+import type { CommunityRoleFilterId } from '@/lib/people-search-constants'
+
+
+
+const NAV = [
+
+  { href: '/people', label: 'People' },
+
+  { href: '/connections', label: 'Connections' },
+
+  { href: '/connections?tab=requests', label: 'Requests' },
+
+  { href: '/profile', label: 'My profile' },
+
+] as const
+
+
+
+type Props = {
+  draft: FindPeopleFilterDraft
+  onDraftChange: (patch: Partial<FindPeopleFilterDraft>) => void
+  onToggleCommunityRole: (id: CommunityRoleFilterId) => void
+  onToggleInterestRole: (role: string) => void
+  onResetAll: () => void
+  onApply: () => void
+  memberCount: number
+  streamTab?: string
+  peopleApiBacked?: boolean
+}
+
+export default function FindPeopleLeftRail(props: Props) {
+  const {
+    draft,
+    onDraftChange,
+    onToggleCommunityRole,
+    onToggleInterestRole,
+    onResetAll,
+    onApply,
+    memberCount,
+    streamTab,
+    peopleApiBacked,
+  } = props
+
+  return (
+
+    <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-label="People directory filters">
+
+      <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
+
+        <nav aria-label="People sections" className="mb-4 border-b border-dc-border pb-4">
+
+          <ul className="space-y-0.5">
+
+            {NAV.map((item, i) => (
+
+              <li key={item.href}>
+
+                <Link
+
+                  to={item.href}
+
+                  className={`flex min-h-10 items-center rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+
+                    i === 0 ?
+
+                      'bg-dc-accent-muted text-dc-accent'
+
+                    : 'text-dc-text-muted hover:bg-dc-elevated-hover hover:text-dc-text'
+
+                  }`}
+
+                >
+
+                  {item.label}
+
+                </Link>
+
+              </li>
+
+            ))}
+
+          </ul>
+
+        </nav>
+
+        <FindPeopleFiltersPanel
+          idPrefix="fp-rail"
+          draft={draft}
+          onDraftChange={onDraftChange}
+          onToggleCommunityRole={onToggleCommunityRole}
+          onToggleInterestRole={onToggleInterestRole}
+          onResetAll={onResetAll}
+          onApply={onApply}
+          memberCount={memberCount}
+          streamTab={streamTab}
+          peopleApiBacked={peopleApiBacked}
+        />
+
+      </div>
+
+      <DiscoveryBrowseLinks className="px-1" />
+
+    </aside>
+
+  )
+
+}
+
+

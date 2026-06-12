@@ -1,0 +1,38 @@
+---
+description: Reuse and extend existing structures before adding parallel code paths
+alwaysApply: true
+---
+
+# Extend before you add
+
+We prototype and ship in the same repo. **Avoid duplicate tables, routes, types, and UI flows.**
+
+## Before implementing
+
+1. Read **`docs/C2K-STRATEGIC-GUIDANCE.md`** (phase gates, identity/worker/WS rules) when the task touches product direction or cross-cutting architecture.
+2. Read **`docs/FEATURE_REGISTRY.md`** (routes, API prefixes, what exists).
+3. Search the monorepo for the feature noun (`event`, `convention`, `schedule`, `forum`, `channel`, `group`, `org`).
+4. Prefer **extending** existing schema/handlers/components over a second parallel path.
+
+## Decision (use in PR description or plan)
+
+- **Existing:** What already covers this (file/table/route names)?
+- **Gap:** What is actually missing?
+- **Choice:** Extend vs new — if new, one sentence why reuse failed.
+
+## High-risk duplication areas (check first)
+
+| Area | Guidance |
+|------|----------|
+| **Events / conventions / schedule** | One user-facing story; align program data with existing `events`, `conventions`, `schedule_slots` — do not add a third calendar model without an ADR. |
+| **Forums** | Org vs group scope uses the same forum pattern; no third forum stack. |
+| **API** | New `/api/v1/...` lives with real route modules; do not duplicate in `ecosystem-stubs.ts` unless the stub is explicitly temporary and tracked. |
+| **Web UI** | Prefer one data layer (hook or client) per domain; avoid long `apiBacked ? … : mock` forks in every page — consolidate at the boundary. |
+
+## Red flags — pause and design
+
+- Second table differing only by FK (org vs group vs event).
+- Copy-paste page with renamed props.
+- Second enum mirroring an existing one.
+
+When duplication already exists, **small consolidation PRs** beat stacking features on both paths.

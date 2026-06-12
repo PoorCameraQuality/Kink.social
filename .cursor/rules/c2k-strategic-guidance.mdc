@@ -1,0 +1,59 @@
+---
+description: C2K product strategy, phase gates, and binding architecture rules for every agent session
+alwaysApply: true
+---
+
+# C2K strategic guidance (v3)
+
+**Full document:** [`docs/C2K-STRATEGIC-GUIDANCE.md`](../docs/C2K-STRATEGIC-GUIDANCE.md) — read at session start ([`docs/MASTER_NEXT_STEPS.md`](../docs/MASTER_NEXT_STEPS.md) §1).
+
+**Local dev:** §2 — Docker + Mailpit; only DNS, public URL, and optional tunnel need a server. [`docs/SERVER_CUTOVER_LOG.md`](../docs/SERVER_CUTOVER_LOG.md) for prod delta.
+
+When this file and [`docs/architecture/`](../docs/architecture/) diverge on **runtime** facts, architecture wins. When they diverge on **product priority and agent constraints**, guidance wins.
+
+## Product frame
+
+C2K is a **community operating system** (organizer-first), not a FetLife clone. **Workflow gravity** beats feed engagement.
+
+| Phase | Horizon | Focus |
+|-------|---------|--------|
+| **1** | Alpha → ~6 months | Event Systems, door mobile, PWA, org onboarding (§15) |
+| **2** | Post-alpha | `feed_activities`, Following feed (§13 F1→F3) |
+| **3** | 12–24 months | Portable identity / credential panel |
+
+Do **not** build Following-feed UI before alpha organizer items unless the user explicitly overrides.
+
+## Session checklist (v3 §22 — before coding)
+
+1. **Docker + Mailpit?** `docker compose -f docker-compose.dev.yml up -d`; `C2K_MAIL_TRANSPORT=smtp` → `127.0.0.1:1025`.
+2. **Phase?** Organizer (1), social/feed (2), or portable identity (3)?
+3. **Identity touch?** One `users` row; every write sets `user_id`.
+4. **Permission layer?** Platform → Org → Group → Convention attendee → Command bridge → Resource — API enforcement.
+5. **Side effects?** Email/sync/push/mod jobs → **BullMQ** after commit (known sync: hub push, `createNotification` — no *new* inline side effects).
+6. **New table?** Column → JSONB → pattern row → new table last.
+7. **Payments?** **Stop.** No Stripe, no `payments` table; `paidConfirmed` organizer-only (§5).
+8. **ECKE?** Outbound publish only.
+9. **WS impact?** Update `authorizeWebSocketSubscribe` in the same commit.
+10. **Notification type?** Register in `@c2k/shared` before routes/UI.
+11. **Hook pattern?** `useApi[Domain].ts` before page components.
+12. **Mobile?** Organizer tools (especially door) must work on phone.
+13. **Moderation?** AI summarizes; humans decide — never autonomous resolution.
+
+## Hard rejects (guidance §21)
+
+- "Needs live server" for mail/storage/queues — use Mailpit, MinIO, Redis locally
+- `presenter_users` / `vendor_accounts` / guest checkout / second forum stack / Stripe in registration
+- Inline moderation ML or digest/sync in route handlers
+- `convention_persons.id` as identity key; WS scope string changes without migration
+- Following feed before organizer alpha items (unless user overrides)
+- Apple App Store focus before PWA + web alpha
+
+## Companion docs
+
+| Doc | Use for |
+|-----|---------|
+| [`docs/FEATURE_REGISTRY.md`](../docs/FEATURE_REGISTRY.md) | Routes, env |
+| [`docs/PILOT_READINESS.md`](../docs/PILOT_READINESS.md) | Alpha checklist §16 |
+| [`docs/SERVER_CUTOVER_LOG.md`](../docs/SERVER_CUTOVER_LOG.md) | Prod-only delta journal |
+| [`docs/architecture/README.md`](../docs/architecture/README.md) | Domains, WS, workers |
+| `.cursor/rules/extend-before-add.mdc` | Extend before duplicate tables/routes |

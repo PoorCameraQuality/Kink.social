@@ -1,0 +1,1660 @@
+{
+  "generatedAt": "2026-06-12T19:16:49.348Z",
+  "groupId": "97c004d2-b180-4a17-879b-22f4a22c2efb",
+  "captureCount": 165,
+  "authCaptureCount": 135,
+  "skippedCount": 0,
+  "loginWallCount": 0,
+  "captures": [
+    {
+      "tier": "A",
+      "path": "/",
+      "persona": "guest",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-360.png",
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-member-360.png",
+      "url": "http://127.0.0.1:5173/home"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "new-member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-new-member-360.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fhome"
+    },
+    {
+      "tier": "A",
+      "path": "/explore",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/explore-member-360.png",
+      "url": "http://127.0.0.1:5173/explore"
+    },
+    {
+      "tier": "A",
+      "path": "/people",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/people-member-360.png",
+      "url": "http://127.0.0.1:5173/people"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "guest",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-guest-360.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fevents"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-member-360.png",
+      "url": "http://127.0.0.1:5173/events"
+    },
+    {
+      "tier": "A",
+      "path": "/groups/97c004d2-b180-4a17-879b-22f4a22c2efb",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/groups-97c004d2-b180-4a17-879b-22f4a22c2efb-member-360.png",
+      "url": "http://127.0.0.1:5173/groups/97c004d2-b180-4a17-879b-22f4a22c2efb"
+    },
+    {
+      "tier": "A",
+      "path": "/messaging",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/messaging-member-360.png",
+      "url": "http://127.0.0.1:5173/messaging"
+    },
+    {
+      "tier": "A",
+      "path": "/notifications",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/notifications-member-360.png",
+      "url": "http://127.0.0.1:5173/notifications"
+    },
+    {
+      "tier": "A",
+      "path": "/profile",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-member-360.png",
+      "url": "http://127.0.0.1:5173/profile"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-member-360.png",
+      "url": "http://127.0.0.1:5173/profile/edit"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "new-member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-new-member-360.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fprofile%2Fedit"
+    },
+    {
+      "tier": "A",
+      "path": "/onboarding",
+      "persona": "new-member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/onboarding-new-member-360.png",
+      "url": "http://127.0.0.1:5173/onboarding"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/account",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-account-member-360.png",
+      "url": "http://127.0.0.1:5173/settings/account"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/privacy",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-privacy-member-360.png",
+      "url": "http://127.0.0.1:5173/settings/privacy"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "guest",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-guest-360.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fsupport"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-member-360.png",
+      "url": "http://127.0.0.1:5173/support"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-member-360.png",
+      "url": "http://127.0.0.1:5173/conventions"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions/preview-c2k-weekend",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-preview-c2k-weekend-member-360.png",
+      "url": "http://127.0.0.1:5173/conventions/preview-c2k-weekend"
+    },
+    {
+      "tier": "B",
+      "path": "/orgs/demo-east-collective",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/orgs-demo-east-collective-member-360.png",
+      "url": "http://127.0.0.1:5173/orgs/demo-east-collective"
+    },
+    {
+      "tier": "B",
+      "path": "/education",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/education-member-360.png",
+      "url": "http://127.0.0.1:5173/education"
+    },
+    {
+      "tier": "B",
+      "path": "/vendors",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/vendors-member-360.png",
+      "url": "http://127.0.0.1:5173/vendors"
+    },
+    {
+      "tier": "B",
+      "path": "/presenters",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/presenters-member-360.png",
+      "url": "http://127.0.0.1:5173/presenters"
+    },
+    {
+      "tier": "B",
+      "path": "/media",
+      "persona": "member",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/media-member-360.png",
+      "url": "http://127.0.0.1:5173/media"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer",
+      "persona": "organizer",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-organizer-360.png",
+      "url": "http://127.0.0.1:5173/organizer"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-organizer-360.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "persona": "organizer",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-organizer-360.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend?tab=dashboard"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door",
+      "persona": "organizer",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-door-organizer-360.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door"
+    },
+    {
+      "tier": "D",
+      "path": "/moderation/dashboard",
+      "persona": "mod-admin",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/moderation-dashboard-mod-admin-360.png",
+      "url": "http://127.0.0.1:5173/moderation/dashboard"
+    },
+    {
+      "tier": "D",
+      "path": "/policies",
+      "persona": "guest",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/policies-guest-360.png",
+      "url": "http://127.0.0.1:5173/policies"
+    },
+    {
+      "tier": "D",
+      "path": "/terms",
+      "persona": "guest",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/terms-guest-360.png",
+      "url": "http://127.0.0.1:5173/terms"
+    },
+    {
+      "tier": "D",
+      "path": "/?login=1",
+      "persona": "guest",
+      "viewport": "360",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-360.png",
+      "url": "http://127.0.0.1:5173/?login=1"
+    },
+    {
+      "tier": "A",
+      "path": "/",
+      "persona": "guest",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-390.png",
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-member-390.png",
+      "url": "http://127.0.0.1:5173/home"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "new-member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-new-member-390.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fhome"
+    },
+    {
+      "tier": "A",
+      "path": "/explore",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/explore-member-390.png",
+      "url": "http://127.0.0.1:5173/explore"
+    },
+    {
+      "tier": "A",
+      "path": "/people",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/people-member-390.png",
+      "url": "http://127.0.0.1:5173/people"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "guest",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-guest-390.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fevents"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-member-390.png",
+      "url": "http://127.0.0.1:5173/events"
+    },
+    {
+      "tier": "A",
+      "path": "/groups/97c004d2-b180-4a17-879b-22f4a22c2efb",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/groups-97c004d2-b180-4a17-879b-22f4a22c2efb-member-390.png",
+      "url": "http://127.0.0.1:5173/groups/97c004d2-b180-4a17-879b-22f4a22c2efb"
+    },
+    {
+      "tier": "A",
+      "path": "/messaging",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/messaging-member-390.png",
+      "url": "http://127.0.0.1:5173/messaging"
+    },
+    {
+      "tier": "A",
+      "path": "/notifications",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/notifications-member-390.png",
+      "url": "http://127.0.0.1:5173/notifications"
+    },
+    {
+      "tier": "A",
+      "path": "/profile",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-member-390.png",
+      "url": "http://127.0.0.1:5173/profile"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-member-390.png",
+      "url": "http://127.0.0.1:5173/profile/edit"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "new-member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-new-member-390.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fprofile%2Fedit"
+    },
+    {
+      "tier": "A",
+      "path": "/onboarding",
+      "persona": "new-member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/onboarding-new-member-390.png",
+      "url": "http://127.0.0.1:5173/onboarding"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/account",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-account-member-390.png",
+      "url": "http://127.0.0.1:5173/settings/account"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/privacy",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-privacy-member-390.png",
+      "url": "http://127.0.0.1:5173/settings/privacy"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "guest",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-guest-390.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fsupport"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-member-390.png",
+      "url": "http://127.0.0.1:5173/support"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-member-390.png",
+      "url": "http://127.0.0.1:5173/conventions"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions/preview-c2k-weekend",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-preview-c2k-weekend-member-390.png",
+      "url": "http://127.0.0.1:5173/conventions/preview-c2k-weekend"
+    },
+    {
+      "tier": "B",
+      "path": "/orgs/demo-east-collective",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/orgs-demo-east-collective-member-390.png",
+      "url": "http://127.0.0.1:5173/orgs/demo-east-collective"
+    },
+    {
+      "tier": "B",
+      "path": "/education",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/education-member-390.png",
+      "url": "http://127.0.0.1:5173/education"
+    },
+    {
+      "tier": "B",
+      "path": "/vendors",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/vendors-member-390.png",
+      "url": "http://127.0.0.1:5173/vendors"
+    },
+    {
+      "tier": "B",
+      "path": "/presenters",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/presenters-member-390.png",
+      "url": "http://127.0.0.1:5173/presenters"
+    },
+    {
+      "tier": "B",
+      "path": "/media",
+      "persona": "member",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/media-member-390.png",
+      "url": "http://127.0.0.1:5173/media"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer",
+      "persona": "organizer",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-organizer-390.png",
+      "url": "http://127.0.0.1:5173/organizer"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-organizer-390.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "persona": "organizer",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-organizer-390.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend?tab=dashboard"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door",
+      "persona": "organizer",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-door-organizer-390.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door"
+    },
+    {
+      "tier": "D",
+      "path": "/moderation/dashboard",
+      "persona": "mod-admin",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/moderation-dashboard-mod-admin-390.png",
+      "url": "http://127.0.0.1:5173/moderation/dashboard"
+    },
+    {
+      "tier": "D",
+      "path": "/policies",
+      "persona": "guest",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/policies-guest-390.png",
+      "url": "http://127.0.0.1:5173/policies"
+    },
+    {
+      "tier": "D",
+      "path": "/terms",
+      "persona": "guest",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/terms-guest-390.png",
+      "url": "http://127.0.0.1:5173/terms"
+    },
+    {
+      "tier": "D",
+      "path": "/?login=1",
+      "persona": "guest",
+      "viewport": "390",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-390.png",
+      "url": "http://127.0.0.1:5173/?login=1"
+    },
+    {
+      "tier": "A",
+      "path": "/",
+      "persona": "guest",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-430.png",
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-member-430.png",
+      "url": "http://127.0.0.1:5173/home"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "new-member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-new-member-430.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fhome"
+    },
+    {
+      "tier": "A",
+      "path": "/explore",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/explore-member-430.png",
+      "url": "http://127.0.0.1:5173/explore"
+    },
+    {
+      "tier": "A",
+      "path": "/people",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/people-member-430.png",
+      "url": "http://127.0.0.1:5173/people"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "guest",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-guest-430.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fevents"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-member-430.png",
+      "url": "http://127.0.0.1:5173/events"
+    },
+    {
+      "tier": "A",
+      "path": "/groups/97c004d2-b180-4a17-879b-22f4a22c2efb",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/groups-97c004d2-b180-4a17-879b-22f4a22c2efb-member-430.png",
+      "url": "http://127.0.0.1:5173/groups/97c004d2-b180-4a17-879b-22f4a22c2efb"
+    },
+    {
+      "tier": "A",
+      "path": "/messaging",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/messaging-member-430.png",
+      "url": "http://127.0.0.1:5173/messaging"
+    },
+    {
+      "tier": "A",
+      "path": "/notifications",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/notifications-member-430.png",
+      "url": "http://127.0.0.1:5173/notifications"
+    },
+    {
+      "tier": "A",
+      "path": "/profile",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-member-430.png",
+      "url": "http://127.0.0.1:5173/profile"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-member-430.png",
+      "url": "http://127.0.0.1:5173/profile/edit"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "new-member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-new-member-430.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fprofile%2Fedit"
+    },
+    {
+      "tier": "A",
+      "path": "/onboarding",
+      "persona": "new-member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/onboarding-new-member-430.png",
+      "url": "http://127.0.0.1:5173/onboarding"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/account",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-account-member-430.png",
+      "url": "http://127.0.0.1:5173/settings/account"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/privacy",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-privacy-member-430.png",
+      "url": "http://127.0.0.1:5173/settings/privacy"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "guest",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-guest-430.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fsupport"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-member-430.png",
+      "url": "http://127.0.0.1:5173/support"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-member-430.png",
+      "url": "http://127.0.0.1:5173/conventions"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions/preview-c2k-weekend",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-preview-c2k-weekend-member-430.png",
+      "url": "http://127.0.0.1:5173/conventions/preview-c2k-weekend"
+    },
+    {
+      "tier": "B",
+      "path": "/orgs/demo-east-collective",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/orgs-demo-east-collective-member-430.png",
+      "url": "http://127.0.0.1:5173/orgs/demo-east-collective"
+    },
+    {
+      "tier": "B",
+      "path": "/education",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/education-member-430.png",
+      "url": "http://127.0.0.1:5173/education"
+    },
+    {
+      "tier": "B",
+      "path": "/vendors",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/vendors-member-430.png",
+      "url": "http://127.0.0.1:5173/vendors"
+    },
+    {
+      "tier": "B",
+      "path": "/presenters",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/presenters-member-430.png",
+      "url": "http://127.0.0.1:5173/presenters"
+    },
+    {
+      "tier": "B",
+      "path": "/media",
+      "persona": "member",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/media-member-430.png",
+      "url": "http://127.0.0.1:5173/media"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer",
+      "persona": "organizer",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-organizer-430.png",
+      "url": "http://127.0.0.1:5173/organizer"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-organizer-430.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "persona": "organizer",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-organizer-430.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend?tab=dashboard"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door",
+      "persona": "organizer",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-door-organizer-430.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door"
+    },
+    {
+      "tier": "D",
+      "path": "/moderation/dashboard",
+      "persona": "mod-admin",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/moderation-dashboard-mod-admin-430.png",
+      "url": "http://127.0.0.1:5173/moderation/dashboard"
+    },
+    {
+      "tier": "D",
+      "path": "/policies",
+      "persona": "guest",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/policies-guest-430.png",
+      "url": "http://127.0.0.1:5173/policies"
+    },
+    {
+      "tier": "D",
+      "path": "/terms",
+      "persona": "guest",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/terms-guest-430.png",
+      "url": "http://127.0.0.1:5173/terms"
+    },
+    {
+      "tier": "D",
+      "path": "/?login=1",
+      "persona": "guest",
+      "viewport": "430",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-430.png",
+      "url": "http://127.0.0.1:5173/?login=1"
+    },
+    {
+      "tier": "A",
+      "path": "/",
+      "persona": "guest",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-768.png",
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-member-768.png",
+      "url": "http://127.0.0.1:5173/home"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "new-member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-new-member-768.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fhome"
+    },
+    {
+      "tier": "A",
+      "path": "/explore",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/explore-member-768.png",
+      "url": "http://127.0.0.1:5173/explore"
+    },
+    {
+      "tier": "A",
+      "path": "/people",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/people-member-768.png",
+      "url": "http://127.0.0.1:5173/people"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "guest",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-guest-768.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fevents"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-member-768.png",
+      "url": "http://127.0.0.1:5173/events"
+    },
+    {
+      "tier": "A",
+      "path": "/groups/97c004d2-b180-4a17-879b-22f4a22c2efb",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/groups-97c004d2-b180-4a17-879b-22f4a22c2efb-member-768.png",
+      "url": "http://127.0.0.1:5173/groups/97c004d2-b180-4a17-879b-22f4a22c2efb"
+    },
+    {
+      "tier": "A",
+      "path": "/messaging",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/messaging-member-768.png",
+      "url": "http://127.0.0.1:5173/messaging"
+    },
+    {
+      "tier": "A",
+      "path": "/notifications",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/notifications-member-768.png",
+      "url": "http://127.0.0.1:5173/notifications"
+    },
+    {
+      "tier": "A",
+      "path": "/profile",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-member-768.png",
+      "url": "http://127.0.0.1:5173/profile"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-member-768.png",
+      "url": "http://127.0.0.1:5173/profile/edit"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "new-member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-new-member-768.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fprofile%2Fedit"
+    },
+    {
+      "tier": "A",
+      "path": "/onboarding",
+      "persona": "new-member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/onboarding-new-member-768.png",
+      "url": "http://127.0.0.1:5173/onboarding"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/account",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-account-member-768.png",
+      "url": "http://127.0.0.1:5173/settings/account"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/privacy",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-privacy-member-768.png",
+      "url": "http://127.0.0.1:5173/settings/privacy"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "guest",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-guest-768.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fsupport"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-member-768.png",
+      "url": "http://127.0.0.1:5173/support"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-member-768.png",
+      "url": "http://127.0.0.1:5173/conventions"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions/preview-c2k-weekend",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-preview-c2k-weekend-member-768.png",
+      "url": "http://127.0.0.1:5173/conventions/preview-c2k-weekend"
+    },
+    {
+      "tier": "B",
+      "path": "/orgs/demo-east-collective",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/orgs-demo-east-collective-member-768.png",
+      "url": "http://127.0.0.1:5173/orgs/demo-east-collective"
+    },
+    {
+      "tier": "B",
+      "path": "/education",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/education-member-768.png",
+      "url": "http://127.0.0.1:5173/education"
+    },
+    {
+      "tier": "B",
+      "path": "/vendors",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/vendors-member-768.png",
+      "url": "http://127.0.0.1:5173/vendors"
+    },
+    {
+      "tier": "B",
+      "path": "/presenters",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/presenters-member-768.png",
+      "url": "http://127.0.0.1:5173/presenters"
+    },
+    {
+      "tier": "B",
+      "path": "/media",
+      "persona": "member",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/media-member-768.png",
+      "url": "http://127.0.0.1:5173/media"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer",
+      "persona": "organizer",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-organizer-768.png",
+      "url": "http://127.0.0.1:5173/organizer"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-organizer-768.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "persona": "organizer",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-organizer-768.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend?tab=dashboard"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door",
+      "persona": "organizer",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-door-organizer-768.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door"
+    },
+    {
+      "tier": "D",
+      "path": "/moderation/dashboard",
+      "persona": "mod-admin",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/moderation-dashboard-mod-admin-768.png",
+      "url": "http://127.0.0.1:5173/moderation/dashboard"
+    },
+    {
+      "tier": "D",
+      "path": "/policies",
+      "persona": "guest",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/policies-guest-768.png",
+      "url": "http://127.0.0.1:5173/policies"
+    },
+    {
+      "tier": "D",
+      "path": "/terms",
+      "persona": "guest",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/terms-guest-768.png",
+      "url": "http://127.0.0.1:5173/terms"
+    },
+    {
+      "tier": "D",
+      "path": "/?login=1",
+      "persona": "guest",
+      "viewport": "768",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-768.png",
+      "url": "http://127.0.0.1:5173/?login=1"
+    },
+    {
+      "tier": "A",
+      "path": "/",
+      "persona": "guest",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-1440.png",
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-member-1440.png",
+      "url": "http://127.0.0.1:5173/home"
+    },
+    {
+      "tier": "A",
+      "path": "/home",
+      "persona": "new-member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/home-new-member-1440.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fhome"
+    },
+    {
+      "tier": "A",
+      "path": "/explore",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/explore-member-1440.png",
+      "url": "http://127.0.0.1:5173/explore"
+    },
+    {
+      "tier": "A",
+      "path": "/people",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/people-member-1440.png",
+      "url": "http://127.0.0.1:5173/people"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "guest",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-guest-1440.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fevents"
+    },
+    {
+      "tier": "A",
+      "path": "/events",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/events-member-1440.png",
+      "url": "http://127.0.0.1:5173/events"
+    },
+    {
+      "tier": "A",
+      "path": "/groups/97c004d2-b180-4a17-879b-22f4a22c2efb",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/groups-97c004d2-b180-4a17-879b-22f4a22c2efb-member-1440.png",
+      "url": "http://127.0.0.1:5173/groups/97c004d2-b180-4a17-879b-22f4a22c2efb"
+    },
+    {
+      "tier": "A",
+      "path": "/messaging",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/messaging-member-1440.png",
+      "url": "http://127.0.0.1:5173/messaging"
+    },
+    {
+      "tier": "A",
+      "path": "/notifications",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/notifications-member-1440.png",
+      "url": "http://127.0.0.1:5173/notifications"
+    },
+    {
+      "tier": "A",
+      "path": "/profile",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-member-1440.png",
+      "url": "http://127.0.0.1:5173/profile"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-member-1440.png",
+      "url": "http://127.0.0.1:5173/profile/edit"
+    },
+    {
+      "tier": "A",
+      "path": "/profile/edit",
+      "persona": "new-member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/profile-edit-new-member-1440.png",
+      "url": "http://127.0.0.1:5173/onboarding?redirect=%2Fprofile%2Fedit"
+    },
+    {
+      "tier": "A",
+      "path": "/onboarding",
+      "persona": "new-member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/onboarding-new-member-1440.png",
+      "url": "http://127.0.0.1:5173/onboarding"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/account",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-account-member-1440.png",
+      "url": "http://127.0.0.1:5173/settings/account"
+    },
+    {
+      "tier": "A",
+      "path": "/settings/privacy",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/settings-privacy-member-1440.png",
+      "url": "http://127.0.0.1:5173/settings/privacy"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "guest",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-guest-1440.png",
+      "url": "http://127.0.0.1:5173/?login=1&redirect=%2Fsupport"
+    },
+    {
+      "tier": "A",
+      "path": "/support",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/support-member-1440.png",
+      "url": "http://127.0.0.1:5173/support"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-member-1440.png",
+      "url": "http://127.0.0.1:5173/conventions"
+    },
+    {
+      "tier": "B",
+      "path": "/conventions/preview-c2k-weekend",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/conventions-preview-c2k-weekend-member-1440.png",
+      "url": "http://127.0.0.1:5173/conventions/preview-c2k-weekend"
+    },
+    {
+      "tier": "B",
+      "path": "/orgs/demo-east-collective",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/orgs-demo-east-collective-member-1440.png",
+      "url": "http://127.0.0.1:5173/orgs/demo-east-collective"
+    },
+    {
+      "tier": "B",
+      "path": "/education",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/education-member-1440.png",
+      "url": "http://127.0.0.1:5173/education"
+    },
+    {
+      "tier": "B",
+      "path": "/vendors",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/vendors-member-1440.png",
+      "url": "http://127.0.0.1:5173/vendors"
+    },
+    {
+      "tier": "B",
+      "path": "/presenters",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/presenters-member-1440.png",
+      "url": "http://127.0.0.1:5173/presenters"
+    },
+    {
+      "tier": "B",
+      "path": "/media",
+      "persona": "member",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/media-member-1440.png",
+      "url": "http://127.0.0.1:5173/media"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer",
+      "persona": "organizer",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-organizer-1440.png",
+      "url": "http://127.0.0.1:5173/organizer"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective",
+      "persona": "organizer",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-organizer-1440.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend",
+      "persona": "organizer",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-organizer-1440.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend?tab=dashboard"
+    },
+    {
+      "tier": "C",
+      "path": "/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door",
+      "persona": "organizer",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/organizer-orgs-demo-east-collective-conventions-preview-c2k-weekend-door-organizer-1440.png",
+      "url": "http://127.0.0.1:5173/organizer/orgs/demo-east-collective/conventions/preview-c2k-weekend/door"
+    },
+    {
+      "tier": "D",
+      "path": "/moderation/dashboard",
+      "persona": "mod-admin",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/moderation-dashboard-mod-admin-1440.png",
+      "url": "http://127.0.0.1:5173/moderation/dashboard"
+    },
+    {
+      "tier": "D",
+      "path": "/policies",
+      "persona": "guest",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/policies-guest-1440.png",
+      "url": "http://127.0.0.1:5173/policies"
+    },
+    {
+      "tier": "D",
+      "path": "/terms",
+      "persona": "guest",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/terms-guest-1440.png",
+      "url": "http://127.0.0.1:5173/terms"
+    },
+    {
+      "tier": "D",
+      "path": "/?login=1",
+      "persona": "guest",
+      "viewport": "1440",
+      "status": "ok",
+      "reason": null,
+      "file": "docs/audits/ui/screenshots/ui-architecture-audit/root-guest-1440.png",
+      "url": "http://127.0.0.1:5173/?login=1"
+    }
+  ]
+}

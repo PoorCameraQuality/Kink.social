@@ -1,0 +1,91 @@
+import { useCallback, useState } from 'react'
+import HomeFeedMockComposer from '@/components/home/HomeFeedMockComposer'
+import HomeFeedRichComposer from '@/components/home/HomeFeedRichComposer'
+import FeedComposerQuickActions from '@/components/home/FeedComposerQuickActions'
+import ComposerAvatar from '@/components/home/ComposerAvatar'
+
+type Props = {
+  viewerUsername: string
+  viewerInitial: string
+  useDbComposer: boolean
+  composerPlaceholder: string
+  onPosted: () => void
+  shell: 'mobile' | 'desktop'
+}
+
+function CollapsedComposerTrigger({
+  placeholder,
+  onActivate,
+}: {
+  placeholder: string
+  onActivate: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onActivate}
+      className="flex min-h-10 min-w-0 flex-1 items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-4 text-left text-sm text-dc-muted transition-colors hover:border-[rgba(214,178,59,0.28)] hover:bg-white/[0.06]"
+    >
+      {placeholder}
+    </button>
+  )
+}
+
+export default function HomeFeedShellComposer({
+  viewerUsername,
+  viewerInitial,
+  useDbComposer,
+  composerPlaceholder,
+  onPosted,
+  shell,
+}: Props) {
+  const [open, setOpen] = useState(false)
+
+  const handlePosted = useCallback(() => {
+    setOpen(false)
+    onPosted()
+  }, [onPosted])
+
+  const collapsed = (shell === 'mobile' || shell === 'desktop') && !open
+
+  if (collapsed) {
+    return (
+      <div className="min-w-0 flex-1 space-y-2.5">
+        <div className="flex items-center gap-2.5">
+          <ComposerAvatar initial={viewerInitial} />
+          <CollapsedComposerTrigger placeholder={composerPlaceholder} onActivate={() => setOpen(true)} />
+        </div>
+        <FeedComposerQuickActions
+          variant={shell === 'mobile' ? 'home-mobile' : 'home-desktop'}
+          onPhoto={() => setOpen(true)}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-w-0 flex-1 space-y-2">
+      <div className="flex items-start gap-2.5">
+        <ComposerAvatar initial={viewerInitial} />
+        <div className="min-w-0 flex-1">
+          {useDbComposer ?
+            <HomeFeedRichComposer
+              onPosted={handlePosted}
+              showQuickActions
+              compact
+              shellMode={shell}
+              composerPlaceholder={composerPlaceholder}
+            />
+          : <HomeFeedMockComposer
+              viewerUsername={viewerUsername}
+              onPosted={handlePosted}
+              showQuickActions
+              compact
+              shellMode={shell}
+              composerPlaceholder={composerPlaceholder}
+            />}
+        </div>
+      </div>
+    </div>
+  )
+}

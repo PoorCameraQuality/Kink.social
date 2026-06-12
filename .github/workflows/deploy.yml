@@ -1,0 +1,43 @@
+# Deploy to VPS: set secrets VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_DEPLOY_PATH
+# VPS must have Node 20+ and npm for db:migrate-prod (runs on host before compose).
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd "${{ secrets.VPS_DEPLOY_PATH }}"
+            git pull origin main
+            if [ -f .env.production ]; then
+              set -a
+              . ./.env.production
+              set +a
+            else
+              echo "Fatal: .env.production missing on VPS"
+              exit 1
+            fi
+            export NODE_ENV=production
+            export USE_DATABASE=true
+            # Host migrations: Postgres is port-mapped to loopback on VPS overlay.
+            export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5432/${POSTGRES_DB}"
+            echo "Running production migrations (no seed)..."
+            npm ci
+            node scripts/migrate-prod.mjs
+            echo "Starting containers (VPS overlay: MinIO, ClamAV, mailserver)..."
+            docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.prod.vps.yml up -d --build
+            bash scripts/vps/fix-minio-public-read.sh
+            echo "Deploy complete."

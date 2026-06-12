@@ -1,0 +1,2931 @@
+{
+  "generatedAt": "2026-06-12T21:16:11.914Z",
+  "routes": [
+    {
+      "path": "/organizer/orgs/:slug/conventions/:convSlug/door",
+      "kind": "unknown",
+      "redirectTo": null,
+      "component": null,
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/",
+      "kind": "redirect",
+      "redirectTo": "/home?tab=Local",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": true,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "LandingPage",
+      "source": "packages/web/src/app/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/page.tsx"
+    },
+    {
+      "path": "/login",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "LoginRedirectPage",
+      "source": "packages/web/src/app/login/LoginRedirectPage.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/login/LoginRedirectPage.tsx"
+    },
+    {
+      "path": "/forgot-password",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ForgotPasswordPage",
+      "source": "packages/web/src/app/forgot-password/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/forgot-password/page.tsx"
+    },
+    {
+      "path": "/reset-password",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ResetPasswordPage",
+      "source": "packages/web/src/app/reset-password/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/reset-password/page.tsx"
+    },
+    {
+      "path": "/feed",
+      "kind": "redirect",
+      "redirectTo": "/home?tab=Local",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/home",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "HomePage",
+      "source": "packages/web/src/app/home/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "feed",
+      "mobileFlags": [
+        "feed-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Personal hub — allow access with inline setup nudges"
+      },
+      "sourceFile": "packages/web/src/app/home/page.tsx"
+    },
+    {
+      "path": "/share/post/:id",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "SharePostPage",
+      "source": "packages/web/src/app/share/post/[id]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/share/post/[id]/page.tsx"
+    },
+    {
+      "path": "/people",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "PeopleDirectoryPage",
+      "source": "packages/web/src/app/people/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/people/page.tsx"
+    },
+    {
+      "path": "/explore",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ExplorePage",
+      "source": "packages/web/src/app/explore/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/explore/page.tsx"
+    },
+    {
+      "path": "/discovery",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "DiscoveryRoute",
+      "source": "packages/web/src/app/discovery/DiscoveryRoute.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/discovery/DiscoveryRoute.tsx"
+    },
+    {
+      "path": "/explore/people",
+      "kind": "redirect",
+      "redirectTo": "/people",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/events",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EventsPage",
+      "source": "packages/web/src/app/events/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/events/page.tsx"
+    },
+    {
+      "path": "/events/:id",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EventDetailPage",
+      "source": "packages/web/src/app/events/[id]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/events/[id]/page.tsx"
+    },
+    {
+      "path": "/groups",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "GroupsPage",
+      "source": "packages/web/src/app/groups/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/groups/page.tsx"
+    },
+    {
+      "path": "/groups/:id",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "GroupDetailPage",
+      "source": "packages/web/src/app/groups/[id]/page.tsx",
+      "layout": "RootLayout + CommunityHubShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/groups/[id]/page.tsx"
+    },
+    {
+      "path": "/places",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "PlacesPage",
+      "source": "packages/web/src/app/places/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/places/page.tsx"
+    },
+    {
+      "path": "/vendors",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "VendorsPage",
+      "source": "packages/web/src/app/vendors/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/vendors/page.tsx"
+    },
+    {
+      "path": "/vendors/new",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "VendorCreatePage",
+      "source": "packages/web/src/app/vendors/new/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "wizard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/vendors/new/page.tsx"
+    },
+    {
+      "path": "/vendors/onboarding",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "VendorOnboardingPage",
+      "source": "packages/web/src/app/vendors/onboarding/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "wizard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/vendors/onboarding/page.tsx"
+    },
+    {
+      "path": "/vendors/:id",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "VendorDetailPage",
+      "source": "packages/web/src/app/vendors/[id]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/vendors/[id]/page.tsx"
+    },
+    {
+      "path": "/orgs",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrgsListPage",
+      "source": "packages/web/src/app/orgs/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/orgs/page.tsx"
+    },
+    {
+      "path": "/orgs/new",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrgCreatePage",
+      "source": "packages/web/src/app/orgs/new/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "wizard",
+      "mobileFlags": [],
+      "backendLanguage": [
+        "ecke"
+      ],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/orgs/new/page.tsx"
+    },
+    {
+      "path": "/orgs/:slug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrgHubPage",
+      "source": "packages/web/src/app/orgs/[slug]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/orgs/[slug]/page.tsx"
+    },
+    {
+      "path": "/conventions",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ConventionsListPage",
+      "source": "packages/web/src/app/conventions/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/conventions/page.tsx"
+    },
+    {
+      "path": "/conventions/:slug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ConventionProgramPage",
+      "source": "packages/web/src/app/conventions/[slug]/page.tsx",
+      "layout": "RootLayout + ConventionAttendeeHubShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [
+        "command-bridge",
+        "ecke"
+      ],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/conventions/[slug]/page.tsx"
+    },
+    {
+      "path": "/conventions/:slug/register",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ConventionRegisterPage",
+      "source": "packages/web/src/app/conventions/[slug]/register/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "wizard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/conventions/[slug]/register/page.tsx"
+    },
+    {
+      "path": "/conventions/:slug/apply/:applySlug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "TrustedRoleApplyPage",
+      "source": "packages/web/src/app/conventions/[slug]/apply/[applySlug]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "wizard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/conventions/[slug]/apply/[applySlug]/page.tsx"
+    },
+    {
+      "path": "/conventions/:slug/present/apply",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ConventionPresentApplyPage",
+      "source": "packages/web/src/app/conventions/[slug]/present/apply/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "wizard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/conventions/[slug]/present/apply/page.tsx"
+    },
+    {
+      "path": "/conventions/:slug/vend/apply",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ConventionVendApplyPage",
+      "source": "packages/web/src/app/conventions/[slug]/vend/apply/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "wizard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/conventions/[slug]/vend/apply/page.tsx"
+    },
+    {
+      "path": "/conventions/:slug/my-offers",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ConventionMyOffersPage",
+      "source": "packages/web/src/app/conventions/[slug]/my-offers/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/conventions/[slug]/my-offers/page.tsx"
+    },
+    {
+      "path": "/conventions/:slug/dancecard/s/:token",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ConventionDancecardSharedPage",
+      "source": "packages/web/src/app/conventions/[slug]/dancecard/s/[token]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/conventions/[slug]/dancecard/s/[token]/page.tsx"
+    },
+    {
+      "path": "/presenters",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "PresentersDirectoryPage",
+      "source": "packages/web/src/app/presenters/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/presenters/page.tsx"
+    },
+    {
+      "path": "/presenters/onboarding",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "PresenterOnboardingPage",
+      "source": "packages/web/src/app/presenters/onboarding/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "wizard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/presenters/onboarding/page.tsx"
+    },
+    {
+      "path": "/presenters/:username",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "PresenterProfilePage",
+      "source": "packages/web/src/app/presenters/[username]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/presenters/[username]/page.tsx"
+    },
+    {
+      "path": "/media",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "MediaPage",
+      "source": "packages/web/src/app/media/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "media",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/media/page.tsx"
+    },
+    {
+      "path": "/media/submit",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "MediaSubmitPage",
+      "source": "packages/web/src/app/media/submit/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "media",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/media/submit/page.tsx"
+    },
+    {
+      "path": "/media/:slug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "MediaShowPage",
+      "source": "packages/web/src/app/media/[slug]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "media",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/media/[slug]/page.tsx"
+    },
+    {
+      "path": "/education",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EducationPage",
+      "source": "packages/web/src/app/education/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "directory",
+      "mobileFlags": [
+        "discover-3col"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/education/page.tsx"
+    },
+    {
+      "path": "/education/write",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EducationWritePage",
+      "source": "packages/web/src/app/education/write/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [
+        "ecke"
+      ],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/education/write/page.tsx"
+    },
+    {
+      "path": "/education/write/:id",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EducationWritePage",
+      "source": "packages/web/src/app/education/write/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [
+        "ecke"
+      ],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/education/write/page.tsx"
+    },
+    {
+      "path": "/education/series/manage",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EducationSeriesManagePage",
+      "source": "packages/web/src/app/education/series/manage/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/education/series/manage/page.tsx"
+    },
+    {
+      "path": "/education/series/manage/:id",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EducationSeriesManageEditPage",
+      "source": "packages/web/src/app/education/series/manage/[id]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/education/series/manage/[id]/page.tsx"
+    },
+    {
+      "path": "/education/series/:slug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EducationSeriesPage",
+      "source": "packages/web/src/app/education/series/[slug]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/education/series/[slug]/page.tsx"
+    },
+    {
+      "path": "/education/:slug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EducationArticlePage",
+      "source": "packages/web/src/app/education/[slug]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/education/[slug]/page.tsx"
+    },
+    {
+      "path": "/tags/:tag",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "TagsPage",
+      "source": "packages/web/src/app/tags/[tag]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/tags/[tag]/page.tsx"
+    },
+    {
+      "path": "/profile",
+      "kind": "redirect",
+      "redirectTo": "/profile/edit/interests",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": true,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/messaging",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "MessagingPage",
+      "source": "packages/web/src/app/messaging/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [
+        "focused-personal"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Personal hub — allow access with inline setup nudges"
+      },
+      "sourceFile": "packages/web/src/app/messaging/page.tsx"
+    },
+    {
+      "path": "/messages",
+      "kind": "redirect",
+      "redirectTo": "/messaging",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/organizations",
+      "kind": "redirect",
+      "redirectTo": "/orgs",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/notifications",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "NotificationsPage",
+      "source": "packages/web/src/app/notifications/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [
+        "focused-personal"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Personal hub — allow access with inline setup nudges"
+      },
+      "sourceFile": "packages/web/src/app/notifications/page.tsx"
+    },
+    {
+      "path": "/email/unsubscribe",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EmailUnsubscribePage",
+      "source": "packages/web/src/app/email/unsubscribe/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/email/unsubscribe/page.tsx"
+    },
+    {
+      "path": "/email/confirm",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EmailConfirmPage",
+      "source": "packages/web/src/app/email/confirm/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/email/confirm/page.tsx"
+    },
+    {
+      "path": "/connections",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ConnectionsPage",
+      "source": "packages/web/src/app/connections/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [
+        "focused-personal"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Personal hub — allow access with inline setup nudges"
+      },
+      "sourceFile": "packages/web/src/app/connections/page.tsx"
+    },
+    {
+      "path": "/saved",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "SavedPage",
+      "source": "packages/web/src/app/saved/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [
+        "focused-personal"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Personal hub — allow access with inline setup nudges"
+      },
+      "sourceFile": "packages/web/src/app/saved/page.tsx"
+    },
+    {
+      "path": "/activity",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ActivityHubPage",
+      "source": "packages/web/src/app/activity/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [
+        "focused-personal"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Personal hub — allow access with inline setup nudges"
+      },
+      "sourceFile": "packages/web/src/app/activity/page.tsx"
+    },
+    {
+      "path": "/my-posts",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "MyPostsPage",
+      "source": "packages/web/src/app/my-posts/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [
+        "focused-personal"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Personal hub — allow access with inline setup nudges"
+      },
+      "sourceFile": "packages/web/src/app/my-posts/page.tsx"
+    },
+    {
+      "path": "/onboarding",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OnboardingPage",
+      "source": "packages/web/src/app/onboarding/page.tsx",
+      "layout": "RootLayout + MemberOnboardingWizard",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding",
+        "onboarding-exempt"
+      ],
+      "archetype": "wizard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/onboarding/page.tsx"
+    },
+    {
+      "path": "/settings",
+      "kind": "redirect",
+      "redirectTo": "account",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": true,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [
+        "focused-personal"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/staff/:username",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "StaffProfilePage",
+      "source": "packages/web/src/app/staff/[username]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/staff/[username]/page.tsx"
+    },
+    {
+      "path": "/admin/owner/investigations",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OwnerInvestigationsIndexPage",
+      "source": "packages/web/src/app/admin/owner/investigations/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": true,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "system"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/admin/owner/investigations/page.tsx"
+    },
+    {
+      "path": "/admin/owner/investigations",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OwnerInvestigationsIndexPage",
+      "source": "packages/web/src/app/admin/owner/investigations/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "system"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/admin/owner/investigations/page.tsx"
+    },
+    {
+      "path": "/admin/owner/investigations/users/:userId",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OwnerInvestigationUserPage",
+      "source": "packages/web/src/app/admin/owner/investigations/users/[userId]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "system"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/admin/owner/investigations/users/[userId]/page.tsx"
+    },
+    {
+      "path": "/moderation",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationShell",
+      "source": "packages/web/src/components/moderation/ModerationShell.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": true,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/components/moderation/ModerationShell.tsx"
+    },
+    {
+      "path": "/moderation",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationIndexPage",
+      "source": "packages/web/src/app/moderation/ModerationIndexPage.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/ModerationIndexPage.tsx"
+    },
+    {
+      "path": "/moderation/dashboard",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationDashboardPage",
+      "source": "packages/web/src/app/moderation/dashboard/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/dashboard/page.tsx"
+    },
+    {
+      "path": "/moderation/queues",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationQueuesPage",
+      "source": "packages/web/src/app/moderation/queues/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/queues/page.tsx"
+    },
+    {
+      "path": "/moderation/cases",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationCasesPage",
+      "source": "packages/web/src/app/moderation/cases/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/cases/page.tsx"
+    },
+    {
+      "path": "/moderation/cases/:caseId",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationCaseDetailPage",
+      "source": "packages/web/src/app/moderation/cases/[caseId]/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [
+        "internal-notes"
+      ],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/cases/[caseId]/page.tsx"
+    },
+    {
+      "path": "/moderation/reports",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationReportsPage",
+      "source": "packages/web/src/app/moderation/reports/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/reports/page.tsx"
+    },
+    {
+      "path": "/moderation/actions",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationActionsPage",
+      "source": "packages/web/src/app/moderation/actions/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [
+        "rule-of-two"
+      ],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/actions/page.tsx"
+    },
+    {
+      "path": "/moderation/profile-flags",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationProfileFlagsPage",
+      "source": "packages/web/src/app/moderation/profile-flags/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/profile-flags/page.tsx"
+    },
+    {
+      "path": "/moderation/audit",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationAuditPage",
+      "source": "packages/web/src/app/moderation/audit/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator",
+        "admin"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/audit/page.tsx"
+    },
+    {
+      "path": "/moderation/admin",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationAdminPage",
+      "source": "packages/web/src/app/moderation/admin/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator",
+        "admin"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [
+        "command-bridge"
+      ],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/admin/page.tsx"
+    },
+    {
+      "path": "/moderation/legal",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationLegalPage",
+      "source": "packages/web/src/app/moderation/legal/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator",
+        "legal"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/legal/page.tsx"
+    },
+    {
+      "path": "/moderation/dmca",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationDmcaPage",
+      "source": "packages/web/src/app/moderation/dmca/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator",
+        "legal"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/dmca/page.tsx"
+    },
+    {
+      "path": "/moderation/contact",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModerationContactPage",
+      "source": "packages/web/src/app/moderation/contact/page.tsx",
+      "layout": "RootLayout → ModerationShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt",
+        "moderator",
+        "legal"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "moderation-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/moderation/contact/page.tsx"
+    },
+    {
+      "path": "/organizer",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerHubPage",
+      "source": "packages/web/src/app/organizer/page.tsx",
+      "layout": "RootLayout + OrganizerAppShell",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/page.tsx"
+    },
+    {
+      "path": "/organizer/orgs/:slug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerOrgPage",
+      "source": "packages/web/src/app/organizer/orgs/[slug]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/orgs/[slug]/page.tsx"
+    },
+    {
+      "path": "/organizer/orgs/:slug/conventions/:convSlug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerOrgConventionPage",
+      "source": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/page.tsx"
+    },
+    {
+      "path": "/organizer/orgs/:slug/conventions/:convSlug/print/schedule",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerConventionPrintSchedulePage",
+      "source": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/print/schedule/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [
+        "command-bridge"
+      ],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/print/schedule/page.tsx"
+    },
+    {
+      "path": "/organizer/orgs/:slug/conventions/:convSlug/print/venue-signs",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerConventionPrintVenueSignsPage",
+      "source": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/print/venue-signs/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [
+        "command-bridge"
+      ],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/print/venue-signs/page.tsx"
+    },
+    {
+      "path": "/organizer/orgs/:slug/events/:eventId",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerOrgEventPage",
+      "source": "packages/web/src/app/organizer/orgs/[slug]/events/[eventId]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/orgs/[slug]/events/[eventId]/page.tsx"
+    },
+    {
+      "path": "/organizer/groups/:id",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerGroupPage",
+      "source": "packages/web/src/app/organizer/groups/[id]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/groups/[id]/page.tsx"
+    },
+    {
+      "path": "/organizer/groups/:id/events/:eventId",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerGroupEventPage",
+      "source": "packages/web/src/app/organizer/groups/[id]/events/[eventId]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/groups/[id]/events/[eventId]/page.tsx"
+    },
+    {
+      "path": "/organizer/conventions/:slug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerConventionRedirectPage",
+      "source": "packages/web/src/app/organizer/conventions/[slug]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/conventions/[slug]/page.tsx"
+    },
+    {
+      "path": "/organizer/dancecard",
+      "kind": "redirect",
+      "redirectTo": "/organizer",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/organizer/dancecard/:slug",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "OrganizerConventionRedirectPage",
+      "source": "packages/web/src/app/organizer/conventions/[slug]/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "organizer"
+      ],
+      "archetype": "dashboard",
+      "mobileFlags": [
+        "organizer-shell"
+      ],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "hard_block",
+        "rationale": "Legal/safety, staff tools, or account integrity action"
+      },
+      "sourceFile": "packages/web/src/app/organizer/conventions/[slug]/page.tsx"
+    },
+    {
+      "path": "/join",
+      "kind": "redirect",
+      "redirectTo": "/?signup=1#auth",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/safety",
+      "kind": "redirect",
+      "redirectTo": "/support",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/community-guidelines",
+      "kind": "redirect",
+      "redirectTo": "/guidelines",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/about",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "AboutPage",
+      "source": "packages/web/src/app/about/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "should_not_gate",
+        "rationale": "Informational/support — should remain reachable during onboarding"
+      },
+      "sourceFile": "packages/web/src/app/about/page.tsx"
+    },
+    {
+      "path": "/contact",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ContactPage",
+      "source": "packages/web/src/app/contact/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/contact/page.tsx"
+    },
+    {
+      "path": "/support",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "SupportPage",
+      "source": "packages/web/src/app/support/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/support/page.tsx"
+    },
+    {
+      "path": "/support/branding",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "BrandingGuidePage",
+      "source": "packages/web/src/app/support/branding/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "onboarding-exempt"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/support/branding/page.tsx"
+    },
+    {
+      "path": "/policies",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "PoliciesIndexPage",
+      "source": "packages/web/src/app/policies/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt",
+        "legal"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/policies/page.tsx"
+    },
+    {
+      "path": "/policies/terms",
+      "kind": "redirect",
+      "redirectTo": "/terms",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/policies/privacy",
+      "kind": "redirect",
+      "redirectTo": "/privacy",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/policies/community-guidelines",
+      "kind": "redirect",
+      "redirectTo": "/guidelines",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/policies/adult-content-and-consent",
+      "kind": "redirect",
+      "redirectTo": "/adult-content-consent",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/policies/minor-safety",
+      "kind": "redirect",
+      "redirectTo": "/minor-safety",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/policies/dmca",
+      "kind": "redirect",
+      "redirectTo": "/dmca",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/policies/ncii",
+      "kind": "redirect",
+      "redirectTo": "/ncii",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/policies/law-enforcement",
+      "kind": "redirect",
+      "redirectTo": "/law-enforcement",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/policies/organizers",
+      "kind": "redirect",
+      "redirectTo": "/vendor-organizer-terms",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/policies/moderator-code-of-conduct",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ModeratorCodeOfConductPage",
+      "source": "packages/web/src/app/policies/moderator-code-of-conduct/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt",
+        "legal"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/policies/moderator-code-of-conduct/page.tsx"
+    },
+    {
+      "path": "/policies/appeals",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "AppealsPolicyPage",
+      "source": "packages/web/src/app/policies/appeals/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt",
+        "legal"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/policies/appeals/page.tsx"
+    },
+    {
+      "path": "/policies/groups",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "GroupGuidelinesPage",
+      "source": "packages/web/src/app/policies/groups/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt",
+        "legal"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/policies/groups/page.tsx"
+    },
+    {
+      "path": "/policies/events",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "EventGuidelinesPage",
+      "source": "packages/web/src/app/policies/events/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt",
+        "legal"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/policies/events/page.tsx"
+    },
+    {
+      "path": "/policies/adult-content-records",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "AdultContentRecordsPage",
+      "source": "packages/web/src/app/policies/adult-content-records/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt",
+        "legal"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/policies/adult-content-records/page.tsx"
+    },
+    {
+      "path": "/privacy",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "PrivacyPage",
+      "source": "packages/web/src/app/privacy/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt",
+        "legal"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/privacy/page.tsx"
+    },
+    {
+      "path": "/terms",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "TermsPage",
+      "source": "packages/web/src/app/terms/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt",
+        "legal"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/terms/page.tsx"
+    },
+    {
+      "path": "/guidelines",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "GuidelinesPage",
+      "source": "packages/web/src/app/guidelines/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "public",
+        "onboarding-exempt",
+        "legal"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": "packages/web/src/app/guidelines/page.tsx"
+    },
+    {
+      "path": "/adult-content-consent",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "AdultContentConsentPage",
+      "source": "packages/web/src/app/adult-content-consent/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "legal"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/adult-content-consent/page.tsx"
+    },
+    {
+      "path": "/law-enforcement",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "LawEnforcementPage",
+      "source": "packages/web/src/app/law-enforcement/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "legal"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/law-enforcement/page.tsx"
+    },
+    {
+      "path": "/dmca",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "DmcaPage",
+      "source": "packages/web/src/app/dmca/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "legal"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/dmca/page.tsx"
+    },
+    {
+      "path": "/ncii",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "NciiPage",
+      "source": "packages/web/src/app/ncii/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "legal"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/ncii/page.tsx"
+    },
+    {
+      "path": "/vendor-organizer-terms",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "VendorOrganizerTermsPage",
+      "source": "packages/web/src/app/vendor-organizer-terms/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "legal"
+      ],
+      "archetype": "policy",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/vendor-organizer-terms/page.tsx"
+    },
+    {
+      "path": "/minor-safety",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "MinorSafetyPage",
+      "source": "packages/web/src/app/minor-safety/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member",
+        "legal"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/minor-safety/page.tsx"
+    },
+    {
+      "path": "/accessibility",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "AccessibilityPage",
+      "source": "packages/web/src/app/accessibility/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "should_not_gate",
+        "rationale": "Informational/support — should remain reachable during onboarding"
+      },
+      "sourceFile": "packages/web/src/app/accessibility/page.tsx"
+    },
+    {
+      "path": "/calendar",
+      "kind": "redirect",
+      "redirectTo": "/events",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/calendar/erobay-community",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "ErobayCommunityMirrorPage",
+      "source": "packages/web/src/app/calendar/erobay-community/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "packages/web/src/app/calendar/erobay-community/page.tsx"
+    },
+    {
+      "path": "/community",
+      "kind": "redirect",
+      "redirectTo": "/groups",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/dungeons",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "DungeonsPage",
+      "source": "packages/web/src/app/dungeons/page.tsx",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "detail",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "read_only_banner",
+        "rationale": "Discovery/browse — user should explore value with onboarding banner, not full redirect"
+      },
+      "sourceFile": "packages/web/src/app/dungeons/page.tsx"
+    },
+    {
+      "path": "/forums",
+      "kind": "redirect",
+      "redirectTo": "/groups",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/online",
+      "kind": "redirect",
+      "redirectTo": "/people",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/rendezvous",
+      "kind": "redirect",
+      "redirectTo": "/events",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/states",
+      "kind": "redirect",
+      "redirectTo": "/places",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/chat",
+      "kind": "redirect",
+      "redirectTo": "/messaging",
+      "component": "Navigate",
+      "source": null,
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "redirect"
+      ],
+      "archetype": "redirect",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": false,
+      "onboardingGateClass": null,
+      "sourceFile": null
+    },
+    {
+      "path": "/*",
+      "kind": "page",
+      "redirectTo": null,
+      "component": "NotFoundPage",
+      "source": "NotFoundPage",
+      "layout": "RootLayout",
+      "hasChildren": false,
+      "access": [
+        "auth",
+        "member"
+      ],
+      "archetype": "system",
+      "mobileFlags": [],
+      "backendLanguage": [],
+      "onboardingRedirect": true,
+      "onboardingGateClass": {
+        "recommendedClass": "setup_prompt",
+        "rationale": "Default — soft gate with contextual prompt unless legal/staff"
+      },
+      "sourceFile": "NotFoundPage"
+    }
+  ],
+  "orphans": [
+    {
+      "path": "/profile/complete",
+      "source": "packages/web/src/app/profile/complete/page.tsx"
+    },
+    {
+      "path": "/profile/edit",
+      "source": "packages/web/src/app/profile/edit/page.tsx"
+    },
+    {
+      "path": "/profile/:username",
+      "source": "packages/web/src/app/profile/[username]/page.tsx"
+    },
+    {
+      "path": "/settings/account",
+      "source": "packages/web/src/app/settings/account/page.tsx"
+    },
+    {
+      "path": "/settings/activity",
+      "source": "packages/web/src/app/settings/activity/page.tsx"
+    },
+    {
+      "path": "/settings/blocked",
+      "source": "packages/web/src/app/settings/blocked/page.tsx"
+    },
+    {
+      "path": "/settings/ecosystem",
+      "source": "packages/web/src/app/settings/ecosystem/page.tsx"
+    },
+    {
+      "path": "/settings/muted",
+      "source": "packages/web/src/app/settings/muted/page.tsx"
+    },
+    {
+      "path": "/settings/notifications",
+      "source": "packages/web/src/app/settings/notifications/page.tsx"
+    },
+    {
+      "path": "/settings/payment-history",
+      "source": "packages/web/src/app/settings/payment-history/page.tsx"
+    },
+    {
+      "path": "/settings/privacy",
+      "source": "packages/web/src/app/settings/privacy/page.tsx"
+    },
+    {
+      "path": "/settings/profile",
+      "source": "packages/web/src/app/settings/profile/page.tsx"
+    },
+    {
+      "path": "/settings/trust",
+      "source": "packages/web/src/app/settings/trust/page.tsx"
+    },
+    {
+      "path": "/settings/vendor",
+      "source": "packages/web/src/app/settings/vendor/page.tsx"
+    }
+  ],
+  "authMismatches": [
+    {
+      "path": "/explore",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/events",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/groups",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/education",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/vendors",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/people",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/orgs",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/conventions",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/about",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/dmca",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/contact",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    },
+    {
+      "path": "/media",
+      "note": "Listed as discoverable/public in FEATURE_REGISTRY; AuthGate requires session"
+    }
+  ]
+}

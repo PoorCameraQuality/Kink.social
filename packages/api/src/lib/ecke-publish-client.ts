@@ -1,0 +1,283 @@
+import { eckePayloadContainsPrivateAppUrls } from '@c2k/shared'
+import type { EckeDancecardEventPayload, EckeListingPayload } from './ecke-publish-payload.js'
+import type { EckeArticleRow, EckeDungeonRow, EckeEventRow, EckeVendorRow } from './ecke-directory-sync.js'
+import {
+  buildDancecardLocationRows,
+  orphanDancecardLocationsDeletePath,
+} from './ecke-dancecard-location-sync.js'
+import { buildDancecardSlotRows, orphanDancecardSlotsDeletePath } from './ecke-dancecard-slot-sync.js'
+import {
+  buildDancecardStaffShiftRows,
+  orphanDancecardStaffShiftsDeletePath,
+} from './ecke-dancecard-staff-sync.js'
+
+export type EckePublishClientConfig = {
+  supabaseUrl: string
+  serviceRoleKey: string
+  listingWebhookUrl?: string
+  listingWebhookSecret?: string
+}
+
+export type EckePublishResult =
+  | {
+      ok: true
+      targetKind:
+        | 'ecke_listing'
+        | 'dancecard_event'
+        | 'ecke_event'
+        | 'ecke_vendor'
+        | 'ecke_article'
+        | 'ecke_dungeon'
+      detail?: string
+    }
+  | {
+      ok: false
+      targetKind:
+        | 'ecke_listing'
+        | 'dancecard_event'
+        | 'ecke_event'
+        | 'ecke_vendor'
+        | 'ecke_article'
+        | 'ecke_dungeon'
+      error: string
+    }
+
+export function loadEckePublishClientConfig(): EckePublishClientConfig | null {
+  if (process.env.ECKE_PUBLISH_ENABLED !== 'true') return null
+  const supabaseUrl = process.env.ECKE_SUPABASE_URL?.trim()
+  const serviceRoleKey = process.env.ECKE_SUPABASE_SERVICE_ROLE_KEY?.trim()
+  if (!supabaseUrl || !serviceRoleKey) return null
+  return {
+    supabaseUrl: supabaseUrl.replace(/\/$/, ''),
+    serviceRoleKey,
+    listingWebhookUrl: process.env.ECKE_PUBLISH_LISTING_WEBHOOK_URL?.trim() || undefined,
+    listingWebhookSecret: process.env.ECKE_PUBLISH_WEBHOOK_SECRET?.trim() || undefined,
+  }
+}
+
+async function supabaseFetch(
+  cfg: EckePublishClientConfig,
+  path: string,
+  init: RequestInit & { prefer?: string },
+): Promise<Response> {
+  const headers: Record<string, string> = {
+    apikey: cfg.serviceRoleKey,
+    Authorization: `Bearer ${cfg.serviceRoleKey}`,
+    'Content-Type': 'application/json',
+    ...(init.prefer ? { Prefer: init.prefer } : {}),
+  }
+  return fetch(`${cfg.supabaseUrl}/rest/v1/${path}`, { ...init, headers: { ...headers, ...(init.headers as Record<string, string>) } })
+}
+
+export async function publishDancecardEventToEcke(
+  cfg: EckePublishClientConfig,
+  payload: EckeDancecardEventPayload,
+): Promise<EckePublishResult> {
+  try {
+    const upsertRes = await supabaseFetch(cfg, 'dancecard_events?on_conflict=slug', {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates,return=representation',
+      body: JSON.stringify([
+        {
+          slug: payload.slug,
+          product_title: payload.productTitle,
+          event_title: payload.eventTitle,
+          subtitle: payload.subtitle,
+          timezone: payload.timezone,
+          window_starts_at: payload.windowStartsAt,
+          window_ends_at: payload.windowEndsAt,
+          shared_by_label: payload.sharedByLabel,
+          shared_by_detail: payload.sharedByDetail,
+          logo_url: payload.logoUrl,
+          status: payload.status,
+          staff_access_code: payload.staffAccessCode || null,
+          registration_access_code: payload.registrationAccessCode || null,
+        },
+      ]),
+    })
+
+    if (!upsertRes.ok) {
+      const text = await upsertRes.text()
+      return { ok: false, targetKind: 'dancecard_event', error: `dancecard_events upsert ${upsertRes.status}: ${text.slice(0, 500)}` }
+    }
+
+    const events = (await upsertRes.json()) as { id: string }[]
+    const eventId = events[0]?.id
+    if (!eventId) {
+      return { ok: false, targetKind: 'dancecard_event', error: 'dancecard_events upsert returned no id' }
+    }
+
+    const locDelRes = await supabaseFetch(
+      cfg,
+      orphanDancecardLocationsDeletePath(
+        eventId,
+        payload.locations.map((l) => l.externalKey),
+      ),
+      { method: 'DELETE', prefer: 'return=minimal' },
+    )
+    if (!locDelRes.ok) {
+      const text = await locDelRes.text()
+      return {
+        ok: false,
+        targetKind: 'dancecard_event',
+        error: `location orphan delete ${locDelRes.status}: ${text.slice(0, 500)}`,
+      }
+    }
+
+    if (payload.locations.length > 0) {
+      const locRows = buildDancecardLocationRows(eventId, payload.locations)
+      const locUpsertRes = await supabaseFetch(cfg, 'dancecard_locations?on_conflict=id', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=minimal',
+        body: JSON.stringify(locRows),
+      })
+      if (!locUpsertRes.ok) {
+        const text = await locUpsertRes.text()
+        return {
+          ok: false,
+          targetKind: 'dancecard_event',
+          error: `location upsert ${locUpsertRes.status}: ${text.slice(0, 500)}`,
+        }
+      }
+    }
+
+    const delRes = await supabaseFetch(cfg, orphanDancecardSlotsDeletePath(eventId, payload.slots.map((s) => s.externalKey)), {
+      method: 'DELETE',
+      prefer: 'return=minimal',
+    })
+    if (!delRes.ok) {
+      const text = await delRes.text()
+      return { ok: false, targetKind: 'dancecard_event', error: `slot orphan delete ${delRes.status}: ${text.slice(0, 500)}` }
+    }
+
+    if (payload.slots.length > 0) {
+      const rows = buildDancecardSlotRows(eventId, payload.slots)
+      const upsertRes = await supabaseFetch(cfg, 'dancecard_program_slots?on_conflict=id', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=minimal',
+        body: JSON.stringify(rows),
+      })
+      if (!upsertRes.ok) {
+        const text = await upsertRes.text()
+        return { ok: false, targetKind: 'dancecard_event', error: `slot upsert ${upsertRes.status}: ${text.slice(0, 500)}` }
+      }
+    }
+
+    const staffDelRes = await supabaseFetch(
+      cfg,
+      orphanDancecardStaffShiftsDeletePath(eventId, payload.staffShifts.map((s) => s.externalKey)),
+      { method: 'DELETE', prefer: 'return=minimal' },
+    )
+    if (!staffDelRes.ok) {
+      const text = await staffDelRes.text()
+      return {
+        ok: false,
+        targetKind: 'dancecard_event',
+        error: `staff shift orphan delete ${staffDelRes.status}: ${text.slice(0, 500)}`,
+      }
+    }
+
+    if (payload.staffShifts.length > 0) {
+      const staffRows = buildDancecardStaffShiftRows(eventId, payload.staffShifts)
+      const staffUpsertRes = await supabaseFetch(cfg, 'dancecard_staff_shifts?on_conflict=id', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=minimal',
+        body: JSON.stringify(staffRows),
+      })
+      if (!staffUpsertRes.ok) {
+        const text = await staffUpsertRes.text()
+        return {
+          ok: false,
+          targetKind: 'dancecard_event',
+          error: `staff shift upsert ${staffUpsertRes.status}: ${text.slice(0, 500)}`,
+        }
+      }
+    }
+
+    const detailParts = [`${payload.locations.length} locations`, `${payload.slots.length} slots`]
+    if (payload.staffShifts.length > 0) detailParts.push(`${payload.staffShifts.length} staff shifts`)
+    return { ok: true, targetKind: 'dancecard_event', detail: detailParts.join(', ') }
+  } catch (e) {
+    return { ok: false, targetKind: 'dancecard_event', error: e instanceof Error ? e.message : 'Unknown error' }
+  }
+}
+
+export async function publishListingToEcke(
+  cfg: EckePublishClientConfig,
+  payload: EckeListingPayload,
+): Promise<EckePublishResult> {
+  if (payload.visibility === 'hidden') {
+    return { ok: false, targetKind: 'ecke_listing', error: 'Listing is not public' }
+  }
+  if (eckePayloadContainsPrivateAppUrls(payload)) {
+    return { ok: false, targetKind: 'ecke_listing', error: 'ECKE payload must not contain kink.social URLs' }
+  }
+  if (!cfg.listingWebhookUrl) {
+    return {
+      ok: false,
+      targetKind: 'ecke_listing',
+      error: 'ECKE_PUBLISH_LISTING_WEBHOOK_URL not configured. Listing payload built but not sent',
+    }
+  }
+
+  try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (cfg.listingWebhookSecret) headers.Authorization = `Bearer ${cfg.listingWebhookSecret}`
+
+    const res = await fetch(cfg.listingWebhookUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ kind: 'ecke_listing', payload }),
+    })
+
+    if (!res.ok) {
+      const text = await res.text()
+      return { ok: false, targetKind: 'ecke_listing', error: `listing webhook ${res.status}: ${text.slice(0, 500)}` }
+    }
+
+    return { ok: true, targetKind: 'ecke_listing' }
+  } catch (e) {
+    return { ok: false, targetKind: 'ecke_listing', error: e instanceof Error ? e.message : 'Unknown error' }
+  }
+}
+
+async function upsertEckeRow(
+  cfg: EckePublishClientConfig,
+  table: string,
+  row: Record<string, unknown>,
+  targetKind: EckePublishResult['targetKind'] & string,
+): Promise<EckePublishResult> {
+  if (eckePayloadContainsPrivateAppUrls(row)) {
+    return { ok: false, targetKind, error: 'ECKE payload must not contain kink.social URLs' }
+  }
+  try {
+    const res = await supabaseFetch(cfg, `${table}?on_conflict=slug`, {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates,return=minimal',
+      body: JSON.stringify([row]),
+    })
+    if (!res.ok) {
+      const text = await res.text()
+      return { ok: false, targetKind, error: `${table} upsert ${res.status}: ${text.slice(0, 500)}` }
+    }
+    return { ok: true, targetKind }
+  } catch (e) {
+    return { ok: false, targetKind, error: e instanceof Error ? e.message : 'Unknown error' }
+  }
+}
+
+export async function publishEventRowToEcke(cfg: EckePublishClientConfig, row: EckeEventRow): Promise<EckePublishResult> {
+  return upsertEckeRow(cfg, 'events', row as unknown as Record<string, unknown>, 'ecke_event')
+}
+
+export async function publishVendorRowToEcke(cfg: EckePublishClientConfig, row: EckeVendorRow): Promise<EckePublishResult> {
+  return upsertEckeRow(cfg, 'vendors', row as unknown as Record<string, unknown>, 'ecke_vendor')
+}
+
+export async function publishArticleRowToEcke(cfg: EckePublishClientConfig, row: EckeArticleRow): Promise<EckePublishResult> {
+  return upsertEckeRow(cfg, 'articles', row as unknown as Record<string, unknown>, 'ecke_article')
+}
+
+export async function publishDungeonRowToEcke(cfg: EckePublishClientConfig, row: EckeDungeonRow): Promise<EckePublishResult> {
+  return upsertEckeRow(cfg, 'dungeon_venues', row as unknown as Record<string, unknown>, 'ecke_dungeon')
+}

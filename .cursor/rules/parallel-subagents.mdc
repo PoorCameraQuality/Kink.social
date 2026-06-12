@@ -1,0 +1,26 @@
+---
+description: Prefer multiple subagents in parallel when work is independent
+alwaysApply: true
+---
+
+# Parallel subagents when possible
+
+When planning work, **default to parallelism** for independent slices: run **multiple subagents in the same turn** (each with its own bounded task and prompt) instead of doing the same exploration sequentially.
+
+## Do parallelize
+
+- Broad codebase discovery across **different** areas (e.g. API vs web vs schema).
+- Several **read-only** investigations (search, map files, answer “where does X live?”).
+- Isolated tasks with **no shared mutable files** in the same step (e.g. one agent per package or domain).
+
+Each parallel subagent must get a **self-contained prompt** (they do not see the parent chat). Include paths, goals, and what to return.
+
+## Do not parallelize
+
+- Step B **depends on** step A’s result (order matters).
+- Multiple agents would **edit the same files** or race the same resource in one pass.
+- A **single small** change where spawning agents adds overhead without benefit.
+
+## Practical default
+
+If you would otherwise run **two or more independent searches or explorations** one after another, **batch them as parallel subagents** instead.

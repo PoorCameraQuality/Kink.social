@@ -1,0 +1,139 @@
+import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
+import HomeFeedSuggestedPerson from '@/components/home/HomeFeedSuggestedPerson'
+
+type Suggestion = {
+  userId?: string | number
+  username: string
+  displayName?: string | null
+  subtitle?: string | null
+  avatarUrl?: string | null
+}
+
+type UpcomingItem = { id: string; title: string; href: string; meta?: string }
+
+type Props = {
+  suggestions: Suggestion[]
+  upcomingNearYou?: UpcomingItem[]
+  trendingEvents?: { id: string; title: string; href: string; mentions?: string }[]
+  spotlight?: { username: string; bio: string; href: string; role?: string }
+}
+
+function RailCard({
+  title,
+  children,
+  footerHref,
+  footerLabel,
+  emphasize,
+}: {
+  title: string
+  children: ReactNode
+  footerHref?: string
+  footerLabel?: string
+  emphasize?: boolean
+}) {
+  return (
+    <div
+      className={`rounded-2xl border p-4 shadow-[var(--dc-shadow-soft)] ${
+        emphasize ?
+          'border-[rgba(214,178,59,0.2)] bg-gradient-to-br from-dc-elevated-solid to-dc-elevated-solid/80'
+        : 'border-dc-border bg-dc-elevated-solid'
+      }`}
+    >
+      <h3 className={`mb-3 text-sm font-semibold ${emphasize ? 'text-dc-accent' : 'text-dc-text'}`}>{title}</h3>
+      {children}
+      {footerHref && footerLabel ?
+        <Link to={footerHref} className="mt-3 inline-block text-xs font-medium text-dc-text-muted hover:text-dc-text hover:underline">
+          {footerLabel}
+        </Link>
+      : null}
+    </div>
+  )
+}
+
+function EmptyHint({ message }: { message: string }) {
+  return <p className="text-xs leading-relaxed text-dc-muted">{message}</p>
+}
+
+export default function HomeFeedDiscoverRail({
+  suggestions,
+  upcomingNearYou = [],
+  trendingEvents = [],
+  spotlight,
+}: Props) {
+  const peopleList = suggestions.slice(0, 4)
+
+  return (
+    <aside className="sticky top-[7.5rem] space-y-4" aria-label="Discovery">
+      <RailCard title="Upcoming near you" footerHref="/events" footerLabel="See all →">
+        {upcomingNearYou.length > 0 ?
+          <ul className="space-y-2.5">
+            {upcomingNearYou.slice(0, 4).map((e) => (
+              <li key={e.id}>
+                <Link to={e.href} className="block rounded-lg p-1 hover:bg-dc-elevated-hover">
+                  <span className="block text-sm font-medium text-dc-text hover:text-dc-accent">{e.title}</span>
+                  {e.meta ? <span className="mt-0.5 block text-xs text-dc-muted">{e.meta}</span> : null}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        : <EmptyHint message="No events near you yet. Browse events to RSVP." />}
+      </RailCard>
+
+      <RailCard title="People you may know" footerHref="/people" footerLabel="See all →">
+        {peopleList.length > 0 ?
+          <div className="space-y-2">
+            {peopleList.map((p) => (
+              <HomeFeedSuggestedPerson
+                key={p.username}
+                userId={p.userId}
+                username={p.username}
+                displayName={p.displayName}
+                subtitle={p.subtitle}
+                avatarUrl={p.avatarUrl}
+              />
+            ))}
+          </div>
+        : <EmptyHint message="No suggestions yet. Complete your profile or explore people." />}
+      </RailCard>
+
+      {spotlight ?
+        <RailCard title="Community spotlight">
+          <p className="text-sm font-semibold text-dc-text">@{spotlight.username}</p>
+          {spotlight.role ?
+            <p className="mt-0.5 text-xs font-medium text-dc-accent">{spotlight.role}</p>
+          : null}
+          <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">{spotlight.bio}</p>
+          <Link
+            to={spotlight.href}
+            className="mt-3 inline-flex min-h-9 items-center rounded-lg border border-dc-accent-border px-3 text-xs font-semibold text-dc-accent hover:bg-dc-accent-muted"
+          >
+            View profile
+          </Link>
+        </RailCard>
+      : null}
+
+      <RailCard title="Trending in the community" footerHref="/home?mode=discover&tab=Trending" footerLabel="See all →">
+        {trendingEvents.length > 0 ?
+          <ul className="space-y-2.5">
+            {trendingEvents.map((e) => (
+              <li key={e.id} className="flex gap-2">
+                <span className="mt-0.5 text-dc-muted" aria-hidden>
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                    <path strokeLinecap="round" d="M4 18l4-6 4 3 4-9 4 12" />
+                  </svg>
+                </span>
+                <div className="min-w-0">
+                  <Link to={e.href} className="block text-sm font-medium text-dc-text hover:text-dc-accent">
+                    {e.title}
+                  </Link>
+                  {e.mentions ? <span className="text-xs text-dc-muted">{e.mentions}</span> : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        : <EmptyHint message="No trending activity yet." />}
+      </RailCard>
+    </aside>
+  )
+}

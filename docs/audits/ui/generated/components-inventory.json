@@ -1,0 +1,5802 @@
+{
+  "generatedAt": "2026-06-12T21:16:16.882Z",
+  "count": 636,
+  "inventory": [
+    {
+      "path": "components/activity/ActivityEmptyPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ActivityEmptyPanel component",
+      "exportName": "ActivityEmptyPanel"
+    },
+    {
+      "path": "components/activity/ActivityRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ActivityRightRail component",
+      "exportName": "ActivityRightRail"
+    },
+    {
+      "path": "components/activity/ActivityTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ActivityTabs component",
+      "exportName": "ActivityTabs"
+    },
+    {
+      "path": "components/AppProviders.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "AppProviders component",
+      "exportName": "AppProviders"
+    },
+    {
+      "path": "components/auth/AuthGate.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Redirect anonymous visitors to the landing login unless the route is public.",
+      "exportName": "AuthGate"
+    },
+    {
+      "path": "components/BadgeDisplay.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "* Reputation badges – Event Verified, Mentor, Community Contributor, etc.",
+      "exportName": "BadgeDisplay"
+    },
+    {
+      "path": "components/BottomNav.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "BottomNav component",
+      "exportName": "BottomNav"
+    },
+    {
+      "path": "components/brand/SiteWordmark.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SiteWordmark component",
+      "exportName": "SiteWordmark"
+    },
+    {
+      "path": "components/browse/BrowseFilterSidebar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "Left-rail browse filters with shared geo control (SG-134).",
+      "exportName": "BrowseFilterSidebar"
+    },
+    {
+      "path": "components/browse/GeoFilterControl.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Shared country / city / radius control for browse surfaces (SG-135).",
+      "exportName": "GeoFilterControl"
+    },
+    {
+      "path": "components/cards/ConventionCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ConventionCard component",
+      "exportName": "ConventionCard"
+    },
+    {
+      "path": "components/cards/EducationCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "EducationCard component",
+      "exportName": "EducationCard"
+    },
+    {
+      "path": "components/cards/EventCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "EventCard component",
+      "exportName": "EventCard"
+    },
+    {
+      "path": "components/cards/GroupCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "GroupCard component",
+      "exportName": "GroupCard"
+    },
+    {
+      "path": "components/cards/LocalPostCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "LocalPostCard component",
+      "exportName": "LocalPostCard"
+    },
+    {
+      "path": "components/cards/OrgCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "OrgCard component",
+      "exportName": "OrgCard"
+    },
+    {
+      "path": "components/cards/PersonCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "Mini profile preview - no gender, pronouns, or orientation (those live on the full profile only).",
+      "exportName": "PersonCard"
+    },
+    {
+      "path": "components/cards/PresenterCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "PresenterCard component",
+      "exportName": "PresenterCard"
+    },
+    {
+      "path": "components/cards/VendorCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "VendorCard component",
+      "exportName": "VendorCard"
+    },
+    {
+      "path": "components/CommunityNavBar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "",
+      "exportName": "CommunityNavBar"
+    },
+    {
+      "path": "components/connections/ConnectionPersonRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConnectionPersonRow component",
+      "exportName": "ConnectionPersonRow"
+    },
+    {
+      "path": "components/connections/ConnectionsRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConnectionsRightRail component",
+      "exportName": "ConnectionsRightRail"
+    },
+    {
+      "path": "components/connections/ConnectionsSendRequestPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ConnectionsSendRequestPanel component",
+      "exportName": "ConnectionsSendRequestPanel"
+    },
+    {
+      "path": "components/connections/ConnectionsTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConnectionsTabs component",
+      "exportName": "ConnectionsTabs"
+    },
+    {
+      "path": "components/contact/ContactForm.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ContactForm component",
+      "exportName": "ContactForm"
+    },
+    {
+      "path": "components/contact/DmcaIntakeForm.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "DmcaIntakeForm component",
+      "exportName": "DmcaIntakeForm"
+    },
+    {
+      "path": "components/conventions/ChannelComposer.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ChannelComposer component",
+      "exportName": "ChannelComposer"
+    },
+    {
+      "path": "components/conventions/ChannelMessageList.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ChannelMessageList component",
+      "exportName": "ChannelMessageList"
+    },
+    {
+      "path": "components/conventions/ConventionAttendeeComparePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ConventionAttendeeComparePanel component",
+      "exportName": "ConventionAttendeeComparePanel"
+    },
+    {
+      "path": "components/conventions/ConventionAttendeeGroupsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ConventionAttendeeGroupsPanel component",
+      "exportName": "ConventionAttendeeGroupsPanel"
+    },
+    {
+      "path": "components/conventions/ConventionAttendeeHubShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "ConventionAttendeeHubShell component",
+      "exportName": "ConventionAttendeeHubShell"
+    },
+    {
+      "path": "components/conventions/ConventionAttendeeIsoMiniPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ConventionAttendeeIsoMiniPanel component",
+      "exportName": "ConventionAttendeeIsoMiniPanel"
+    },
+    {
+      "path": "components/conventions/ConventionAttendeeProfilePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ConventionAttendeeProfilePanel component",
+      "exportName": "ConventionAttendeeProfilePanel"
+    },
+    {
+      "path": "components/conventions/ConventionDancecardCompareGrid.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConventionDancecardCompareGrid component",
+      "exportName": "ConventionDancecardCompareGrid"
+    },
+    {
+      "path": "components/conventions/ConventionDancecardPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "Value for `<input type=\"datetime-local\" />` in the viewer's local timezone.",
+      "exportName": "ConventionDancecardPanel"
+    },
+    {
+      "path": "components/conventions/ConventionFiltersPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ConventionFiltersPanel component",
+      "exportName": "ConventionFiltersPanel"
+    },
+    {
+      "path": "components/conventions/ConventionGalleryGrid.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConventionGalleryGrid component",
+      "exportName": "ConventionGalleryGrid"
+    },
+    {
+      "path": "components/conventions/ConventionGetInvolvedPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ConventionGetInvolvedPanel component",
+      "exportName": "ConventionGetInvolvedPanel"
+    },
+    {
+      "path": "components/conventions/ConventionHero.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "",
+      "exportName": "ConventionHero"
+    },
+    {
+      "path": "components/conventions/ConventionParticipationStrip.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConventionParticipationStrip component",
+      "exportName": "ConventionParticipationStrip"
+    },
+    {
+      "path": "components/conventions/ConventionProgramSchedulePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "",
+      "exportName": "ConventionProgramSchedulePanel"
+    },
+    {
+      "path": "components/conventions/ConventionPublishedPoliciesPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ConventionPublishedPoliciesPanel component",
+      "exportName": "ConventionPublishedPoliciesPanel"
+    },
+    {
+      "path": "components/conventions/ConventionScheduleAgenda.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Matches {@link SchedulePersonChip} with `variant=\"presenter\"` (always program presenter profile route).",
+      "exportName": "ConventionScheduleAgenda"
+    },
+    {
+      "path": "components/conventions/ConventionsFeaturedCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ConventionsFeaturedCard component",
+      "exportName": "ConventionsFeaturedCard"
+    },
+    {
+      "path": "components/conventions/ConventionsFeaturedRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConventionsFeaturedRow component",
+      "exportName": "ConventionsFeaturedRow"
+    },
+    {
+      "path": "components/conventions/ConventionsLeftRail.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "ConventionsLeftRail component",
+      "exportName": "ConventionsLeftRail"
+    },
+    {
+      "path": "components/conventions/ConventionsListRow.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ConventionsListRow component",
+      "exportName": "ConventionsListRow"
+    },
+    {
+      "path": "components/conventions/ConventionsSubmitCta.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConventionsSubmitCta component",
+      "exportName": "ConventionsSubmitCta"
+    },
+    {
+      "path": "components/conventions/ConventionWelcomeTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConventionWelcomeTab component",
+      "exportName": "ConventionWelcomeTab"
+    },
+    {
+      "path": "components/conventions/DancecardOpsCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "DancecardOpsCard component",
+      "exportName": "DancecardOpsCard"
+    },
+    {
+      "path": "components/conventions/DancecardScheduleEmbed.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ECKE schedule embed with `dc-embed-ready` height hints (Phase 8).",
+      "exportName": "DancecardScheduleEmbed"
+    },
+    {
+      "path": "components/conventions/HostedByCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "HostedByCard component",
+      "exportName": "HostedByCard"
+    },
+    {
+      "path": "components/conventions/RegisterFlow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "RegisterFlow component",
+      "exportName": "RegisterFlow"
+    },
+    {
+      "path": "components/conventions/RegisterToUnlockCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "RegisterToUnlockCard component",
+      "exportName": "RegisterToUnlockCard"
+    },
+    {
+      "path": "components/conventions/SchedulePersonChip.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SchedulePersonChip component",
+      "exportName": "SchedulePersonChip"
+    },
+    {
+      "path": "components/conventions/VenueMapsList.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VenueMapsList component",
+      "exportName": "VenueMapsList"
+    },
+    {
+      "path": "components/create-flow/CreateFlowTriggerButton.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Opens the global create-event wizard without leaving the current page.",
+      "exportName": "CreateFlowTriggerButton"
+    },
+    {
+      "path": "components/create-flow/CreateFlowWizardUi.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/CreateFlowModal.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "CreateFlowModal component",
+      "exportName": "CreateFlowModal"
+    },
+    {
+      "path": "components/CreateMenuDropdown.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "CreateMenuDropdown component",
+      "exportName": "CreateMenuDropdown"
+    },
+    {
+      "path": "components/dancecard/DancecardAppearanceContext.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/DancecardAppearancePicker.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "DancecardAppearancePicker component",
+      "exportName": "DancecardAppearancePicker"
+    },
+    {
+      "path": "components/dancecard/onboarding/GuideRouter.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Onboarding guide overlay - stub until Kink Social wires guide flows.",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/onboarding/TutorialOverlay.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Tutorial overlay - stub until Kink Social wires full onboarding UI.",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/AssignmentBoardPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/AttendeeGroupsModerationPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/BadgePrintCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/BadgePrintSheet.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/BadgesPrintPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/C2kFromBanner.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/DmCoveragePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/door/BadgeQr.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/door/DoorModePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/door/DoorQrCamera.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Camera QR scan for door kiosk - requires secure context (HTTPS or localhost).",
+      "exportName": "DoorQrCamera"
+    },
+    {
+      "path": "components/dancecard/organizer/EventSettingsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/EventSetupRequired.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ExhibitorsOrganizerPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ExportsHubPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/GoogleSheetsImportSection.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/home/DashboardAttendeeSurfaces.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/home/DashboardQuickActions.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/home/SetupTaskList.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/hub/OrganizerHubHowItWorks.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/IcalBusyPreviewPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ImportColumnMappingPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/integrations/EmbedSkinPreview.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/IntegrationsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/IsoModerationPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/KitchenMealPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/LiveOpsConsolePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/LocationsSettingsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/MapsSettingsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/MessagingPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/onboarding/GhostCursorRehearsal.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/OrganizerAuthShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/OrganizerCommandContext.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/OrganizerCommandPalette.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/OrganizerCommandShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/OrganizerEventDashboard.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/OrganizerShortcutsLegend.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/organizerWorkspaceContext.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Workspace base from context, or `/organizer/conventions/:slug` redirect path.",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ParticipationOfferComposer.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/people/ImportSignupsMenu.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/people/PeopleEmptyState.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/people/PeopleGroupedTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/people/PeopleHelpCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/people/PeopleHubHeader.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/people/PeopleOpsSummaryRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/PeopleDirectoryPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/PeopleHubPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/PeopleHubParticipationStrip.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/PersonDetailDrawer.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/PolicyLedgerSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/program/ConflictDock.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/program/PresenterRequestsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/program/ProgramEventWindowBar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/program/ProgramListView.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/program/programScheduleParts.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Prominent control to open the session drawer (assign people, edit, publish).",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/program/ProgramTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/program/ProgramVisibilityCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ProgramScheduleGrid.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/registrants/RegistrantsMasterDetail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/registrants/RegistrationAttendeePreview.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/registrants/RegistrationCategoryList.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Stacked label + control with consistent label height so grid rows align.",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/RegistrantsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/RegistrationSettingsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/SafetyIncidentsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ScheduleChangeImpactModal.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/scheduleImportDndParts.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ScheduleImportPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/SessionDetailDrawer.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/SessionFeedbackConfigPanel.tsx",
+      "categories": [
+        "form",
+        "card-feed"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/AgreementsSettingsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/AttendeeGuideSettingsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/AttendeeProfileSettingsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/ChannelsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/CommandTeamPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/EventSettingsAdvancedForm.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/EventSettingsBasicsForm.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/EventSettingsBrandingForm.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "Four-color presets that map 1:1 to `themeConfig` (accent / surface / elevated / slotPublished).",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/EventSetupWizard.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/GalleryPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/ParticipationSettingsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/PoliciesAgreementsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/settings/StaffInviteLinksPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/shell/OrganizerEventHeader.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/shell/OrganizerEventShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/shell/OrganizerEventSidebar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ShiftSwapsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/StaffShiftsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/TracksTagsSettingsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/TrustedRolesPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/TrustedRoleWorkflowCallout.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ui/DancecardSkeleton.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Organizer workspace main panel while bootstrap loads.",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ui/DatetimeLocalField.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ui/EntityPickerModal.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ui/InlineSuccessBanner.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ui/OrganizerConfirmDialog.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ui/OrganizerSectionTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "* Section switcher for organizer hubs (e.g. People → Signups / Staff / …).",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ui/OrganizerToast.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/ui/useConfirmDialog.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/venue/VenueMapAssignPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/venue/VenueMapCanvas.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Only show zones that have been placed away from the default center (or are being edited).",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/venue/VenuesSetupPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/venue/VenuesTabPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/VenueAvailabilityGrid.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/VettingQueuePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/organizer/VolunteerCompliancePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/ui/Button.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/ui/InsetRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/ui/Panel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/ui/PillTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/ui/TabContentTransition.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Cross-fade tab/panel swaps; pair with `dc-tab-content-enter` in dancecard-motion.css.",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/ui/Toast.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/venue/MapZoneOverlay.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "",
+      "exportName": null
+    },
+    {
+      "path": "components/dancecard/venue/VenueMapViewport.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/discovery/DiscoveryBrowseLinks.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "DiscoveryBrowseLinks component",
+      "exportName": "DiscoveryBrowseLinks"
+    },
+    {
+      "path": "components/ecke/EckeEntityPublishStatus.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EckeEntityPublishStatus component",
+      "exportName": "EckeEntityPublishStatus"
+    },
+    {
+      "path": "components/editor/EducatorArticleEditor.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Same hostname/path rules as API `sanitizeEducationHtml`.",
+      "exportName": null
+    },
+    {
+      "path": "components/editor/MarkdownRichEditor.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MarkdownRichEditor component",
+      "exportName": "MarkdownRichEditor"
+    },
+    {
+      "path": "components/education/EducationArticleCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "Extra pills after the eyebrow category — skips duplicates of primary category and difficulty.",
+      "exportName": "EducationArticleCard"
+    },
+    {
+      "path": "components/education/EducationArticleStripCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "EducationArticleStripCard component",
+      "exportName": "EducationArticleStripCard"
+    },
+    {
+      "path": "components/education/EducationComingSoonPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "EducationComingSoonPanel component",
+      "exportName": "EducationComingSoonPanel"
+    },
+    {
+      "path": "components/education/EducationDiscoverCenter.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Build strip sections from API articles when live data is available.",
+      "exportName": "EducationDiscoverCenter"
+    },
+    {
+      "path": "components/education/EducationDiscoverHero.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EducationDiscoverHero component",
+      "exportName": "EducationDiscoverHero"
+    },
+    {
+      "path": "components/education/EducationDiscoverSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EducationDiscoverSection component",
+      "exportName": "EducationDiscoverSection"
+    },
+    {
+      "path": "components/education/EducationDiscoverShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "Education discover uses its own left rail - no duplicate Explore sub-nav.",
+      "exportName": "EducationDiscoverShell"
+    },
+    {
+      "path": "components/education/EducationFeaturedEducators.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EducationFeaturedEducators component",
+      "exportName": "EducationFeaturedEducators"
+    },
+    {
+      "path": "components/education/EducationLearningPaths.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EducationLearningPaths component",
+      "exportName": "EducationLearningPaths"
+    },
+    {
+      "path": "components/education/EducationLeftRail.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "EducationLeftRail component",
+      "exportName": "EducationLeftRail"
+    },
+    {
+      "path": "components/education/EducationPathsPage.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EducationPathsPage component",
+      "exportName": "EducationPathsPage"
+    },
+    {
+      "path": "components/education/EducationRecentTextCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "EducationRecentTextCard component",
+      "exportName": "EducationRecentTextCard"
+    },
+    {
+      "path": "components/education/EducationRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EducationRightRail component",
+      "exportName": "EducationRightRail"
+    },
+    {
+      "path": "components/education/EducationSectionHeader.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "EducationSectionHeader component",
+      "exportName": "EducationSectionHeader"
+    },
+    {
+      "path": "components/education/EducationSeriesNav.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "EducationSeriesNav component",
+      "exportName": "EducationSeriesNav"
+    },
+    {
+      "path": "components/education/EducationVideoStripCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "EducationVideoStripCard component",
+      "exportName": "EducationVideoStripCard"
+    },
+    {
+      "path": "components/email/ScopeEmailBroadcastPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ScopeEmailBroadcastPanel component",
+      "exportName": "ScopeEmailBroadcastPanel"
+    },
+    {
+      "path": "components/email/ScopeEmailSignupForm.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ScopeEmailSignupForm component",
+      "exportName": "ScopeEmailSignupForm"
+    },
+    {
+      "path": "components/EventMatchmakerPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "EventMatchmakerPanel component",
+      "exportName": "EventMatchmakerPanel"
+    },
+    {
+      "path": "components/events/EventCoverPhotoControl.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventCoverPhotoControl component",
+      "exportName": "EventCoverPhotoControl"
+    },
+    {
+      "path": "components/events/EventDiscussionPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "EventDiscussionPanel component",
+      "exportName": "EventDiscussionPanel"
+    },
+    {
+      "path": "components/events/EventFiltersPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "EventFiltersPanel component",
+      "exportName": "EventFiltersPanel"
+    },
+    {
+      "path": "components/events/EventSaveButton.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventSaveButton component",
+      "exportName": "EventSaveButton"
+    },
+    {
+      "path": "components/events/EventsCategoryChips.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventsCategoryChips component",
+      "exportName": "EventsCategoryChips"
+    },
+    {
+      "path": "components/events/EventsDiscoverLeftRail.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "EventsDiscoverLeftRail component",
+      "exportName": "EventsDiscoverLeftRail"
+    },
+    {
+      "path": "components/events/EventsFeaturedStrip.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventsFeaturedStrip component",
+      "exportName": "EventsFeaturedStrip"
+    },
+    {
+      "path": "components/events/EventsLeftRail.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "@deprecated Import EventsDiscoverLeftRail - discovery layout only.",
+      "exportName": null
+    },
+    {
+      "path": "components/events/EventsListRow.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "EventsListRow component",
+      "exportName": "EventsListRow"
+    },
+    {
+      "path": "components/events/EventsPersonalCompactFilters.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventsPersonalCompactFilters component",
+      "exportName": "EventsPersonalCompactFilters"
+    },
+    {
+      "path": "components/events/EventsPersonalNav.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "EventsPersonalNav component",
+      "exportName": "EventsPersonalNav"
+    },
+    {
+      "path": "components/events/EventsPersonalRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventsPersonalRightRail component",
+      "exportName": "EventsPersonalRightRail"
+    },
+    {
+      "path": "components/events/EventsRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventsRightRail component",
+      "exportName": "EventsRightRail"
+    },
+    {
+      "path": "components/events/EventsScopeTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventsScopeTabs component",
+      "exportName": "EventsScopeTabs"
+    },
+    {
+      "path": "components/events/EventsSectionNavLinks.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "EventsSectionNavLinks component",
+      "exportName": "EventsSectionNavLinks"
+    },
+    {
+      "path": "components/events/PersonalRegistrationRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PersonalRegistrationRow component",
+      "exportName": "PersonalRegistrationRow"
+    },
+    {
+      "path": "components/explore/ExploreActiveFilterPills.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ExploreActiveFilterPills component",
+      "exportName": "ExploreActiveFilterPills"
+    },
+    {
+      "path": "components/explore/ExploreChipRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ExploreChipRow component",
+      "exportName": "ExploreChipRow"
+    },
+    {
+      "path": "components/explore/ExploreCompactEventRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ExploreCompactEventRow component",
+      "exportName": "ExploreCompactEventRow"
+    },
+    {
+      "path": "components/explore/ExploreCompactTrendingRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ExploreCompactTrendingRow component",
+      "exportName": "ExploreCompactTrendingRow"
+    },
+    {
+      "path": "components/explore/ExploreFeaturedTrendingCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "Hero-style featured trending card for Explore mobile curation.",
+      "exportName": "ExploreFeaturedTrendingCard"
+    },
+    {
+      "path": "components/explore/ExploreFiltersPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ExploreFiltersPanel component",
+      "exportName": "ExploreFiltersPanel"
+    },
+    {
+      "path": "components/explore/ExploreHubHeader.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "ExploreHubHeader component",
+      "exportName": "ExploreHubHeader"
+    },
+    {
+      "path": "components/explore/ExploreHubSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ExploreHubSection component",
+      "exportName": "ExploreHubSection"
+    },
+    {
+      "path": "components/explore/ExplorePeopleMayKnowSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ExplorePeopleMayKnowSection component",
+      "exportName": "ExplorePeopleMayKnowSection"
+    },
+    {
+      "path": "components/explore/ExplorePopularCategories.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ExplorePopularCategories component",
+      "exportName": "ExplorePopularCategories"
+    },
+    {
+      "path": "components/explore/ExploreSuggestedRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ExploreSuggestedRow component",
+      "exportName": "ExploreSuggestedRow"
+    },
+    {
+      "path": "components/feed/FeedInteractionIcons.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "Feed interaction iconography - reactions (Love, Respect, Sympathize, Helpful) and community actions.",
+      "exportName": null
+    },
+    {
+      "path": "components/feed/FeedPostDiscussion.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "FeedPostDiscussion component",
+      "exportName": "FeedPostDiscussion"
+    },
+    {
+      "path": "components/feed/FeedPostTypeBadge.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "FeedPostTypeBadge component",
+      "exportName": "FeedPostTypeBadge"
+    },
+    {
+      "path": "components/feed/FeedReactionsRow.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "FeedReactionsRow component",
+      "exportName": "FeedReactionsRow"
+    },
+    {
+      "path": "components/FeedbackForm.tsx",
+      "categories": [
+        "form",
+        "card-feed"
+      ],
+      "purpose": "* Post-interaction feedback form for reputation.",
+      "exportName": "FeedbackForm"
+    },
+    {
+      "path": "components/find-people/FindPeopleFiltersPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "FindPeopleFiltersPanel component",
+      "exportName": "FindPeopleFiltersPanel"
+    },
+    {
+      "path": "components/find-people/FindPeopleLeftRail.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "FindPeopleLeftRail component",
+      "exportName": "FindPeopleLeftRail"
+    },
+    {
+      "path": "components/find-people/FindPeopleProfileCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "FindPeopleProfileCard component",
+      "exportName": "FindPeopleProfileCard"
+    },
+    {
+      "path": "components/find-people/FindPeopleRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "FindPeopleRightRail component",
+      "exportName": "FindPeopleRightRail"
+    },
+    {
+      "path": "components/find-people/FindPeopleScopeTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "FindPeopleScopeTabs component",
+      "exportName": "FindPeopleScopeTabs"
+    },
+    {
+      "path": "components/Footer.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Footer component",
+      "exportName": "Footer"
+    },
+    {
+      "path": "components/forum/ForumPostList.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ForumPostList component",
+      "exportName": "ForumPostList"
+    },
+    {
+      "path": "components/forum/ForumPostRoleBadges.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ForumPostRoleBadges component",
+      "exportName": "ForumPostRoleBadges"
+    },
+    {
+      "path": "components/forum/ForumThreadReplyComposer.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ForumThreadReplyComposer component",
+      "exportName": "ForumThreadReplyComposer"
+    },
+    {
+      "path": "components/group/ChannelPostsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ChannelPostsSection component",
+      "exportName": "ChannelPostsSection"
+    },
+    {
+      "path": "components/group/CreateGroupModal.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "CreateGroupModal component",
+      "exportName": "CreateGroupModal"
+    },
+    {
+      "path": "components/group/GroupCommunityShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "Mock/demo slug groups - full tab set including mock-only sections.",
+      "exportName": "GroupCommunityShell"
+    },
+    {
+      "path": "components/group/GroupEventsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupEventsSection component",
+      "exportName": "GroupEventsSection"
+    },
+    {
+      "path": "components/group/GroupFeedbackSection.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "GroupFeedbackSection component",
+      "exportName": "GroupFeedbackSection"
+    },
+    {
+      "path": "components/group/GroupForumsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupForumsSection component",
+      "exportName": "GroupForumsSection"
+    },
+    {
+      "path": "components/group/GroupJoinRulesModal.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "GroupJoinRulesModal component",
+      "exportName": "GroupJoinRulesModal"
+    },
+    {
+      "path": "components/group/GroupLeadershipElectionSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupLeadershipElectionSection component",
+      "exportName": "GroupLeadershipElectionSection"
+    },
+    {
+      "path": "components/group/GroupMembersSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupMembersSection component",
+      "exportName": "GroupMembersSection"
+    },
+    {
+      "path": "components/group/GroupPhotosSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupPhotosSection component",
+      "exportName": "GroupPhotosSection"
+    },
+    {
+      "path": "components/group/GroupResourcesSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupResourcesSection component",
+      "exportName": "GroupResourcesSection"
+    },
+    {
+      "path": "components/group/PhotoPlaceholder.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PhotoPlaceholder component",
+      "exportName": "PhotoPlaceholder"
+    },
+    {
+      "path": "components/GroupEventCalendar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupEventCalendar component",
+      "exportName": "GroupEventCalendar"
+    },
+    {
+      "path": "components/GroupPhotoAlbumPreview.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Compact photo grid for sidebar. Photos require approval before appearing.",
+      "exportName": "GroupPhotoAlbumPreview"
+    },
+    {
+      "path": "components/GroupRoleBadge.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupRoleBadge component",
+      "exportName": "GroupRoleBadge"
+    },
+    {
+      "path": "components/groups/GroupDiscoverCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "GroupDiscoverCard component",
+      "exportName": "GroupDiscoverCard"
+    },
+    {
+      "path": "components/groups/GroupDiscoverListCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "GroupDiscoverListCard component",
+      "exportName": "GroupDiscoverListCard"
+    },
+    {
+      "path": "components/groups/GroupsDiscoverLeftRail.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "GroupsDiscoverLeftRail component",
+      "exportName": "GroupsDiscoverLeftRail"
+    },
+    {
+      "path": "components/groups/GroupsFiltersPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "GroupsFiltersPanel component",
+      "exportName": "GroupsFiltersPanel"
+    },
+    {
+      "path": "components/groups/GroupsPersonalLeftRail.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "GroupsPersonalLeftRail component",
+      "exportName": "GroupsPersonalLeftRail"
+    },
+    {
+      "path": "components/groups/GroupsPurposeChips.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupsPurposeChips component",
+      "exportName": "GroupsPurposeChips"
+    },
+    {
+      "path": "components/groups/GroupsRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupsRightRail component",
+      "exportName": "GroupsRightRail"
+    },
+    {
+      "path": "components/groups/GroupsScopeTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupsScopeTabs component",
+      "exportName": "GroupsScopeTabs"
+    },
+    {
+      "path": "components/groups/GroupsSectionNavLinks.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "GroupsSectionNavLinks component",
+      "exportName": "GroupsSectionNavLinks"
+    },
+    {
+      "path": "components/groups/GroupsSectionTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupsSectionTabs component",
+      "exportName": "GroupsSectionTabs"
+    },
+    {
+      "path": "components/Header.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "Legacy: CommunityNavBar no longer duplicates browse links - show full nav in mobile menu.",
+      "exportName": "Header"
+    },
+    {
+      "path": "components/home/ActivityFeedCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ActivityFeedCard component",
+      "exportName": "ActivityFeedCard"
+    },
+    {
+      "path": "components/home/AutoScrollRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "AutoScrollRow component",
+      "exportName": "AutoScrollRow"
+    },
+    {
+      "path": "components/home/ComposerAvatar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ComposerAvatar component",
+      "exportName": "ComposerAvatar"
+    },
+    {
+      "path": "components/home/ConventionPinsCompact.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Slim convention hub row - lives inside the feed column, not as a homepage billboard.",
+      "exportName": "ConventionPinsCompact"
+    },
+    {
+      "path": "components/home/FeedComposerQuickActions.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "FeedComposerQuickActions component",
+      "exportName": "FeedComposerQuickActions"
+    },
+    {
+      "path": "components/home/FeedScopeTabs.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "FeedScopeTabs component",
+      "exportName": "FeedScopeTabs"
+    },
+    {
+      "path": "components/home/HomeDashboardLeftRail.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "HomeDashboardLeftRail component",
+      "exportName": "HomeDashboardLeftRail"
+    },
+    {
+      "path": "components/home/HomeFeedDiscoverRail.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "HomeFeedDiscoverRail component",
+      "exportName": "HomeFeedDiscoverRail"
+    },
+    {
+      "path": "components/home/HomeFeedMockComposer.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "Short CC0 sample for mock-only audio attachment preview.",
+      "exportName": "HomeFeedMockComposer"
+    },
+    {
+      "path": "components/home/homeFeedNavIcons.tsx",
+      "categories": [
+        "nav",
+        "card-feed"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/home/HomeFeedRichComposer.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "HomeFeedRichComposer component",
+      "exportName": "HomeFeedRichComposer"
+    },
+    {
+      "path": "components/home/HomeFeedShellComposer.tsx",
+      "categories": [
+        "layout",
+        "card-feed"
+      ],
+      "purpose": "HomeFeedShellComposer component",
+      "exportName": "HomeFeedShellComposer"
+    },
+    {
+      "path": "components/home/HomeFeedSuggestedPerson.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "HomeFeedSuggestedPerson component",
+      "exportName": "HomeFeedSuggestedPerson"
+    },
+    {
+      "path": "components/home/HomeFirstSessionDashboard.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "HomeFirstSessionDashboard component",
+      "exportName": "HomeFirstSessionDashboard"
+    },
+    {
+      "path": "components/home/HomeHero.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "HomeHero component",
+      "exportName": "HomeHero"
+    },
+    {
+      "path": "components/home/HomeMobileComposer.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "HomeMobileComposer component",
+      "exportName": "HomeMobileComposer"
+    },
+    {
+      "path": "components/home/HomeUpcomingEventCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "HomeUpcomingEventCard component",
+      "exportName": "HomeUpcomingEventCard"
+    },
+    {
+      "path": "components/home/HomeWelcomePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "HomeWelcomePanel component",
+      "exportName": "HomeWelcomePanel"
+    },
+    {
+      "path": "components/home/LocalHomeFeed.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "LocalHomeFeed component",
+      "exportName": "LocalHomeFeed"
+    },
+    {
+      "path": "components/home/MentionList.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/home/PinnedConventionsRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PinnedConventionsRail component",
+      "exportName": "PinnedConventionsRail"
+    },
+    {
+      "path": "components/home/PostComposerModeBar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Home feed composer is status-only; long-form education posts use `/education/write`.",
+      "exportName": "PostComposerModeBar"
+    },
+    {
+      "path": "components/home/TrendingItemCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "TrendingItemCard component",
+      "exportName": "TrendingItemCard"
+    },
+    {
+      "path": "components/home/VendorListingMiniCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "VendorListingMiniCard component",
+      "exportName": "VendorListingMiniCard"
+    },
+    {
+      "path": "components/landing/landing-content.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/landing/LandingCommunityProof.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingCommunityProof component",
+      "exportName": "LandingCommunityProof"
+    },
+    {
+      "path": "components/landing/LandingDanceCardMock.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "Decorative Dance Card dashboard preview — not functional.",
+      "exportName": "LandingDanceCardMock"
+    },
+    {
+      "path": "components/landing/LandingDiscoveryPreview.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingDiscoveryPreview component",
+      "exportName": "LandingDiscoveryPreview"
+    },
+    {
+      "path": "components/landing/LandingFeatureShortcuts.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingFeatureShortcuts component",
+      "exportName": "LandingFeatureShortcuts"
+    },
+    {
+      "path": "components/landing/LandingHeroBackdrop.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Atmospheric hero background — gradients and abstract leather atmosphere.",
+      "exportName": "LandingHeroBackdrop"
+    },
+    {
+      "path": "components/landing/LandingLegalStrip.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingLegalStrip component",
+      "exportName": "LandingLegalStrip"
+    },
+    {
+      "path": "components/landing/LandingMobileSearch.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Logged-out landing search - visible below header on small screens only.",
+      "exportName": "LandingMobileSearch"
+    },
+    {
+      "path": "components/landing/LandingOrganizerSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingOrganizerSection component",
+      "exportName": "LandingOrganizerSection"
+    },
+    {
+      "path": "components/landing/LandingPreviewEducatorRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingPreviewEducatorRow component",
+      "exportName": "LandingPreviewEducatorRow"
+    },
+    {
+      "path": "components/landing/LandingPreviewEventRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingPreviewEventRow component",
+      "exportName": "LandingPreviewEventRow"
+    },
+    {
+      "path": "components/landing/LandingProductPreview.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingProductPreview component",
+      "exportName": "LandingProductPreview"
+    },
+    {
+      "path": "components/landing/LandingPublicFooter.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingPublicFooter component",
+      "exportName": "LandingPublicFooter"
+    },
+    {
+      "path": "components/landing/LandingSignupBlock.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingSignupBlock component",
+      "exportName": "LandingSignupBlock"
+    },
+    {
+      "path": "components/landing/LandingTrustPillRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingTrustPillRow component",
+      "exportName": "LandingTrustPillRow"
+    },
+    {
+      "path": "components/landing/LandingValuePillars.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "LandingValuePillars component",
+      "exportName": "LandingValuePillars"
+    },
+    {
+      "path": "components/landing/MobilePublicNav.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "MobilePublicNav component",
+      "exportName": "MobilePublicNav"
+    },
+    {
+      "path": "components/landing/PublicNav.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "PublicNav component",
+      "exportName": "PublicNav"
+    },
+    {
+      "path": "components/layout/PersonalUtilityPageShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "",
+      "exportName": "PersonalUtilityPageShell"
+    },
+    {
+      "path": "components/location/PlaceRegionPicker.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PlaceRegionPicker component",
+      "exportName": "PlaceRegionPicker"
+    },
+    {
+      "path": "components/LoginCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "Landing signup checkbox with 44px hit area (audit-safe).",
+      "exportName": "LoginCard"
+    },
+    {
+      "path": "components/media/MediaAttestationModal.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "MediaAttestationModal component",
+      "exportName": "MediaAttestationModal"
+    },
+    {
+      "path": "components/media/MediaChannelCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "MediaChannelCard component",
+      "exportName": "MediaChannelCard"
+    },
+    {
+      "path": "components/media/MediaEmptyPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "MediaEmptyPanel component",
+      "exportName": "MediaEmptyPanel"
+    },
+    {
+      "path": "components/media/MediaEpisodeList.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MediaEpisodeList component",
+      "exportName": "MediaEpisodeList"
+    },
+    {
+      "path": "components/media/MediaLightbox.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MediaLightbox component",
+      "exportName": "MediaLightbox"
+    },
+    {
+      "path": "components/media/MediaOutboundBar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MediaOutboundBar component",
+      "exportName": "MediaOutboundBar"
+    },
+    {
+      "path": "components/media/MediaRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MediaRightRail component",
+      "exportName": "MediaRightRail"
+    },
+    {
+      "path": "components/media/MediaUploadProgress.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Shared upload in-flight UI for profile photos and gallery adds.",
+      "exportName": null
+    },
+    {
+      "path": "components/messaging/MessagingEmptyPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "MessagingEmptyPanel component",
+      "exportName": "MessagingEmptyPanel"
+    },
+    {
+      "path": "components/messaging/MessagingFolderTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MessagingFolderTabs component",
+      "exportName": "MessagingFolderTabs"
+    },
+    {
+      "path": "components/messaging/MessagingInboxFilters.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MessagingInboxFilters component",
+      "exportName": "MessagingInboxFilters"
+    },
+    {
+      "path": "components/messaging/MessagingSafetyPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "MessagingSafetyPanel component",
+      "exportName": "MessagingSafetyPanel"
+    },
+    {
+      "path": "components/MockDataBanner.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "",
+      "exportName": "MockDataBanner"
+    },
+    {
+      "path": "components/moderation/AdminStepUpModal.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "AdminStepUpModal component",
+      "exportName": "AdminStepUpModal"
+    },
+    {
+      "path": "components/moderation/ModerationIncidentClusterPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ModerationIncidentClusterPanel component",
+      "exportName": "ModerationIncidentClusterPanel"
+    },
+    {
+      "path": "components/moderation/ModerationShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "ModerationShell component",
+      "exportName": "ModerationShell"
+    },
+    {
+      "path": "components/moderation/ModerationTrustSummaryPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ModerationTrustSummaryPanel component",
+      "exportName": "ModerationTrustSummaryPanel"
+    },
+    {
+      "path": "components/moderation/PlatformStaffNavLinks.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "PlatformStaffNavLinks component",
+      "exportName": "PlatformStaffNavLinks"
+    },
+    {
+      "path": "components/moderation/ReportAction.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ReportAction component",
+      "exportName": "ReportAction"
+    },
+    {
+      "path": "components/moderation/ReputationIntegritySignalsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ReputationIntegritySignalsPanel component",
+      "exportName": "ReputationIntegritySignalsPanel"
+    },
+    {
+      "path": "components/moderation/TsReportModal.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "TsReportModal component",
+      "exportName": "TsReportModal"
+    },
+    {
+      "path": "components/my-posts/MyPostListCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "MyPostListCard component",
+      "exportName": "MyPostListCard"
+    },
+    {
+      "path": "components/my-posts/MyPostsEmptyPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "MyPostsEmptyPanel component",
+      "exportName": "MyPostsEmptyPanel"
+    },
+    {
+      "path": "components/my-posts/MyPostsRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MyPostsRightRail component",
+      "exportName": "MyPostsRightRail"
+    },
+    {
+      "path": "components/my-posts/MyPostsTabs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MyPostsTabs component",
+      "exportName": "MyPostsTabs"
+    },
+    {
+      "path": "components/notifications/NotificationsEmptyPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "NotificationsEmptyPanel component",
+      "exportName": "NotificationsEmptyPanel"
+    },
+    {
+      "path": "components/notifications/NotificationsSafetyFooter.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "NotificationsSafetyFooter component",
+      "exportName": "NotificationsSafetyFooter"
+    },
+    {
+      "path": "components/onboarding/MemberOnboardingWizard.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "MemberOnboardingWizard component",
+      "exportName": "MemberOnboardingWizard"
+    },
+    {
+      "path": "components/onboarding/onboarding-step-icons.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/onboarding/OnboardingGate.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Redirect authenticated members who have not finished first-time onboarding.",
+      "exportName": "OnboardingGate"
+    },
+    {
+      "path": "components/org/hub/OrgHubAboutTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/org/hub/OrgHubCalendarTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/org/hub/OrgHubSectionCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/org/OrgAdminDashboard.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrgAdminDashboard component",
+      "exportName": "OrgAdminDashboard"
+    },
+    {
+      "path": "components/org/OrgAnchorAttendeesCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "OrgAnchorAttendeesCard component",
+      "exportName": "OrgAnchorAttendeesCard"
+    },
+    {
+      "path": "components/org/OrgCommunityModules.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrgCommunityModules component",
+      "exportName": "OrgCommunityModules"
+    },
+    {
+      "path": "components/org/OrgCommunityModulesEditor.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrgCommunityModulesEditor component",
+      "exportName": "OrgCommunityModulesEditor"
+    },
+    {
+      "path": "components/org/OrgCommunityShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "DB may still hold `/seed/paf/*` paths; serve via `/api/public-seed/paf/*` instead.",
+      "exportName": "OrgCommunityShell"
+    },
+    {
+      "path": "components/org/OrgDiscordEmbedPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrgDiscordEmbedPanel component",
+      "exportName": "OrgDiscordEmbedPanel"
+    },
+    {
+      "path": "components/org/OrgRichBioEditor.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrgRichBioEditor component",
+      "exportName": "OrgRichBioEditor"
+    },
+    {
+      "path": "components/org/OrgVoicePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrgVoicePanel component",
+      "exportName": "OrgVoicePanel"
+    },
+    {
+      "path": "components/organizer/admin/GroupCommunicationsAdminPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "GroupCommunicationsAdminPanel component",
+      "exportName": "GroupCommunicationsAdminPanel"
+    },
+    {
+      "path": "components/organizer/admin/GroupForumModerationPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "GroupForumModerationPanel component",
+      "exportName": "GroupForumModerationPanel"
+    },
+    {
+      "path": "components/organizer/admin/GroupMemberRolePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "Roles accepted by PATCH /api/v1/groups/:id/members/:userId",
+      "exportName": "GroupMemberRolePanel"
+    },
+    {
+      "path": "components/organizer/admin/GroupSettingsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "GroupSettingsPanel component",
+      "exportName": "GroupSettingsPanel"
+    },
+    {
+      "path": "components/organizer/admin/OrganizerGroupModerationPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerGroupModerationPanel component",
+      "exportName": "OrganizerGroupModerationPanel"
+    },
+    {
+      "path": "components/organizer/admin/OrganizerOrgModerationPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/organizer/admin/OrgBioEditorPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrgBioEditorPanel component",
+      "exportName": "OrgBioEditorPanel"
+    },
+    {
+      "path": "components/organizer/admin/OrgChatModerationPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrgChatModerationPanel component",
+      "exportName": "OrgChatModerationPanel"
+    },
+    {
+      "path": "components/organizer/admin/OrgContentEditorPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrgContentEditorPanel component",
+      "exportName": "OrgContentEditorPanel"
+    },
+    {
+      "path": "components/organizer/admin/OrgEmailListPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrgEmailListPanel component",
+      "exportName": "OrgEmailListPanel"
+    },
+    {
+      "path": "components/organizer/admin/OrgForumModerationPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrgForumModerationPanel component",
+      "exportName": "OrgForumModerationPanel"
+    },
+    {
+      "path": "components/organizer/admin/OrgGalleryAdminPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "DB may still hold `/seed/paf/*` paths; serve via `/api/public-seed/paf/*` instead.",
+      "exportName": "OrgGalleryAdminPanel"
+    },
+    {
+      "path": "components/organizer/admin/OrgMemberAdminPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrgMemberAdminPanel component",
+      "exportName": "OrgMemberAdminPanel"
+    },
+    {
+      "path": "components/organizer/admin/OrgSubgroupAdminPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrgSubgroupAdminPanel component",
+      "exportName": "OrgSubgroupAdminPanel"
+    },
+    {
+      "path": "components/organizer/communications/ChatChannelsManager.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ChatChannelsManager component",
+      "exportName": "ChatChannelsManager"
+    },
+    {
+      "path": "components/organizer/communications/comms-ui.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/organizer/communications/ForumCategoriesManager.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ForumCategoriesManager component",
+      "exportName": "ForumCategoriesManager"
+    },
+    {
+      "path": "components/organizer/communications/OrganizerOrgCommunicationsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerOrgCommunicationsPanel component",
+      "exportName": "OrganizerOrgCommunicationsPanel"
+    },
+    {
+      "path": "components/organizer/convention/ConventionDancecardOrganizerClient.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConventionDancecardOrganizerClient component",
+      "exportName": "ConventionDancecardOrganizerClient"
+    },
+    {
+      "path": "components/organizer/convention/ConventionOrganizerClient.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Convention organizer - full Dancecard kit shell and tabs.",
+      "exportName": "ConventionOrganizerClient"
+    },
+    {
+      "path": "components/organizer/ConventionPublishActions.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConventionPublishActions component",
+      "exportName": "ConventionPublishActions"
+    },
+    {
+      "path": "components/organizer/EckePublishStub.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EckePublishStub component",
+      "exportName": "EckePublishStub"
+    },
+    {
+      "path": "components/organizer/EventContributorsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "EventContributorsPanel component",
+      "exportName": "EventContributorsPanel"
+    },
+    {
+      "path": "components/organizer/EventMatchmakerSettingsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventMatchmakerSettingsSection component",
+      "exportName": "EventMatchmakerSettingsSection"
+    },
+    {
+      "path": "components/organizer/EventOrganizerPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "EventOrganizerPanel component",
+      "exportName": "EventOrganizerPanel"
+    },
+    {
+      "path": "components/organizer/moderation/AuditTimeline.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "AuditTimeline component",
+      "exportName": "AuditTimeline"
+    },
+    {
+      "path": "components/organizer/moderation/BanList.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "BanList component",
+      "exportName": "BanList"
+    },
+    {
+      "path": "components/organizer/moderation/moderation-ui.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/organizer/moderation/OrganizerOrgModerationPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerOrgModerationPanel component",
+      "exportName": "OrganizerOrgModerationPanel"
+    },
+    {
+      "path": "components/organizer/moderation/ReportInbox.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ReportInbox component",
+      "exportName": "ReportInbox"
+    },
+    {
+      "path": "components/organizer/org-console/OrganizationStatusHero.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrganizationStatusHero component",
+      "exportName": "OrganizationStatusHero"
+    },
+    {
+      "path": "components/organizer/org-console/OrganizerChecklist.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrganizerChecklist component",
+      "exportName": "OrganizerChecklist"
+    },
+    {
+      "path": "components/organizer/org-console/OrganizerNavIcons.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/organizer/org-console/OrganizerOrgHomePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerOrgHomePanel component",
+      "exportName": "OrganizerOrgHomePanel"
+    },
+    {
+      "path": "components/organizer/org-console/PublicHubPreviewCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "PublicHubPreviewCard component",
+      "exportName": "PublicHubPreviewCard"
+    },
+    {
+      "path": "components/organizer/org-console/QuickActionsCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "QuickActionsCard component",
+      "exportName": "QuickActionsCard"
+    },
+    {
+      "path": "components/organizer/org-console/RolePermissionsCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "RolePermissionsCard component",
+      "exportName": "RolePermissionsCard"
+    },
+    {
+      "path": "components/organizer/org-console/UpcomingOrgEventsCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "UpcomingOrgEventsCard component",
+      "exportName": "UpcomingOrgEventsCard"
+    },
+    {
+      "path": "components/organizer/OrganizerCommunicationsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerCommunicationsPanel component",
+      "exportName": "OrganizerCommunicationsPanel"
+    },
+    {
+      "path": "components/organizer/OrganizerGroupSettingsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerGroupSettingsPanel component",
+      "exportName": "OrganizerGroupSettingsPanel"
+    },
+    {
+      "path": "components/organizer/OrganizerHomePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerHomePanel component",
+      "exportName": "OrganizerHomePanel"
+    },
+    {
+      "path": "components/organizer/OrganizerOrgSettingsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerOrgSettingsPanel component",
+      "exportName": "OrganizerOrgSettingsPanel"
+    },
+    {
+      "path": "components/organizer/OrganizerPeoplePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerPeoplePanel component",
+      "exportName": "OrganizerPeoplePanel"
+    },
+    {
+      "path": "components/organizer/OrganizerSchedulePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerSchedulePanel component",
+      "exportName": "OrganizerSchedulePanel"
+    },
+    {
+      "path": "components/organizer/OrganizerToolsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerToolsPanel component",
+      "exportName": "OrganizerToolsPanel"
+    },
+    {
+      "path": "components/organizer/PaymentsPlaceholder.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PaymentsPlaceholder component",
+      "exportName": "PaymentsPlaceholder"
+    },
+    {
+      "path": "components/organizer/people/MemberFilters.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MemberFilters component",
+      "exportName": "MemberFilters"
+    },
+    {
+      "path": "components/organizer/people/MemberRoleBadge.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MemberRoleBadge component",
+      "exportName": "MemberRoleBadge"
+    },
+    {
+      "path": "components/organizer/people/MemberRoster.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MemberRoster component",
+      "exportName": "MemberRoster"
+    },
+    {
+      "path": "components/organizer/people/OrganizerOrgPeoplePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerOrgPeoplePanel component",
+      "exportName": "OrganizerOrgPeoplePanel"
+    },
+    {
+      "path": "components/organizer/people/people-ui.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/organizer/people/PublicPersonnelPreviewCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "PublicPersonnelPreviewCard component",
+      "exportName": "PublicPersonnelPreviewCard"
+    },
+    {
+      "path": "components/organizer/schedule/OrganizerOrgSchedulePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerOrgSchedulePanel component",
+      "exportName": "OrganizerOrgSchedulePanel"
+    },
+    {
+      "path": "components/organizer/schedule/ProgramListSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProgramListSection component",
+      "exportName": "ProgramListSection"
+    },
+    {
+      "path": "components/organizer/schedule/schedule-ui.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/organizer/schedule/UpcomingProgramsTimeline.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "UpcomingProgramsTimeline component",
+      "exportName": "UpcomingProgramsTimeline"
+    },
+    {
+      "path": "components/organizer/ScopeBrandingPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ScopeBrandingPanel component",
+      "exportName": "ScopeBrandingPanel"
+    },
+    {
+      "path": "components/organizer/settings/settings-ui.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/organizer/settings/SettingsBrandingTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsBrandingTab component",
+      "exportName": "SettingsBrandingTab"
+    },
+    {
+      "path": "components/organizer/settings/SettingsContentTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsContentTab component",
+      "exportName": "SettingsContentTab"
+    },
+    {
+      "path": "components/organizer/settings/SettingsFeaturesTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsFeaturesTab component",
+      "exportName": "SettingsFeaturesTab"
+    },
+    {
+      "path": "components/organizer/settings/SettingsGeneralTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsGeneralTab component",
+      "exportName": "SettingsGeneralTab"
+    },
+    {
+      "path": "components/organizer/settings/SettingsPublishTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsPublishTab component",
+      "exportName": "SettingsPublishTab"
+    },
+    {
+      "path": "components/organizer/tools/ComingSoonPaymentsCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ComingSoonPaymentsCard component",
+      "exportName": "ComingSoonPaymentsCard"
+    },
+    {
+      "path": "components/organizer/tools/ExternalPublishingSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ExternalPublishingSection component",
+      "exportName": "ExternalPublishingSection"
+    },
+    {
+      "path": "components/organizer/tools/OrganizerOrgToolsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerOrgToolsPanel component",
+      "exportName": "OrganizerOrgToolsPanel"
+    },
+    {
+      "path": "components/organizer/tools/ProgramExportsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProgramExportsSection component",
+      "exportName": "ProgramExportsSection"
+    },
+    {
+      "path": "components/organizer/tools/QuickLinksCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "QuickLinksCard component",
+      "exportName": "QuickLinksCard"
+    },
+    {
+      "path": "components/organizer/tools/tools-ui.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/organizer/ui/OrganizerAppShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "OrganizerAppShell component",
+      "exportName": "OrganizerAppShell"
+    },
+    {
+      "path": "components/organizer/ui/OrganizerBreadcrumbs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrganizerBreadcrumbs component",
+      "exportName": "OrganizerBreadcrumbs"
+    },
+    {
+      "path": "components/organizer/ui/OrganizerCommandPalette.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrganizerCommandPalette component",
+      "exportName": "OrganizerCommandPalette"
+    },
+    {
+      "path": "components/organizer/ui/OrganizerDataTable.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrganizerDataTable component",
+      "exportName": "OrganizerDataTable"
+    },
+    {
+      "path": "components/organizer/ui/OrganizerFormSection.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerFormSection component",
+      "exportName": "OrganizerFormSection"
+    },
+    {
+      "path": "components/organizer/ui/OrganizerPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "OrganizerPanel component",
+      "exportName": "OrganizerPanel"
+    },
+    {
+      "path": "components/organizer/ui/OrganizerPublishConfirmDialog.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "OrganizerPublishConfirmDialog component",
+      "exportName": "OrganizerPublishConfirmDialog"
+    },
+    {
+      "path": "components/organizer/ui/OrganizerSetupCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "OrganizerSetupCard component",
+      "exportName": "OrganizerSetupCard"
+    },
+    {
+      "path": "components/organizer/ui/OrganizerSidebarNav.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "OrganizerSidebarNav component",
+      "exportName": "OrganizerSidebarNav"
+    },
+    {
+      "path": "components/organizer/ui/OrganizerStatusBar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrganizerStatusBar component",
+      "exportName": "OrganizerStatusBar"
+    },
+    {
+      "path": "components/orgs/OrganizationsHero.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrganizationsHero component",
+      "exportName": "OrganizationsHero"
+    },
+    {
+      "path": "components/orgs/OrganizationsRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OrganizationsRightRail component",
+      "exportName": "OrganizationsRightRail"
+    },
+    {
+      "path": "components/orgs/OrgCreateBenefitCards.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "OrgCreateBenefitCards component",
+      "exportName": "OrgCreateBenefitCards"
+    },
+    {
+      "path": "components/orgs/OrgDirectoryCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "OrgDirectoryCard component",
+      "exportName": "OrgDirectoryCard"
+    },
+    {
+      "path": "components/PersonAvatar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Person/presenter avatar with initials gradient fallback.",
+      "exportName": "PersonAvatar"
+    },
+    {
+      "path": "components/PhotoUpload.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PhotoUpload component",
+      "exportName": "PhotoUpload"
+    },
+    {
+      "path": "components/PlaceholderAvatar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "",
+      "exportName": "PlaceholderAvatar"
+    },
+    {
+      "path": "components/places/CommunityPlacesBrowse.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "CommunityPlacesBrowse component",
+      "exportName": "CommunityPlacesBrowse"
+    },
+    {
+      "path": "components/presenters/onboarding/PresenterOnboardingRouter.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PresenterOnboardingRouter component",
+      "exportName": "PresenterOnboardingRouter"
+    },
+    {
+      "path": "components/presenters/onboarding/PresenterTrackChooser.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PresenterTrackChooser component",
+      "exportName": "PresenterTrackChooser"
+    },
+    {
+      "path": "components/presenters/onboarding/shared/OfferingCatalogStep.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "OfferingCatalogStep component",
+      "exportName": "OfferingCatalogStep"
+    },
+    {
+      "path": "components/presenters/onboarding/shared/OnboardingShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/presenters/onboarding/shared/ProfileBasicsStep.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileBasicsStep component",
+      "exportName": "ProfileBasicsStep"
+    },
+    {
+      "path": "components/presenters/onboarding/shared/ReviewStep.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ReviewStep component",
+      "exportName": "ReviewStep"
+    },
+    {
+      "path": "components/presenters/onboarding/shared/VisibilityStep.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VisibilityStep component",
+      "exportName": "VisibilityStep"
+    },
+    {
+      "path": "components/presenters/PresenterBadges.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PresenterBadges component",
+      "exportName": "PresenterBadges"
+    },
+    {
+      "path": "components/presenters/PresenterOnboardingWizard.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/profile/AlsoOnC2KStrip.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "AlsoOnC2KStrip component",
+      "exportName": "AlsoOnC2KStrip"
+    },
+    {
+      "path": "components/profile/edit/AboutPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "AboutPanel component",
+      "exportName": "AboutPanel"
+    },
+    {
+      "path": "components/profile/edit/CommunityIdentityPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "CommunityIdentityPanel component",
+      "exportName": "CommunityIdentityPanel"
+    },
+    {
+      "path": "components/profile/edit/ConnectionGoalsEditor.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ConnectionGoalsEditor component",
+      "exportName": "ConnectionGoalsEditor"
+    },
+    {
+      "path": "components/profile/edit/FetishesPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "@deprecated Use InterestsPanel - route redirects to /profile/edit/interests",
+      "exportName": null
+    },
+    {
+      "path": "components/profile/edit/InterestsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "InterestsPanel component",
+      "exportName": "InterestsPanel"
+    },
+    {
+      "path": "components/profile/edit/LookingForPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "LookingForPanel component",
+      "exportName": "LookingForPanel"
+    },
+    {
+      "path": "components/profile/edit/PrivacyPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "PrivacyPanel component",
+      "exportName": "PrivacyPanel"
+    },
+    {
+      "path": "components/profile/edit/ProfileBasicsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ProfileBasicsPanel component",
+      "exportName": "ProfileBasicsPanel"
+    },
+    {
+      "path": "components/profile/edit/ProfileEditTabNav.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "ProfileEditTabNav component",
+      "exportName": "ProfileEditTabNav"
+    },
+    {
+      "path": "components/profile/edit/RelationshipsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "RelationshipsPanel component",
+      "exportName": "RelationshipsPanel"
+    },
+    {
+      "path": "components/profile/edit/WebsitesPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "WebsitesPanel component",
+      "exportName": "WebsitesPanel"
+    },
+    {
+      "path": "components/profile/layout/ProfileCoverHeader.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "Desktop cover band with overlapping avatar — identity zone top-left, actions top-right.",
+      "exportName": "ProfileCoverHeader"
+    },
+    {
+      "path": "components/profile/layout/ProfileMediaTabPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "Desktop: writing left, photos right. Mobile: stacked.",
+      "exportName": "ProfileMediaTabPanel"
+    },
+    {
+      "path": "components/profile/layout/ProfilePageShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "* Desktop profile layout: cover header, 3-column grid (story | tabs | network).",
+      "exportName": "ProfilePageShell"
+    },
+    {
+      "path": "components/profile/ProfileAgeConfirmationCard.tsx",
+      "categories": [
+        "card-feed",
+        "modal-sheet"
+      ],
+      "purpose": "ProfileAgeConfirmationCard component",
+      "exportName": "ProfileAgeConfirmationCard"
+    },
+    {
+      "path": "components/profile/ProfileAttendedEventCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileAttendedEventCard component",
+      "exportName": "ProfileAttendedEventCard"
+    },
+    {
+      "path": "components/profile/ProfileCommunityPresence.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileCommunityPresence component",
+      "exportName": "ProfileCommunityPresence"
+    },
+    {
+      "path": "components/profile/ProfileEditCompletionCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileEditCompletionCard component",
+      "exportName": "ProfileEditCompletionCard"
+    },
+    {
+      "path": "components/profile/ProfileEditEcosystemPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ProfileEditEcosystemPanel component",
+      "exportName": "ProfileEditEcosystemPanel"
+    },
+    {
+      "path": "components/profile/ProfileEditLivePreview.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileEditLivePreview component",
+      "exportName": "ProfileEditLivePreview"
+    },
+    {
+      "path": "components/profile/ProfileEditSectionNav.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "ProfileEditSectionNav component",
+      "exportName": "ProfileEditSectionNav"
+    },
+    {
+      "path": "components/profile/ProfileExtendedSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileExtendedSection component",
+      "exportName": "ProfileExtendedSection"
+    },
+    {
+      "path": "components/profile/ProfileFinishPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ProfileFinishPanel component",
+      "exportName": "ProfileFinishPanel"
+    },
+    {
+      "path": "components/profile/ProfileGroupCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileGroupCard component",
+      "exportName": "ProfileGroupCard"
+    },
+    {
+      "path": "components/profile/ProfileIsoEditor.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileIsoEditor component",
+      "exportName": "ProfileIsoEditor"
+    },
+    {
+      "path": "components/profile/ProfileIsoView.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileIsoView component",
+      "exportName": "ProfileIsoView"
+    },
+    {
+      "path": "components/profile/ProfileMeHub.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Quick links for the Me tab — collapsed on mobile below profile tools.",
+      "exportName": "ProfileMeHub"
+    },
+    {
+      "path": "components/profile/ProfileOnboardingRedirect.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Canonical redirect for legacy `/profile/complete` URLs.",
+      "exportName": "ProfileOnboardingRedirect"
+    },
+    {
+      "path": "components/profile/ProfileOwnerActions.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileOwnerActions component",
+      "exportName": "ProfileOwnerActions"
+    },
+    {
+      "path": "components/profile/ProfilePhotoCredit.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfilePhotoCredit component",
+      "exportName": "ProfilePhotoCredit"
+    },
+    {
+      "path": "components/profile/ProfilePhotoGallery.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfilePhotoGallery component",
+      "exportName": "ProfilePhotoGallery"
+    },
+    {
+      "path": "components/profile/ProfilePhotoImage.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfilePhotoImage component",
+      "exportName": "ProfilePhotoImage"
+    },
+    {
+      "path": "components/profile/ProfilePhotoManager.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfilePhotoManager component",
+      "exportName": "ProfilePhotoManager"
+    },
+    {
+      "path": "components/profile/ProfilePublicHero.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfilePublicHero component",
+      "exportName": "ProfilePublicHero"
+    },
+    {
+      "path": "components/profile/ProfileReferencesPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ProfileReferencesPanel component",
+      "exportName": "ProfileReferencesPanel"
+    },
+    {
+      "path": "components/profile/ProfileRelationshipsList.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileRelationshipsList component",
+      "exportName": "ProfileRelationshipsList"
+    },
+    {
+      "path": "components/profile/ProfileStatsBar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileStatsBar component",
+      "exportName": "ProfileStatsBar"
+    },
+    {
+      "path": "components/profile/ProfileTabBar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileTabBar component",
+      "exportName": "ProfileTabBar"
+    },
+    {
+      "path": "components/profile/ProfileTrustPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ProfileTrustPanel component",
+      "exportName": "ProfileTrustPanel"
+    },
+    {
+      "path": "components/profile/ProfileViewerActions.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileViewerActions component",
+      "exportName": "ProfileViewerActions"
+    },
+    {
+      "path": "components/profile/social/ProfileSocialRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileSocialRail component",
+      "exportName": "ProfileSocialRail"
+    },
+    {
+      "path": "components/profile/social/SocialAvatarGrid.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SocialAvatarGrid component",
+      "exportName": "SocialAvatarGrid"
+    },
+    {
+      "path": "components/profile/story/ProfileAboutCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileAboutCard component",
+      "exportName": "ProfileAboutCard"
+    },
+    {
+      "path": "components/profile/story/ProfileActivityTimeline.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileActivityTimeline component",
+      "exportName": "ProfileActivityTimeline"
+    },
+    {
+      "path": "components/profile/story/ProfileCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileCard component",
+      "exportName": "ProfileCard"
+    },
+    {
+      "path": "components/profile/story/ProfileCommunitySnapshotCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileCommunitySnapshotCard component",
+      "exportName": "ProfileCommunitySnapshotCard"
+    },
+    {
+      "path": "components/profile/story/ProfileEntityAvatar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileEntityAvatar component",
+      "exportName": "ProfileEntityAvatar"
+    },
+    {
+      "path": "components/profile/story/ProfileFeedbackCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileFeedbackCard component",
+      "exportName": "ProfileFeedbackCard"
+    },
+    {
+      "path": "components/profile/story/ProfileHeroCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileHeroCard component",
+      "exportName": "ProfileHeroCard"
+    },
+    {
+      "path": "components/profile/story/ProfileLookingForCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileLookingForCard component",
+      "exportName": "ProfileLookingForCard"
+    },
+    {
+      "path": "components/profile/story/ProfileOrganizationsCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileOrganizationsCard component",
+      "exportName": "ProfileOrganizationsCard"
+    },
+    {
+      "path": "components/profile/story/ProfilePersonalityCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfilePersonalityCard component",
+      "exportName": "ProfilePersonalityCard"
+    },
+    {
+      "path": "components/profile/story/ProfilePill.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfilePill component",
+      "exportName": "ProfilePill"
+    },
+    {
+      "path": "components/profile/story/ProfileStoryIcons.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/profile/story/ProfileStorySidebar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "Condensed story cards for desktop left rail.",
+      "exportName": "ProfileStorySidebar"
+    },
+    {
+      "path": "components/profile/story/ProfileStoryView.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Map full story props into desktop cover + sidebar slices.",
+      "exportName": "ProfileStoryView"
+    },
+    {
+      "path": "components/profile/story/ProfileUpcomingEventsCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileUpcomingEventsCard component",
+      "exportName": "ProfileUpcomingEventsCard"
+    },
+    {
+      "path": "components/profile/studio/ProfileStudioCoachRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileStudioCoachRail component",
+      "exportName": "ProfileStudioCoachRail"
+    },
+    {
+      "path": "components/profile/studio/ProfileStudioInsetCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileStudioInsetCard component",
+      "exportName": "ProfileStudioInsetCard"
+    },
+    {
+      "path": "components/profile/studio/ProfileStudioLivePreview.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileStudioLivePreview component",
+      "exportName": "ProfileStudioLivePreview"
+    },
+    {
+      "path": "components/profile/studio/ProfileStudioSaveBar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileStudioSaveBar component",
+      "exportName": "ProfileStudioSaveBar"
+    },
+    {
+      "path": "components/profile/studio/ProfileStudioSectionCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "Wrapper matching public profile story cards for edit sections.",
+      "exportName": "ProfileStudioSectionCard"
+    },
+    {
+      "path": "components/profile/studio/ProfileStudioStrengthCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "ProfileStudioStrengthCard component",
+      "exportName": "ProfileStudioStrengthCard"
+    },
+    {
+      "path": "components/profile/studio/ProfileStudioVisitorReadout.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileStudioVisitorReadout component",
+      "exportName": "ProfileStudioVisitorReadout"
+    },
+    {
+      "path": "components/profile/tabs/ProfileActivityTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileActivityTab component",
+      "exportName": "ProfileActivityTab"
+    },
+    {
+      "path": "components/profile/tabs/ProfileConnectionsTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileConnectionsTab component",
+      "exportName": "ProfileConnectionsTab"
+    },
+    {
+      "path": "components/profile/tabs/ProfileIsoTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileIsoTab component",
+      "exportName": "ProfileIsoTab"
+    },
+    {
+      "path": "components/profile/tabs/ProfileReviewsTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileReviewsTab component",
+      "exportName": "ProfileReviewsTab"
+    },
+    {
+      "path": "components/profile/tabs/ProfileWritingTab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileWritingTab component",
+      "exportName": "ProfileWritingTab"
+    },
+    {
+      "path": "components/profile/ZipLocationCandidatePicker.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ZipLocationCandidatePicker component",
+      "exportName": "ZipLocationCandidatePicker"
+    },
+    {
+      "path": "components/RootErrorBoundary.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "",
+      "exportName": null
+    },
+    {
+      "path": "components/RouteNavigationPending.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "Thin top bar while a route transition is in flight (UI_UX follow-up C1).",
+      "exportName": "RouteNavigationPending"
+    },
+    {
+      "path": "components/saved/SavedBackLink.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SavedBackLink component",
+      "exportName": "SavedBackLink"
+    },
+    {
+      "path": "components/saved/SavedBookmarkTip.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SavedBookmarkTip component",
+      "exportName": "SavedBookmarkTip"
+    },
+    {
+      "path": "components/saved/SavedEmptyPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "SavedEmptyPanel component",
+      "exportName": "SavedEmptyPanel"
+    },
+    {
+      "path": "components/saved/SavedFilterChips.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SavedFilterChips component",
+      "exportName": "SavedFilterChips"
+    },
+    {
+      "path": "components/saved/SavedRemoveMenu.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SavedRemoveMenu component",
+      "exportName": "SavedRemoveMenu"
+    },
+    {
+      "path": "components/saved/SavedRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SavedRightRail component",
+      "exportName": "SavedRightRail"
+    },
+    {
+      "path": "components/seo/AppRobotsMeta.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Global robots meta — noindex by default; public launch enables indexing on marketing pages.",
+      "exportName": "AppRobotsMeta"
+    },
+    {
+      "path": "components/seo/ScopePageMeta.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ScopePageMeta component",
+      "exportName": "ScopePageMeta"
+    },
+    {
+      "path": "components/settings/AccountAgeConfirmationPanel.tsx",
+      "categories": [
+        "form",
+        "modal-sheet"
+      ],
+      "purpose": "AccountAgeConfirmationPanel component",
+      "exportName": "AccountAgeConfirmationPanel"
+    },
+    {
+      "path": "components/settings/BlockedMembersPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "Embedded blocked list (legacy privacy composite). Prefer `/settings/blocked`.",
+      "exportName": "BlockedMembersPanel"
+    },
+    {
+      "path": "components/settings/EmailNotificationPrefs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EmailNotificationPrefs component",
+      "exportName": "EmailNotificationPrefs"
+    },
+    {
+      "path": "components/settings/NotificationMatrixTable.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/settings/PresenterCatalogSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PresenterCatalogSection component",
+      "exportName": "PresenterCatalogSection"
+    },
+    {
+      "path": "components/settings/PushNotificationSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PushNotificationSection component",
+      "exportName": "PushNotificationSection"
+    },
+    {
+      "path": "components/settings/SettingsAccountRow.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsAccountRow component",
+      "exportName": "SettingsAccountRow"
+    },
+    {
+      "path": "components/settings/SettingsActivityFeedSections.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "SettingsActivityFeedSections component",
+      "exportName": "SettingsActivityFeedSections"
+    },
+    {
+      "path": "components/settings/SettingsBlockedSections.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsBlockedSections component",
+      "exportName": "SettingsBlockedSections"
+    },
+    {
+      "path": "components/settings/SettingsBlockedSidebar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "SettingsBlockedSidebar component",
+      "exportName": "SettingsBlockedSidebar"
+    },
+    {
+      "path": "components/settings/SettingsBundleSaveBar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsBundleSaveBar component",
+      "exportName": "SettingsBundleSaveBar"
+    },
+    {
+      "path": "components/settings/SettingsMessagingPresets.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsMessagingPresets component",
+      "exportName": "SettingsMessagingPresets"
+    },
+    {
+      "path": "components/settings/SettingsMutedSections.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsMutedSections component",
+      "exportName": "SettingsMutedSections"
+    },
+    {
+      "path": "components/settings/SettingsMutedSidebar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "SettingsMutedSidebar component",
+      "exportName": "SettingsMutedSidebar"
+    },
+    {
+      "path": "components/settings/SettingsMutedTagsPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "SettingsMutedTagsPanel component",
+      "exportName": "SettingsMutedTagsPanel"
+    },
+    {
+      "path": "components/settings/SettingsNotificationBulkSidebar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "SettingsNotificationBulkSidebar component",
+      "exportName": "SettingsNotificationBulkSidebar"
+    },
+    {
+      "path": "components/settings/SettingsNotificationMatrix.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsNotificationMatrix component",
+      "exportName": "SettingsNotificationMatrix"
+    },
+    {
+      "path": "components/settings/SettingsPaymentHistorySections.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsPaymentHistorySections component",
+      "exportName": "SettingsPaymentHistorySections"
+    },
+    {
+      "path": "components/settings/SettingsPaymentHistorySidebar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "SettingsPaymentHistorySidebar component",
+      "exportName": "SettingsPaymentHistorySidebar"
+    },
+    {
+      "path": "components/settings/SettingsPrivacyDataPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "SettingsPrivacyDataPanel component",
+      "exportName": "SettingsPrivacyDataPanel"
+    },
+    {
+      "path": "components/settings/SettingsPrivacySidebar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "SettingsPrivacySidebar component",
+      "exportName": "SettingsPrivacySidebar"
+    },
+    {
+      "path": "components/settings/SettingsPushBuildNote.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Dev-only note about push/email plumbing - not shown on the public notifications inbox.",
+      "exportName": "SettingsPushBuildNote"
+    },
+    {
+      "path": "components/settings/SettingsPushEnableBanner.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsPushEnableBanner component",
+      "exportName": "SettingsPushEnableBanner"
+    },
+    {
+      "path": "components/settings/SettingsStaffSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsStaffSection component",
+      "exportName": "SettingsStaffSection"
+    },
+    {
+      "path": "components/settings/SettingsSupportSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SettingsSupportSection component",
+      "exportName": "SettingsSupportSection"
+    },
+    {
+      "path": "components/settings/VendorManagedShopsSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VendorManagedShopsSection component",
+      "exportName": "VendorManagedShopsSection"
+    },
+    {
+      "path": "components/settings/VendorShopSection.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VendorShopSection component",
+      "exportName": "VendorShopSection"
+    },
+    {
+      "path": "components/shell/AppShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "* Authenticated mobile app shell — max-width, overflow guard, consistent horizontal padding.",
+      "exportName": "AppShell"
+    },
+    {
+      "path": "components/shell/CreateFab.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Mobile floating create action — opens CreateSheet. Hidden on md+.",
+      "exportName": "CreateFab"
+    },
+    {
+      "path": "components/shell/CreateSheet.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "CreateSheet component",
+      "exportName": "CreateSheet"
+    },
+    {
+      "path": "components/shell/MobileActionBar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "* Sticky primary actions for mobile — sits above bottom nav when present.",
+      "exportName": "MobileActionBar"
+    },
+    {
+      "path": "components/shell/PageHeader.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "* Mobile-first page header with optional sticky behavior below site chrome.",
+      "exportName": "PageHeader"
+    },
+    {
+      "path": "components/support/ContentReportDialog.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "ContentReportDialog component",
+      "exportName": "ContentReportDialog"
+    },
+    {
+      "path": "components/support/PlatformReportForm.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "PlatformReportForm component",
+      "exportName": "PlatformReportForm"
+    },
+    {
+      "path": "components/TagLink.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Tag label pill - not linked until a real tag browse API exists.",
+      "exportName": "TagLink"
+    },
+    {
+      "path": "components/templates/DashboardTemplate.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Organizer / mod / admin dashboards — stacked cards on mobile.",
+      "exportName": "DashboardTemplate"
+    },
+    {
+      "path": "components/templates/DetailTemplate.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Entity detail pages — profile, event, group, org, vendor, article.",
+      "exportName": "DetailTemplate"
+    },
+    {
+      "path": "components/templates/DirectoryTemplate.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "* Directory / list pages — search, filters, responsive grid or list.",
+      "exportName": "DirectoryTemplate"
+    },
+    {
+      "path": "components/templates/FeedTemplate.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "Feed surfaces — home, group, org activity.",
+      "exportName": "FeedTemplate"
+    },
+    {
+      "path": "components/templates/FilterSheet.tsx",
+      "categories": [
+        "modal-sheet"
+      ],
+      "purpose": "* Mobile filter bottom sheet — canonical filter UX for directory routes.",
+      "exportName": "FilterSheet"
+    },
+    {
+      "path": "components/templates/SettingsTemplate.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Settings / account / privacy grouped sections.",
+      "exportName": "SettingsTemplate"
+    },
+    {
+      "path": "components/templates/WizardTemplate.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "Multi-step create/setup flows.",
+      "exportName": "WizardTemplate"
+    },
+    {
+      "path": "components/trust/CommunityTrustCard.tsx",
+      "categories": [
+        "card-feed"
+      ],
+      "purpose": "CommunityTrustCard component",
+      "exportName": "CommunityTrustCard"
+    },
+    {
+      "path": "components/trust/CommunityTrustChip.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Compact positive trust label for cards and headers - never shows negative signals.",
+      "exportName": "CommunityTrustChip"
+    },
+    {
+      "path": "components/trust/DmTrustContext.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Shared positive context in DM header - recipient never sees restriction labels.",
+      "exportName": "DmTrustContext"
+    },
+    {
+      "path": "components/trust/ScopedMemberStandingPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "ScopedMemberStandingPanel component",
+      "exportName": "ScopedMemberStandingPanel"
+    },
+    {
+      "path": "components/trust/SharedTrustContext.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "SharedTrustContext component",
+      "exportName": "SharedTrustContext"
+    },
+    {
+      "path": "components/trust/TrustBadge.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "TrustBadge component",
+      "exportName": "TrustBadge"
+    },
+    {
+      "path": "components/trust/TrustBadgeTooltip.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "TrustBadgeTooltip component",
+      "exportName": "TrustBadgeTooltip"
+    },
+    {
+      "path": "components/TrustRing.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "TrustRing component",
+      "exportName": "TrustRing"
+    },
+    {
+      "path": "components/TrustTierIndicator.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "",
+      "exportName": "TrustTierIndicator"
+    },
+    {
+      "path": "components/ui/AppToast.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/ui/Badge.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "Badge component",
+      "exportName": "Badge"
+    },
+    {
+      "path": "components/ui/Button.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "Button component",
+      "exportName": "Button"
+    },
+    {
+      "path": "components/ui/Card.tsx",
+      "categories": [
+        "card-feed",
+        "ui-primitive"
+      ],
+      "purpose": "* Shared card container - ECKE elevated panel (matches dancecard Panel).",
+      "exportName": "Card"
+    },
+    {
+      "path": "components/ui/ComingSoonLayout.tsx",
+      "categories": [
+        "layout",
+        "ui-primitive"
+      ],
+      "purpose": "* Consistent “coming soon” shell for placeholder routes (audit §4.4 / §4.6).",
+      "exportName": "ComingSoonLayout"
+    },
+    {
+      "path": "components/ui/CommunityHubShell.tsx",
+      "categories": [
+        "layout",
+        "ui-primitive"
+      ],
+      "purpose": "CommunityHubShell component",
+      "exportName": "CommunityHubShell"
+    },
+    {
+      "path": "components/ui/ConfirmDialog.tsx",
+      "categories": [
+        "modal-sheet",
+        "ui-primitive"
+      ],
+      "purpose": "In-app replacement for `window.confirm`.",
+      "exportName": "ConfirmDialog"
+    },
+    {
+      "path": "components/ui/ContentPanel.tsx",
+      "categories": [
+        "form",
+        "ui-primitive"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/ui/CopyLinkOverflowMenu.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "CopyLinkOverflowMenu component",
+      "exportName": "CopyLinkOverflowMenu"
+    },
+    {
+      "path": "components/ui/Dialog.tsx",
+      "categories": [
+        "modal-sheet",
+        "ui-primitive"
+      ],
+      "purpose": "Dialog component",
+      "exportName": "Dialog"
+    },
+    {
+      "path": "components/ui/empty-state-presets.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/ui/EmptyState.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "EmptyState component",
+      "exportName": "EmptyState"
+    },
+    {
+      "path": "components/ui/FormField.tsx",
+      "categories": [
+        "form",
+        "ui-primitive"
+      ],
+      "purpose": "FormField component",
+      "exportName": "FormField"
+    },
+    {
+      "path": "components/ui/LabelCombobox.tsx",
+      "categories": [
+        "form",
+        "ui-primitive"
+      ],
+      "purpose": "LabelCombobox component",
+      "exportName": "LabelCombobox"
+    },
+    {
+      "path": "components/ui/LegalDocumentTemplate.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "* Shared layout for long policy / legal document pages — draft banner, section anchors,",
+      "exportName": "LegalDocumentTemplate"
+    },
+    {
+      "path": "components/ui/LegalDraftPage.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/ui/LoadErrorBanner.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "LoadErrorBanner component",
+      "exportName": "LoadErrorBanner"
+    },
+    {
+      "path": "components/ui/MarkdownContent.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "MarkdownContent component",
+      "exportName": "MarkdownContent"
+    },
+    {
+      "path": "components/ui/MediaCard.tsx",
+      "categories": [
+        "card-feed",
+        "ui-primitive"
+      ],
+      "purpose": "MediaCard component",
+      "exportName": "MediaCard"
+    },
+    {
+      "path": "components/ui/PermissionDeniedPanel.tsx",
+      "categories": [
+        "form",
+        "ui-primitive"
+      ],
+      "purpose": "Signed-in user lacks access - explain why and offer a clear exit.",
+      "exportName": "PermissionDeniedPanel"
+    },
+    {
+      "path": "components/ui/PlaceholderPanel.tsx",
+      "categories": [
+        "form",
+        "ui-primitive"
+      ],
+      "purpose": "",
+      "exportName": "PlaceholderPanel"
+    },
+    {
+      "path": "components/ui/PolicyStandardPage.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "",
+      "exportName": "PolicyStandardPage"
+    },
+    {
+      "path": "components/ui/primitives/dashboard.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/ui/primitives/layout.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/ui/SectionHeader.tsx",
+      "categories": [
+        "nav",
+        "ui-primitive"
+      ],
+      "purpose": "SectionHeader component",
+      "exportName": "SectionHeader"
+    },
+    {
+      "path": "components/ui/skeleton/C2kSkeleton.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "Feed rail / activity card placeholder grid.",
+      "exportName": null
+    },
+    {
+      "path": "components/ui/StatusBanner.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "StatusBanner component",
+      "exportName": "StatusBanner"
+    },
+    {
+      "path": "components/ui/TabButton.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "TabButton component",
+      "exportName": "TabButton"
+    },
+    {
+      "path": "components/ui/TabShell.tsx",
+      "categories": [
+        "layout",
+        "ui-primitive"
+      ],
+      "purpose": "ECKE-style rounded tab shell - children should be `TabShellButton` / `PillTab`.",
+      "exportName": "TabShell"
+    },
+    {
+      "path": "components/ui/TagMultiSelect.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "TagMultiSelect component",
+      "exportName": "TagMultiSelect"
+    },
+    {
+      "path": "components/ui/TagSelector.tsx",
+      "categories": [
+        "ui-primitive"
+      ],
+      "purpose": "TagSelector component",
+      "exportName": "TagSelector"
+    },
+    {
+      "path": "components/ui/TextInput.tsx",
+      "categories": [
+        "form",
+        "ui-primitive"
+      ],
+      "purpose": "—",
+      "exportName": null
+    },
+    {
+      "path": "components/UserAvatar.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "UserAvatar component",
+      "exportName": "UserAvatar"
+    },
+    {
+      "path": "components/VendorExternalStorePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "VendorExternalStorePanel component",
+      "exportName": "VendorExternalStorePanel"
+    },
+    {
+      "path": "components/vendors/VendorCommunityReviews.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VendorCommunityReviews component",
+      "exportName": "VendorCommunityReviews"
+    },
+    {
+      "path": "components/vendors/VendorIntegrationGuide.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VendorIntegrationGuide component",
+      "exportName": "VendorIntegrationGuide"
+    },
+    {
+      "path": "components/vendors/VendorOnboardingWizard.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "VendorOnboardingWizard component",
+      "exportName": "VendorOnboardingWizard"
+    },
+    {
+      "path": "components/vendors/VendorProductFallback.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Polished placeholder when a vendor listing has no product image or logo.",
+      "exportName": "VendorProductFallback"
+    },
+    {
+      "path": "components/vendors/VendorsCategoryChips.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VendorsCategoryChips component",
+      "exportName": "VendorsCategoryChips"
+    },
+    {
+      "path": "components/vendors/VendorsFiltersPanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "VendorsFiltersPanel component",
+      "exportName": "VendorsFiltersPanel"
+    },
+    {
+      "path": "components/vendors/VendorShopAppearancePanel.tsx",
+      "categories": [
+        "form"
+      ],
+      "purpose": "VendorShopAppearancePanel component",
+      "exportName": "VendorShopAppearancePanel"
+    },
+    {
+      "path": "components/vendors/VendorShopBreadcrumbs.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VendorShopBreadcrumbs component",
+      "exportName": "VendorShopBreadcrumbs"
+    },
+    {
+      "path": "components/vendors/VendorShopHeader.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "Full-bleed shop hero: banner strip + OVERLAY (text on image) or BELOW (card row for logo + title).",
+      "exportName": "VendorShopHeader"
+    },
+    {
+      "path": "components/vendors/VendorShopPeople.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Links from a vendor shop to the people who run it on Kink Social (community profiles, not external store).",
+      "exportName": "VendorShopPeople"
+    },
+    {
+      "path": "components/vendors/VendorShopSidebar.tsx",
+      "categories": [
+        "nav"
+      ],
+      "purpose": "VendorShopSidebar component",
+      "exportName": "VendorShopSidebar"
+    },
+    {
+      "path": "components/vendors/VendorsRightRail.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VendorsRightRail component",
+      "exportName": "VendorsRightRail"
+    },
+    {
+      "path": "components/vendors/VendorVendingSoonBanner.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "VendorVendingSoonBanner component",
+      "exportName": "VendorVendingSoonBanner"
+    },
+    {
+      "path": "components/WelcomeBanner.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "Soft, dismissible nudge when ZIP, birth date, or photo are missing.",
+      "exportName": "WelcomeBanner"
+    },
+    {
+      "path": "layouts/OrganizerScopeShell.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "OrganizerScopeShell component",
+      "exportName": "OrganizerScopeShell"
+    },
+    {
+      "path": "layouts/RootLayout.tsx",
+      "categories": [
+        "layout"
+      ],
+      "purpose": "Must render under `AppProviders` / `AuthProvider` - see `RootLayout`.",
+      "exportName": "RootLayout"
+    },
+    {
+      "path": "app/discovery/layout.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "DiscoveryLayout component",
+      "exportName": "DiscoveryLayout"
+    },
+    {
+      "path": "app/events/layout.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "EventsLayout component",
+      "exportName": "EventsLayout"
+    },
+    {
+      "path": "app/groups/layout.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "GroupsLayout component",
+      "exportName": "GroupsLayout"
+    },
+    {
+      "path": "app/messaging/layout.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "MessagingLayout component",
+      "exportName": "MessagingLayout"
+    },
+    {
+      "path": "app/places/layout.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "PlacesLayout component",
+      "exportName": "PlacesLayout"
+    },
+    {
+      "path": "app/profile/complete/layout.tsx",
+      "categories": [
+        "domain"
+      ],
+      "purpose": "ProfileCompleteLayout component",
+      "exportName": "ProfileCompleteLayout"
+    }
+  ],
+  "duplicates": [
+    {
+      "id": "button",
+      "severity": "high",
+      "note": "Twin Button implementations with different size APIs",
+      "files": [],
+      "fileCount": 0
+    },
+    {
+      "id": "confirm-dialog",
+      "severity": "high",
+      "note": "Parallel confirm dialog stacks",
+      "files": [
+        "hooks/useConfirm.tsx"
+      ],
+      "fileCount": 1
+    },
+    {
+      "id": "card-panel",
+      "severity": "high",
+      "note": "Card vs Panel vs OrganizerPanel containers",
+      "files": [],
+      "fileCount": 0
+    },
+    {
+      "id": "left-rails",
+      "severity": "medium",
+      "note": "Per-vertical discover/personal left rails (8+ files)",
+      "files": [
+        "components/conventions/ConventionsLeftRail.tsx",
+        "components/education/EducationLeftRail.tsx",
+        "components/events/EventsDiscoverLeftRail.tsx",
+        "components/events/EventsLeftRail.tsx",
+        "components/find-people/FindPeopleLeftRail.tsx",
+        "components/groups/GroupsDiscoverLeftRail.tsx",
+        "components/groups/GroupsPersonalLeftRail.tsx",
+        "components/home/HomeDashboardLeftRail.tsx"
+      ],
+      "fileCount": 8
+    },
+    {
+      "id": "settings-sidebars",
+      "severity": "medium",
+      "note": "Repeated settings sub-nav sidebars",
+      "files": [],
+      "fileCount": 0
+    },
+    {
+      "id": "organizer-shells",
+      "severity": "high",
+      "note": "Three organizer layout systems",
+      "files": [
+        "layouts/OrganizerScopeShell.tsx"
+      ],
+      "fileCount": 1
+    },
+    {
+      "id": "skeleton",
+      "severity": "medium",
+      "note": "Twin skeleton libraries",
+      "files": [],
+      "fileCount": 0
+    },
+    {
+      "id": "toast",
+      "severity": "low",
+      "note": "Toast re-exports / aliases",
+      "files": [],
+      "fileCount": 0
+    },
+    {
+      "id": "community-hub",
+      "severity": "medium",
+      "note": "Near-identical org/group hub wrappers",
+      "files": [],
+      "fileCount": 0
+    },
+    {
+      "id": "public-nav",
+      "severity": "low",
+      "note": "Twin public landing headers",
+      "files": [],
+      "fileCount": 0
+    },
+    {
+      "id": "feed-composers",
+      "severity": "medium",
+      "note": "Three feed composer implementations",
+      "files": [],
+      "fileCount": 0
+    },
+    {
+      "id": "group-discover-cards",
+      "severity": "medium",
+      "note": "Grid vs list card for same entity",
+      "files": [],
+      "fileCount": 0
+    },
+    {
+      "id": "tab-systems",
+      "severity": "medium",
+      "note": "Multiple tab button implementations",
+      "files": [],
+      "fileCount": 0
+    }
+  ],
+  "consolidationPlans": [
+    {
+      "id": "button",
+      "canonical": "components/ui/Button.tsx",
+      "deprecate": [
+        "components/dancecard/ui/Button.tsx"
+      ],
+      "risk": "high",
+      "importPattern": "components/ui/Button",
+      "api": "`variant` primary|secondary|ghost|danger; `size` sm|md|lg; mobile min-h-11",
+      "importCount": 17,
+      "sampleFiles": [
+        "app/education/write/page.tsx",
+        "app/home/FollowingFeedTab.tsx",
+        "app/media/submit/page.tsx",
+        "app/settings/SettingsPrivacySections.tsx",
+        "components/create-flow/CreateFlowWizardUi.tsx",
+        "components/editor/EducatorArticleEditor.tsx",
+        "components/events/EventCoverPhotoControl.tsx",
+        "components/home/HomeFeedRichComposer.tsx"
+      ],
+      "deprecateFiles": [
+        "components/dancecard/ui/Button.tsx"
+      ]
+    },
+    {
+      "id": "confirm-dialog",
+      "canonical": "components/ui/ConfirmDialog.tsx + hooks/useConfirm.tsx",
+      "deprecate": [
+        "components/dancecard/organizer/ui/OrganizerConfirmDialog.tsx",
+        "useConfirmDialog.tsx"
+      ],
+      "risk": "high",
+      "importPattern": "ConfirmDialog",
+      "api": "Promise-based confirm via `useConfirm()`; single portal + focus trap",
+      "importCount": 24,
+      "sampleFiles": [
+        "components/dancecard/organizer/DmCoveragePanel.tsx",
+        "components/dancecard/organizer/door/DoorModePanel.tsx",
+        "components/dancecard/organizer/ExportsHubPanel.tsx",
+        "components/dancecard/organizer/IntegrationsPanel.tsx",
+        "components/dancecard/organizer/LocationsSettingsSection.tsx",
+        "components/dancecard/organizer/MapsSettingsSection.tsx",
+        "components/dancecard/organizer/PeopleDirectoryPanel.tsx",
+        "components/dancecard/organizer/PolicyLedgerSection.tsx"
+      ],
+      "deprecateFiles": [
+        "components/dancecard/organizer/ui/OrganizerConfirmDialog.tsx",
+        "useConfirmDialog.tsx"
+      ]
+    },
+    {
+      "id": "card-panel",
+      "canonical": "components/ui/Card.tsx",
+      "deprecate": [
+        "components/dancecard/ui/Panel.tsx",
+        "components/organizer/ui/OrganizerPanel.tsx"
+      ],
+      "risk": "high",
+      "importPattern": "components/ui/Card",
+      "api": "Elevated surface with `dc-*` tokens; optional title/footer slots",
+      "importCount": 27,
+      "sampleFiles": [
+        "components/cards/ConventionCard.tsx",
+        "components/cards/EventCard.tsx",
+        "components/cards/PersonCard.tsx",
+        "components/editor/EducatorArticleEditor.tsx",
+        "components/find-people/FindPeopleProfileCard.tsx",
+        "components/group/ChannelPostsSection.tsx",
+        "components/group/GroupMembersSection.tsx",
+        "components/group/GroupPhotosSection.tsx"
+      ],
+      "deprecateFiles": [
+        "components/dancecard/ui/Panel.tsx",
+        "components/organizer/ui/OrganizerPanel.tsx"
+      ]
+    },
+    {
+      "id": "organizer-shells",
+      "canonical": "components/organizer/ui/OrganizerAppShell.tsx",
+      "deprecate": [
+        "components/dancecard/organizer/shell/OrganizerEventShell.tsx",
+        "layouts/OrganizerScopeShell.tsx"
+      ],
+      "risk": "high",
+      "importPattern": "OrganizerAppShell",
+      "api": "Single organizer frame: sidebar, breadcrumbs, command palette, mobile tab collapse",
+      "importCount": 7,
+      "sampleFiles": [
+        "app/organizer/groups/[id]/events/[eventId]/OrganizerGroupEventPageClient.tsx",
+        "app/organizer/groups/[id]/OrganizerGroupClient.tsx",
+        "app/organizer/orgs/[slug]/conventions/[convSlug]/OrganizerConventionPageClient.tsx",
+        "app/organizer/orgs/[slug]/events/[eventId]/OrganizerOrgEventPageClient.tsx",
+        "app/organizer/orgs/[slug]/OrganizerOrgClient.tsx",
+        "app/organizer/page.tsx",
+        "components/organizer/ui/OrganizerAppShell.tsx"
+      ],
+      "deprecateFiles": [
+        "components/dancecard/organizer/shell/OrganizerEventShell.tsx",
+        "layouts/OrganizerScopeShell.tsx"
+      ]
+    },
+    {
+      "id": "left-rails",
+      "canonical": "NEW: DirectorySidebar or FilterSheet",
+      "deprecate": [
+        "**/*LeftRail.tsx"
+      ],
+      "risk": "medium",
+      "importPattern": "LeftRail",
+      "api": "Desktop sidebar + mobile bottom sheet from one filter state hook",
+      "importCount": 17,
+      "sampleFiles": [
+        "app/conventions/ConventionsDiscoverPage.tsx",
+        "app/discovery/FindPeopleDiscoverPage.tsx",
+        "app/education/EducationDiscoverPage.tsx",
+        "app/events/EventsDiscoverPage.tsx",
+        "app/groups/GroupsDiscoverPage.tsx",
+        "app/groups/GroupsPersonalLibraryPage.tsx",
+        "app/home/HomePageClient.tsx",
+        "components/conventions/ConventionsLeftRail.tsx"
+      ],
+      "deprecateFiles": [
+        "components/conventions/ConventionsLeftRail.tsx",
+        "components/education/EducationLeftRail.tsx",
+        "components/events/EventsDiscoverLeftRail.tsx",
+        "components/events/EventsLeftRail.tsx",
+        "components/find-people/FindPeopleLeftRail.tsx",
+        "components/groups/GroupsDiscoverLeftRail.tsx",
+        "components/groups/GroupsPersonalLeftRail.tsx",
+        "components/home/HomeDashboardLeftRail.tsx"
+      ]
+    },
+    {
+      "id": "tab-systems",
+      "canonical": "components/ui/TabShell.tsx + TabButton.tsx",
+      "deprecate": [
+        "components/dancecard/ui/PillTab.tsx",
+        "GroupsSectionTabs",
+        "OrganizerSectionTabs"
+      ],
+      "risk": "medium",
+      "importPattern": "TabShell",
+      "api": "Pill tabs with keyboard roving; scrollable on mobile",
+      "importCount": 5,
+      "sampleFiles": [
+        "app/home/FollowingFeedTab.tsx",
+        "app/home/HomePageClient.tsx",
+        "components/ui/CommunityHubShell.tsx",
+        "components/ui/index.ts",
+        "components/ui/TabShell.tsx"
+      ],
+      "deprecateFiles": [
+        "components/dancecard/ui/PillTab.tsx",
+        "GroupsSectionTabs",
+        "OrganizerSectionTabs"
+      ]
+    },
+    {
+      "id": "form-controls",
+      "canonical": "components/ui/FormField.tsx + TextInput.tsx",
+      "deprecate": [
+        "DatetimeLocalField (organizer-only)",
+        "inline raw inputs in panels"
+      ],
+      "risk": "medium",
+      "importPattern": "FormField",
+      "api": "Label + hint + error; 44px touch targets",
+      "importCount": 5,
+      "sampleFiles": [
+        "app/orgs/new/page.tsx",
+        "components/CreateFlowModal.tsx",
+        "components/LoginCard.tsx",
+        "components/ui/FormField.tsx",
+        "components/ui/index.ts"
+      ],
+      "deprecateFiles": [
+        "DatetimeLocalField (organizer-only)",
+        "inline raw inputs in panels"
+      ]
+    },
+    {
+      "id": "modals-sheets",
+      "canonical": "components/ui/Dialog.tsx",
+      "deprecate": [
+        "OrganizerConfirmDialog portal",
+        "feature-specific modals without Dialog base"
+      ],
+      "risk": "medium",
+      "importPattern": "components/ui/Dialog",
+      "api": "centered modal + mobile bottom sheet modes; wizard layout slot",
+      "importCount": 8,
+      "sampleFiles": [
+        "components/CreateFlowModal.tsx",
+        "components/group/GroupJoinRulesModal.tsx",
+        "components/media/MediaAttestationModal.tsx",
+        "components/moderation/TsReportModal.tsx",
+        "components/support/ContentReportDialog.tsx",
+        "components/templates/FilterSheet.tsx",
+        "components/ui/ConfirmDialog.tsx",
+        "components/ui/TagMultiSelect.tsx"
+      ],
+      "deprecateFiles": [
+        "OrganizerConfirmDialog portal",
+        "feature-specific modals without Dialog base"
+      ]
+    }
+  ],
+  "primitiveReadiness": [
+    {
+      "name": "AppShell",
+      "status": "missing",
+      "nearest": "layouts/RootLayout.tsx",
+      "note": "No unified mobile frame; chrome split across Header, CommunityNavBar, BottomNav"
+    },
+    {
+      "name": "MobileBottomNav",
+      "status": "exists_usable",
+      "nearest": "components/BottomNav.tsx",
+      "note": "Works but Create slot should become FAB/sheet"
+    },
+    {
+      "name": "MobileActionBar",
+      "status": "missing",
+      "nearest": "—",
+      "note": "Critical for forms, wizards, moderation — no shared sticky submit"
+    },
+    {
+      "name": "PageHeader",
+      "status": "exists_not_mobile_ready",
+      "nearest": "components/ui/SectionHeader.tsx",
+      "note": "No sticky/safe-area contract"
+    },
+    {
+      "name": "SectionCard",
+      "status": "exists_usable",
+      "nearest": "components/ui/primitives/layout.tsx",
+      "note": "SectionCard + FeatureCard in primitives"
+    },
+    {
+      "name": "EntityCard",
+      "status": "exists_duplicated",
+      "nearest": "components/cards/*",
+      "note": "Per-entity cards; grid/list twins for groups"
+    },
+    {
+      "name": "FeedCard",
+      "status": "exists_usable",
+      "nearest": "components/cards/LocalPostCard.tsx",
+      "note": "Report/mute access varies by surface"
+    },
+    {
+      "name": "WizardShell",
+      "status": "exists_not_mobile_ready",
+      "nearest": "OnboardingShell, CreateFlowWizardUi",
+      "note": "No shared sticky bottom primary action"
+    },
+    {
+      "name": "StickySubmitBar",
+      "status": "missing",
+      "nearest": "—",
+      "note": "Profile edit save bar is page-local only"
+    },
+    {
+      "name": "BottomSheet",
+      "status": "exists_usable",
+      "nearest": "components/ui/Dialog.tsx",
+      "note": "Dialog supports sheet mode"
+    },
+    {
+      "name": "FilterSheet",
+      "status": "exists_not_mobile_ready",
+      "nearest": "*FiltersPanel.tsx",
+      "note": "Desktop panels; not bottom sheets on mobile"
+    },
+    {
+      "name": "EmptyState",
+      "status": "exists_usable",
+      "nearest": "components/ui/EmptyState.tsx",
+      "note": ""
+    },
+    {
+      "name": "SkeletonCard",
+      "status": "exists_duplicated",
+      "nearest": "C2kSkeleton + DancecardSkeleton",
+      "note": "Twin skeleton systems"
+    },
+    {
+      "name": "ReportButton",
+      "status": "exists_usable",
+      "nearest": "ContentReportDialog, PlatformReportForm",
+      "note": "Not on every feed card consistently"
+    },
+    {
+      "name": "BlockUserButton",
+      "status": "exists_not_mobile_ready",
+      "nearest": "settings/blocked",
+      "note": "Settings-only; not inline on profiles everywhere"
+    },
+    {
+      "name": "PrivacyVisibilityChip",
+      "status": "partial",
+      "nearest": "profile edit panels",
+      "note": "No shared chip component"
+    },
+    {
+      "name": "TrustSafetyBadge",
+      "status": "exists_usable",
+      "nearest": "TrustRing, Badge",
+      "note": ""
+    }
+  ],
+  "contractGaps": [
+    {
+      "name": "AppShell",
+      "status": "duplicate",
+      "matches": [
+        "components/organizer/ui/OrganizerAppShell.tsx",
+        "components/shell/AppShell.tsx",
+        "layouts/RootLayout.tsx"
+      ]
+    },
+    {
+      "name": "MobileBottomNav",
+      "status": "duplicate",
+      "matches": [
+        "components/BottomNav.tsx",
+        "components/shell/AppShell.tsx",
+        "layouts/RootLayout.tsx"
+      ]
+    },
+    {
+      "name": "DesktopTopNav",
+      "status": "duplicate",
+      "matches": [
+        "components/dancecard/organizer/people/PeopleHubHeader.tsx",
+        "components/dancecard/organizer/shell/OrganizerEventHeader.tsx",
+        "components/education/EducationSectionHeader.tsx",
+        "components/explore/ExploreHubHeader.tsx",
+        "components/Header.tsx"
+      ]
+    },
+    {
+      "name": "PageHeader",
+      "status": "duplicate",
+      "matches": [
+        "components/education/EducationPathsPage.tsx",
+        "components/education/EducationSectionHeader.tsx",
+        "components/explore/ExploreHubHeader.tsx",
+        "components/organizer/admin/OrganizerGroupModerationPanel.tsx",
+        "components/organizer/communications/OrganizerOrgCommunicationsPanel.tsx"
+      ]
+    },
+    {
+      "name": "MobileActionBar",
+      "status": "duplicate",
+      "matches": [
+        "components/profile/studio/ProfileStudioSaveBar.tsx",
+        "components/shell/MobileActionBar.tsx",
+        "components/templates/DetailTemplate.tsx",
+        "components/templates/SettingsTemplate.tsx",
+        "components/templates/WizardTemplate.tsx"
+      ]
+    },
+    {
+      "name": "SectionCard",
+      "status": "duplicate",
+      "matches": [
+        "components/group/CreateGroupModal.tsx",
+        "components/landing/LandingValuePillars.tsx",
+        "components/org/hub/OrgHubAboutTab.tsx",
+        "components/org/hub/OrgHubCalendarTab.tsx",
+        "components/org/hub/OrgHubSectionCard.tsx"
+      ]
+    },
+    {
+      "name": "EntityCard",
+      "status": "duplicate",
+      "matches": [
+        "components/cards/GroupCard.tsx",
+        "components/cards/OrgCard.tsx",
+        "components/cards/PersonCard.tsx",
+        "components/profile/ProfileGroupCard.tsx"
+      ]
+    },
+    {
+      "name": "FeedCard",
+      "status": "duplicate",
+      "matches": [
+        "components/cards/LocalPostCard.tsx",
+        "components/home/ActivityFeedCard.tsx",
+        "components/home/LocalHomeFeed.tsx"
+      ]
+    },
+    {
+      "name": "ProfilePreviewCard",
+      "status": "duplicate",
+      "matches": [
+        "components/explore/ExplorePeopleMayKnowSection.tsx",
+        "components/find-people/FindPeopleProfileCard.tsx"
+      ]
+    },
+    {
+      "name": "EventCard",
+      "status": "duplicate",
+      "matches": [
+        "components/cards/ConventionCard.tsx",
+        "components/cards/EventCard.tsx",
+        "components/group/GroupEventsSection.tsx",
+        "components/home/HomeUpcomingEventCard.tsx",
+        "components/home/LocalHomeFeed.tsx"
+      ]
+    },
+    {
+      "name": "GroupCard",
+      "status": "duplicate",
+      "matches": [
+        "components/cards/GroupCard.tsx",
+        "components/groups/GroupDiscoverCard.tsx",
+        "components/groups/GroupDiscoverListCard.tsx",
+        "components/profile/ProfileGroupCard.tsx"
+      ]
+    },
+    {
+      "name": "OrgCard",
+      "status": "duplicate",
+      "matches": [
+        "components/cards/OrgCard.tsx",
+        "components/orgs/OrgDirectoryCard.tsx"
+      ]
+    },
+    {
+      "name": "TrustSafetyBadge",
+      "status": "duplicate",
+      "matches": [
+        "components/TrustRing.tsx",
+        "components/TrustTierIndicator.tsx"
+      ]
+    },
+    {
+      "name": "PrivacyVisibilityChip",
+      "status": "partial",
+      "matches": []
+    },
+    {
+      "name": "ReportButton",
+      "status": "duplicate",
+      "matches": [
+        "components/moderation/ReportAction.tsx",
+        "components/moderation/TsReportModal.tsx",
+        "components/support/ContentReportDialog.tsx",
+        "components/support/PlatformReportForm.tsx"
+      ]
+    },
+    {
+      "name": "BlockUserButton",
+      "status": "duplicate",
+      "matches": [
+        "components/profile/ProfileMeHub.tsx",
+        "components/settings/BlockedMembersPanel.tsx",
+        "components/settings/SettingsBlockedSections.tsx",
+        "components/settings/SettingsBlockedSidebar.tsx",
+        "components/settings/SettingsMessagingPresets.tsx"
+      ]
+    },
+    {
+      "name": "SearchFilterBar",
+      "status": "duplicate",
+      "matches": [
+        "components/explore/ExploreFiltersPanel.tsx",
+        "components/explore/ExploreHubHeader.tsx",
+        "components/find-people/FindPeopleFiltersPanel.tsx",
+        "components/find-people/FindPeopleLeftRail.tsx"
+      ]
+    },
+    {
+      "name": "FilterSheet",
+      "status": "duplicate",
+      "matches": [
+        "components/conventions/ConventionFiltersPanel.tsx",
+        "components/conventions/ConventionsLeftRail.tsx",
+        "components/events/EventFiltersPanel.tsx",
+        "components/events/EventsDiscoverLeftRail.tsx",
+        "components/explore/ExploreFiltersPanel.tsx"
+      ]
+    },
+    {
+      "name": "Tabs",
+      "status": "duplicate",
+      "matches": [
+        "components/conventions/ConventionScheduleAgenda.tsx",
+        "components/dancecard/organizer/ui/OrganizerSectionTabs.tsx",
+        "components/dancecard/ui/PillTab.tsx",
+        "components/groups/GroupsSectionTabs.tsx",
+        "components/profile/ProfileTabBar.tsx"
+      ]
+    },
+    {
+      "name": "BottomSheet",
+      "status": "partial",
+      "matches": []
+    },
+    {
+      "name": "OverflowMenu",
+      "status": "duplicate",
+      "matches": [
+        "components/cards/LocalPostCard.tsx",
+        "components/group/GroupCommunityShell.tsx",
+        "components/home/ActivityFeedCard.tsx",
+        "components/ui/CopyLinkOverflowMenu.tsx"
+      ]
+    },
+    {
+      "name": "WizardShell",
+      "status": "duplicate",
+      "matches": [
+        "components/create-flow/CreateFlowWizardUi.tsx",
+        "components/group/CreateGroupModal.tsx",
+        "components/presenters/onboarding/shared/OfferingCatalogStep.tsx",
+        "components/presenters/onboarding/shared/OnboardingShell.tsx",
+        "components/presenters/onboarding/shared/ProfileBasicsStep.tsx"
+      ]
+    },
+    {
+      "name": "StepProgress",
+      "status": "duplicate",
+      "matches": [
+        "components/CreateFlowModal.tsx",
+        "components/group/CreateGroupModal.tsx"
+      ]
+    },
+    {
+      "name": "StickySubmitBar",
+      "status": "missing",
+      "matches": []
+    },
+    {
+      "name": "EmptyState",
+      "status": "duplicate",
+      "matches": [
+        "components/dancecard/organizer/people/PeopleEmptyState.tsx",
+        "components/dancecard/organizer/SafetyIncidentsPanel.tsx",
+        "components/dancecard/organizer/ShiftSwapsPanel.tsx",
+        "components/dancecard/organizer/VolunteerCompliancePanel.tsx",
+        "components/events/EventDiscussionPanel.tsx"
+      ]
+    },
+    {
+      "name": "SkeletonCard",
+      "status": "duplicate",
+      "matches": [
+        "components/dancecard/organizer/IntegrationsPanel.tsx",
+        "components/dancecard/organizer/MessagingPanel.tsx",
+        "components/dancecard/organizer/ui/DancecardSkeleton.tsx",
+        "components/profile/ProfilePhotoManager.tsx",
+        "components/settings/SettingsBlockedSections.tsx"
+      ]
+    },
+    {
+      "name": "UploadDropzone",
+      "status": "duplicate",
+      "matches": [
+        "components/group/GroupPhotosSection.tsx",
+        "components/PhotoUpload.tsx",
+        "components/profile/ProfileIsoEditor.tsx",
+        "components/profile/ProfilePhotoManager.tsx"
+      ]
+    },
+    {
+      "name": "MediaSafetyNotice",
+      "status": "duplicate",
+      "matches": [
+        "components/media/MediaAttestationModal.tsx",
+        "components/profile/ProfilePhotoManager.tsx"
+      ]
+    },
+    {
+      "name": "AdvancedDisclosure",
+      "status": "partial",
+      "matches": []
+    }
+  ]
+}

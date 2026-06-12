@@ -1,0 +1,36 @@
+# Production: canonical host is https://kink.social (set DOMAIN=kink.social in compose).
+# www and bare HTTP redirect to the apex over HTTPS.
+
+www.{$DOMAIN:localhost} {
+    redir https://{$DOMAIN:localhost}{uri} permanent
+}
+
+{$DOMAIN:localhost} {
+    encode gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    }
+
+    handle /api/* {
+        reverse_proxy api:3001
+    }
+
+    handle /share/* {
+        reverse_proxy api:3001
+    }
+
+    handle /c2k-uploads/* {
+        reverse_proxy minio:9000
+    }
+
+    @private_launch not expression {env.C2K_PUBLIC_LAUNCH} == "true"
+    handle {
+        header @private_launch X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+        reverse_proxy web:80
+    }
+}

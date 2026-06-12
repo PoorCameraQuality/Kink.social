@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-06-12T21:16:36.511Z",
+  "outputs": [
+    "docs/UI_DESKTOP_ROUTE_INVENTORY.md",
+    "docs/UI_DESKTOP_COMPONENT_INVENTORY.md",
+    "docs/UI_DESKTOP_DESIGN_SYSTEM_AUDIT.md",
+    "docs/UI_DESKTOP_SCREENSHOT_AUDIT.md",
+    "docs/UI_DESKTOP_REDESIGN_RISK_REPORT.md",
+    "docs/UI_DESKTOP_IMPLEMENTATION_PLAN.md"
+  ],
+  "captureCount": 186,
+  "issueChecks": 84
+}

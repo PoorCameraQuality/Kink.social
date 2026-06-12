@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { isAlphaUploadDisabled } from './alpha-upload-policy.js'
+
+test('isAlphaUploadDisabled respects env flags', () => {
+  const prev = process.env.C2K_ALPHA_DISABLE_CONVENTION_GALLERY_UPLOADS
+  process.env.C2K_ALPHA_DISABLE_CONVENTION_GALLERY_UPLOADS = 'true'
+  assert.equal(isAlphaUploadDisabled('convention_gallery'), true)
+  process.env.C2K_ALPHA_DISABLE_CONVENTION_GALLERY_UPLOADS = 'false'
+  assert.equal(isAlphaUploadDisabled('convention_gallery'), false)
+  if (prev === undefined) delete process.env.C2K_ALPHA_DISABLE_CONVENTION_GALLERY_UPLOADS
+  else process.env.C2K_ALPHA_DISABLE_CONVENTION_GALLERY_UPLOADS = prev
+})
+
+test('profile_photo uploads enabled unless explicitly disabled', () => {
+  const prev = process.env.C2K_ALPHA_DISABLE_PROFILE_PHOTO_UPLOADS
+  delete process.env.C2K_ALPHA_DISABLE_PROFILE_PHOTO_UPLOADS
+  assert.equal(isAlphaUploadDisabled('profile_photo'), false)
+  process.env.C2K_ALPHA_DISABLE_PROFILE_PHOTO_UPLOADS = 'true'
+  assert.equal(isAlphaUploadDisabled('profile_photo'), true)
+  if (prev === undefined) delete process.env.C2K_ALPHA_DISABLE_PROFILE_PHOTO_UPLOADS
+  else process.env.C2K_ALPHA_DISABLE_PROFILE_PHOTO_UPLOADS = prev
+})

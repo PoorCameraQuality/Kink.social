@@ -1,0 +1,34 @@
+---
+description: Unattended C2K backlog loops from docs/BACKLOG_QUEUE.md — no user checkpoints between items
+globs:
+  - docs/BACKLOG_QUEUE.md
+  - docs/HANDOFF.md
+  - .cursor/c2k-loop-active.json
+alwaysApply: false
+---
+
+# C2K autonomous loop
+
+When this rule applies (user asked for hands-off / feature loop / backlog automation, or `.cursor/c2k-loop-active.json` exists):
+
+## Forbidden
+
+- `AskQuestion` — decide locally; document assumptions in BACKLOG_QUEUE Notes or HANDOFF
+- `SwitchMode` — implement in Agent mode
+- Stopping after one item with only a summary — **continue** to the next `pending` queue row
+- New parallel tables/routes when [`docs/EXTEND_BEFORE_ADD.md`](../docs/EXTEND_BEFORE_ADD.md) says extend existing
+- Phase 2 social/feed work while Phase 1 organizer gaps remain — unless queue row explicitly says otherwise ([`docs/C2K-STRATEGIC-GUIDANCE.md`](../docs/C2K-STRATEGIC-GUIDANCE.md) §2)
+
+## Required each item
+
+Follow [`.cursor/skills/c2k-feature-loop/SKILL.md`](../skills/c2k-feature-loop/SKILL.md):
+
+`audit → plan → implement → test → UX pass → docs → mark done in BACKLOG_QUEUE → next pending`
+
+## Queue of record
+
+[`docs/BACKLOG_QUEUE.md`](../docs/BACKLOG_QUEUE.md) — only one `in_progress` at a time.
+
+## Commits
+
+Do not commit unless the user explicitly requested a commit in this chat.

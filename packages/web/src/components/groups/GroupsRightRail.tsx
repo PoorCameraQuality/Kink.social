@@ -1,0 +1,106 @@
+import { Link } from 'react-router-dom'
+import PlaceholderAvatar from '@/components/PlaceholderAvatar'
+import { GROUP_PURPOSE_FILTERS, countGroupsByPurpose } from '@/lib/groups-page-utils'
+import type { MockGroup } from '@/data/types'
+
+function RailCard({
+  title,
+  children,
+  footerHref,
+  footerLabel,
+}: {
+  title: string
+  children: React.ReactNode
+  footerHref?: string
+  footerLabel?: string
+}) {
+  return (
+    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
+      <h3 className="mb-3 text-sm font-semibold text-dc-text">{title}</h3>
+      {children}
+      {footerHref && footerLabel ?
+        <Link to={footerHref} className="mt-3 inline-block text-xs font-medium text-dc-accent hover:underline">
+          {footerLabel}
+        </Link>
+      : null}
+    </div>
+  )
+}
+
+type Props = {
+  allGroups: MockGroup[]
+  suggested: MockGroup[]
+  onPurposeSelect?: (purpose: string) => void
+  onNearYou?: () => void
+}
+
+export default function GroupsRightRail({
+  allGroups,
+  suggested,
+  onPurposeSelect,
+  onNearYou,
+}: Props) {
+  const counts = countGroupsByPurpose(allGroups)
+  const suggestRows = (suggested.length > 0 ? suggested : allGroups).slice(0, 3)
+
+  return (
+    <aside className="space-y-4 lg:sticky lg:top-24" aria-label="Groups discovery helpers">
+      <RailCard title="Suggested for you" footerHref="/groups" footerLabel="View all">
+        {suggestRows.length === 0 ?
+          <p className="text-xs text-dc-text-muted">More groups appear as communities join Kink Social.</p>
+        : <ul className="space-y-3">
+            {suggestRows.map((g) => (
+              <li key={g.id}>
+                <Link to={`/groups/${g.id}`} className="flex items-center gap-2 rounded-lg p-1 hover:bg-dc-elevated-hover">
+                  {g.coverImageUrl ?
+                    <img src={g.coverImageUrl} alt="" className="h-11 w-11 shrink-0 rounded-lg object-cover" />
+                  : <PlaceholderAvatar size="sm" className="!h-11 !w-11 !rounded-lg" />}
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium text-dc-text">{g.name}</span>
+                    <span className="text-xs text-dc-muted">
+                      {g.members} member{g.members === 1 ? '' : 's'}
+                      {g.category ? ` · ${g.category}` : ''}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        }
+      </RailCard>
+
+      <RailCard title="Browse by purpose" footerHref="/groups" footerLabel="View all purposes">
+        <ul className="space-y-2 text-sm">
+          {GROUP_PURPOSE_FILTERS.map((purpose) => (
+            <li key={purpose}>
+              <button
+                type="button"
+                onClick={() => onPurposeSelect?.(purpose)}
+                className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-dc-text-muted hover:bg-dc-elevated-hover hover:text-dc-text"
+              >
+                <span>{purpose}</span>
+                <span className="tabular-nums text-xs text-dc-muted">{counts.get(purpose) ?? 0}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </RailCard>
+
+      <RailCard title="Nearby communities">
+        <p className="text-xs leading-relaxed text-dc-text-muted">
+          Use <strong className="font-medium text-dc-text">Near you</strong> and set your location in profile
+          settings to find groups in your region.
+        </p>
+        {onNearYou ?
+          <button
+            type="button"
+            onClick={onNearYou}
+            className="mt-3 text-xs font-medium text-dc-accent hover:underline"
+          >
+            Groups near you
+          </button>
+        : null}
+      </RailCard>
+    </aside>
+  )
+}

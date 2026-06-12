@@ -1,0 +1,472 @@
+[
+  {
+    "path": "/about",
+    "access": "public",
+    "source": "packages/web/src/app/about/page.tsx"
+  },
+  {
+    "path": "/accessibility",
+    "access": "public",
+    "source": "packages/web/src/app/accessibility/page.tsx"
+  },
+  {
+    "path": "/activity",
+    "access": "public",
+    "source": "packages/web/src/app/activity/page.tsx"
+  },
+  {
+    "path": "/calendar/erobay-community",
+    "access": "public",
+    "source": "packages/web/src/app/calendar/erobay-community/page.tsx"
+  },
+  {
+    "path": "/calendar",
+    "access": "public",
+    "source": "packages/web/src/app/calendar/page.tsx"
+  },
+  {
+    "path": "/community",
+    "access": "public",
+    "source": "packages/web/src/app/community/page.tsx"
+  },
+  {
+    "path": "/connections",
+    "access": "authenticated",
+    "source": "packages/web/src/app/connections/page.tsx"
+  },
+  {
+    "path": "/contact",
+    "access": "public",
+    "source": "packages/web/src/app/contact/page.tsx"
+  },
+  {
+    "path": "/conventions",
+    "access": "public",
+    "source": "packages/web/src/app/conventions/page.tsx"
+  },
+  {
+    "path": "/conventions/:slug/apply/:applySlug",
+    "access": "public-attendee",
+    "source": "packages/web/src/app/conventions/[slug]/apply/[applySlug]/page.tsx"
+  },
+  {
+    "path": "/conventions/:slug/dancecard/s/:token",
+    "access": "public",
+    "source": "packages/web/src/app/conventions/[slug]/dancecard/s/[token]/page.tsx"
+  },
+  {
+    "path": "/conventions/:slug/my-offers",
+    "access": "public",
+    "source": "packages/web/src/app/conventions/[slug]/my-offers/page.tsx"
+  },
+  {
+    "path": "/conventions/:slug",
+    "access": "public",
+    "source": "packages/web/src/app/conventions/[slug]/page.tsx"
+  },
+  {
+    "path": "/conventions/:slug/present/apply",
+    "access": "public-attendee",
+    "source": "packages/web/src/app/conventions/[slug]/present/apply/page.tsx"
+  },
+  {
+    "path": "/conventions/:slug/register",
+    "access": "public-attendee",
+    "source": "packages/web/src/app/conventions/[slug]/register/page.tsx"
+  },
+  {
+    "path": "/conventions/:slug/vend/apply",
+    "access": "public-attendee",
+    "source": "packages/web/src/app/conventions/[slug]/vend/apply/page.tsx"
+  },
+  {
+    "path": "/discovery",
+    "access": "public",
+    "source": "packages/web/src/app/discovery/page.tsx"
+  },
+  {
+    "path": "/dungeons",
+    "access": "public",
+    "source": "packages/web/src/app/dungeons/page.tsx"
+  },
+  {
+    "path": "/education",
+    "access": "public",
+    "source": "packages/web/src/app/education/page.tsx"
+  },
+  {
+    "path": "/education/series/manage",
+    "access": "public",
+    "source": "packages/web/src/app/education/series/manage/page.tsx"
+  },
+  {
+    "path": "/education/series/manage/:id",
+    "access": "public",
+    "source": "packages/web/src/app/education/series/manage/[id]/page.tsx"
+  },
+  {
+    "path": "/education/series/:slug",
+    "access": "public",
+    "source": "packages/web/src/app/education/series/[slug]/page.tsx"
+  },
+  {
+    "path": "/education/write",
+    "access": "public",
+    "source": "packages/web/src/app/education/write/page.tsx"
+  },
+  {
+    "path": "/education/:slug",
+    "access": "public",
+    "source": "packages/web/src/app/education/[slug]/page.tsx"
+  },
+  {
+    "path": "/email/confirm",
+    "access": "public",
+    "source": "packages/web/src/app/email/confirm/page.tsx"
+  },
+  {
+    "path": "/email/unsubscribe",
+    "access": "public",
+    "source": "packages/web/src/app/email/unsubscribe/page.tsx"
+  },
+  {
+    "path": "/events",
+    "access": "public",
+    "source": "packages/web/src/app/events/page.tsx"
+  },
+  {
+    "path": "/events/:id",
+    "access": "public",
+    "source": "packages/web/src/app/events/[id]/page.tsx"
+  },
+  {
+    "path": "/explore",
+    "access": "public",
+    "source": "packages/web/src/app/explore/page.tsx"
+  },
+  {
+    "path": "/forums",
+    "access": "public",
+    "source": "packages/web/src/app/forums/page.tsx"
+  },
+  {
+    "path": "/groups",
+    "access": "public",
+    "source": "packages/web/src/app/groups/page.tsx"
+  },
+  {
+    "path": "/groups/:id",
+    "access": "public",
+    "source": "packages/web/src/app/groups/[id]/page.tsx"
+  },
+  {
+    "path": "/guidelines",
+    "access": "public",
+    "source": "packages/web/src/app/guidelines/page.tsx"
+  },
+  {
+    "path": "/home",
+    "access": "authenticated",
+    "source": "packages/web/src/app/home/page.tsx"
+  },
+  {
+    "path": "/media",
+    "access": "public",
+    "source": "packages/web/src/app/media/page.tsx"
+  },
+  {
+    "path": "/media/submit",
+    "access": "public",
+    "source": "packages/web/src/app/media/submit/page.tsx"
+  },
+  {
+    "path": "/media/:slug",
+    "access": "public",
+    "source": "packages/web/src/app/media/[slug]/page.tsx"
+  },
+  {
+    "path": "/messaging",
+    "access": "authenticated",
+    "source": "packages/web/src/app/messaging/page.tsx"
+  },
+  {
+    "path": "/moderation/actions",
+    "access": "admin",
+    "source": "packages/web/src/app/moderation/actions/page.tsx"
+  },
+  {
+    "path": "/moderation/admin",
+    "access": "admin",
+    "source": "packages/web/src/app/moderation/admin/page.tsx"
+  },
+  {
+    "path": "/moderation/audit",
+    "access": "admin",
+    "source": "packages/web/src/app/moderation/audit/page.tsx"
+  },
+  {
+    "path": "/moderation/profile-flags",
+    "access": "admin",
+    "source": "packages/web/src/app/moderation/profile-flags/page.tsx"
+  },
+  {
+    "path": "/moderation/reports",
+    "access": "admin",
+    "source": "packages/web/src/app/moderation/reports/page.tsx"
+  },
+  {
+    "path": "/my-posts",
+    "access": "public",
+    "source": "packages/web/src/app/my-posts/page.tsx"
+  },
+  {
+    "path": "/notifications",
+    "access": "authenticated",
+    "source": "packages/web/src/app/notifications/page.tsx"
+  },
+  {
+    "path": "/onboarding",
+    "access": "authenticated",
+    "source": "packages/web/src/app/onboarding/page.tsx"
+  },
+  {
+    "path": "/online",
+    "access": "public",
+    "source": "packages/web/src/app/online/page.tsx"
+  },
+  {
+    "path": "/organizer/conventions/:slug",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/conventions/[slug]/page.tsx"
+  },
+  {
+    "path": "/organizer/groups/:id/events/:eventId",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/groups/[id]/events/[eventId]/page.tsx"
+  },
+  {
+    "path": "/organizer/groups/:id",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/groups/[id]/page.tsx"
+  },
+  {
+    "path": "/organizer/orgs/:slug/conventions/:convSlug/door",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/door/page.tsx"
+  },
+  {
+    "path": "/organizer/orgs/:slug/conventions/:convSlug",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/page.tsx"
+  },
+  {
+    "path": "/organizer/orgs/:slug/conventions/:convSlug/print/schedule",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/print/schedule/page.tsx"
+  },
+  {
+    "path": "/organizer/orgs/:slug/conventions/:convSlug/print/venue-signs",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/orgs/[slug]/conventions/[convSlug]/print/venue-signs/page.tsx"
+  },
+  {
+    "path": "/organizer/orgs/:slug/events/:eventId",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/orgs/[slug]/events/[eventId]/page.tsx"
+  },
+  {
+    "path": "/organizer/orgs/:slug",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/orgs/[slug]/page.tsx"
+  },
+  {
+    "path": "/organizer",
+    "access": "organizer",
+    "source": "packages/web/src/app/organizer/page.tsx"
+  },
+  {
+    "path": "/orgs/new",
+    "access": "public",
+    "source": "packages/web/src/app/orgs/new/page.tsx"
+  },
+  {
+    "path": "/orgs",
+    "access": "public",
+    "source": "packages/web/src/app/orgs/page.tsx"
+  },
+  {
+    "path": "/orgs/:slug",
+    "access": "public",
+    "source": "packages/web/src/app/orgs/[slug]/page.tsx"
+  },
+  {
+    "path": "/",
+    "access": "public",
+    "source": "packages/web/src/app/page.tsx"
+  },
+  {
+    "path": "/people",
+    "access": "public",
+    "source": "packages/web/src/app/people/page.tsx"
+  },
+  {
+    "path": "/places",
+    "access": "public",
+    "source": "packages/web/src/app/places/page.tsx"
+  },
+  {
+    "path": "/presenters/onboarding",
+    "access": "public",
+    "source": "packages/web/src/app/presenters/onboarding/page.tsx"
+  },
+  {
+    "path": "/presenters",
+    "access": "public",
+    "source": "packages/web/src/app/presenters/page.tsx"
+  },
+  {
+    "path": "/presenters/:username",
+    "access": "public",
+    "source": "packages/web/src/app/presenters/[username]/page.tsx"
+  },
+  {
+    "path": "/privacy",
+    "access": "public",
+    "source": "packages/web/src/app/privacy/page.tsx"
+  },
+  {
+    "path": "/profile/complete",
+    "access": "authenticated",
+    "source": "packages/web/src/app/profile/complete/page.tsx"
+  },
+  {
+    "path": "/profile/edit",
+    "access": "authenticated",
+    "source": "packages/web/src/app/profile/edit/page.tsx"
+  },
+  {
+    "path": "/profile",
+    "access": "authenticated",
+    "source": "packages/web/src/app/profile/page.tsx"
+  },
+  {
+    "path": "/profile/:username",
+    "access": "authenticated",
+    "source": "packages/web/src/app/profile/[username]/page.tsx"
+  },
+  {
+    "path": "/rendezvous",
+    "access": "public",
+    "source": "packages/web/src/app/rendezvous/page.tsx"
+  },
+  {
+    "path": "/saved",
+    "access": "authenticated",
+    "source": "packages/web/src/app/saved/page.tsx"
+  },
+  {
+    "path": "/settings/account",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/account/page.tsx"
+  },
+  {
+    "path": "/settings/activity",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/activity/page.tsx"
+  },
+  {
+    "path": "/settings/blocked",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/blocked/page.tsx"
+  },
+  {
+    "path": "/settings/ecosystem",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/ecosystem/page.tsx"
+  },
+  {
+    "path": "/settings/muted",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/muted/page.tsx"
+  },
+  {
+    "path": "/settings/notifications",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/notifications/page.tsx"
+  },
+  {
+    "path": "/settings",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/page.tsx"
+  },
+  {
+    "path": "/settings/payment-history",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/payment-history/page.tsx"
+  },
+  {
+    "path": "/settings/privacy",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/privacy/page.tsx"
+  },
+  {
+    "path": "/settings/profile",
+    "access": "authenticated",
+    "source": "packages/web/src/app/settings/profile/page.tsx"
+  },
+  {
+    "path": "/share/post/:id",
+    "access": "public",
+    "source": "packages/web/src/app/share/post/[id]/page.tsx"
+  },
+  {
+    "path": "/staff/:username",
+    "access": "public",
+    "source": "packages/web/src/app/staff/[username]/page.tsx"
+  },
+  {
+    "path": "/states",
+    "access": "public",
+    "source": "packages/web/src/app/states/page.tsx"
+  },
+  {
+    "path": "/support/branding",
+    "access": "public",
+    "source": "packages/web/src/app/support/branding/page.tsx"
+  },
+  {
+    "path": "/support",
+    "access": "public",
+    "source": "packages/web/src/app/support/page.tsx"
+  },
+  {
+    "path": "/tags/:tag",
+    "access": "public",
+    "source": "packages/web/src/app/tags/[tag]/page.tsx"
+  },
+  {
+    "path": "/terms",
+    "access": "public",
+    "source": "packages/web/src/app/terms/page.tsx"
+  },
+  {
+    "path": "/vendors/new",
+    "access": "public",
+    "source": "packages/web/src/app/vendors/new/page.tsx"
+  },
+  {
+    "path": "/vendors/onboarding",
+    "access": "public",
+    "source": "packages/web/src/app/vendors/onboarding/page.tsx"
+  },
+  {
+    "path": "/vendors",
+    "access": "public",
+    "source": "packages/web/src/app/vendors/page.tsx"
+  },
+  {
+    "path": "/vendors/:id",
+    "access": "public",
+    "source": "packages/web/src/app/vendors/[id]/page.tsx"
+  }
+]

@@ -1,0 +1,82 @@
+/**
+ * Phase 8 - align C2K convention dancecard surfaces with ECKE session typography.
+ * Full tokens live in EastCoast `dancecard-tokens.css`; subset here for native C2K panels.
+ */
+.dc-session-title {
+  font-family: var(--c2k-font-display);
+  letter-spacing: -0.02em;
+  color: var(--c2k-text-primary, #fff);
+}
+
+[data-dc-hallway='true'] .dc-session-title {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* Wave 2B - organizer convention program chrome (ECKE Dancecard parity) */
+.organizer-convention-chrome {
+  margin-top: 0.5rem;
+}
+
+.organizer-convention-eyebrow {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--c2k-text-muted, #737373);
+}
+
+.organizer-convention-title {
+  font-family: var(--c2k-font-display);
+  font-size: 1.875rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--c2k-text-primary, #fff);
+}
+
+.organizer-convention-meta {
+  color: var(--c2k-text-muted, #737373);
+}
+
+.organizer-convention-public-link {
+  color: var(--c2k-accent-primary, #22d3ee);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.organizer-convention-public-link:hover {
+  color: var(--c2k-text-primary, #fff);
+}
+
+.organizer-convention-pill-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.organizer-convention-pill {
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--c2k-text-secondary, #a3a3a3);
+  background: transparent;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.organizer-convention-pill:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--c2k-text-primary, #fff);
+}
+
+.organizer-convention-pill--active {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--c2k-accent-primary, #22d3ee) 20%, transparent);
+  font-weight: 500;
+  color: var(--c2k-text-primary, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c2k-accent-primary, #22d3ee) 50%, transparent);
+}
+
+.organizer-convention-pill--active:hover {
+  background: color-mix(in srgb, var(--c2k-accent-primary, #22d3ee) 25%, transparent);
+}
