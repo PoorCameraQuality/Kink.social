@@ -21,6 +21,7 @@ import { hideAppHomeMainNavForPath } from '@/lib/focused-personal-shell'
 import { hideHeaderSearchForPath } from '@/lib/discover-nav-policy'
 import { buildLoginHref } from '@/lib/auth-links'
 import SiteWordmark from '@/components/brand/SiteWordmark'
+import { shellWideClass } from '@/lib/shell-contract'
 
 type EcosystemPayload = {
   orgs: { slug: string; displayName: string; role: string }[]
@@ -287,7 +288,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-dc-border-subtle bg-dc-elevated/95 shadow-[var(--dc-shadow-soft)] backdrop-blur-md safe-area-pt">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className={marketingHeader ? 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8' : shellWideClass}>
         {marketingHeader ?
           <>
             <div className="flex h-14 items-center gap-2 lg:hidden">

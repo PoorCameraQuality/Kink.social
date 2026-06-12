@@ -1,6 +1,6 @@
 # Desktop UI Sprint 1 — Foundation and Shell Stabilization
 
-**Status:** Checkpoint 2 complete — Checkpoint 3+ pending  
+**Status:** Checkpoint 3 complete — Checkpoint 4+ pending  
 **Core principle:** **Desktop improvements must be additive, not a replacement of the mobile system.**
 
 The mobile UI was recently overhauled and is **protected**. Sprint 1 targets shell, tokens, directory templates, rails, empty states, and max-width behavior on desktop. It is **not** a reason to disturb finished mobile patterns.
@@ -11,7 +11,7 @@ The mobile UI was recently overhauled and is **protected**. Sprint 1 targets she
 |----|-------|--------|
 | 1 | Chrome and breakpoint alignment | **Complete** |
 | 2 | Token, docs, stale config | **Complete** |
-| 3 | Desktop shell contract (lg+, 1600/1920) | Pending |
+| 3 | Desktop shell contract (lg+, 1600/1920) | **Complete** |
 | 4 | People → DirectoryTemplate | Pending |
 | 5 | EmptyState primitive | Pending |
 | 6 | Card/surface cleanup | Pending |
@@ -48,7 +48,19 @@ Sprint 1 stabilizes documentation and guardrails — **not** a broad color migra
 
 **Active Tailwind:** `packages/web/tailwind.config.js`. Repo root `tailwind.config.js` is **deprecated** (stale Inter / hardcoded hex).
 
-**Deferred:** Global removal of `--c2k-*`, raw palette hex in components, organizer program grids / door mode / embed styling, landing/login visual redesign.
+## Desktop shell contract (Checkpoint 3)
+
+Authenticated **lg+ (1024px+)** layout uses shared width tokens from `packages/web/src/lib/shell-contract.ts`:
+
+| Token / class | Width at lg+ | Use |
+|---------------|--------------|-----|
+| `max-w-shell-wide` / `shellWideClass` | 1920px | Header (member), AppShell outer, `/people`, `/profile`, settings chrome |
+| `max-w-shell-feed` / `shellFeedClass` | 1440px | Home feed 3-col, `PersonalUtilityPageShell` (notifications, saved, connections) |
+| `shellDirectoryClass` | fills parent | `DirectoryTemplate`, messaging — no nested `max-w-[1600px]` island |
+
+Below **lg**, shells keep `max-w-7xl` behavior; mobile gutters and spacing unchanged.
+
+**Deferred:** Organizer shells, non-priority routes with hardcoded `max-w-[1600px]`, People → DirectoryTemplate (CP4).
 
 **Checkpoint 1 rollback:** No `.git` directory in workspace — CP1 code state is uncommitted on disk; initialize git or copy the tree before CP3 if rollback is needed.
 

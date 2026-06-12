@@ -26,6 +26,8 @@ import { PEOPLE_STREAM_TABS } from '@/lib/people-search-constants'
 
 import type { CommunityRoleFilterId } from '@/lib/people-search-constants'
 
+import { shellWideClass } from '@/lib/shell-contract'
+import { cn } from '@/lib/cn'
 import { countPeopleActiveFilters } from '@/lib/people-directory-utils'
 
 import { toggleArrayItem } from '@/lib/utils/toggleArrayItem'
@@ -377,7 +379,7 @@ export default function FindPeopleDiscoverPage() {
 
   return (
 
-    <div className="c2k-mobile-scroll-pad mx-auto max-w-[1600px] px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+    <div className={cn(shellWideClass, 'c2k-mobile-scroll-pad py-4 sm:py-6')}>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(260px,300px)]">
 

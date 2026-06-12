@@ -1,6 +1,6 @@
 # Desktop Sprint 1 — Mobile Safety Report
 
-**Status:** Checkpoint 2 complete — see below  
+**Status:** Checkpoint 3 complete — see below  
 **Principle:** Desktop improvements must be additive, not a replacement of the mobile system.
 
 ## Checkpoint 1 (complete)
@@ -21,6 +21,14 @@
 | Token docs + deprecated root `tailwind.config.js` | docs / config comments only | N/A |
 
 **Mobile layout primitives:** unchanged. No edits to `mobile-polish.css`, bottom-nav clearance utilities, card padding, or feed layout.
+
+## Checkpoint 3 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `shell-contract.ts` + Tailwind `max-w-shell-wide` / `max-w-shell-feed` | `lg:` only for width expansion | **None** below lg — still `max-w-7xl` + same gutters |
+| `AppShell`, `Header` (member), `DirectoryTemplate`, `PersonalUtilityPageShell` | `lg+` width tokens | **None** — mobile padding and grids unchanged |
+| Priority routes: home, people, messaging, profile, settings | `lg+` outer shell | **None** — inner grids and mobile markup untouched |
 
 ## Summary
 

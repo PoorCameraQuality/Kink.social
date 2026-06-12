@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import HomeDashboardLeftRail from '@/components/home/HomeDashboardLeftRail'
+import { shellFeedClass } from '@/lib/shell-contract'
 
 type Props = {
   children: ReactNode
@@ -21,7 +22,7 @@ export default function PersonalUtilityPageShell({
   mobileNavOpen,
 }: Props) {
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 lg:py-6">
+    <div className={`${shellFeedClass} py-4 lg:py-6`}>
       {showMobileNavToggle ?
         <button
           type="button"

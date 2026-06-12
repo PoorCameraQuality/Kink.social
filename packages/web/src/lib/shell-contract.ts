@@ -9,11 +9,15 @@
  */
 export const SHELL_GUTTER = 'px-4 sm:px-6 lg:px-8' as const
 
-/** Header, footer, AppShell, and full-width page shells — 1920 cap at lg+. */
-export const shellWideClass = `mx-auto w-full min-w-0 max-w-7xl lg:max-w-shell-wide overflow-x-hidden ${SHELL_GUTTER}` as const
+/** Width cap only — use when an outer wrapper already owns gutters (e.g. AppShell). */
+export const shellOuterClass =
+  'mx-auto w-full min-w-0 max-w-7xl lg:max-w-shell-wide overflow-x-hidden' as const
+
+/** Header chrome and standalone page shells — 1920 cap at lg+. */
+export const shellWideClass = `${shellOuterClass} ${SHELL_GUTTER}` as const
 
 /** Feed and 2-col utility pages — 1440 reference at lg+; full width below lg. */
 export const shellFeedClass = `mx-auto w-full min-w-0 max-w-7xl lg:max-w-shell-feed ${SHELL_GUTTER}` as const
 
-/** Directory / 3-col discover — fills shell-wide parent; no nested 1600 island. */
+/** Directory / 3-col discover — fills shell-wide parent; no nested max-width island. */
 export const shellDirectoryClass = `w-full min-w-0 overflow-x-hidden ${SHELL_GUTTER}` as const

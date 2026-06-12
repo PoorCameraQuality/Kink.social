@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-
+import { shellWideClass } from '@/lib/shell-contract'
 import { cn } from '@/lib/cn'
 
 type Props = {
@@ -37,7 +37,7 @@ export default function ProfilePageShell({
   afterGrid,
 }: Props) {
   return (
-    <div className={cn('mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 lg:py-8', className)}>
+    <div className={cn(shellWideClass, 'py-6 lg:py-8', className)}>
       {alerts}
       {cover}
       <div

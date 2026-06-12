@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import UserAvatar from '@/components/UserAvatar'
+import { shellDirectoryClass } from '@/lib/shell-contract'
+import { cn } from '@/lib/cn'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
 import EmptyState from '@/components/ui/EmptyState'
 import { ConversationSkeleton } from '@/components/ui/skeleton'
@@ -486,7 +488,12 @@ export default function MessagingPage() {
   const showConvSearch = convSearchOpen || Boolean(convSearch.trim()) || inboxHasMessages
 
   return (
-    <div className="c2k-mobile-scroll-pad c2k-mobile-viewport-fill mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col px-4 py-2 sm:px-6 sm:py-3 lg:px-8">
+    <div
+      className={cn(
+        shellDirectoryClass,
+        'c2k-mobile-scroll-pad c2k-mobile-viewport-fill flex min-h-0 flex-1 flex-col py-2 sm:py-3',
+      )}
+    >
       <header className="mb-1 shrink-0 sm:mb-2">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>

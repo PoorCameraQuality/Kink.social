@@ -92,6 +92,10 @@ module.exports = {
         'c2k-5': 'var(--c2k-space-5)',
         'c2k-6': 'var(--c2k-space-6)',
       },
+      maxWidth: {
+        'shell-wide': '1920px',
+        'shell-feed': '1440px',
+      },
       minHeight: {
         touch: '2.75rem',
       },

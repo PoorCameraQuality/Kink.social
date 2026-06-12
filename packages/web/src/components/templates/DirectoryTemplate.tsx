@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import PageHeader from '@/components/shell/PageHeader'
 import { cn } from '@/lib/cn'
+import { shellDirectoryClass } from '@/lib/shell-contract'
 
 type Props = {
   title: string
@@ -39,7 +40,7 @@ export default function DirectoryTemplate({
   const hasSidebars = desktopSidebar || desktopAside
 
   return (
-    <div className={cn('mx-auto max-w-[1600px] overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8', className)}>
+    <div className={cn(shellDirectoryClass, 'py-6', className)}>
       {header ?? (
         <PageHeader title={title} description={description} actions={headerActions} sticky={false} className="mb-6" />
       )}

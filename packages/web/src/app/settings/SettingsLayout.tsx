@@ -7,6 +7,10 @@ import { TabContentTransition } from '@/components/dancecard/ui/TabContentTransi
 import { SettingsPageSkeleton } from '@/components/ui/skeleton'
 import SettingsTabNav from './SettingsTabNav'
 import { SettingsProvider, useSettingsContext } from './SettingsContext'
+import { shellWideClass } from '@/lib/shell-contract'
+import { cn } from '@/lib/cn'
+
+const settingsShellClass = cn(shellWideClass, 'py-8')
 
 const LEGACY_HASH_ROUTES: Record<string, string> = {
   account: '/settings/account',
@@ -35,7 +39,8 @@ function SettingsLayoutInner() {
 
   if (!isAuthenticated) {
     return (
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className={cn(settingsShellClass)}>
+        <div className="mx-auto w-full max-w-6xl">
         <h1 className="text-2xl font-semibold text-dc-text">Settings</h1>
         <p className="text-dc-muted mt-2 text-sm">
           <Link to={buildLoginHref('/settings')} className="text-dc-accent hover:underline">
@@ -43,17 +48,20 @@ function SettingsLayoutInner() {
           </Link>{' '}
           to manage your account and preferences.
         </p>
+        </div>
       </div>
     )
   }
 
   if (isFallback) {
     return (
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className={cn(settingsShellClass)}>
+        <div className="mx-auto w-full max-w-6xl">
         <h1 className="text-2xl font-semibold text-dc-text">Settings</h1>
         <p className="text-dc-muted mt-2 text-sm">
           Sign in with a real account to save settings. Preview mode does not persist changes.
         </p>
+        </div>
       </div>
     )
   }
@@ -64,7 +72,8 @@ function SettingsLayoutInner() {
 
   if (ctx.loadState === 'error' || !ctx.bundleReady || !ctx.privacy || !ctx.notifications || !ctx.feed) {
     return (
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className={cn(settingsShellClass)}>
+        <div className="mx-auto w-full max-w-6xl">
         <h1 className="text-2xl font-semibold text-dc-text">Settings</h1>
         <p className="text-dc-danger mt-2 text-sm">{ctx.loadError ?? 'We could not load your settings.'}</p>
         <button
@@ -74,12 +83,14 @@ function SettingsLayoutInner() {
         >
           Retry
         </button>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className={settingsShellClass}>
+      <div className="mx-auto w-full max-w-6xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-dc-text">Settings</h1>
         <p className="text-sm text-dc-muted mt-1 max-w-prose">
@@ -94,6 +105,7 @@ function SettingsLayoutInner() {
             <Outlet />
           </TabContentTransition>
         </div>
+      </div>
       </div>
     </div>
   )

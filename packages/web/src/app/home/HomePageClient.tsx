@@ -1,6 +1,8 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useSearchParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { isHomeFeedPresentation } from '@/lib/home-feed-layout'
+import { shellFeedClass, shellWideClass } from '@/lib/shell-contract'
+import { cn } from '@/lib/cn'
 import EventCard from '@/components/cards/EventCard'
 import ConventionCard from '@/components/cards/ConventionCard'
 import PersonCard from '@/components/cards/PersonCard'
@@ -637,7 +639,7 @@ export default function HomePageClient() {
 
   return (
     <div
-      className={`mx-auto px-4 py-4 sm:px-6 md:py-6 lg:px-8 ${showFeedThreeColumn ? 'max-w-[1440px]' : 'max-w-7xl'}`}
+      className={cn(showFeedThreeColumn ? shellFeedClass : shellWideClass, 'py-4 sm:py-6 md:py-6')}
     >
       {showDevHeadline && !showFeedThreeColumn ?
         <p className={`mb-2 text-xs font-medium leading-snug ${headlineToneClass}`} role="status">

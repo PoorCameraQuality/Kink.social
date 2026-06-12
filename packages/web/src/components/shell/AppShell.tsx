@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
+import { shellOuterClass } from '@/lib/shell-contract'
 
 type Props = {
   children: ReactNode
@@ -14,7 +15,7 @@ type Props = {
  */
 export default function AppShell({ children, header, className }: Props) {
   return (
-    <div className={cn('app-shell mx-auto w-full min-w-0 max-w-7xl overflow-x-hidden', className)}>
+    <div className={cn('app-shell', shellOuterClass, className)}>
       {header}
       {children}
     </div>
