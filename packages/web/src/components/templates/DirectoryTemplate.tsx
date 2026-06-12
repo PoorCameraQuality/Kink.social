@@ -12,8 +12,10 @@ type Props = {
   resultSummary?: ReactNode
   /** Desktop left rail (filters, nav) */
   desktopSidebar?: ReactNode
-  /** Optional right rail on xl+ */
+  /** Optional right rail on xl+ (or lg+ when desktopAsideFrom is lg) */
   desktopAside?: ReactNode
+  /** When to show desktopAside — People uses lg; Events uses xl (default). */
+  desktopAsideFrom?: 'lg' | 'xl'
   children: ReactNode
   footer?: ReactNode
   className?: string
@@ -32,6 +34,7 @@ export default function DirectoryTemplate({
   resultSummary,
   desktopSidebar,
   desktopAside,
+  desktopAsideFrom = 'xl',
   children,
   footer,
   className,
@@ -55,7 +58,7 @@ export default function DirectoryTemplate({
           : <div className="hidden lg:block" />}
           <main className="min-w-0">{children}</main>
           {desktopAside ?
-            <div className="hidden xl:block">{desktopAside}</div>
+            <div className={desktopAsideFrom === 'lg' ? 'hidden lg:block' : 'hidden xl:block'}>{desktopAside}</div>
           : null}
         </div>
       : <main className="min-w-0">{children}</main>}

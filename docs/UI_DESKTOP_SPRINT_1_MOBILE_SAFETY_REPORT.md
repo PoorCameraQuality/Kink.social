@@ -1,6 +1,6 @@
 # Desktop Sprint 1 — Mobile Safety Report
 
-**Status:** Checkpoint 3 complete — see below  
+**Status:** Checkpoint 4 complete — see below  
 **Principle:** Desktop improvements must be additive, not a replacement of the mobile system.
 
 ## Checkpoint 1 (complete)
@@ -29,6 +29,13 @@
 | `shell-contract.ts` + Tailwind `max-w-shell-wide` / `max-w-shell-feed` | `lg:` only for width expansion | **None** below lg — still `max-w-7xl` + same gutters |
 | `AppShell`, `Header` (member), `DirectoryTemplate`, `PersonalUtilityPageShell` | `lg+` width tokens | **None** — mobile padding and grids unchanged |
 | Priority routes: home, people, messaging, profile, settings | `lg+` outer shell | **None** — inner grids and mobile markup untouched |
+
+## Checkpoint 4 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `/people` migrated to `DirectoryTemplate` | Same grid/slots as manual 3-col; `desktopAsideFrom="lg"` | **None** — custom header, FilterSheet, scope tabs, card grid, and `mobileCompact` unchanged |
+| `DirectoryTemplate.desktopAsideFrom` prop | Optional; Events default `xl` unchanged | **None** on Events or mobile People |
 
 ## Summary
 
