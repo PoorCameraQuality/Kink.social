@@ -4,7 +4,9 @@
 **Branch:** `desktop-ui-sprint-2-template-migration`  
 **CP1 commit:** `c23fff3`  
 **CP1 rollback tag:** `desktop-ui-sprint-2-cp1-baseline`  
-**CP1 rollback command:** `git reset --hard desktop-ui-sprint-2-cp1-baseline`  
+**CP2 commit:** `43ad6f8`  
+**CP2 rollback tag:** `desktop-ui-sprint-2-cp2-baseline`  
+**CP2 rollback command:** `git reset --hard desktop-ui-sprint-2-cp2-baseline`  
 **Core principle:** Use Sprint 1 foundation to migrate member-facing surfaces into shared templates. **Not** a functionality, organizer, or mobile redesign sprint.
 
 ## Sprint 1 handoff
@@ -32,7 +34,7 @@
 | 0 | Sprint 1 verification gate | **Complete** |
 | 1 | DirectoryTemplate migration plan | **Complete** (this doc) |
 | 2 | Low-risk directory migrations (vendors, presenters, groups) | **Complete** |
-| 3 | Higher-complexity directories (education, media, conventions, places, orgs) | Pending |
+| 3 | Higher-complexity directories (places, conventions, media, orgs, education) | **Complete** |
 | 4 | DetailTemplate audit + plan | Pending |
 | 5 | Low-risk detail migrations | Pending |
 | 6 | Profile, group, org, event, convention detail refinement | Pending |
@@ -83,7 +85,7 @@ Removed nested `max-w-[1600px]` / `max-w-[1440px]` / `max-w-5xl` islands; parent
 | `npm run build -w web` | Pass |
 | Focused smoke: vendors, events, people (desktop + mobile) | Pass |
 | Focused smoke: groups mobile | Pass |
-| Focused smoke: groups desktop | **Pre-existing fail** — public `/groups` redirects to landing AuthGate (documented CP0; not introduced by CP2) |
+| Focused smoke: groups desktop | **Pre-existing fail** — unauthenticated `/groups` redirects to landing AuthGate (not caused by CP2) |
 | `/presenters` smoke | Not in `PUBLIC_ROUTES`; manual typecheck/build only |
 
 ### Recommended CP3 order
@@ -93,6 +95,59 @@ Removed nested `max-w-[1600px]` / `max-w-[1440px]` / `max-w-5xl` islands; parent
 3. `/media` — right-rail + mobile duplication  
 4. `/orgs` — hero + 2-col  
 5. `/education` — last (richest hub)
+
+---
+
+## Checkpoint 3 — Higher-complexity DirectoryTemplate migrations
+
+**Status:** Complete  
+**Routes migrated:** `/places`, `/conventions`, `/media`, `/orgs`, `/education` (partial shell alignment)  
+**Routes deferred:** None  
+
+### DirectoryTemplate API change
+
+**Inferred grid layout** (backwards compatible, no new props):
+
+| Slots set | Grid at `lg+` |
+|-----------|----------------|
+| `desktopSidebar` + `desktopAside` | 3-column (unchanged default for Events/People/Vendors/Groups) |
+| `desktopSidebar` only | 2-column: sidebar + main (`/conventions`) |
+| `desktopAside` only | 2-column: main + aside (`/media`, `/orgs`) |
+| Neither | Single main column (`/places`, `/presenters`) |
+
+Removes empty left grid track on aside-only routes. Existing 3-col migrations unchanged.
+
+### Per-route behavior preserved
+
+| Route | File | Notes |
+|-------|------|-------|
+| `/places` | `places/page.tsx`, `CommunityPlacesBrowse.tsx` | Category chips, fetch, list cards, suggest form, `DiscoveryBrowseLinks`; sidebar-less proof |
+| `/conventions` | `ConventionsDiscoverPage.tsx` | Left rail, featured row, list rows, submit CTAs, `?view=` / `?mine=1`; mobile `FilterSheet` |
+| `/media` | `media/page.tsx` | Format tabs, topic chips/drawer, search, `MediaChannelCard` list, desktop + mobile `MediaRightRail` duplicate |
+| `/orgs` | `orgs/page.tsx` | `OrganizationsHero`, search/sort/chips, `OrgDirectoryCard` grid, right rail |
+| `/education` | `EducationDiscoverPage.tsx` | **Partial:** shell + 3-col template; `EducationDiscoverCenter` carousels/paths/views unchanged; mobile Topics drawer preserved (not FilterSheet) |
+
+### Verification (CP3)
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck -w web` | Pass |
+| `npm run build -w web` | Pass |
+| Mobile smoke (places, conventions, media, orgs, education, vendors, groups, events, people) | **Pass** |
+| Desktop smoke | Mixed — pre-existing AuthGate on `/groups`, `/orgs`; intermittent timeouts on parallel desktop workers (not reproduced on mobile) |
+| Screenshot matrix | Deferred to CP8 |
+
+### Recommended CP4 DetailTemplate audit order
+
+1. `/vendors/:slug` — simpler commerce-adjacent detail  
+2. `/presenters/:username` — profile-style, low organizer coupling  
+3. `/education/:slug` — article detail  
+4. `/media/:slug` — channel show page  
+5. `/events/:id` — high-traffic member detail  
+6. `/groups/:id` — membership/privacy sensitive  
+7. `/orgs/:slug` — org hub with staff/moderation  
+8. `/conventions/:slug` — convention hub (defer organizer tabs to Sprint 3)  
+9. `/profile/:username` — highest privacy surface; audit last before CP6 code
 
 ---
 
@@ -123,10 +178,10 @@ Shell: `shellDirectoryClass` (no nested `max-w-[1600px]` islands). Parent pages 
 
 ### Optional template extensions (evaluate in CP2, not blockers)
 
-| Extension | Why | Routes affected |
-|-----------|-----|-----------------|
-| `layout="two-column"` | Skip empty left grid track when only `desktopAside` is set | `/orgs`, `/media` |
-| `toolbarBand` or wider `toolbar` | Full-width chip rows above grid | `/vendors`, `/groups`, `/orgs` |
+| Extension | Why | Routes affected | Status |
+|-----------|-----|-----------------|--------|
+| Inferred grid layout | Skip empty grid track for 2-col routes | `/media`, `/orgs`, `/conventions` | **Shipped CP3** (no new prop) |
+| `toolbarBand` or wider `toolbar` | Full-width chip rows above grid | `/vendors`, `/groups`, `/orgs` | Not needed — chips in `toolbar`/`children` |
 
 ---
 
@@ -303,10 +358,11 @@ Organizer/convention operations: separate shells, program grids, schedule canvas
 |-----|--------|------|
 | `desktop-ui-sprint-1-cp7-baseline` | `ed3dcf2` | Before any Sprint 2 work |
 | `desktop-ui-sprint-2-cp1-baseline` | `c23fff3` | After CP0/CP1 docs; before CP2 code |
-| `desktop-ui-sprint-2-cp2-baseline` | TBD | After CP2 |
+| `desktop-ui-sprint-2-cp2-baseline` | `43ad6f8` | After CP2 migrations |
 | `desktop-ui-sprint-2-cp3-baseline` | TBD | After CP3 |
 
 ```powershell
+git reset --hard desktop-ui-sprint-2-cp2-baseline  # undo CP3+ work, keep CP2 migrations
 git reset --hard desktop-ui-sprint-2-cp1-baseline  # undo CP2+ work, keep Sprint 2 plan
 git reset --hard desktop-ui-sprint-1-cp7-baseline  # undo all Sprint 2 work
 ```

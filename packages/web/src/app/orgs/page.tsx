@@ -5,8 +5,10 @@ import OrganizationsRightRail from '@/components/orgs/OrganizationsRightRail'
 import EmptyState from '@/components/ui/EmptyState'
 import { CardSkeleton } from '@/components/ui/skeleton'
 import TextInput from '@/components/ui/TextInput'
+import DirectoryTemplate from '@/components/templates/DirectoryTemplate'
 import { useApiOrganizations, type OrgListSort } from '@/hooks/useApiOrganizations'
 import { useOrganizerOrgScopes, viewerCanManageOrg } from '@/hooks/useOrganizerOrgScopes'
+import { cn } from '@/lib/cn'
 import {
   filterOrgsByChip,
   sortOrgDirectory,
@@ -14,6 +16,7 @@ import {
   type OrgDirectorySort,
   type OrgFilterChip,
 } from '@/lib/org-directory-utils'
+import { shellOuterClass } from '@/lib/shell-contract'
 
 const FILTER_CHIPS: { id: OrgFilterChip; label: string }[] = [
   { id: 'all', label: 'Top rated' },
@@ -57,11 +60,13 @@ export default function OrgsListPage() {
   const globalEmpty = !listLoading && !listError && items.length === 0 && !q.trim() && filterChip === 'all'
 
   return (
-    <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-      <OrganizationsHero hasOrganizerAccess={hasAnyScope} scopesLoading={scopesLoading} />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,280px)]">
-        <div className="min-w-0">
+    <div className={cn(shellOuterClass, 'c2k-mobile-scroll-pad')}>
+      <DirectoryTemplate
+        title="Organizations"
+        className="py-4 sm:py-6"
+        desktopAsideFrom="lg"
+        header={<OrganizationsHero hasOrganizerAccess={hasAnyScope} scopesLoading={scopesLoading} />}
+        toolbar={
           <section aria-labelledby="browse-orgs-heading">
             <h2 id="browse-orgs-heading" className="text-lg font-semibold text-dc-text">
               Browse organizations
@@ -120,7 +125,7 @@ export default function OrgsListPage() {
               </div>
 
               <div
-                className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1"
+                className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1"
                 role="group"
                 aria-label="Filter organizations"
               >
@@ -129,7 +134,7 @@ export default function OrgsListPage() {
                     key={chip.id}
                     type="button"
                     onClick={() => setFilterChip(chip.id)}
-                    className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors min-h-9 ${
+                    className={`min-h-9 shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                       filterChip === chip.id ?
                         'border-dc-accent bg-dc-accent text-dc-accent-foreground'
                       : 'border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:text-dc-text'
@@ -143,62 +148,54 @@ export default function OrgsListPage() {
                 Filters use best-match heuristics from listed organizations. Sort applies to the current results.
               </p>
             </div>
-
-            {directoryItems.length > 0 && !listLoading && !listError ?
-              <p className="mt-4 text-sm text-dc-muted" role="status">
-                {directoryItems.length} organization{directoryItems.length === 1 ? '' : 's'}
-              </p>
-            : null}
-
-            <div className="mt-4">
-              {listLoading ?
-                <CardSkeleton count={4} />
-              : listError ?
-                <EmptyState
-                  title="Could not load organizations"
-                  message="The organization directory did not load. Check your connection and try again."
-                  actionLabel="Retry"
-                  onAction={reload}
-                  secondaryCtaLabel="Explore events"
-                  secondaryCtaHref="/events"
-                />
-              : directoryEmpty ?
-                globalEmpty ?
-                  <EmptyState
-                    title="No organizations listed yet"
-                    message="Organizations are how Kink Social communities create events, run groups, coordinate staff, and build trust."
-                    ctaLabel="Create organization"
-                    ctaHref="/orgs/new"
-                    secondaryCtaLabel="Explore events"
-                    secondaryCtaHref="/events"
-                  />
-                : <EmptyState
-                    message={
-                      q.trim() ?
-                        'No organizations match your search.'
-                      : 'No organizations match these filters.'
-                    }
-                    ctaLabel="Create organization"
-                    ctaHref="/orgs/new"
-                    secondaryCtaLabel="Explore events"
-                    secondaryCtaHref="/events"
-                  />
-              : <ul className="grid gap-4 sm:grid-cols-2 min-[1500px]:grid-cols-3 min-[1800px]:grid-cols-4">
-                  {directoryItems.map((org) => (
-                    <li key={org.id}>
-                      <OrgDirectoryCard org={org} canManage={viewerCanManageOrg(bySlug, org.slug)} />
-                    </li>
-                  ))}
-                </ul>
-              }
-            </div>
           </section>
-        </div>
-
-        <div className="hidden lg:block">
-          <OrganizationsRightRail />
-        </div>
-      </div>
+        }
+        resultSummary={
+          directoryItems.length > 0 && !listLoading && !listError ?
+            `${directoryItems.length} organization${directoryItems.length === 1 ? '' : 's'}`
+          : undefined
+        }
+        desktopAside={<OrganizationsRightRail />}
+      >
+        {listLoading ?
+          <CardSkeleton count={4} />
+        : listError ?
+          <EmptyState
+            title="Could not load organizations"
+            message="The organization directory did not load. Check your connection and try again."
+            actionLabel="Retry"
+            onAction={reload}
+            secondaryCtaLabel="Explore events"
+            secondaryCtaHref="/events"
+          />
+        : directoryEmpty ?
+          globalEmpty ?
+            <EmptyState
+              title="No organizations listed yet"
+              message="Organizations are how Kink Social communities create events, run groups, coordinate staff, and build trust."
+              ctaLabel="Create organization"
+              ctaHref="/orgs/new"
+              secondaryCtaLabel="Explore events"
+              secondaryCtaHref="/events"
+            />
+          : <EmptyState
+              message={
+                q.trim() ? 'No organizations match your search.' : 'No organizations match these filters.'
+              }
+              ctaLabel="Create organization"
+              ctaHref="/orgs/new"
+              secondaryCtaLabel="Explore events"
+              secondaryCtaHref="/events"
+            />
+        : <ul className="grid gap-4 sm:grid-cols-2 min-[1500px]:grid-cols-3 min-[1800px]:grid-cols-4">
+            {directoryItems.map((org) => (
+              <li key={org.id}>
+                <OrgDirectoryCard org={org} canManage={viewerCanManageOrg(bySlug, org.slug)} />
+              </li>
+            ))}
+          </ul>
+        }
+      </DirectoryTemplate>
     </div>
   )
 }

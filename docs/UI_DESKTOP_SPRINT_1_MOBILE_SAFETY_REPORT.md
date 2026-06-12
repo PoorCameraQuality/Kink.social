@@ -76,7 +76,15 @@
 
 **Mobile layout primitives:** `BottomNav`, `CreateFab`, `FilterSheet`, mobile drawers unchanged. No edits to `mobile-polish.css`.
 
-**Screenshot matrix:** Deferred to Sprint 2 CP8 (automated mobile smoke passed for `/vendors`, `/groups`, `/events`, `/people`).
+**Screenshot matrix:** Deferred to Sprint 2 CP8 (automated mobile smoke passed for CP2 and CP3 routes).
+
+## Sprint 2 Checkpoint 3 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `DirectoryTemplate` inferred grid (`sidebar-main`, `main-aside`) | `lg+` only | **None** — mobile stays single-column main |
+| `/places`, `/conventions`, `/media`, `/orgs`, `/education` shell migrations | `shellOuterClass` + template slots | **None** — preserved mobile filters, drawers, carousels, dual media rail |
+| Education | Partial shell only; center hub untouched | **None** — Topics drawer and `EducationDiscoverCenter` carousels unchanged |
 
 ## Summary
 
