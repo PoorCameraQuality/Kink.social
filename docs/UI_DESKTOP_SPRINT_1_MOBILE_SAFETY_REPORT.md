@@ -1,6 +1,6 @@
 # Desktop Sprint 1 — Mobile Safety Report
 
-**Status:** Checkpoint 4 complete — see below  
+**Status:** Checkpoint 5 complete — see below  
 **Principle:** Desktop improvements must be additive, not a replacement of the mobile system.
 
 ## Checkpoint 1 (complete)
@@ -36,6 +36,13 @@
 |--------|-----------------|---------------|
 | `/people` migrated to `DirectoryTemplate` | Same grid/slots as manual 3-col; `desktopAsideFrom="lg"` | **None** — custom header, FilterSheet, scope tabs, card grid, and `mobileCompact` unchanged |
 | `DirectoryTemplate.desktopAsideFrom` prop | Optional; Events default `xl` unchanged | **None** on Events or mobile People |
+
+## Checkpoint 5 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `EmptyState` variants + presets | Shared primitive; wrappers preserve spacing | **None** — `compact` and `surface` paths match prior panel padding |
+| Tier A empty wrappers (messaging, notifications, saved, activity, my-posts, connections) | Domain wrappers delegate to EmptyState | **None** — same copy, actions, and mobile layout |
 
 ## Summary
 

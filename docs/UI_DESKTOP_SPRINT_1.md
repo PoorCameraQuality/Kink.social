@@ -1,6 +1,6 @@
 # Desktop UI Sprint 1 — Foundation and Shell Stabilization
 
-**Status:** Checkpoint 4 complete — Checkpoint 5+ pending  
+**Status:** Checkpoint 5 complete — Checkpoint 6+ pending  
 **Core principle:** **Desktop improvements must be additive, not a replacement of the mobile system.**
 
 The mobile UI was recently overhauled and is **protected**. Sprint 1 targets shell, tokens, directory templates, rails, empty states, and max-width behavior on desktop. It is **not** a reason to disturb finished mobile patterns.
@@ -13,7 +13,7 @@ The mobile UI was recently overhauled and is **protected**. Sprint 1 targets she
 | 2 | Token, docs, stale config | **Complete** |
 | 3 | Desktop shell contract (lg+, 1600/1920) | **Complete** |
 | 4 | People → DirectoryTemplate | **Complete** |
-| 5 | EmptyState primitive | Pending |
+| 5 | EmptyState primitive | **Complete** |
 | 6 | Card/surface cleanup | Pending |
 | 7 | Copy + empty media | Pending |
 | 8 | Verification + mobile safety report | Pending |
@@ -66,6 +66,10 @@ Below **lg**, shells keep `max-w-7xl` behavior; mobile gutters and spacing uncha
 
 `/people` (`FindPeopleDiscoverPage`) now uses `DirectoryTemplate` with Events as reference. Custom `header` preserves mobile title/description behavior. `desktopAsideFrom="lg"` keeps the right rail visible at 1024px (Events remains `xl` default).
 
+## Checkpoint 5 (EmptyState primitive)
+
+Normalized `EmptyState` with `variant` (`card` | `inline` | `surface`), `actions[]`, `footer`, and `titleAs`. Presets in `empty-state-presets.tsx`. Tier A wrappers migrated: messaging, notifications, saved, connections (via NotificationsEmptyPanel), activity, my-posts. Media, education coming-soon, organizer, and onboarding panels untouched.
+
 **Checkpoint 1 rollback:** No `.git` directory in workspace — CP1 code state is uncommitted on disk; initialize git or copy the tree before CP3 if rollback is needed.
 
 ## Rollback safety (required before CP4+)
@@ -91,6 +95,11 @@ git reset --hard 17f0c71
 If git is unavailable, copy the full tree to a timestamped folder before each checkpoint (e.g. `coast-to-coast-kink-backup-YYYYMMDD-HHMM`).
 
 **Rule:** No further implementation checkpoints without rollback safety documented and tagged.
+
+| Tag | Scope |
+|-----|-------|
+| `desktop-ui-sprint-1-cp3-baseline` | Post-CP3 shell contract |
+| `desktop-ui-sprint-1-cp4-baseline` | Post-CP4 People DirectoryTemplate (tag before CP5) |
 
 ## Sprint 1 scope (desktop-first)
 
