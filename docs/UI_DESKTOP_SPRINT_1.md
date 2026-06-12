@@ -1,6 +1,6 @@
 # Desktop UI Sprint 1 — Foundation and Shell Stabilization
 
-**Status:** Checkpoint 3 complete — Checkpoint 4+ pending  
+**Status:** Checkpoint 4 complete — Checkpoint 5+ pending  
 **Core principle:** **Desktop improvements must be additive, not a replacement of the mobile system.**
 
 The mobile UI was recently overhauled and is **protected**. Sprint 1 targets shell, tokens, directory templates, rails, empty states, and max-width behavior on desktop. It is **not** a reason to disturb finished mobile patterns.
@@ -12,7 +12,7 @@ The mobile UI was recently overhauled and is **protected**. Sprint 1 targets she
 | 1 | Chrome and breakpoint alignment | **Complete** |
 | 2 | Token, docs, stale config | **Complete** |
 | 3 | Desktop shell contract (lg+, 1600/1920) | **Complete** |
-| 4 | People → DirectoryTemplate | Pending |
+| 4 | People → DirectoryTemplate | **Complete** |
 | 5 | EmptyState primitive | Pending |
 | 6 | Card/surface cleanup | Pending |
 | 7 | Copy + empty media | Pending |
@@ -60,9 +60,37 @@ Authenticated **lg+ (1024px+)** layout uses shared width tokens from `packages/w
 
 Below **lg**, shells keep `max-w-7xl` behavior; mobile gutters and spacing unchanged.
 
-**Deferred:** Organizer shells, non-priority routes with hardcoded `max-w-[1600px]`, People → DirectoryTemplate (CP4).
+**Deferred:** Organizer shells, non-priority routes with hardcoded `max-w-[1600px]`, Groups/Orgs/Vendors directory migrations.
+
+## Checkpoint 4 (People → DirectoryTemplate)
+
+`/people` (`FindPeopleDiscoverPage`) now uses `DirectoryTemplate` with Events as reference. Custom `header` preserves mobile title/description behavior. `desktopAsideFrom="lg"` keeps the right rail visible at 1024px (Events remains `xl` default).
 
 **Checkpoint 1 rollback:** No `.git` directory in workspace — CP1 code state is uncommitted on disk; initialize git or copy the tree before CP3 if rollback is needed.
+
+## Rollback safety (required before CP4+)
+
+Local git is initialized on branch `main`. Use these checkpoints to undo sprint work:
+
+| Tag / commit | Scope |
+|--------------|-------|
+| `desktop-ui-sprint-1-cp3-baseline` | End of CP3 (shell contract) — safe point before People migration |
+| `main` @ latest | Current sprint head |
+
+```powershell
+# Return to post-CP3 state (discard CP4+ work on current branch)
+git checkout desktop-ui-sprint-1-cp3-baseline
+
+# Or reset current branch hard to CP3 baseline
+git reset --hard desktop-ui-sprint-1-cp3-baseline
+
+# Return to initial monorepo import
+git reset --hard 17f0c71
+```
+
+If git is unavailable, copy the full tree to a timestamped folder before each checkpoint (e.g. `coast-to-coast-kink-backup-YYYYMMDD-HHMM`).
+
+**Rule:** No further implementation checkpoints without rollback safety documented and tagged.
 
 ## Sprint 1 scope (desktop-first)
 
