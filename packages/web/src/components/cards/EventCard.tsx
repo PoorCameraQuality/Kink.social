@@ -50,7 +50,7 @@ export default function EventCard({ event }: EventCardProps) {
   const displayTags = filterPublicEventTags(tags)
 
   return (
-    <Card className="dc-card-polish relative min-w-0 overflow-hidden hover:border-dc-accent-border/40 transition-colors">
+    <Card interactive className="relative min-w-0 overflow-hidden p-0">
       <div className="relative aspect-[2/1] bg-dc-elevated-solid">
         <Link
           to={`/events/${id}`}

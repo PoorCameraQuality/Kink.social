@@ -10,6 +10,7 @@ import FeedTemplate from '@/components/templates/FeedTemplate'
 import { Panel } from '@/components/dancecard/ui/Panel'
 import FeedScopeTabs from '@/components/home/FeedScopeTabs'
 import EmptyState from '@/components/ui/EmptyState'
+import { cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
 import { FeedCardSkeleton, HomeEventGridSkeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/contexts/AuthContext'
@@ -111,7 +112,7 @@ export default function LocalHomeFeed({
     : localFeedPosts.length === 0 ?
       <EmptyState
         inline
-        className="dc-card-polish rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
+        className={`${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass}`}
         icon={
           <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />

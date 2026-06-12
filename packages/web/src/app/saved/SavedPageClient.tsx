@@ -7,6 +7,7 @@ import MediaChannelCard from '@/components/media/MediaChannelCard'
 import PersonalUtilityPageShell from '@/components/layout/PersonalUtilityPageShell'
 import SavedBookmarkTip from '@/components/saved/SavedBookmarkTip'
 import SavedEmptyPanel from '@/components/saved/SavedEmptyPanel'
+import { cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 import SavedFilterChips from '@/components/saved/SavedFilterChips'
 import SavedRemoveMenu from '@/components/saved/SavedRemoveMenu'
 import SavedRightRail from '@/components/saved/SavedRightRail'
@@ -278,7 +279,7 @@ export default function SavedPageClient() {
           >
             <Link
               to={`/media/${encodeURIComponent(entry.episode.showSlug)}`}
-              className="block rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 pr-14 transition-colors hover:border-dc-accent-border/40"
+              className={`block p-4 pr-14 ${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass}`}
             >
               <p className="text-xs font-medium uppercase tracking-wide text-dc-muted">
                 {entry.episode.showTitle}

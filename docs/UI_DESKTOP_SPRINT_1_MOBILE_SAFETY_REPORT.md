@@ -1,6 +1,6 @@
 # Desktop Sprint 1 — Mobile Safety Report
 
-**Status:** Checkpoint 5 complete — see below  
+**Status:** Checkpoint 6 complete — see below  
 **Principle:** Desktop improvements must be additive, not a replacement of the mobile system.
 
 ## Checkpoint 1 (complete)
@@ -43,6 +43,17 @@
 |--------|-----------------|---------------|
 | `EmptyState` variants + presets | Shared primitive; wrappers preserve spacing | **None** — `compact` and `surface` paths match prior panel padding |
 | Tier A empty wrappers (messaging, notifications, saved, activity, my-posts, connections) | Domain wrappers delegate to EmptyState | **None** — same copy, actions, and mobile layout |
+
+## Checkpoint 6 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `card-surface.ts` shared tokens | All breakpoints use same border/radius/shadow | **None** — padding and content unchanged |
+| `Card` `interactive` + `.dc-card-polish` | Hover shadow only at `@media (hover: hover)` in mobile-polish.css | **None** — no card size or density change |
+| Event/Person/FindPeople/LocalPost outer shells | Removed duplicate `hover:border-*` utilities | **None** — active press scale unchanged |
+| Non-feed `LocalPostCard` (saved, my-posts) | Keeps `hover:bg-[var(--dc-elevated-hover)]` on solid surface | **None** — background hover only; no padding/size change |
+
+**Screenshot matrix:** Not captured in CP6 — deferred to CP8 (375–1440px audit).
 
 ## Summary
 

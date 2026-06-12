@@ -1,6 +1,6 @@
 # Desktop UI Sprint 1 — Foundation and Shell Stabilization
 
-**Status:** Checkpoint 5 complete — Checkpoint 6+ pending  
+**Status:** Checkpoint 6 complete — Checkpoint 7+ pending  
 **Core principle:** **Desktop improvements must be additive, not a replacement of the mobile system.**
 
 The mobile UI was recently overhauled and is **protected**. Sprint 1 targets shell, tokens, directory templates, rails, empty states, and max-width behavior on desktop. It is **not** a reason to disturb finished mobile patterns.
@@ -14,7 +14,7 @@ The mobile UI was recently overhauled and is **protected**. Sprint 1 targets she
 | 3 | Desktop shell contract (lg+, 1600/1920) | **Complete** |
 | 4 | People → DirectoryTemplate | **Complete** |
 | 5 | EmptyState primitive | **Complete** |
-| 6 | Card/surface cleanup | Pending |
+| 6 | Card/surface cleanup | **Complete** |
 | 7 | Copy + empty media | Pending |
 | 8 | Verification + mobile safety report | Pending |
 
@@ -70,36 +70,41 @@ Below **lg**, shells keep `max-w-7xl` behavior; mobile gutters and spacing uncha
 
 Normalized `EmptyState` with `variant` (`card` | `inline` | `surface`), `actions[]`, `footer`, and `titleAs`. Presets in `empty-state-presets.tsx`. Tier A wrappers migrated: messaging, notifications, saved, connections (via NotificationsEmptyPanel), activity, my-posts. Media, education coming-soon, organizer, and onboarding panels untouched.
 
-**Checkpoint 1 rollback:** No `.git` directory in workspace — CP1 code state is uncommitted on disk; initialize git or copy the tree before CP3 if rollback is needed.
+## Checkpoint 6 (card/surface normalization)
+
+Shared surface tokens in `packages/web/src/lib/card-surface.ts`. `Card` gains optional `interactive` prop (delegates hover to `.dc-card-polish`). Normalized outer shells on `EventCard`, `PersonCard`, `FindPeopleProfileCard`, `LocalPostCard` (feed + default), `SectionCard`, home feed empty inline, and saved media episode link. No field, action, routing, or privacy changes.
+
+**Verification (CP6):** `npm run typecheck -w web` and `npm run build -w web` pass. Focused desktop route smoke: `/home`, `/events`, `/people`, `/messaging`, `/notifications`, `/saved` (5 passed; organizer/db routes skipped). Responsive screenshot matrix deferred to **CP8** per sprint plan.
 
 ## Rollback safety (required before CP4+)
 
-Local git is initialized on branch `main`. Use these checkpoints to undo sprint work:
+Local git on branch `main`. Tags mark safe rollback points:
 
-| Tag / commit | Scope |
-|--------------|-------|
-| `desktop-ui-sprint-1-cp3-baseline` | End of CP3 (shell contract) — safe point before People migration |
-| `main` @ latest | Current sprint head |
+| Tag | Commit | Scope |
+|-----|--------|-------|
+| `desktop-ui-sprint-1-cp3-baseline` | (see `git rev-parse`) | End of CP3 — shell contract |
+| `desktop-ui-sprint-1-cp4-baseline` | `d87cc65` | End of CP4 — People DirectoryTemplate |
+| `desktop-ui-sprint-1-cp5-baseline` | `0f7d360` | End of CP5 — EmptyState primitive |
 
 ```powershell
-# Return to post-CP3 state (discard CP4+ work on current branch)
-git checkout desktop-ui-sprint-1-cp3-baseline
+# Return to post-CP5 state (discard CP6+ work)
+git reset --hard desktop-ui-sprint-1-cp5-baseline
 
-# Or reset current branch hard to CP3 baseline
+# Return to post-CP4 state (discard CP5+ work)
+git reset --hard desktop-ui-sprint-1-cp4-baseline
+
+# Return to post-CP3 state (discard CP4+ work)
 git reset --hard desktop-ui-sprint-1-cp3-baseline
+```
 
+```powershell
 # Return to initial monorepo import
 git reset --hard 17f0c71
 ```
 
-If git is unavailable, copy the full tree to a timestamped folder before each checkpoint (e.g. `coast-to-coast-kink-backup-YYYYMMDD-HHMM`).
+If git is unavailable, copy the full tree to a timestamped folder before each checkpoint.
 
 **Rule:** No further implementation checkpoints without rollback safety documented and tagged.
-
-| Tag | Scope |
-|-----|-------|
-| `desktop-ui-sprint-1-cp3-baseline` | Post-CP3 shell contract |
-| `desktop-ui-sprint-1-cp4-baseline` | Post-CP4 People DirectoryTemplate (tag before CP5) |
 
 ## Sprint 1 scope (desktop-first)
 

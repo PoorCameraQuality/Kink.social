@@ -105,9 +105,10 @@ export default function FindPeopleProfileCard({ person, recommended, mobileCompa
 
   return (
     <Card
-      className={`flex h-full min-w-0 flex-col p-4 transition-colors hover:border-dc-accent-border/40 ${
-        mobileCompact ? 'max-sm:p-3' : ''
-      } ${recommended ? 'border-dc-accent-border/50 ring-1 ring-dc-accent/15' : ''}`}
+      interactive
+      className={`flex h-full min-w-0 flex-col p-4 ${mobileCompact ? 'max-sm:p-3' : ''} ${
+        recommended ? 'border-dc-accent-border/50 ring-1 ring-dc-accent/15' : ''
+      }`}
     >
       <div className={`relative flex min-w-0 gap-3 pr-8 ${mobileCompact ? 'max-sm:gap-2.5' : ''}`}>
         <Link to={`/profile/${username}`} className="shrink-0" aria-hidden tabIndex={-1}>
