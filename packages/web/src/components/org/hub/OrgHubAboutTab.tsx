@@ -223,7 +223,7 @@ export function OrgHubAboutTab({
             <>
               <p className="text-sm text-dc-text-muted">No gallery images yet.</p>
               <p className="mt-2 text-xs leading-relaxed text-dc-muted">
-                Organizers can add photos, banners, or visual highlights from the console.
+                Organizers can add photos, banners, or visual highlights from the dashboard.
               </p>
               {canManageOrg ?
                 <Link
@@ -292,7 +292,7 @@ export function OrgHubAboutTab({
               </li>
               <li>
                 <Link to={organizerBase} className="font-medium text-dc-accent hover:underline">
-                  Open organizer console
+                  Open organizer dashboard
                 </Link>
               </li>
             </ul>

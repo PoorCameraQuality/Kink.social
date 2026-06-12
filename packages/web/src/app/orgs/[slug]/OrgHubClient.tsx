@@ -1945,7 +1945,7 @@ export default function OrgHubClient() {
               <p className="font-medium text-dc-text">Forums are enabled but no categories exist yet</p>
               <p className="mt-1 text-dc-text-muted">
                 {canModerate || canManageOrg ?
-                  'Add at least one forum category in the organizer console before members can start threads.'
+                  'Add at least one forum category in the organizer dashboard before members can start threads.'
                 : 'Ask an organizer or moderator to add a forum category before you can post.'}
               </p>
               {canModerate || canManageOrg ?
@@ -2294,7 +2294,7 @@ export default function OrgHubClient() {
                       <p className="text-base font-medium text-dc-text-muted">Forums not set up yet</p>
                       <p className="max-w-sm text-sm text-dc-muted">
                         {canModerate || canManageOrg ?
-                          'Create a forum category in the organizer console, then members can start threads here.'
+                          'Create a forum category in the organizer dashboard, then members can start threads here.'
                         : 'Organizers need to add forum categories before discussions can begin.'}
                       </p>
                       {canModerate || canManageOrg ?
@@ -2338,7 +2338,7 @@ export default function OrgHubClient() {
                   <p className="text-sm text-zinc-400">No channels yet</p>
                   <p className="mt-1 text-xs text-zinc-500">
                     {canModerate || canManageOrg ?
-                      'Create a chat channel in the organizer console.'
+                      'Create a chat channel in the organizer dashboard.'
                     : 'Ask an organizer to add a channel.'}
                   </p>
                   {canModerate || canManageOrg ?
@@ -2637,7 +2637,7 @@ export default function OrgHubClient() {
                     <p className="max-w-sm text-sm text-zinc-500">
                       Chat is enabled, but no channels exist yet.
                       {canModerate || canManageOrg ?
-                        ' Create your first channel in the organizer console.'
+                        ' Create your first channel in the organizer dashboard.'
                       : ' Ask an organizer to add a channel.'}
                     </p>
                     {canModerate || canManageOrg ?

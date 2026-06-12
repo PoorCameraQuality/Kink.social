@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 
+import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import type { EducationStripVideo } from '@/lib/education-discover-data'
 
 type Props = {
@@ -15,7 +16,7 @@ export default function EducationVideoStripCard({ video }: Props) {
         <div className="relative aspect-[16/10] w-full bg-dc-surface-muted">
           {video.thumbnailUrl ?
             <img src={video.thumbnailUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
-          : null}
+          : <MediaSurfaceFallback variant="video" label={video.category} />}
           <span className="absolute inset-0 flex items-center justify-center bg-dc-surface/30">
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-dc-accent/90 text-dc-accent-foreground shadow-lg">
               <svg className="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>

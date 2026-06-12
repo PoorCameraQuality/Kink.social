@@ -47,10 +47,10 @@ export default function DancecardOpsCard({ c2kConventionSlug, settings, embedTok
   return (
     <section className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300/90">ECKE Dancecard (attendee app)</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300/90">Dancecard (attendee app)</p>
         <p className="mt-1 text-sm text-dc-text-muted">
-          Attendees use Dancecard on ECKE for weekend schedules, gate, and reservations. Edit program on Kink Social, then publish
-          to ECKE from the convention organizer (Event settings tab).
+          Attendees use Dancecard on the public events directory for weekend schedules, gate, and reservations. Edit program on Kink Social, then publish
+          to the public directory from the convention organizer (Event settings tab).
         </p>
       </div>
 
@@ -70,7 +70,7 @@ export default function DancecardOpsCard({ c2kConventionSlug, settings, embedTok
           on Kink Social (grid, staff, settings)
         </li>
         <li>
-          Publish to ECKE from Event settings, then share the{' '}
+          Publish to the public directory from Event settings, then share the{' '}
           <button type="button" className="text-dc-accent hover:underline" onClick={() => void copy('attendee', attendeeUrl)}>
             attendee link
           </button>

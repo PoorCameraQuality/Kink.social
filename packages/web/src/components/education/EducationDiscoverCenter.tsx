@@ -86,7 +86,7 @@ export default function EducationDiscoverCenter({
           {showMockOverview ?
             <>
               <p className="mb-4 rounded-xl border border-amber-200/80 bg-amber-50/80 px-3 py-2 text-xs text-amber-950 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-100">
-                Learning paths, featured educators, and video strips below use demo data. Article catalogue is live when
+                Learning paths, featured educators, and video strips below use preview content. Article catalogue is live when
                 signed in.
               </p>
               <EducationLearningPaths paths={learningPaths} />

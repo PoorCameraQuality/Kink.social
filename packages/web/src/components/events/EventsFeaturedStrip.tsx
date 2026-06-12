@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import EventSaveButton from '@/components/events/EventSaveButton'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
-import { demoMockImageUrl } from '@/data/mock-data'
+import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import type { MockEvent } from '@/data/types'
 
 function HighlightCard({ event, compact }: { event: MockEvent; compact?: boolean }) {
-  const heroSrc = event.imageUrl ?? event.bannerUrl ?? demoMockImageUrl(`evt-hi-${String(event.id)}`, 480, 280)
+  const heroSrc = event.imageUrl ?? event.bannerUrl ?? null
   const preview = event.connectionRsvpPreview?.slice(0, 3) ?? []
   const showFeaturedBadge = event.featured === true
 
@@ -22,7 +22,9 @@ function HighlightCard({ event, compact }: { event: MockEvent; compact?: boolean
       : null}
       <Link to={`/events/${event.id}`} className="block">
         <div className={`w-full bg-dc-surface-muted ${compact ? 'aspect-[2/1]' : 'aspect-[16/10]'}`}>
-          <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
+          {heroSrc ?
+            <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
+          : <MediaSurfaceFallback variant="event" />}
         </div>
         <div className="p-2.5 sm:p-3">
           <h3 className="line-clamp-2 text-sm font-semibold text-dc-text">{event.title}</h3>

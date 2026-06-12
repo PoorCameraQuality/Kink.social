@@ -126,7 +126,7 @@ export default function OrganizerOrgClient() {
         if (!cancelled) setOrg(o)
         if (!o.viewerRole || !MOD_ROLES.has(o.viewerRole)) {
           if (!cancelled) {
-            setLoadError('You need staff, moderator, or admin access to use the organizer console.')
+            setLoadError('You need staff, moderator, or admin access to use the organizer dashboard.')
           }
           return
         }
@@ -344,7 +344,7 @@ export default function OrganizerOrgClient() {
         {
           id: 'publish',
           label: 'Publishing settings',
-          description: 'Optional ECKE public listings',
+          description: 'Optional public directory listings',
           href: `${orgBase}?tab=settings&settingsSection=publish`,
         },
       )

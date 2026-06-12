@@ -165,7 +165,7 @@ export default function OrganizerOrgHomePanel({
 
       <p className="max-w-3xl text-dc-micro text-dc-muted">
         <span className="text-dc-text-muted">Kink Social</span> is your member community and organizer workspace.{' '}
-        <span className="text-dc-text-muted">ECKE publishing</span> controls optional public listings and Dancecard
+        <span className="text-dc-text-muted">Public directory listing</span> controls optional public listings and Dancecard
         attendee surfaces. Configure under Tools or Settings → Publish.
       </p>
     </div>

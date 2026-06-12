@@ -268,12 +268,11 @@ export function useConventionHub({ slug, previewRoleQuery }: UseConventionHubOpt
           const apiMsg = typeof errJson.error === 'string' ? errJson.error : ''
           if (r1.status === 503) {
             setErr(
-              apiMsg ||
-                'API database mode is off or unavailable. Ensure Postgres is running, root `.env.development` has USE_DATABASE=true, then run `npm run db:prepare` from the repo root.',
+              apiMsg || 'Could not load convention data right now. Try again in a moment.',
             )
           } else if (r1.status === 404) {
             setErr(
-              `No convention matches this URL slug (${slug ?? ''}). If this is a fresh database, run \`npm run db:prepare\` (or \`npm run db:seed -w @c2k/api\`) after Postgres is up. Demo slugs include seed-demo-con-program, seed-demo-con-gated, and preview-c2k-weekend.`,
+              `No convention matches this URL slug (${slug ?? ''}). Check the link or browse events and conventions.`,
             )
           } else {
             setErr(apiMsg || `Could not load convention (HTTP ${r1.status}).`)

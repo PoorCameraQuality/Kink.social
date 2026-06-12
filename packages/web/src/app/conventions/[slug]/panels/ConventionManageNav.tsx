@@ -39,7 +39,7 @@ export default function ConventionManageNav({
             to={consoleHref}
             className="inline-flex min-h-10 items-center rounded-xl border border-dc-accent-border/40 px-4 text-sm text-dc-accent hover:bg-dc-accent/10"
           >
-            Open in organizer console
+            Open in organizer dashboard
           </Link>
         : null}
       </nav>

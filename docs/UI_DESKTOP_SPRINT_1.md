@@ -1,6 +1,6 @@
 # Desktop UI Sprint 1 — Foundation and Shell Stabilization
 
-**Status:** Checkpoint 6 complete — Checkpoint 7+ pending  
+**Status:** Checkpoint 7 complete — Checkpoint 8+ pending  
 **Core principle:** **Desktop improvements must be additive, not a replacement of the mobile system.**
 
 The mobile UI was recently overhauled and is **protected**. Sprint 1 targets shell, tokens, directory templates, rails, empty states, and max-width behavior on desktop. It is **not** a reason to disturb finished mobile patterns.
@@ -15,7 +15,7 @@ The mobile UI was recently overhauled and is **protected**. Sprint 1 targets she
 | 4 | People → DirectoryTemplate | **Complete** |
 | 5 | EmptyState primitive | **Complete** |
 | 6 | Card/surface cleanup | **Complete** |
-| 7 | Copy + empty media | Pending |
+| 7 | Copy + empty media | **Complete** |
 | 8 | Verification + mobile safety report | Pending |
 
 ## Audit baseline
@@ -76,6 +76,12 @@ Shared surface tokens in `packages/web/src/lib/card-surface.ts`. `Card` gains op
 
 **Verification (CP6):** `npm run typecheck -w web` and `npm run build -w web` pass. Focused desktop route smoke: `/home`, `/events`, `/people`, `/messaging`, `/notifications`, `/saved` (5 passed; organizer/db routes skipped). Responsive screenshot matrix deferred to **CP8** per sprint plan.
 
+## Checkpoint 7 (copy cleanup + empty media fallbacks)
+
+Member-facing copy on listed routes: Command Bridge/console/ECKE/dev language replaced with dashboard/public-directory/preview wording where shown to members or organizers in scope. Removed `demoMockImageUrl` hero fallbacks on Tier A listing surfaces; missing media uses `MediaSurfaceFallback` (gradient + icon). No route, API, upload, or moderation changes.
+
+**Verification (CP7):** typecheck + build pass; focused route smoke on changed paths. Screenshot matrix deferred to **CP8**.
+
 ## Rollback safety (required before CP4+)
 
 Local git on branch `main`. Tags mark safe rollback points:
@@ -85,8 +91,12 @@ Local git on branch `main`. Tags mark safe rollback points:
 | `desktop-ui-sprint-1-cp3-baseline` | (see `git rev-parse`) | End of CP3 — shell contract |
 | `desktop-ui-sprint-1-cp4-baseline` | `d87cc65` | End of CP4 — People DirectoryTemplate |
 | `desktop-ui-sprint-1-cp5-baseline` | `0f7d360` | End of CP5 — EmptyState primitive |
+| `desktop-ui-sprint-1-cp6-baseline` | `0e8dd27` | End of CP6 — card surface normalization |
 
 ```powershell
+# Return to post-CP6 state (discard CP7+ work)
+git reset --hard desktop-ui-sprint-1-cp6-baseline
+
 # Return to post-CP5 state (discard CP6+ work)
 git reset --hard desktop-ui-sprint-1-cp5-baseline
 

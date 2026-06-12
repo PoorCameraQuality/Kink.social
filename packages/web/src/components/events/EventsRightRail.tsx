@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { demoMockImageUrl } from '@/data/mock-data'
+import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import { EVENT_CATEGORY_VALUES } from '@c2k/shared'
 import type { MockEvent } from '@/data/types'
 import { countEventsByCategory } from '@/lib/events-page-utils'
@@ -45,11 +45,17 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
       <RailCard title="Suggested for you">
         <ul className="space-y-3">
           {picks.map((ev) => {
-            const img = ev.imageUrl ?? demoMockImageUrl(`sug-${ev.id}`, 80, 80)
+            const img = ev.imageUrl ?? ev.bannerUrl ?? null
             return (
               <li key={String(ev.id)}>
                 <Link to={`/events/${ev.id}`} className="flex gap-2 rounded-lg p-1 hover:bg-dc-elevated-hover">
-                  <img src={img} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                  {img ?
+                    <img src={img} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                  : (
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-dc-border">
+                      <MediaSurfaceFallback variant="event" compact className="h-full" />
+                    </div>
+                  )}
                   <span className="min-w-0">
                     <span className="block text-sm font-medium text-dc-text line-clamp-2">{ev.title}</span>
                     <span className="text-xs text-dc-muted">

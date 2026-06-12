@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { RSVP_LABEL_INTERESTED } from '@c2k/shared'
 import { formatMyRsvpLabel } from '@/hooks/useApiMyRsvps'
-import { demoMockImageUrl } from '@/data/mock-data'
+import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 
 export type UpcomingRsvpItem = {
   eventId: string
@@ -85,7 +85,7 @@ type Props = {
 }
 
 export default function HomeUpcomingEventCard({ event, compact = false, embedded = false, onNavigate }: Props) {
-  const img = event.imageUrl ?? demoMockImageUrl(`upcoming-${event.eventId}`, 120, 96)
+  const img = event.imageUrl ?? null
   const statusKey = resolveStatus(event.status)
   const status = STATUS_META[statusKey]
   const { date } = formatMyRsvpLabel({
@@ -104,7 +104,13 @@ export default function HomeUpcomingEventCard({ event, compact = false, embedded
       aria-label={ariaLabel}
       className={`group flex min-h-11 items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-2.5 transition-colors hover:border-[rgba(214,178,59,0.35)] hover:bg-white/[0.05] sm:p-3 ${compact ? 'mt-0' : 'mt-3'}`}
     >
-      <img src={img} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover ring-1 ring-white/10" loading="lazy" />
+      {img ?
+        <img src={img} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover ring-1 ring-white/10" loading="lazy" />
+      : (
+        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg ring-1 ring-white/10">
+          <MediaSurfaceFallback variant="event" compact className="h-full" />
+        </div>
+      )}
 
       <span className="min-w-0 flex-1">
         {embedded ? null : (

@@ -1,6 +1,6 @@
 # Desktop Sprint 1 — Mobile Safety Report
 
-**Status:** Checkpoint 6 complete — see below  
+**Status:** Checkpoint 7 complete — see below  
 **Principle:** Desktop improvements must be additive, not a replacement of the mobile system.
 
 ## Checkpoint 1 (complete)
@@ -54,6 +54,16 @@
 | Non-feed `LocalPostCard` (saved, my-posts) | Keeps `hover:bg-[var(--dc-elevated-hover)]` on solid surface | **None** — background hover only; no padding/size change |
 
 **Screenshot matrix:** Not captured in CP6 — deferred to CP8 (375–1440px audit).
+
+## Checkpoint 7 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `MediaSurfaceFallback` on event/explore/home listing thumbs | Same classes at all breakpoints | **None** — compact fallbacks in existing thumb boxes; no card resize |
+| Education learning path / video strip fallbacks | All breakpoints | **None** — same aspect ratios; gradient replaces blank regions |
+| `EducationDiscoverHero` gradient-only backdrop | All breakpoints | **None** — removed decorative mock photo layer |
+| `VendorListingMiniCard` initials fallback | All breakpoints | **None** — same aspect-[4/3] frame |
+| Copy-only string updates | N/A | **None** — text only |
 
 ## Summary
 
