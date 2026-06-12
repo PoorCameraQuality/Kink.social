@@ -8,12 +8,16 @@ import GroupsRightRail from '@/components/groups/GroupsRightRail'
 import GroupsScopeTabs from '@/components/groups/GroupsScopeTabs'
 import EmptyState from '@/components/ui/EmptyState'
 import { GroupSkeleton } from '@/components/ui/skeleton'
+import DirectoryTemplate, { DirectoryFilterButton } from '@/components/templates/DirectoryTemplate'
+import FilterSheet from '@/components/templates/FilterSheet'
 import type { MockGroup } from '@/data/mock-data'
 import { mockGroups } from '@/data/mock-data'
 import { useAuth } from '@/contexts/AuthContext'
 import { useApiGroups, type ApiGroupListItem } from '@/hooks/useApiGroups'
 import { usePersistedGeoText } from '@/hooks/usePersistedGeoText'
+import { cn } from '@/lib/cn'
 import { MAX_DISTANCE_MI, rankGroups } from '@/lib/discovery-utils'
+import { shellOuterClass } from '@/lib/shell-contract'
 import {
   countGroupsByPurpose,
   deriveGroupDiscoverBadge,
@@ -47,6 +51,24 @@ function mapApiGroup(row: ApiGroupListItem): MockGroup {
   }
 }
 
+function countGroupsActiveFilters(args: {
+  searchQuery: string
+  selectedPurposes: GroupPurposeFilter[]
+  scopeTab: GroupsScopeTab
+  distance: number
+  country: string
+  city: string
+}): number {
+  let count = 0
+  if (args.searchQuery.trim()) count++
+  count += args.selectedPurposes.length
+  if (args.scopeTab !== 'all') count++
+  if (args.distance < MAX_DISTANCE_MI) count++
+  if (args.country.trim()) count++
+  if (args.city.trim()) count++
+  return count
+}
+
 export default function GroupsDiscoverPage() {
   const searchId = useId()
   const mainSearchId = useId()
@@ -56,7 +78,7 @@ export default function GroupsDiscoverPage() {
   const homeDemoFallbackEnv = import.meta.env.VITE_HOME_DEMO_FALLBACK === 'true'
   const useDemoFallback = homeDemoFallbackEnv && !isAuthenticated
 
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
   const [morePurposeOpen, setMorePurposeOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPurposes, setSelectedPurposes] = useState<GroupPurposeFilter[]>([])
@@ -177,6 +199,15 @@ export default function GroupsDiscoverPage() {
     Boolean(country.trim()) ||
     Boolean(city.trim())
 
+  const activeFilterCount = countGroupsActiveFilters({
+    searchQuery,
+    selectedPurposes,
+    scopeTab,
+    distance,
+    country,
+    city,
+  })
+
   const clearFilters = () => {
     setSearchQuery('')
     setSelectedPurposes([])
@@ -185,6 +216,7 @@ export default function GroupsDiscoverPage() {
     setDistance(MAX_DISTANCE_MI)
     setCountry('')
     setCity('')
+    setFilterSheetOpen(false)
   }
 
   const filterState = {
@@ -207,37 +239,31 @@ export default function GroupsDiscoverPage() {
 
   const sparse = filteredGroups.length > 0 && filteredGroups.length <= 3
 
+  const rightRailProps = {
+    allGroups: groupSource,
+    suggested: filteredGroups.length > 0 ? filteredGroups : groupSource,
+    onPurposeSelect: (p: string) => {
+      togglePurpose(p as GroupPurposeFilter)
+      setMorePurposeOpen(false)
+    },
+    onNearYou: () => setScopeTab('near-you'),
+  }
+
   return (
-    <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)_minmax(240px,280px)]">
-        <div className="hidden lg:block">
-          <GroupsDiscoverLeftRail
-            filterState={filterState}
-            purposeCounts={purposeCounts}
-            searchId={searchId}
-            filterIdPrefix="grp-rail"
-          />
-        </div>
-
-        <main className="min-w-0">
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">Discover Groups</h1>
-              <p className="mt-1 text-sm text-dc-text-muted">Find your people, munches, classes, and local scenes.</p>
-            </div>
-            <div className="flex flex-wrap gap-2 lg:hidden">
-              <button
-                type="button"
-                onClick={() => setFilterDrawerOpen(!filterDrawerOpen)}
-                className="inline-flex min-h-11 items-center rounded-xl border border-dc-border bg-dc-elevated-solid px-4 text-sm font-medium text-dc-accent"
-              >
-                Filters
-              </button>
-            </div>
+    <div className={cn(shellOuterClass, 'c2k-mobile-scroll-pad')}>
+      <DirectoryTemplate
+        title="Discover Groups"
+        className="py-4 sm:py-6"
+        desktopAsideFrom="lg"
+        header={
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">Discover Groups</h1>
+            <p className="mt-1 text-sm text-dc-text-muted">Find your people, munches, classes, and local scenes.</p>
           </div>
-
+        }
+        toolbar={
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
+            <div className="relative min-w-0 flex-1">
               <label htmlFor={mainSearchId} className="sr-only">
                 Search groups
               </label>
@@ -264,127 +290,132 @@ export default function GroupsDiscoverPage() {
                 className="w-full min-h-11 rounded-xl border border-dc-border bg-[var(--dc-input)] py-2.5 pl-10 pr-4 text-sm text-dc-text placeholder-dc-muted focus:border-dc-accent focus:outline-none focus:ring-1 focus:ring-dc-accent"
               />
             </div>
-            <label className="sr-only" htmlFor="groups-sort">
-              Sort groups
-            </label>
-            <select
-              id="groups-sort"
-              value={sortMode}
-              onChange={(e) => setSortMode(e.target.value as GroupsSortMode)}
-              className="min-h-11 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 text-sm text-dc-text"
-            >
-              <option value="popular">Sort by: Popular</option>
-              <option value="new">Sort by: Newest</option>
-              <option value="active">Sort by: Recently active</option>
-              <option value="members">Sort by: Most members</option>
-              <option value="name">Sort by: Name</option>
-            </select>
-          </div>
-
-          {filterDrawerOpen ?
-            <div className="mb-6 rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 lg:hidden">
-              <GroupsDiscoverLeftRail
-                filterState={filterState}
-                purposeCounts={purposeCounts}
-                searchId={searchId}
-                filterIdPrefix="grp-mobile"
-              />
+            <div className="flex shrink-0 items-center gap-2">
+              <DirectoryFilterButton activeFilterCount={activeFilterCount} onClick={() => setFilterSheetOpen(true)} />
+              <label className="sr-only" htmlFor="groups-sort">
+                Sort groups
+              </label>
+              <select
+                id="groups-sort"
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value as GroupsSortMode)}
+                className="min-h-11 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 text-sm text-dc-text"
+              >
+                <option value="popular">Sort by: Popular</option>
+                <option value="new">Sort by: Newest</option>
+                <option value="active">Sort by: Recently active</option>
+                <option value="members">Sort by: Most members</option>
+                <option value="name">Sort by: Name</option>
+              </select>
             </div>
-          : null}
-
-          <GroupsScopeTabs active={scopeTab} onChange={setScopeTab} />
-          <GroupsPurposeChips
-            selected={selectedPurposes}
-            onToggle={togglePurpose}
-            moreOpen={morePurposeOpen}
-            onMoreToggle={() => setMorePurposeOpen((o) => !o)}
+          </div>
+        }
+        desktopSidebar={
+          <GroupsDiscoverLeftRail
+            filterState={filterState}
+            purposeCounts={purposeCounts}
+            searchId={searchId}
+            filterIdPrefix="grp-rail"
           />
+        }
+        desktopAside={<GroupsRightRail {...rightRailProps} />}
+      >
+        <GroupsScopeTabs active={scopeTab} onChange={setScopeTab} />
+        <GroupsPurposeChips
+          selected={selectedPurposes}
+          onToggle={togglePurpose}
+          moreOpen={morePurposeOpen}
+          onMoreToggle={() => setMorePurposeOpen((o) => !o)}
+        />
 
-          {nearbyError && scopeTab === 'near-you' ?
-            <p
-              className="mb-4 rounded-xl border border-amber-500/30 bg-amber-950/25 px-3 py-2 text-sm text-amber-200/90"
-              role="status"
-            >
-              {nearbyError}{' '}
-              <Link to="/profile/edit" className="text-dc-accent hover:underline">
-                Set your location in profile settings
-              </Link>{' '}
-              to use Near you.
-            </p>
-          : null}
+        {nearbyError && scopeTab === 'near-you' ?
+          <p
+            className="mb-4 rounded-xl border border-amber-500/30 bg-amber-950/25 px-3 py-2 text-sm text-amber-200/90"
+            role="status"
+          >
+            {nearbyError}{' '}
+            <Link to="/profile/edit" className="text-dc-accent hover:underline">
+              Set your location in profile settings
+            </Link>{' '}
+            to use Near you.
+          </p>
+        : null}
 
-          {loading ?
-            <GroupSkeleton count={4} />
-          : !useDemoFallback && apiGroups.status === 'error' ?
+        {loading ?
+          <GroupSkeleton count={4} />
+        : !useDemoFallback && apiGroups.status === 'error' ?
+          <EmptyState
+            title="Could not load groups"
+            message={apiGroups.errorMessage ?? 'The groups directory did not load.'}
+            actionLabel="Retry"
+            onAction={apiGroups.reload}
+          />
+        : filteredGroups.length === 0 ?
+          hasActiveFilters ?
             <EmptyState
-              title="Could not load groups"
-              message={apiGroups.errorMessage ?? 'The groups directory did not load.'}
-              actionLabel="Retry"
-              onAction={apiGroups.reload}
+              title="No groups found"
+              message="Try widening your location, removing a purpose filter, or starting a new community."
+              actionLabel="Reset filters"
+              onAction={clearFilters}
+              secondaryCtaLabel="Organizations"
+              secondaryCtaHref="/orgs"
             />
-          : filteredGroups.length === 0 ?
-            hasActiveFilters ?
-              <EmptyState
-                title="No groups found"
-                message="Try widening your location, removing a purpose filter, or starting a new community."
-                actionLabel="Reset filters"
-                onAction={clearFilters}
-                secondaryCtaLabel="Organizations"
-                secondaryCtaHref="/orgs"
-              />
-            : <EmptyState
-                title="No groups found"
-                message="Try widening your location or start a new community."
-                actionLabel="Create a group"
-                onAction={() => setCreateOpen(true)}
-                secondaryCtaLabel="Organizations"
-                secondaryCtaHref="/orgs"
-              />
-          : <>
-              <p className="mb-4 text-sm text-dc-muted" role="status">
-                {filteredGroups.length} group{filteredGroups.length === 1 ? '' : 's'}
-                {useDemoFallback ? ' · demo data' : null}
-              </p>
-              <ul className="space-y-4">
-                {filteredGroups.map((g, index) => (
-                  <li key={g.id}>
-                    <GroupDiscoverListCard
-                      group={g}
-                      badge={deriveGroupDiscoverBadge(g, index, scopeTab)}
-                      friendsHere={useDemoFallback ? mockFriendsHereCount(g.id) : undefined}
-                    />
-                  </li>
-                ))}
-              </ul>
-              {sparse ?
-                <div className="mt-8 lg:hidden">
-                  <GroupsRightRail
-                    allGroups={groupSource}
-                    suggested={filteredGroups}
-                    onPurposeSelect={(p) => {
-                      togglePurpose(p as GroupPurposeFilter)
-                      setMorePurposeOpen(false)
-                    }}
-                    onNearYou={() => setScopeTab('near-you')}
+          : <EmptyState
+              title="No groups found"
+              message="Try widening your location or start a new community."
+              actionLabel="Create a group"
+              onAction={() => setCreateOpen(true)}
+              secondaryCtaLabel="Organizations"
+              secondaryCtaHref="/orgs"
+            />
+        : <>
+            <p className="mb-4 text-sm text-dc-muted" role="status">
+              {filteredGroups.length} group{filteredGroups.length === 1 ? '' : 's'}
+              {useDemoFallback ? ' · demo data' : null}
+            </p>
+            <ul className="space-y-4">
+              {filteredGroups.map((g, index) => (
+                <li key={g.id}>
+                  <GroupDiscoverListCard
+                    group={g}
+                    badge={deriveGroupDiscoverBadge(g, index, scopeTab)}
+                    friendsHere={useDemoFallback ? mockFriendsHereCount(g.id) : undefined}
                   />
-                </div>
-              : null}
-            </>
-          }
-        </main>
+                </li>
+              ))}
+            </ul>
+            {sparse ?
+              <div className="mt-8 lg:hidden">
+                <GroupsRightRail
+                  allGroups={groupSource}
+                  suggested={filteredGroups}
+                  onPurposeSelect={(p) => {
+                    togglePurpose(p as GroupPurposeFilter)
+                    setMorePurposeOpen(false)
+                  }}
+                  onNearYou={() => setScopeTab('near-you')}
+                />
+              </div>
+            : null}
+          </>
+        }
 
-        <div className="hidden lg:block">
-          <GroupsRightRail
-            allGroups={groupSource}
-            suggested={filteredGroups.length > 0 ? filteredGroups : groupSource}
-            onPurposeSelect={(p) => {
-              togglePurpose(p as GroupPurposeFilter)
-              setMorePurposeOpen(false)
-            }}
-            onNearYou={() => setScopeTab('near-you')}
+        <FilterSheet
+          open={filterSheetOpen}
+          onClose={() => setFilterSheetOpen(false)}
+          title="Group filters"
+          activeFilterCount={activeFilterCount}
+          onClear={clearFilters}
+          liveApply
+        >
+          <GroupsDiscoverLeftRail
+            filterState={filterState}
+            purposeCounts={purposeCounts}
+            searchId={searchId}
+            filterIdPrefix="grp-mobile"
           />
-        </div>
-      </div>
+        </FilterSheet>
+      </DirectoryTemplate>
 
       {createOpen ?
         <CreateGroupModal

@@ -1,7 +1,10 @@
 # Desktop UI Sprint 2 — Template Migration and Member Surface Polish
 
-**Status:** Checkpoint 0 complete — Checkpoint 1 plan ready — implementation not started  
+**Status:** Checkpoint 1 complete — Checkpoint 2 in progress  
 **Branch:** `desktop-ui-sprint-2-template-migration`  
+**CP1 commit:** `c23fff3`  
+**CP1 rollback tag:** `desktop-ui-sprint-2-cp1-baseline`  
+**CP1 rollback command:** `git reset --hard desktop-ui-sprint-2-cp1-baseline`  
 **Core principle:** Use Sprint 1 foundation to migrate member-facing surfaces into shared templates. **Not** a functionality, organizer, or mobile redesign sprint.
 
 ## Sprint 1 handoff
@@ -28,7 +31,7 @@
 |----|-------|--------|
 | 0 | Sprint 1 verification gate | **Complete** |
 | 1 | DirectoryTemplate migration plan | **Complete** (this doc) |
-| 2 | Low-risk directory migrations (groups, vendors, presenters) | Pending |
+| 2 | Low-risk directory migrations (vendors, presenters, groups) | **Complete** |
 | 3 | Higher-complexity directories (education, media, conventions, places, orgs) | Pending |
 | 4 | DetailTemplate audit + plan | Pending |
 | 5 | Low-risk detail migrations | Pending |
@@ -50,6 +53,46 @@
 | `npm run audit:ui-desktop` | Partial | Route/component/design inventories refreshed; screenshot capture blocked (dev server not running). Baseline: 186 desktop screenshots from Sprint 1 audit packet |
 | Responsive screenshot matrix | Deferred | Full matrix scheduled for Sprint 2 CP8 |
 | Sprint 2 branch | `desktop-ui-sprint-2-template-migration` | Created from tagged Sprint 1 baseline |
+
+---
+
+## Checkpoint 2 — DirectoryTemplate migrations (vendors, presenters, groups)
+
+**Status:** Complete  
+**DirectoryTemplate API changes:** None  
+**Routes migrated:** `/vendors`, `/presenters`, `/groups`  
+**Routes deliberately not migrated:** `/events`, `/people` (reference only — unchanged), all CP3 routes  
+
+### Per-route behavior preserved
+
+| Route | File | Preserved |
+|-------|------|-----------|
+| `/vendors` | `packages/web/src/app/vendors/page.tsx` | API fetch, search, category chips, filters, sort, `VendorCard` grid, skeleton/empty, left/right rails, `FilterSheet` live apply, mobile List-shop CTA hide rule |
+| `/presenters` | `packages/web/src/app/presenters/page.tsx` | Hero card header, search, sort pills, expertise tag chips, `PresenterCard` grid, load-more, education footer CTA |
+| `/groups` | `packages/web/src/app/groups/GroupsDiscoverPage.tsx` | Discover list, scope tabs, purpose chips, geo filters, sort, sparse mobile right rail, `CreateGroupModal`, join/membership untouched |
+
+### Shell change
+
+Removed nested `max-w-[1600px]` / `max-w-[1440px]` / `max-w-5xl` islands; parent `shellOuterClass` + `DirectoryTemplate` (`shellDirectoryClass`) now owns width at `lg+`. Mobile gutters unchanged.
+
+### Verification (CP2)
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck -w web` | Pass |
+| `npm run build -w web` | Pass |
+| Focused smoke: vendors, events, people (desktop + mobile) | Pass |
+| Focused smoke: groups mobile | Pass |
+| Focused smoke: groups desktop | **Pre-existing fail** — public `/groups` redirects to landing AuthGate (documented CP0; not introduced by CP2) |
+| `/presenters` smoke | Not in `PUBLIC_ROUTES`; manual typecheck/build only |
+
+### Recommended CP3 order
+
+1. `/places` — sidebar-less proof  
+2. `/conventions` — left-rail list  
+3. `/media` — right-rail + mobile duplication  
+4. `/orgs` — hero + 2-col  
+5. `/education` — last (richest hub)
 
 ---
 
@@ -256,12 +299,14 @@ Organizer/convention operations: separate shells, program grids, schedule canvas
 
 ## Rollback (Sprint 2)
 
-| Tag | When |
-|-----|------|
-| `desktop-ui-sprint-1-cp7-baseline` | Before any Sprint 2 work |
-| `desktop-ui-sprint-2-cp2-baseline` | TBD after CP2 |
-| `desktop-ui-sprint-2-cp3-baseline` | TBD after CP3 |
+| Tag | Commit | When |
+|-----|--------|------|
+| `desktop-ui-sprint-1-cp7-baseline` | `ed3dcf2` | Before any Sprint 2 work |
+| `desktop-ui-sprint-2-cp1-baseline` | `c23fff3` | After CP0/CP1 docs; before CP2 code |
+| `desktop-ui-sprint-2-cp2-baseline` | TBD | After CP2 |
+| `desktop-ui-sprint-2-cp3-baseline` | TBD | After CP3 |
 
 ```powershell
+git reset --hard desktop-ui-sprint-2-cp1-baseline  # undo CP2+ work, keep Sprint 2 plan
 git reset --hard desktop-ui-sprint-1-cp7-baseline  # undo all Sprint 2 work
 ```

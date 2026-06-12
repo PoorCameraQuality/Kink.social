@@ -65,11 +65,24 @@
 | `VendorListingMiniCard` initials fallback | All breakpoints | **None** — same aspect-[4/3] frame |
 | Copy-only string updates | N/A | **None** — text only |
 
+## Sprint 2 Checkpoint 2 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `/vendors` → `DirectoryTemplate` + `shellOuterClass` | 3-col grid unchanged below `lg`; `DirectoryFilterButton` + `FilterSheet` preserved | **None** — same search row, mobile sort select, category chips, vendor cards, empty/loading |
+| `/presenters` → `DirectoryTemplate` + `shellOuterClass` | Sidebar-less template; hero card header preserved | **None** — same hero, sort pills, expertise chips, grid, load-more, education footer |
+| `/groups` → `DirectoryTemplate` + `shellOuterClass` | Inline mobile filter drawer → `FilterSheet` + `DirectoryFilterButton` (Events/People pattern); sparse bottom right rail preserved | **None** — `FilterSheet`/`DirectoryFilterButton` are existing mobile primitives; scope tabs, purpose chips, list cards unchanged |
+| `DirectoryTemplate` API | No changes | **None** |
+
+**Mobile layout primitives:** `BottomNav`, `CreateFab`, `FilterSheet`, mobile drawers unchanged. No edits to `mobile-polish.css`.
+
+**Screenshot matrix:** Deferred to Sprint 2 CP8 (automated mobile smoke passed for `/vendors`, `/groups`, `/events`, `/people`).
+
 ## Summary
 
 | Metric | Value |
 |--------|------:|
-| Mobile-protected components touched | 5 (CP1 only) |
+| Mobile-protected components touched | 5 (CP1 only) + 0 new (CP2) |
 | Confirmed mobile regressions | 0 (pending full screenshot pass at CP8) |
 | Regressions fixed in sprint | 0 |
 | Risks deferred | Tablet density at 768–1023 (browse + feed tabs) — monitor at CP8 |
