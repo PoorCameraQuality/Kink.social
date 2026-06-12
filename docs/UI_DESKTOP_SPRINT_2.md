@@ -1,12 +1,15 @@
 # Desktop UI Sprint 2 — Template Migration and Member Surface Polish
 
-**Status:** Checkpoint 1 complete — Checkpoint 2 in progress  
+**Status:** Checkpoint 4 complete — DetailTemplate audit (plan only)  
 **Branch:** `desktop-ui-sprint-2-template-migration`  
 **CP1 commit:** `c23fff3`  
 **CP1 rollback tag:** `desktop-ui-sprint-2-cp1-baseline`  
 **CP2 commit:** `43ad6f8`  
 **CP2 rollback tag:** `desktop-ui-sprint-2-cp2-baseline`  
 **CP2 rollback command:** `git reset --hard desktop-ui-sprint-2-cp2-baseline`  
+**CP3 commit:** `b7d1c7e`  
+**CP3 rollback tag:** `desktop-ui-sprint-2-cp3-baseline`  
+**CP3 rollback command:** `git reset --hard desktop-ui-sprint-2-cp3-baseline`  
 **Core principle:** Use Sprint 1 foundation to migrate member-facing surfaces into shared templates. **Not** a functionality, organizer, or mobile redesign sprint.
 
 ## Sprint 1 handoff
@@ -35,7 +38,7 @@
 | 1 | DirectoryTemplate migration plan | **Complete** (this doc) |
 | 2 | Low-risk directory migrations (vendors, presenters, groups) | **Complete** |
 | 3 | Higher-complexity directories (places, conventions, media, orgs, education) | **Complete** |
-| 4 | DetailTemplate audit + plan | Pending |
+| 4 | DetailTemplate audit + plan | **Complete** |
 | 5 | Low-risk detail migrations | Pending |
 | 6 | Profile, group, org, event, convention detail refinement | Pending |
 | 7 | Desktop hierarchy polish (`lg+` only) | Pending |
@@ -137,17 +140,58 @@ Removes empty left grid track on aside-only routes. Existing 3-col migrations un
 | Desktop smoke | Mixed — pre-existing AuthGate on `/groups`, `/orgs`; intermittent timeouts on parallel desktop workers (not reproduced on mobile) |
 | Screenshot matrix | Deferred to CP8 |
 
-### Recommended CP4 DetailTemplate audit order
+### CP3 rollback
 
-1. `/vendors/:slug` — simpler commerce-adjacent detail  
-2. `/presenters/:username` — profile-style, low organizer coupling  
-3. `/education/:slug` — article detail  
-4. `/media/:slug` — channel show page  
-5. `/events/:id` — high-traffic member detail  
-6. `/groups/:id` — membership/privacy sensitive  
-7. `/orgs/:slug` — org hub with staff/moderation  
-8. `/conventions/:slug` — convention hub (defer organizer tabs to Sprint 3)  
-9. `/profile/:username` — highest privacy surface; audit last before CP6 code
+| Item | Value |
+|------|-------|
+| Commit | `b7d1c7e` |
+| Tag | `desktop-ui-sprint-2-cp3-baseline` |
+| Rollback | `git reset --hard desktop-ui-sprint-2-cp3-baseline` |
+| Migrated routes | `/places`, `/conventions`, `/media`, `/orgs`, `/education` (partial) |
+
+---
+
+## Checkpoint 4 — DetailTemplate audit (plan only)
+
+**Status:** Complete — **no code migrations**  
+**Full audit:** [`UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md`](UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md)
+
+### Risk summary
+
+| Route | Risk | Strategy |
+|-------|------|----------|
+| `/vendors/:id` | High | Partial or direct after full-bleed hero extension |
+| `/presenters/:username` | Medium | Direct migration + width override |
+| `/education/:slug` | Medium | Direct migration (CP5 pilot) |
+| `/media/:slug` | Low–medium | Direct migration (CP5 pilot) |
+| `/events/:id` | Medium–high | Defer CP6 |
+| `/groups/:id` | High | Partial shell only — keep `CommunityHubShell` |
+| `/orgs/:slug` | High | Partial shell only — keep `CommunityHubShell` |
+| `/conventions/:slug` | Critical | Defer Sprint 3 |
+| `/profile/:username`, `/profile` | Critical | Defer CP6 last |
+
+**DetailTemplate adopters today:** none.
+
+### Recommended CP5 batch
+
+1. `/media/:slug`  
+2. `/education/:slug`  
+3. `/presenters/:username`  
+4. `/vendors/:id` (last in batch, or shell-only if hero extension deferred)
+
+**Defer:** events, groups, orgs, conventions, profile.
+
+### CP4 audit order (reference)
+
+1. `/vendors/:id`  
+2. `/presenters/:username`  
+3. `/education/:slug`  
+4. `/media/:slug`  
+5. `/events/:id`  
+6. `/groups/:id`  
+7. `/orgs/:slug`  
+8. `/conventions/:slug`  
+9. `/profile/:username`
 
 ---
 
@@ -359,9 +403,10 @@ Organizer/convention operations: separate shells, program grids, schedule canvas
 | `desktop-ui-sprint-1-cp7-baseline` | `ed3dcf2` | Before any Sprint 2 work |
 | `desktop-ui-sprint-2-cp1-baseline` | `c23fff3` | After CP0/CP1 docs; before CP2 code |
 | `desktop-ui-sprint-2-cp2-baseline` | `43ad6f8` | After CP2 migrations |
-| `desktop-ui-sprint-2-cp3-baseline` | TBD | After CP3 |
+| `desktop-ui-sprint-2-cp3-baseline` | `b7d1c7e` | After CP3 migrations |
 
 ```powershell
+git reset --hard desktop-ui-sprint-2-cp3-baseline  # undo CP4+ work, keep CP3 migrations
 git reset --hard desktop-ui-sprint-2-cp2-baseline  # undo CP3+ work, keep CP2 migrations
 git reset --hard desktop-ui-sprint-2-cp1-baseline  # undo CP2+ work, keep Sprint 2 plan
 git reset --hard desktop-ui-sprint-1-cp7-baseline  # undo all Sprint 2 work

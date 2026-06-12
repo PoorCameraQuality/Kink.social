@@ -86,6 +86,19 @@
 | `/places`, `/conventions`, `/media`, `/orgs`, `/education` shell migrations | `shellOuterClass` + template slots | **None** — preserved mobile filters, drawers, carousels, dual media rail |
 | Education | Partial shell only; center hub untouched | **None** — Topics drawer and `EducationDiscoverCenter` carousels unchanged |
 
+## Sprint 2 Checkpoint 4 (complete)
+
+Docs-only audit. Detail routes with **special mobile patterns** to protect in CP5/CP6:
+
+| Route | Mobile pattern |
+|-------|----------------|
+| `/events/:id` | `MobileActionBar` RSVP; full-bleed hero; tab horizontal scroll |
+| `/conventions/:slug` | Primary 4 tabs + More overflow |
+| `/profile/*` | `ProfileStoryView` replaces desktop cover |
+| Group/org hubs | Sticky `CommunityHubShell` tab bar |
+
+No `DetailTemplate` code migrations in CP4. Full route tables in [`UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md`](UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md).
+
 ## Summary
 
 | Metric | Value |
