@@ -28,9 +28,9 @@ export default function EventsListRow({ event }: Props) {
   const formatLabel = isVirtual ? 'Online' : 'In person'
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)] transition-colors hover:border-dc-accent-border/40">
+    <article className="overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)] transition-colors hover:border-dc-accent-border/40 lg:hover:shadow-[var(--dc-shadow-panel)]">
       <div className="flex items-start justify-between gap-2 p-3 pb-2 sm:p-4 sm:pb-2">
-        <div className="c2k-event-date-badge">
+        <div className="c2k-event-date-badge min-w-[4.25rem] flex-col items-center py-2">
           <span className="text-[10px] font-bold uppercase tracking-wide text-dc-accent">{weekday}</span>
           <span className="text-sm font-bold leading-none text-dc-text">{monthDay}</span>
         </div>
@@ -62,8 +62,8 @@ export default function EventsListRow({ event }: Props) {
           >
             {event.title}
           </Link>
-          <p className="mt-1 text-sm text-dc-text-muted">
-            {displayLocation}
+          <p className="mt-1 text-sm">
+            <span className="font-medium text-dc-text">{displayLocation}</span>
             <span className="text-dc-muted"> · {formatLabel}</span>
           </p>
 
@@ -107,7 +107,7 @@ export default function EventsListRow({ event }: Props) {
             </div>
             <Link
               to={`/events/${event.id}`}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-dc-accent-border bg-dc-accent/10 px-4 text-sm font-semibold text-dc-accent hover:bg-dc-accent-muted"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-dc-accent-border bg-dc-accent/10 px-4 text-sm font-semibold text-dc-accent hover:bg-dc-accent-muted lg:border-transparent lg:bg-dc-accent lg:text-dc-accent-foreground lg:hover:bg-dc-accent-hover"
             >
               View details
             </Link>

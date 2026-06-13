@@ -1,4 +1,4 @@
-import { useId, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
+import { useId, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import EventCard from '@/components/cards/EventCard'
 import EventsCategoryChips from '@/components/events/EventsCategoryChips'
@@ -9,6 +9,7 @@ import EventsListRow from '@/components/events/EventsListRow'
 import EventsRightRail from '@/components/events/EventsRightRail'
 import EventsScopeTabs from '@/components/events/EventsScopeTabs'
 import EmptyState from '@/components/ui/EmptyState'
+import PageHeader from '@/components/shell/PageHeader'
 import { EventSkeleton } from '@/components/ui/skeleton'
 import DirectoryTemplate, { DirectoryFilterButton } from '@/components/templates/DirectoryTemplate'
 import FilterSheet from '@/components/templates/FilterSheet'
@@ -27,6 +28,64 @@ import {
 } from '@/lib/events-page-utils'
 type ViewMode = 'list' | 'grid'
 type SortMode = 'upcoming' | 'relevance' | 'new'
+
+const SCOPE_SUMMARY_LABEL: Record<EventsScopeTab, string> = {
+  all: 'events',
+  'for-you': 'events picked for you',
+  weekend: 'events this weekend',
+  next7: 'events in the next 7 days',
+  month: 'events this month',
+}
+
+const SORT_SUMMARY_LABEL: Record<SortMode, string> = {
+  upcoming: 'sorted by soonest',
+  relevance: 'sorted by popularity',
+  new: 'sorted by newest',
+}
+
+function buildEventsResultSummary({
+  count,
+  pastView,
+  scopeTab,
+  searchQuery,
+  appliedFilterCount,
+  sortMode,
+  viewMode,
+  onClearFilters,
+}: {
+  count: number
+  pastView: boolean
+  scopeTab: EventsScopeTab
+  searchQuery: string
+  appliedFilterCount: number
+  sortMode: SortMode
+  viewMode: ViewMode
+  onClearFilters: () => void
+}): ReactNode {
+  const scopeNoun = pastView ? 'past public events' : SCOPE_SUMMARY_LABEL[scopeTab]
+  const parts = [`${count} ${scopeNoun}`]
+  const q = searchQuery.trim()
+  if (q) parts.push(`matching “${q}”`)
+  if (appliedFilterCount > 0) {
+    parts.push(`${appliedFilterCount} filter${appliedFilterCount === 1 ? '' : 's'} active`)
+  }
+  parts.push(SORT_SUMMARY_LABEL[sortMode])
+  parts.push(`${viewMode} view`)
+
+  return (
+    <p className="text-sm text-dc-text-muted">
+      <span>Showing {parts.join(' · ')}</span>
+      {appliedFilterCount > 0 || q ?
+        <>
+          {' '}
+          <button type="button" onClick={onClearFilters} className="font-medium text-dc-accent hover:underline">
+            Clear filters
+          </button>
+        </>
+      : null}
+    </p>
+  )
+}
 
 type EventFilterDraft = {
   eventFormatFilter: 'all' | 'in-person' | 'virtual'
@@ -323,13 +382,36 @@ export default function EventsDiscoverPage() {
   const pageSubtitle =
     pastView ?
       'Browse events that have already happened.'
-    : 'Find classes, munches, conventions, and community gatherings.'
+    : 'Find munches, classes, conventions, and play parties. Compare by date, location, format, and category before you RSVP.'
+
+  const resultSummary =
+    apiEvents.status === 'ready' && filteredEvents.length > 0 ?
+      buildEventsResultSummary({
+        count: filteredEvents.length,
+        pastView,
+        scopeTab,
+        searchQuery,
+        appliedFilterCount,
+        sortMode,
+        viewMode,
+        onClearFilters: clearFilters,
+      })
+    : null
 
   return (
     <DirectoryTemplate
       title={pageTitle}
       description={pageSubtitle}
       className="py-4 sm:py-6"
+      header={
+        <PageHeader
+          eyebrow={pastView ? 'Event archive' : 'Discover gatherings'}
+          title={pageTitle}
+          description={pageSubtitle}
+          sticky={false}
+          className="mb-4 lg:mb-6"
+        />
+      }
       desktopSidebar={
         <EventsDiscoverLeftRail
           filterState={filterState}
@@ -410,7 +492,7 @@ export default function EventsDiscoverPage() {
           </div>
         </div>
       }
-      resultSummary={null}
+      resultSummary={resultSummary}
     >
       <EventsCategoryChips
         selectedCategories={selectedCategories}

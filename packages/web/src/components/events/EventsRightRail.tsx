@@ -25,17 +25,15 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
 
   return (
     <aside className={railAsideClass} aria-label="Events discovery">
-      <RailCard title="Host an event">
-        <p className="text-2xl" aria-hidden>
-          🎉
-        </p>
-        <p className="mt-2 text-xs leading-relaxed text-dc-text-muted">
+      <RailCard title="Host a gathering" emphasize>
+        <p className="text-xs leading-relaxed text-dc-text-muted">
           Bring your community together. Use <strong className="font-medium text-dc-text">+ Create</strong> in the
           header to publish a munch, class, or convention.
         </p>
       </RailCard>
 
-      <RailCard title="Suggested for you">
+      <RailCard title="Worth checking next">
+        <p className="mb-2 text-xs text-dc-text-muted">Compare these before you RSVP.</p>
         <ul className="space-y-3">
           {picks.map((ev) => {
             const img = ev.imageUrl ?? ev.bannerUrl ?? null
@@ -51,7 +49,8 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
                   )}
                   <span className="min-w-0">
                     <span className="block text-sm font-medium text-dc-text line-clamp-2">{ev.title}</span>
-                    <span className="text-xs text-dc-muted">
+                    <span className="text-xs text-dc-muted">{ev.date}</span>
+                    <span className="block text-xs text-dc-muted">
                       {(ev.mutualGoingCount ?? 0) > 0 ? `${ev.mutualGoingCount} friends going` : `${ev.rsvpCount} going`}
                     </span>
                   </span>
@@ -62,7 +61,8 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
         </ul>
       </RailCard>
 
-      <RailCard title="Browse by category">
+      <RailCard title="Explore by category">
+        <p className="mb-2 text-xs text-dc-text-muted">Jump into a type of gathering.</p>
         <ul className="space-y-2 text-sm">
           {EVENT_CATEGORY_VALUES.slice(0, 6).map((cat) => (
             <li key={cat} className="flex items-center justify-between gap-2 text-dc-text-muted">
@@ -73,7 +73,8 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
         </ul>
       </RailCard>
 
-      <RailCard title="Popular locations">
+      <RailCard title="Browse by city">
+        <p className="mb-2 text-xs text-dc-text-muted">Popular places members list events.</p>
         <ul className="space-y-2 text-sm">
           {LOCATION_COUNTS.map((row) => (
             <li key={row.city} className="flex items-center justify-between gap-2">
@@ -84,15 +85,12 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
         </ul>
       </RailCard>
 
-      <div className="rounded-2xl border border-dc-accent-border/60 bg-dc-accent-muted/30 p-4">
-        <p className="text-lg" aria-hidden>
-          👑
-        </p>
-        <p className="mt-1 text-sm font-semibold text-dc-accent">Get more with Kink Social+</p>
-        <p className="mt-1 text-xs text-dc-text-muted">Visibility, analytics, and organizer tools.</p>
+      <div className="rounded-2xl border border-dc-border/80 bg-dc-elevated-solid/60 p-4">
+        <p className="text-sm font-medium text-dc-text">Kink Social+</p>
+        <p className="mt-1 text-xs text-dc-text-muted">Visibility, analytics, and organizer tools for hosts.</p>
         <Link
           to="/settings"
-          className="mt-3 inline-flex min-h-9 items-center rounded-lg bg-dc-accent px-3 text-xs font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover"
+          className="mt-3 inline-flex min-h-9 items-center rounded-lg border border-dc-border px-3 text-xs font-medium text-dc-text-muted hover:border-dc-accent-border hover:text-dc-accent"
         >
           Learn more
         </Link>
