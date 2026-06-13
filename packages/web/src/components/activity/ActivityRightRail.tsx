@@ -1,17 +1,10 @@
 import { Link } from 'react-router-dom'
-
-function RailCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-      <h3 className="mb-3 text-sm font-semibold text-dc-text">{title}</h3>
-      {children}
-    </div>
-  )
-}
+import RailCard from '@/components/ui/RailCard'
+import { railAsideClass } from '@/lib/card-surface'
 
 export default function ActivityRightRail() {
   return (
-    <aside className="space-y-4 lg:sticky lg:top-24" aria-label="Activity shortcuts">
+    <aside className={railAsideClass} aria-label="Activity shortcuts">
       <RailCard title="Notification settings">
         <p className="text-xs leading-relaxed text-dc-text-muted">
           Choose which alerts you receive by email and in-app.

@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import HomeFeedSuggestedPerson from '@/components/home/HomeFeedSuggestedPerson'
+import RailCard from '@/components/ui/RailCard'
 
 type Suggestion = {
   userId?: string | number
@@ -19,38 +19,6 @@ type Props = {
   spotlight?: { username: string; bio: string; href: string; role?: string }
 }
 
-function RailCard({
-  title,
-  children,
-  footerHref,
-  footerLabel,
-  emphasize,
-}: {
-  title: string
-  children: ReactNode
-  footerHref?: string
-  footerLabel?: string
-  emphasize?: boolean
-}) {
-  return (
-    <div
-      className={`rounded-2xl border p-4 shadow-[var(--dc-shadow-soft)] ${
-        emphasize ?
-          'border-[rgba(214,178,59,0.2)] bg-gradient-to-br from-dc-elevated-solid to-dc-elevated-solid/80'
-        : 'border-dc-border bg-dc-elevated-solid'
-      }`}
-    >
-      <h3 className={`mb-3 text-sm font-semibold ${emphasize ? 'text-dc-accent' : 'text-dc-text'}`}>{title}</h3>
-      {children}
-      {footerHref && footerLabel ?
-        <Link to={footerHref} className="mt-3 inline-block text-xs font-medium text-dc-text-muted hover:text-dc-text hover:underline">
-          {footerLabel}
-        </Link>
-      : null}
-    </div>
-  )
-}
-
 function EmptyHint({ message }: { message: string }) {
   return <p className="text-xs leading-relaxed text-dc-muted">{message}</p>
 }
@@ -64,7 +32,7 @@ export default function HomeFeedDiscoverRail({
   const peopleList = suggestions.slice(0, 4)
 
   return (
-    <aside className="sticky top-[7.5rem] space-y-4" aria-label="Discovery">
+    <aside className="dc-rail-aside sticky top-[7.5rem] space-y-4" aria-label="Discovery">
       <RailCard title="Upcoming near you" footerHref="/events" footerLabel="See all →">
         {upcomingNearYou.length > 0 ?
           <ul className="space-y-2.5">

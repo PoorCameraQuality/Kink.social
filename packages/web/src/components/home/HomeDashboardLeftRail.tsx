@@ -11,6 +11,7 @@ import {
   getProfileOnboardingGaps,
   type ProfileOnboardingGap,
 } from '@/lib/profile-onboarding'
+import { railNavShellClass } from '@/lib/card-surface'
 import {
   NavIconConnections,
   NavIconEvents,
@@ -149,7 +150,7 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
 
   return (
     <nav className="sticky top-[7.5rem] space-y-1" aria-label="My Kink Social">
-      <div className="rounded-2xl border border-white/[0.08] bg-dc-elevated-solid p-3 shadow-[var(--dc-shadow-soft)]">
+      <div className={railNavShellClass}>
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-dc-muted">My Kink Social</p>
         <ul className="space-y-0.5">
           {navItems.map((item) => (

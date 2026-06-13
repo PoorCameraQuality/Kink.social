@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
+import RailCard from '@/components/ui/RailCard'
+import { railAsideClass } from '@/lib/card-surface'
 import { EVENT_CATEGORY_VALUES } from '@c2k/shared'
 import type { MockEvent } from '@/data/types'
 import { countEventsByCategory } from '@/lib/events-page-utils'
@@ -17,21 +19,12 @@ type Props = {
   suggested: MockEvent[]
 }
 
-function RailCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-      <h3 className="mb-3 text-sm font-semibold text-dc-text">{title}</h3>
-      {children}
-    </div>
-  )
-}
-
 export default function EventsRightRail({ allEvents, suggested }: Props) {
   const categoryCounts = countEventsByCategory(allEvents)
   const picks = suggested.length > 0 ? suggested.slice(0, 3) : allEvents.slice(3, 6)
 
   return (
-    <aside className="sticky top-24 space-y-4" aria-label="Events discovery">
+    <aside className={railAsideClass} aria-label="Events discovery">
       <RailCard title="Host an event">
         <p className="text-2xl" aria-hidden>
           🎉

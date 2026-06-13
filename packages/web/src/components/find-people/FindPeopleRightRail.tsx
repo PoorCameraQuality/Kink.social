@@ -1,50 +1,12 @@
 import { Link } from 'react-router-dom'
 
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
+import RailCard from '@/components/ui/RailCard'
+import { railAsideClass } from '@/lib/card-surface'
 
 import { mockCoAttendanceSuggestions, mockNearbyPeopleSuggestions } from '@/data/mock-home-surface'
 
 import type { MockPerson } from '@/data/types'
-
-
-
-function RailCard({ title, children, footerHref, footerLabel }: {
-
-  title: string
-
-  children: React.ReactNode
-
-  footerHref?: string
-
-  footerLabel?: string
-
-}) {
-
-  return (
-
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-
-      <h3 className="mb-3 text-sm font-semibold text-dc-text">{title}</h3>
-
-      {children}
-
-      {footerHref && footerLabel ?
-
-        <Link to={footerHref} className="mt-3 inline-block text-xs font-medium text-dc-accent hover:underline">
-
-          {footerLabel}
-
-        </Link>
-
-      : null}
-
-    </div>
-
-  )
-
-}
-
-
 
 type SuggestRow = {
 
@@ -198,7 +160,7 @@ export default function FindPeopleRightRail({ suggested, useDemoFallback }: Prop
 
   return (
 
-    <aside className="sticky top-24 space-y-4" aria-label="People discovery suggestions">
+    <aside className={railAsideClass} aria-label="People discovery suggestions">
 
       <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
 

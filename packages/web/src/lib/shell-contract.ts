@@ -16,6 +16,13 @@ export const shellOuterClass =
 /** Header chrome and standalone page shells — 1920 cap at lg+. */
 export const shellWideClass = `${shellOuterClass} ${SHELL_GUTTER}` as const
 
+/**
+ * Header inner wrapper — must not clip absolutely positioned menus/drawers below the bar.
+ * (`overflow-x-hidden` on shellWideClass computes overflow-y to auto and clips dropdowns.)
+ */
+export const shellHeaderClass =
+  `mx-auto w-full min-w-0 max-w-7xl lg:max-w-shell-wide overflow-visible ${SHELL_GUTTER}` as const
+
 /** Feed and 2-col utility pages — 1440 reference at lg+; full width below lg. */
 export const shellFeedClass = `mx-auto w-full min-w-0 max-w-7xl lg:max-w-shell-feed ${SHELL_GUTTER}` as const
 

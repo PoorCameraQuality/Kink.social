@@ -1,6 +1,7 @@
 import type { ElementType, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import Card from '@/components/ui/Card'
+import { cardSurfaceSolidClass } from '@/lib/card-surface'
 
 export type EmptyStateAction = {
   label: string
@@ -180,8 +181,8 @@ export default function EmptyState({
         role="status"
         className={`flex flex-col items-center justify-center ${alignClass} dc-card-polish ${
           compact ?
-            'c2k-empty-state-compact rounded-xl border border-dc-border/60 bg-dc-elevated-solid/70 px-4 py-6'
-          : 'rounded-2xl border border-dc-border bg-dc-elevated-solid px-6 py-10 shadow-[var(--dc-shadow-soft)]'
+            'c2k-empty-state-compact dc-surface-lift rounded-xl border border-dc-border/70 bg-dc-elevated-solid/85 px-4 py-6 shadow-[var(--dc-shadow-soft)]'
+          : `${cardSurfaceSolidClass} px-6 py-10`
         } ${className}`.trim()}
       >
         {body}

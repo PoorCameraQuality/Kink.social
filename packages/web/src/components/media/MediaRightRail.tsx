@@ -1,34 +1,12 @@
 import { Link } from 'react-router-dom'
+import RailCard from '@/components/ui/RailCard'
+import { railAsideClass } from '@/lib/card-surface'
 import type { ApiMediaShow } from '@/hooks/useApiMediaShows'
 import {
   FORMAT_BADGE_LABEL,
   formatMediaSubmittedAgo,
   submissionStatusLabel,
 } from '@/lib/media-page-utils'
-
-function RailCard({
-  title,
-  icon,
-  children,
-}: {
-  title: string
-  icon?: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-      <div className="mb-3 flex items-center gap-2">
-        {icon ?
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dc-accent-muted text-dc-accent" aria-hidden>
-            {icon}
-          </span>
-        : null}
-        <h3 className="text-sm font-semibold text-dc-text">{title}</h3>
-      </div>
-      {children}
-    </div>
-  )
-}
 
 function RecentSubmissionRow({ show, viewerUsername }: { show: ApiMediaShow; viewerUsername?: string }) {
   const ago = formatMediaSubmittedAgo(show.submittedAt ?? show.updatedAt)
@@ -94,7 +72,7 @@ export default function MediaRightRail({ myShows = [], myShowsLoading, viewerUse
     .slice(0, 4)
 
   return (
-    <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-label="Media directory tips">
+    <aside className={railAsideClass} aria-label="Media directory tips">
       <RailCard
         title="What belongs here?"
         icon={
