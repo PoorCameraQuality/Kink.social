@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useApiEducationSeriesByAuthor } from '@/hooks/useApiEducationSeries'
 import { presenterTarget } from '@/lib/moderation/report-targets'
 import PresenterBadges from '@/components/presenters/PresenterBadges'
+import DetailTemplate from '@/components/templates/DetailTemplate'
 import {
   formatPresenterRating,
   presenterFeedbackStatusLabel,
@@ -19,6 +20,8 @@ import {
 import type { PresenterBadgeKey } from '@/lib/presenter-badges-types'
 import type { ProfileFocus } from '@/lib/presenter-focus'
 import { PRESENTER_MIN_REVIEWS_FOR_TIER } from '@c2k/shared'
+
+const presenterDetailShellClass = 'max-w-3xl py-8 lg:py-8'
 
 type RunnerMaterial = { label: string; url: string }
 
@@ -267,74 +270,80 @@ export default function PresenterProfilePage() {
     : null
 
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-8">
+    <>
       <ScopePageMeta
         title={`${data.displayName || data.username} — Professional profile`}
         description={p.headline ?? p.bioShort ?? undefined}
         path={`/presenters/${encodeURIComponent(data.username)}`}
         noIndex={p.directoryVisibility === 'UNLISTED'}
       />
-      <Link to="/presenters" className="text-sm text-dc-accent hover:underline mb-6 inline-block">
-        ← All presenters
-      </Link>
-
-      <header className="flex flex-col sm:flex-row gap-6 mt-2">
-        {data.avatarUrl ?
-          <img
-            src={data.avatarUrl}
-            alt=""
-            className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover shrink-0 bg-dc-elevated-solid"
-          />
-        : <PlaceholderAvatar size="xl" className="rounded-2xl w-28 h-28 sm:w-32 sm:h-32 shrink-0" />}
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-dc-text">{data.displayName || data.username}</h1>
-          {data.pronouns && <p className="text-sm text-dc-muted mt-1">{data.pronouns}</p>}
-          {p.headline && <p className="text-dc-text-muted mt-2">{p.headline}</p>}
-          <p className="text-xs text-dc-muted mt-2">{roleLabel}</p>
-          {data.badges && data.badges.length > 0 ?
-            <PresenterBadges badges={data.badges} className="mt-3" />
-          : null}
-          <p className="text-xs text-dc-muted mt-2">
-            {presenterFeedbackStatusLabel(p.reviewCount) ??
-              (p.reviewCount >= PRESENTER_MIN_REVIEWS_FOR_TIER && p.ratingAvg > 0 ?
-                `${formatPresenterRating(p.ratingAvg, p.reviewCount)} from ${p.reviewCount} community review${p.reviewCount === 1 ? '' : 's'}`
-              : p.reviewCount > 0 ?
-                'Limited feedback'
-              : 'Limited feedback')}
-          </p>
-          <div className="flex flex-wrap gap-2 mt-3">
-            {p.expertiseTags?.map((t) => (
-              <span key={t} className="text-xs px-2 py-1 rounded-lg bg-dc-elevated-muted text-dc-text-muted">
-                {t}
-              </span>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-3 mt-4">
-            <Link
-              to={`/profile/${encodeURIComponent(data.username)}`}
-              className="text-sm text-dc-accent hover:underline"
-            >
-              Social profile
+      <DetailTemplate
+        className={presenterDetailShellClass}
+        hero={
+          <>
+            <Link to="/presenters" className="mb-6 inline-block text-sm text-dc-accent hover:underline">
+              ← All presenters
             </Link>
-            {isAuthenticated && !isFallback && viewerUsername !== data.username ?
-              (() => {
-                const target = presenterTarget(data.userId)
-                return (
-                  <ReportAction
-                    variant="button"
-                    targetType={target.targetType}
-                    targetId={target.targetId}
-                    targetLabel="presenter"
-                    surface="presenter_profile"
-                    className="text-sm text-dc-muted hover:text-dc-accent min-h-0 px-0"
-                  />
-                )
-              })()
-            : null}
-          </div>
-        </div>
-      </header>
 
+            <header className="mt-2 flex flex-col gap-6 sm:flex-row">
+              {data.avatarUrl ?
+                <img
+                  src={data.avatarUrl}
+                  alt=""
+                  className="h-28 w-28 shrink-0 rounded-2xl bg-dc-elevated-solid object-cover sm:h-32 sm:w-32"
+                />
+              : <PlaceholderAvatar size="xl" className="h-28 w-28 shrink-0 rounded-2xl sm:h-32 sm:w-32" />}
+              <div className="min-w-0">
+                <h1 className="text-2xl font-bold text-dc-text">{data.displayName || data.username}</h1>
+                {data.pronouns && <p className="mt-1 text-sm text-dc-muted">{data.pronouns}</p>}
+                {p.headline && <p className="mt-2 text-dc-text-muted">{p.headline}</p>}
+                <p className="mt-2 text-xs text-dc-muted">{roleLabel}</p>
+                {data.badges && data.badges.length > 0 ?
+                  <PresenterBadges badges={data.badges} className="mt-3" />
+                : null}
+                <p className="mt-2 text-xs text-dc-muted">
+                  {presenterFeedbackStatusLabel(p.reviewCount) ??
+                    (p.reviewCount >= PRESENTER_MIN_REVIEWS_FOR_TIER && p.ratingAvg > 0 ?
+                      `${formatPresenterRating(p.ratingAvg, p.reviewCount)} from ${p.reviewCount} community review${p.reviewCount === 1 ? '' : 's'}`
+                    : p.reviewCount > 0 ?
+                      'Limited feedback'
+                    : 'Limited feedback')}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {p.expertiseTags?.map((t) => (
+                    <span key={t} className="rounded-lg bg-dc-elevated-muted px-2 py-1 text-xs text-dc-text-muted">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link
+                    to={`/profile/${encodeURIComponent(data.username)}`}
+                    className="text-sm text-dc-accent hover:underline"
+                  >
+                    Social profile
+                  </Link>
+                  {isAuthenticated && !isFallback && viewerUsername !== data.username ?
+                    (() => {
+                      const target = presenterTarget(data.userId)
+                      return (
+                        <ReportAction
+                          variant="button"
+                          targetType={target.targetType}
+                          targetId={target.targetId}
+                          targetLabel="presenter"
+                          surface="presenter_profile"
+                          className="min-h-0 px-0 text-sm text-dc-muted hover:text-dc-accent"
+                        />
+                      )
+                    })()
+                  : null}
+                </div>
+              </div>
+            </header>
+          </>
+        }
+      >
       {linkEntries.length > 0 && (
         <section className="mt-10">
           <h2 className="text-sm font-semibold text-dc-muted uppercase mb-3">Links</h2>
@@ -639,6 +648,7 @@ export default function PresenterProfilePage() {
           {reviewMsg && <p className="text-sm mt-2 text-dc-muted">{reviewMsg}</p>}
         </section>
       )}
-    </div>
+      </DetailTemplate>
+    </>
   )
 }

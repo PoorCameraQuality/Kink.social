@@ -245,7 +245,7 @@ export default function NotificationsPageClient() {
               </button>
             </div>
           </div>
-        : <PresetEmptyState preset="noNotifications" />
+        : <PresetEmptyState preset="noNotifications" variant="surface" />
       : filteredItems.length === 0 ?
         <NotificationsEmptyPanel
           title="No unread notifications"

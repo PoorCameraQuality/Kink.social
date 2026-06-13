@@ -1,6 +1,6 @@
 # Desktop Sprint 1 — Mobile Safety Report
 
-**Status:** Checkpoint 3 complete — see below  
+**Status:** Checkpoint 7 complete — see below  
 **Principle:** Desktop improvements must be additive, not a replacement of the mobile system.
 
 ## Checkpoint 1 (complete)
@@ -30,11 +30,91 @@
 | `AppShell`, `Header` (member), `DirectoryTemplate`, `PersonalUtilityPageShell` | `lg+` width tokens | **None** — mobile padding and grids unchanged |
 | Priority routes: home, people, messaging, profile, settings | `lg+` outer shell | **None** — inner grids and mobile markup untouched |
 
+## Checkpoint 4 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `/people` migrated to `DirectoryTemplate` | Same grid/slots as manual 3-col; `desktopAsideFrom="lg"` | **None** — custom header, FilterSheet, scope tabs, card grid, and `mobileCompact` unchanged |
+| `DirectoryTemplate.desktopAsideFrom` prop | Optional; Events default `xl` unchanged | **None** on Events or mobile People |
+
+## Checkpoint 5 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `EmptyState` variants + presets | Shared primitive; wrappers preserve spacing | **None** — `compact` and `surface` paths match prior panel padding |
+| Tier A empty wrappers (messaging, notifications, saved, activity, my-posts, connections) | Domain wrappers delegate to EmptyState | **None** — same copy, actions, and mobile layout |
+
+## Checkpoint 6 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `card-surface.ts` shared tokens | All breakpoints use same border/radius/shadow | **None** — padding and content unchanged |
+| `Card` `interactive` + `.dc-card-polish` | Hover shadow only at `@media (hover: hover)` in mobile-polish.css | **None** — no card size or density change |
+| Event/Person/FindPeople/LocalPost outer shells | Removed duplicate `hover:border-*` utilities | **None** — active press scale unchanged |
+| Non-feed `LocalPostCard` (saved, my-posts) | Keeps `hover:bg-[var(--dc-elevated-hover)]` on solid surface | **None** — background hover only; no padding/size change |
+
+**Screenshot matrix:** Not captured in CP6 — deferred to CP8 (375–1440px audit).
+
+## Checkpoint 7 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `MediaSurfaceFallback` on event/explore/home listing thumbs | Same classes at all breakpoints | **None** — compact fallbacks in existing thumb boxes; no card resize |
+| Education learning path / video strip fallbacks | All breakpoints | **None** — same aspect ratios; gradient replaces blank regions |
+| `EducationDiscoverHero` gradient-only backdrop | All breakpoints | **None** — removed decorative mock photo layer |
+| `VendorListingMiniCard` initials fallback | All breakpoints | **None** — same aspect-[4/3] frame |
+| Copy-only string updates | N/A | **None** — text only |
+
+## Sprint 2 Checkpoint 2 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `/vendors` → `DirectoryTemplate` + `shellOuterClass` | 3-col grid unchanged below `lg`; `DirectoryFilterButton` + `FilterSheet` preserved | **None** — same search row, mobile sort select, category chips, vendor cards, empty/loading |
+| `/presenters` → `DirectoryTemplate` + `shellOuterClass` | Sidebar-less template; hero card header preserved | **None** — same hero, sort pills, expertise chips, grid, load-more, education footer |
+| `/groups` → `DirectoryTemplate` + `shellOuterClass` | Inline mobile filter drawer → `FilterSheet` + `DirectoryFilterButton` (Events/People pattern); sparse bottom right rail preserved | **None** — `FilterSheet`/`DirectoryFilterButton` are existing mobile primitives; scope tabs, purpose chips, list cards unchanged |
+| `DirectoryTemplate` API | No changes | **None** |
+
+**Mobile layout primitives:** `BottomNav`, `CreateFab`, `FilterSheet`, mobile drawers unchanged. No edits to `mobile-polish.css`.
+
+**Screenshot matrix:** Deferred to Sprint 2 CP8 (automated mobile smoke passed for CP2 and CP3 routes).
+
+## Sprint 2 Checkpoint 3 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `DirectoryTemplate` inferred grid (`sidebar-main`, `main-aside`) | `lg+` only | **None** — mobile stays single-column main |
+| `/places`, `/conventions`, `/media`, `/orgs`, `/education` shell migrations | `shellOuterClass` + template slots | **None** — preserved mobile filters, drawers, carousels, dual media rail |
+| Education | Partial shell only; center hub untouched | **None** — Topics drawer and `EducationDiscoverCenter` carousels unchanged |
+
+## Sprint 2 Checkpoint 4 (complete)
+
+Docs-only audit. Detail routes with **special mobile patterns** to protect in CP5/CP6:
+
+| Route | Mobile pattern |
+|-------|----------------|
+| `/events/:id` | `MobileActionBar` RSVP; full-bleed hero; tab horizontal scroll |
+| `/conventions/:slug` | Primary 4 tabs + More overflow |
+| `/profile/*` | `ProfileStoryView` replaces desktop cover |
+| Group/org hubs | Sticky `CommunityHubShell` tab bar |
+
+No `DetailTemplate` code migrations in CP4. Full route tables in [`UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md`](UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md).
+
+## Sprint 2 Checkpoint 5 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `/media/:slug` → `DetailTemplate` | `className` max-w-3xl; no `MobileActionBar` | **None** — same hero, save/report, episodes order |
+| `/education/:slug` → `DetailTemplate` | `className` max-w-4xl; `<article>` preserved | **None** — reading layout unchanged |
+| `/presenters/:username` → `DetailTemplate` | `className` max-w-3xl; hero in `hero` slot | **None** — single-column sections unchanged |
+| `DetailTemplate` API | No changes | **None** |
+
+**Screenshot matrix:** Deferred to CP8.
+
 ## Summary
 
 | Metric | Value |
 |--------|------:|
-| Mobile-protected components touched | 5 (CP1 only) |
+| Mobile-protected components touched | 5 (CP1 only) + 0 new (CP2) |
 | Confirmed mobile regressions | 0 (pending full screenshot pass at CP8) |
 | Regressions fixed in sprint | 0 |
 | Risks deferred | Tablet density at 768–1023 (browse + feed tabs) — monitor at CP8 |

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '@/components/ui/Button'
+import { cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 
 type PageShellProps = {
   title?: string
@@ -44,7 +45,7 @@ type SectionCardProps = {
 export function SectionCard({ title, description, eyebrow, children, className = '' }: SectionCardProps) {
   return (
     <section
-      className={`rounded-2xl border border-dc-border bg-dc-elevated-solid/90 p-5 shadow-[var(--dc-shadow-soft)] sm:p-6 ${className}`.trim()}
+      className={`${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass} p-5 sm:p-6 ${className}`.trim()}
     >
       {eyebrow ?
         <p className="text-xs font-semibold uppercase tracking-wide text-dc-accent">{eyebrow}</p>

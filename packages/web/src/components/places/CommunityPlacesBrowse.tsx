@@ -22,41 +22,53 @@ type PlaceRow = {
   country: string | null
 }
 
-export default function CommunityPlacesBrowse({ initialCategory = '' }: { initialCategory?: string }) {
-  const [category, setCategory] = useState(initialCategory)
-  const [items, setItems] = useState<PlaceRow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+type BrowseProps = {
+  initialCategory?: string
+  category?: string
+  onCategoryChange?: (value: string) => void
+  omitToolbar?: boolean
+  omitSuggestForm?: boolean
+}
+
+export function PlacesCategoryToolbar({
+  category,
+  onCategoryChange,
+}: {
+  category: string
+  onCategoryChange: (value: string) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {CATEGORIES.map((c) => (
+        <button
+          key={c.value || 'all'}
+          type="button"
+          onClick={() => onCategoryChange(c.value)}
+          className={`rounded-lg border px-3 py-1.5 text-sm ${
+            category === c.value ?
+              'border-dc-accent-border/40 bg-dc-accent/15 text-dc-accent'
+            : 'border-dc-border text-dc-text-muted hover:text-dc-text'
+          }`}
+        >
+          {c.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+export function PlacesLocationNotice() {
+  return (
+    <p className="max-w-prose rounded-xl border border-dc-border bg-dc-elevated/60 px-4 py-3 text-sm text-dc-text-muted">
+      Location filters coming soon
+    </p>
+  )
+}
+
+export function PlacesSuggestForm({ category }: { category: string }) {
   const [suggestName, setSuggestName] = useState('')
   const [suggestBusy, setSuggestBusy] = useState(false)
   const [suggestNotice, setSuggestNotice] = useState<string | null>(null)
-
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const p = new URLSearchParams()
-      if (category) p.set('category', category)
-      const r = await fetch(`/api/v1/community-places?${p.toString()}`, { credentials: 'include' })
-      if (!r.ok) {
-        const j = (await r.json().catch(() => ({}))) as { error?: string }
-        setError(j.error ?? `HTTP ${r.status}`)
-        setItems([])
-        return
-      }
-      const data = (await r.json()) as { items: PlaceRow[] }
-      setItems(data.items ?? [])
-    } catch {
-      setError('Failed to load places')
-      setItems([])
-    } finally {
-      setLoading(false)
-    }
-  }, [category])
-
-  useEffect(() => {
-    void load()
-  }, [load])
 
   const submitSuggestion = async () => {
     const name = suggestName.trim()
@@ -88,27 +100,84 @@ export default function CommunityPlacesBrowse({ initialCategory = '' }: { initia
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.value || 'all'}
-            type="button"
-            onClick={() => setCategory(c.value)}
-            className={`px-3 py-1.5 rounded-lg text-sm border ${
-              category === c.value ?
-                'bg-dc-accent/15 text-dc-accent border-dc-accent-border/40'
-              : 'border-dc-border text-dc-text-muted hover:text-dc-text'
-            }`}
-          >
-            {c.label}
-          </button>
-        ))}
+    <div className="space-y-2 rounded-2xl border border-dc-border p-4">
+      <h3 className="text-sm font-semibold text-dc-text">Suggest a place</h3>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          type="text"
+          value={suggestName}
+          onChange={(e) => setSuggestName(e.target.value)}
+          placeholder="Venue name"
+          className="flex-1 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 py-2 text-sm"
+        />
+        <button
+          type="button"
+          disabled={suggestBusy || !suggestName.trim()}
+          onClick={() => void submitSuggestion()}
+          className="rounded-xl bg-dc-accent px-4 py-2 text-sm font-medium text-dc-accent-foreground disabled:opacity-50"
+        >
+          {suggestBusy ? 'Sending…' : 'Submit'}
+        </button>
       </div>
+      {suggestNotice ? <p className="text-sm text-dc-muted">{suggestNotice}</p> : null}
+    </div>
+  )
+}
 
-      <p className="text-sm text-dc-text-muted rounded-xl border border-dc-border bg-dc-elevated/60 px-4 py-3 max-w-prose">
-        Location filters coming soon
-      </p>
+export default function CommunityPlacesBrowse({
+  initialCategory = '',
+  category: controlledCategory,
+  onCategoryChange,
+  omitToolbar = false,
+  omitSuggestForm = false,
+}: BrowseProps) {
+  const [internalCategory, setInternalCategory] = useState(initialCategory)
+  const category = controlledCategory ?? internalCategory
+  const setCategory = onCategoryChange ?? setInternalCategory
+
+  const [items, setItems] = useState<PlaceRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const p = new URLSearchParams()
+      if (category) p.set('category', category)
+      const r = await fetch(`/api/v1/community-places?${p.toString()}`, { credentials: 'include' })
+      if (!r.ok) {
+        const j = (await r.json().catch(() => ({}))) as { error?: string }
+        setError(j.error ?? `HTTP ${r.status}`)
+        setItems([])
+        return
+      }
+      const data = (await r.json()) as { items: PlaceRow[] }
+      setItems(data.items ?? [])
+    } catch {
+      setError('Failed to load places')
+      setItems([])
+    } finally {
+      setLoading(false)
+    }
+  }, [category])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  useEffect(() => {
+    if (controlledCategory === undefined) setInternalCategory(initialCategory)
+  }, [initialCategory, controlledCategory])
+
+  return (
+    <div className="space-y-6">
+      {!omitToolbar ?
+        <>
+          <PlacesCategoryToolbar category={category} onCategoryChange={setCategory} />
+          <PlacesLocationNotice />
+        </>
+      : null}
 
       {error ? <LoadErrorBanner message={error} onRetry={() => void load()} /> : null}
       {loading ?
@@ -116,45 +185,25 @@ export default function CommunityPlacesBrowse({ initialCategory = '' }: { initia
       : items.length === 0 ?
         <EmptyState inline title="No places yet" message="Be the first to suggest a venue for the community directory." />
       : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {items.map((p) => (
             <li key={p.id} className="rounded-2xl border border-dc-border bg-dc-elevated/95 p-4">
               <h3 className="font-semibold text-dc-text">{p.name}</h3>
-              <p className="text-xs text-dc-muted mt-1 capitalize">{p.category.replace(/_/g, ' ')}</p>
+              <p className="mt-1 text-xs capitalize text-dc-muted">{p.category.replace(/_/g, ' ')}</p>
               {(p.city || p.region || p.country) ?
-                <p className="text-sm text-dc-text-muted mt-2">
+                <p className="mt-2 text-sm text-dc-text-muted">
                   {[p.city, p.region, p.country].filter(Boolean).join(', ')}
                 </p>
               : null}
               {p.description ?
-                <p className="text-sm text-dc-text-muted mt-2 line-clamp-3">{p.description}</p>
+                <p className="mt-2 line-clamp-3 text-sm text-dc-text-muted">{p.description}</p>
               : null}
             </li>
           ))}
         </ul>
       )}
 
-      <div className="rounded-2xl border border-dc-border p-4 space-y-2">
-        <h3 className="text-sm font-semibold text-dc-text">Suggest a place</h3>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            value={suggestName}
-            onChange={(e) => setSuggestName(e.target.value)}
-            placeholder="Venue name"
-            className="flex-1 px-3 py-2 rounded-xl border border-dc-border bg-dc-elevated-solid text-sm"
-          />
-          <button
-            type="button"
-            disabled={suggestBusy || !suggestName.trim()}
-            onClick={() => void submitSuggestion()}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-dc-accent text-dc-accent-foreground disabled:opacity-50"
-          >
-            {suggestBusy ? 'Sending…' : 'Submit'}
-          </button>
-        </div>
-        {suggestNotice ? <p className="text-sm text-dc-muted">{suggestNotice}</p> : null}
-      </div>
+      {!omitSuggestForm ? <PlacesSuggestForm category={category} /> : null}
     </div>
   )
 }

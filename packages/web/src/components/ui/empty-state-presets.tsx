@@ -1,61 +1,149 @@
-import type { ComponentProps } from 'react'
-import EmptyState from '@/components/ui/EmptyState'
+import type { ReactNode } from 'react'
+import EmptyState, { type EmptyStateAction, type EmptyStateProps } from '@/components/ui/EmptyState'
+import {
+  AlertEmptyIcon,
+  BookmarkEmptyIcon,
+  CalendarEmptyIcon,
+  EducationEmptyIcon,
+  FeedEmptyIcon,
+  GroupEmptyIcon,
+  MediaEmptyIcon,
+  MessageEmptyIcon,
+  NotificationEmptyIcon,
+  ProfileEmptyIcon,
+  SearchEmptyIcon,
+  VendorEmptyIcon,
+} from '@/components/ui/empty-state-icons'
 
-type EmptyPreset = Pick<
-  ComponentProps<typeof EmptyState>,
-  'title' | 'message' | 'ctaLabel' | 'ctaHref' | 'secondaryCtaLabel' | 'secondaryCtaHref' | 'actionLabel' | 'icon'
->
-
-function FeedEmptyIcon() {
-  return (
-    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-    </svg>
-  )
+export type EmptyPreset = {
+  title: string
+  message: string
+  icon?: ReactNode
+  ctaLabel?: string
+  ctaHref?: string
+  secondaryCtaLabel?: string
+  secondaryCtaHref?: string
+  actionLabel?: string
+  actions?: EmptyStateAction[]
 }
 
-function CalendarEmptyIcon() {
-  return (
-    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-  )
-}
-
-function MessageEmptyIcon() {
-  return (
-    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-    </svg>
-  )
-}
-
-function SearchEmptyIcon() {
-  return (
-    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-  )
-}
-
+/** Canonical empty-state copy for Tier A and directory surfaces (Desktop UI Sprint 1, CP5). */
 export const EMPTY_STATE_PRESETS = {
+  noResults: {
+    title: 'No results',
+    message: 'Try different keywords or fewer filters.',
+    actionLabel: 'Clear search',
+    icon: <SearchEmptyIcon />,
+  },
+  noMessages: {
+    title: 'No messages yet',
+    message: 'Messages from people you connect with will appear here.',
+    ctaLabel: 'Message settings',
+    ctaHref: '/settings/privacy',
+    secondaryCtaLabel: 'Find people',
+    secondaryCtaHref: '/discovery',
+    icon: <MessageEmptyIcon />,
+  },
+  noNotifications: {
+    title: 'No notifications',
+    message: 'You are caught up. New activity will appear here.',
+    ctaLabel: 'Go home',
+    ctaHref: '/home',
+    icon: <NotificationEmptyIcon />,
+  },
+  noSavedItems: {
+    title: 'Nothing saved yet',
+    message: 'Save events, articles, media, vendors, and posts so you can come back to them later.',
+    icon: <BookmarkEmptyIcon />,
+    actions: [
+      { label: 'Browse events', href: '/events', primary: true },
+      { label: 'Explore education', href: '/education' },
+    ],
+  },
+  noMedia: {
+    title: 'No media yet',
+    message: 'Photos and channels you follow will appear here.',
+    ctaLabel: 'Browse media',
+    ctaHref: '/media',
+    icon: <MediaEmptyIcon />,
+  },
+  noEvents: {
+    title: 'No upcoming events',
+    message: 'Browse the calendar or widen your search to find gatherings near you.',
+    ctaLabel: 'Browse events',
+    ctaHref: '/events',
+    icon: <CalendarEmptyIcon />,
+  },
+  noGroups: {
+    title: 'No groups yet',
+    message: 'Find communities that match your interests.',
+    ctaLabel: 'Explore groups',
+    ctaHref: '/groups',
+    icon: <GroupEmptyIcon />,
+  },
+  noVendors: {
+    title: 'No vendors found',
+    message: 'Try a different search or browse the vendor directory.',
+    ctaLabel: 'Browse vendors',
+    ctaHref: '/vendors',
+    icon: <VendorEmptyIcon />,
+  },
+  noEducationItems: {
+    title: 'No education items yet',
+    message: 'Articles and series from the community will appear here.',
+    ctaLabel: 'Explore education',
+    ctaHref: '/education',
+    icon: <EducationEmptyIcon />,
+  },
+  incompleteProfile: {
+    title: 'Complete your profile',
+    message: 'Add a few details so people can find you and trust who they are connecting with.',
+    ctaLabel: 'Edit profile',
+    ctaHref: '/profile/edit',
+    icon: <ProfileEmptyIcon />,
+  },
+  loadingFailed: {
+    title: 'Could not load',
+    message: 'Check your connection and try again.',
+    actionLabel: 'Retry',
+    icon: <AlertEmptyIcon />,
+  },
+  noActivity: {
+    title: 'No activity yet',
+    message: 'Messages, notifications, and connection requests will appear here as you use Kink Social.',
+    actions: [
+      { label: 'Find people', href: '/people', primary: true },
+      { label: 'Browse events', href: '/events' },
+    ],
+  },
+  noMyPosts: {
+    title: 'You have not posted yet',
+    message: 'Share an update, write an article, or create an event to start contributing to the community.',
+    actions: [
+      { label: 'Create post', href: '/home?mode=discover&tab=Local#home-feed-composer', primary: true },
+      { label: 'Write article', href: '/education/write' },
+    ],
+  },
   noFeedPosts: {
     title: 'No posts yet',
     message: 'Posts from people and groups you follow will show up here.',
     ctaLabel: 'Explore groups',
     ctaHref: '/groups',
     icon: <FeedEmptyIcon />,
-  },  noGroupsJoined: {
+  },
+  noGroupsJoined: {
     title: 'No groups yet',
     message: 'Find communities that match your interests.',
     ctaLabel: 'Explore groups',
     ctaHref: '/groups',
+    icon: <GroupEmptyIcon />,
   },
   noGroupsFound: {
     title: 'No groups found',
     message: 'Try a different search or browse all groups.',
     ctaLabel: 'Browse groups',
     ctaHref: '/groups',
+    icon: <GroupEmptyIcon />,
   },
   noOrgsFollowed: {
     title: 'No organizations followed',
@@ -70,31 +158,12 @@ export const EMPTY_STATE_PRESETS = {
     ctaHref: '/events',
     icon: <CalendarEmptyIcon />,
   },
-  noMessages: {
-    title: 'No messages yet',
-    message: 'Messages from people you connect with will appear here.',
-    ctaLabel: 'Message settings',
-    ctaHref: '/settings/privacy',
-    secondaryCtaLabel: 'Find people',
-    secondaryCtaHref: '/discovery',
-    icon: <MessageEmptyIcon />,
-  },  noNotifications: {
-    title: 'No notifications',
-    message: 'You are caught up. New activity will appear here.',
-    ctaLabel: 'Go home',
-    ctaHref: '/home',
-  },
-  noSavedItems: {
-    title: 'Nothing saved yet',
-    message: 'Save events and posts to find them quickly later.',
-    ctaLabel: 'Browse events',
-    ctaHref: '/events',
-  },
   noUploadedMedia: {
     title: 'No media yet',
     message: 'Photos you upload will appear here after review.',
     ctaLabel: 'Edit profile',
     ctaHref: '/profile/edit',
+    icon: <MediaEmptyIcon />,
   },
   alphaUploadDisabled: {
     title: 'Upload disabled during alpha',
@@ -108,7 +177,8 @@ export const EMPTY_STATE_PRESETS = {
     message: 'Try different keywords or fewer filters.',
     actionLabel: 'Clear search',
     icon: <SearchEmptyIcon />,
-  },  noModerationReports: {
+  },
+  noModerationReports: {
     title: 'Queue is clear',
     message: 'No open reports need review right now.',
     ctaLabel: 'Moderation home',
@@ -116,27 +186,45 @@ export const EMPTY_STATE_PRESETS = {
   },
 } satisfies Record<string, EmptyPreset>
 
+export type EmptyStatePresetKey = keyof typeof EMPTY_STATE_PRESETS
+
+type PresetEmptyStateProps = {
+  preset: EmptyStatePresetKey
+  onAction?: () => void
+  footer?: ReactNode
+} & Pick<EmptyStateProps, 'inline' | 'variant' | 'compact' | 'className' | 'align' | 'titleAs'>
+
 export function PresetEmptyState({
   preset,
   inline,
+  variant,
+  compact,
+  className,
+  align,
+  titleAs,
   onAction,
-}: {
-  preset: keyof typeof EMPTY_STATE_PRESETS
-  inline?: boolean
-  onAction?: () => void
-}) {
+  footer,
+}: PresetEmptyStateProps) {
   const p = EMPTY_STATE_PRESETS[preset]
   return (
     <EmptyState
       inline={inline}
+      variant={variant}
+      compact={compact}
+      className={className}
+      align={align}
+      titleAs={titleAs}
       title={p.title}
       message={p.message}
       icon={'icon' in p ? p.icon : undefined}
-      ctaLabel={'ctaLabel' in p ? p.ctaLabel : undefined}      ctaHref={'ctaHref' in p ? p.ctaHref : undefined}
+      ctaLabel={'ctaLabel' in p ? p.ctaLabel : undefined}
+      ctaHref={'ctaHref' in p ? p.ctaHref : undefined}
       secondaryCtaLabel={'secondaryCtaLabel' in p ? p.secondaryCtaLabel : undefined}
       secondaryCtaHref={'secondaryCtaHref' in p ? p.secondaryCtaHref : undefined}
       actionLabel={'actionLabel' in p ? p.actionLabel : undefined}
+      actions={'actions' in p ? p.actions : undefined}
       onAction={onAction}
+      footer={footer}
     />
   )
 }

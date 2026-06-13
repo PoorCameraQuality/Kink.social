@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 
-import { demoMockImageUrl } from '@/data/mock-data'
 import type { EducationHubStats } from '@/lib/education-discover-data'
 
 type Props = {
@@ -11,21 +10,13 @@ type Props = {
 }
 
 export default function EducationDiscoverHero({ stats, onBrowseTopics, apiBacked = false }: Props) {
-  const heroBg = demoMockImageUrl('c2k-edu-hero-books-rope', 1400, 520)
-
   return (
     <section
       className="relative mb-6 overflow-hidden rounded-2xl border border-dc-border shadow-[var(--dc-shadow-soft)] sm:mb-10"
       aria-label="Education hub hero"
     >
       <div className="absolute inset-0 bg-dc-surface-muted" aria-hidden>
-        <img
-          src={heroBg}
-          alt=""
-          className="h-full w-full scale-105 object-cover opacity-25 blur-sm saturate-50"
-          loading="eager"
-          decoding="async"
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-dc-accent/15 via-dc-surface-muted to-violet-950/40" />
         <div className="absolute inset-0 bg-dc-surface/90" />
         <div className="absolute inset-0 bg-gradient-to-r from-dc-surface via-dc-surface/92 to-dc-surface/78" />
         <div className="absolute inset-0 bg-gradient-to-t from-dc-surface via-dc-surface/55 to-transparent" />

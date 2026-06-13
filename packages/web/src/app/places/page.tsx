@@ -1,21 +1,45 @@
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import CommunityPlacesBrowse from '@/components/places/CommunityPlacesBrowse'
+import CommunityPlacesBrowse, {
+  PlacesCategoryToolbar,
+  PlacesLocationNotice,
+  PlacesSuggestForm,
+} from '@/components/places/CommunityPlacesBrowse'
 import DiscoveryBrowseLinks from '@/components/discovery/DiscoveryBrowseLinks'
+import DirectoryTemplate from '@/components/templates/DirectoryTemplate'
+import { cn } from '@/lib/cn'
+import { shellOuterClass } from '@/lib/shell-contract'
 
 export default function PlacesPage() {
   const [searchParams] = useSearchParams()
-  const category = searchParams.get('category') ?? ''
+  const initialCategory = searchParams.get('category') ?? ''
+  const [category, setCategory] = useState(initialCategory)
+
+  useEffect(() => {
+    setCategory(searchParams.get('category') ?? '')
+  }, [searchParams])
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8 max-w-2xl">
-        <h1 className="text-2xl font-bold text-dc-text">Places</h1>
-        <p className="mt-2 text-sm text-dc-text-muted leading-relaxed">
-          Community-submitted venues and resources. Dungeons, clubs, kink-friendly hotels, and web resources.
-        </p>
-      </div>
-      <CommunityPlacesBrowse initialCategory={category} />
-      <DiscoveryBrowseLinks className="mt-10" />
+    <div className={cn(shellOuterClass, 'c2k-mobile-scroll-pad')}>
+      <DirectoryTemplate
+        title="Places"
+        description="Community-submitted venues and resources. Dungeons, clubs, kink-friendly hotels, and web resources."
+        className="py-6 sm:py-8"
+        toolbar={
+          <div className="space-y-4">
+            <PlacesCategoryToolbar category={category} onCategoryChange={setCategory} />
+            <PlacesLocationNotice />
+          </div>
+        }
+        footer={
+          <div className="mt-10 space-y-10">
+            <PlacesSuggestForm category={category} />
+            <DiscoveryBrowseLinks />
+          </div>
+        }
+      >
+        <CommunityPlacesBrowse category={category} onCategoryChange={setCategory} omitToolbar omitSuggestForm />
+      </DirectoryTemplate>
     </div>
   )
 }

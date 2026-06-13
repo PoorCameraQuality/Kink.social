@@ -21,7 +21,7 @@ import { hideAppHomeMainNavForPath } from '@/lib/focused-personal-shell'
 import { hideHeaderSearchForPath } from '@/lib/discover-nav-policy'
 import { buildLoginHref } from '@/lib/auth-links'
 import SiteWordmark from '@/components/brand/SiteWordmark'
-import { shellWideClass } from '@/lib/shell-contract'
+import { shellHeaderClass } from '@/lib/shell-contract'
 
 type EcosystemPayload = {
   orgs: { slug: string; displayName: string; role: string }[]
@@ -287,8 +287,8 @@ export default function Header() {
   : null
 
   return (
-    <header className="sticky top-0 z-50 border-b border-dc-border-subtle bg-dc-elevated/95 shadow-[var(--dc-shadow-soft)] backdrop-blur-md safe-area-pt">
-      <div className={marketingHeader ? 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8' : shellWideClass}>
+    <header className="dc-header-chrome sticky top-0 z-[100] overflow-visible border-b border-dc-border-subtle bg-dc-elevated/95 shadow-[var(--dc-shadow-soft)] backdrop-blur-md safe-area-pt">
+      <div className={marketingHeader ? 'mx-auto max-w-7xl overflow-visible px-4 sm:px-6 lg:px-8' : shellHeaderClass}>
         {marketingHeader ?
           <>
             <div className="flex h-14 items-center gap-2 lg:hidden">
@@ -364,7 +364,7 @@ export default function Header() {
                     <span className="hidden lg:inline">Create</span>
                   </button>
                   {createOpen && (
-                    <div className="absolute right-0 top-full z-[100] mt-2 max-h-[min(70vh,420px)] w-64 overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-1 shadow-[var(--dc-shadow-panel)]">
+                    <div className="absolute right-0 top-full z-[110] mt-2 max-h-[min(70vh,420px)] w-64 overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-1 shadow-[var(--dc-shadow-panel)]">
                       <CreateMenuDropdown onNavigate={() => setCreateOpen(false)} />
                     </div>
                   )}
@@ -396,7 +396,7 @@ export default function Header() {
                   {notifOpen && (
                     <>
                       <div className="fixed inset-0 z-[90] bg-black/40 md:hidden" aria-hidden onClick={() => setNotifOpen(false)} />
-                      <div className="fixed inset-x-0 bottom-0 z-[100] max-h-[min(75dvh,480px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)] md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:top-full md:mt-2 md:w-80 md:max-h-none md:rounded-xl md:border md:pb-2 md:bg-dc-elevated-solid">
+                      <div className="fixed inset-x-0 bottom-0 z-[110] max-h-[min(75dvh,480px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)] md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:top-full md:z-[110] md:mt-2 md:w-80 md:max-h-none md:rounded-xl md:border md:pb-2 md:bg-dc-elevated-solid">
                         <div className="mx-auto mb-2 mt-1 h-1 w-10 shrink-0 rounded-full bg-dc-border/80 md:hidden" aria-hidden />
                         <p className="px-4 pb-2 text-xs font-semibold uppercase tracking-wide text-dc-muted md:px-3">Notifications</p>
                         <ul className="max-h-[min(50dvh,16rem)] overflow-y-auto md:max-h-64">
@@ -489,7 +489,7 @@ export default function Header() {
                     )}
                   </button>
                   {msgOpen && (
-                    <div className="absolute right-0 top-full z-[100] w-[min(100vw-2rem,22rem)] rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)]">
+                    <div className="absolute right-0 top-full z-[110] w-[min(100vw-2rem,22rem)] rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)]">
                       <p className="px-3 pb-2 text-xs font-semibold text-dc-muted uppercase tracking-wide">Messages</p>
                       <ul className="max-h-64 overflow-y-auto">
                         {msgItems.slice(0, 6).map((c) => (
@@ -560,8 +560,8 @@ export default function Header() {
                   </button>
                   {isProfileOpen && (
                     <>
-                      <div className="fixed inset-0 z-40" aria-hidden onClick={() => setIsProfileOpen(false)} />
-                      <div className="fixed inset-x-0 bottom-0 z-50 max-h-[min(88dvh,640px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)] md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:top-full md:mt-2 md:w-72 md:max-h-[min(80vh,520px)] md:rounded-xl md:border md:pb-2">
+                      <div className="fixed inset-0 z-[90] bg-black/40 md:hidden" aria-hidden onClick={() => setIsProfileOpen(false)} />
+                      <div className="fixed inset-x-0 bottom-0 z-[110] max-h-[min(88dvh,640px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)] md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:top-full md:z-[110] md:mt-2 md:w-72 md:max-h-[min(80vh,520px)] md:rounded-xl md:border md:pb-2">
                         <div className="mx-auto mb-2 mt-1 h-1 w-10 shrink-0 rounded-full bg-dc-border/80 md:hidden" aria-hidden />
                         <div className="px-4 py-3 border-b border-dc-border">
                           <p className="font-medium text-dc-text">{sceneLabel}</p>
@@ -749,7 +749,7 @@ export default function Header() {
             </div>
             {showAppHomeMainNav ?
               <nav
-                className="hidden w-full items-center justify-center gap-0.5 overflow-x-auto border-t border-dc-border-subtle/80 pb-1 pt-1 md:flex"
+                className="dc-header-subnav hidden w-full items-center justify-center gap-0.5 overflow-x-auto border-t border-dc-border-subtle/80 pb-1 pt-1 md:flex"
                 aria-label="Main navigation"
               >
                 {siteConfig.appHomeMainNav.map((link) => {
@@ -758,9 +758,9 @@ export default function Header() {
                     <Link
                       key={`${link.href}-${link.label}`}
                       to={link.href}
-                      className={`min-h-10 shrink-0 whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors ${
+                      className={`dc-browse-nav-link min-h-10 shrink-0 whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors ${
                         active ?
-                          'border-b-2 border-dc-accent bg-dc-accent-muted/50 text-dc-accent'
+                          'dc-browse-nav-link--active border-b-2 border-dc-accent bg-dc-accent-muted/50 text-dc-accent'
                         : 'text-dc-text-muted hover:bg-dc-elevated-muted hover:text-dc-text'
                       }`}
                     >

@@ -203,7 +203,7 @@ export default function ConventionProgramSchedulePanel({
       <ProgramPartnersStrip items={contributorsPreview} />
       {dancecardLinked && !embedScheduleUrl ?
         <p className="text-sm text-dc-muted">
-          Add an embed token in Manage → Logistics to show the ECKE program here. The Kink Social schedule below is still available.
+          Add an embed token in Manage → Logistics to show the published program embed here. The Kink Social schedule below is still available.
         </p>
       : null}
       {showEmptyProgram ?

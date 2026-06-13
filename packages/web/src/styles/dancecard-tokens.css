@@ -30,8 +30,8 @@
   --dc-warning-muted: rgba(245, 158, 11, 0.12);
   --dc-slot-published: #d4af37;
   --dc-slot-accent-mix: 18%;
-  --dc-shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.35);
-  --dc-shadow-panel: 0 20px 48px rgba(0, 0, 0, 0.45);
+  --dc-shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 36px rgba(0, 0, 0, 0.42);
+  --dc-shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 44px rgba(0, 0, 0, 0.48);
   color: var(--dc-text);
   background-color: var(--dc-surface);
 }

@@ -18,6 +18,7 @@ import { useFeedPostReactions } from '@/hooks/useFeedPostReactions'
 import { emptyFeedReactionCounts, FEED_ACTION_LABELS, type FeedReactionId } from '@c2k/shared'
 import { BOOKMARK_OBJECT_FEED_POST, useApiBookmarks } from '@/hooks/useApiBookmarks'
 import type { ConnectionLikerPreview, HomeFeedPost } from '@/lib/feed-types'
+import { cardSurfaceFeedClass, cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 
 export type LocalPostCardProps = {
   post: HomeFeedPost
@@ -208,8 +209,8 @@ export default function LocalPostCard({
   }
 
   const cardClass = feedLayout ?
-    'dc-card-polish rounded-2xl border border-white/[0.07] bg-dc-elevated/95 p-4 shadow-[var(--dc-shadow-soft)] sm:p-4'
-  : 'dc-card-polish rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)] transition-all duration-200 hover:border-dc-accent-border/50 hover:bg-[var(--dc-elevated-hover)] hover:shadow-[var(--dc-shadow-panel)]'
+    `${cardSurfaceFeedClass} ${cardSurfaceInteractiveClass} p-4 sm:p-4`
+  : `${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass} p-4 transition-colors hover:bg-[var(--dc-elevated-hover)]`
 
   const showFeedActivityLead =
     feedLayout && activityLead && activityLead !== 'Shared an update' && activityLead !== 'Posted an update'

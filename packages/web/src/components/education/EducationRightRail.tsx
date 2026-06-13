@@ -1,17 +1,10 @@
 import { Link } from 'react-router-dom'
-
-function RailCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-      <h3 className="mb-3 text-sm font-semibold text-dc-text">{title}</h3>
-      {children}
-    </div>
-  )
-}
+import RailCard from '@/components/ui/RailCard'
+import { railAsideClass } from '@/lib/card-surface'
 
 export default function EducationRightRail() {
   return (
-    <aside className="sticky top-24 space-y-4" aria-label="Education discovery">
+    <aside className={railAsideClass} aria-label="Education discovery">
       <RailCard title="Progress &amp; follows">
         <p className="text-xs leading-relaxed text-dc-text-muted">
           Account progress, saved lessons, and educator follows are not wired on this overview yet. Use{' '}

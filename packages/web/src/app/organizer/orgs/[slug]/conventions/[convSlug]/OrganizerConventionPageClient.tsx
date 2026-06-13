@@ -86,7 +86,7 @@ async function fetchCommandAccess(
       }
     }
     if (!r.ok) {
-      return { ok: false, message: 'Could not verify command bridge access.' }
+      return { ok: false, message: 'Could not verify dashboard access.' }
     }
     const j = (await r.json()) as CommandAccessResponse
     if (j.hasAnyAccess === false) {
@@ -136,7 +136,7 @@ export default function OrganizerConventionPageClient() {
         const orgJson = (await orgRes.json()) as { organization: OrgDetail }
         const o = orgJson.organization
         if (!o.viewerRole) {
-          if (!cancelled) setLoadError('You must belong to this organization to use the organizer console.')
+          if (!cancelled) setLoadError('You must belong to this organization to use the organizer dashboard.')
           return
         }
         if (!convRes.ok) {
@@ -196,7 +196,7 @@ export default function OrganizerConventionPageClient() {
   return (
     <OrganizerAppShell
       scopeKind="convention"
-      eyebrow="Convention command bridge"
+      eyebrow="Convention dashboard"
       title={convention.name}
       subtitle={formatConventionWindow(convention.startsAt, convention.endsAt, convention.timezone)}
       roleBadge={org.viewerRole}

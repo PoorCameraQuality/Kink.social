@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { MockEvent } from '@/data/mock-data'
-import { demoMockImageUrl } from '@/data/mock-data'
+import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import { eventDateBlock } from '@/lib/explore-hub'
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 
 export default function ExploreCompactEventRow({ event, hideThumb = false, className = '' }: Props) {
   const { month, day } = eventDateBlock(event.date)
-  const thumb = event.imageUrl ?? event.bannerUrl ?? demoMockImageUrl(`evt-compact-${event.id}`, 80, 80)
+  const thumb = event.imageUrl ?? event.bannerUrl ?? null
   const goingLabel =
     event.capacityLimit && event.capacityLimit > 0 ?
       `${event.rsvpCount}/${event.capacityLimit} going`
@@ -41,7 +41,9 @@ export default function ExploreCompactEventRow({ event, hideThumb = false, class
         </div>
         {hideThumb ? null : (
           <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-dc-border">
-            <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
+            {thumb ?
+              <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
+            : <MediaSurfaceFallback variant="event" compact className="h-full" />}
           </div>
         )}
       </Link>

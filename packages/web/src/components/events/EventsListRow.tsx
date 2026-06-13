@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import EventSaveButton from '@/components/events/EventSaveButton'
 import TagLink from '@/components/TagLink'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
-import { demoMockImageUrl } from '@/data/mock-data'
+import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import {
   filterPublicEventTags,
   formatEventListDateBlock,
@@ -16,7 +16,7 @@ type Props = {
 
 export default function EventsListRow({ event }: Props) {
   const { weekday, monthDay } = formatEventListDateBlock(event)
-  const heroSrc = event.imageUrl ?? event.bannerUrl ?? demoMockImageUrl(`evt-list-${String(event.id)}`, 640, 360)
+  const heroSrc = event.imageUrl ?? event.bannerUrl ?? null
   const capacity = event.capacityLimit ?? 100
   const fillPct = Math.min(100, Math.round(((event.rsvpCount ?? 0) / Math.max(capacity, 1)) * 100))
   const isVirtual = event.eventFormat === 'virtual'
@@ -39,7 +39,9 @@ export default function EventsListRow({ event }: Props) {
 
       <Link to={`/events/${event.id}`} className="relative mx-3 block overflow-hidden rounded-xl border border-dc-border bg-dc-surface-muted sm:mx-4 md:hidden">
         <div className="aspect-[16/9] w-full">
-          <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
+          {heroSrc ?
+            <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
+          : <MediaSurfaceFallback variant="event" />}
         </div>
       </Link>
 
@@ -48,7 +50,9 @@ export default function EventsListRow({ event }: Props) {
           to={`/events/${event.id}`}
           className="relative hidden h-28 w-36 shrink-0 overflow-hidden rounded-xl border border-dc-border md:block lg:h-32 lg:w-40"
         >
-          <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
+          {heroSrc ?
+            <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
+          : <MediaSurfaceFallback variant="event" />}
         </Link>
 
         <div className="flex min-w-0 flex-1 flex-col">

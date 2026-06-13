@@ -7,6 +7,11 @@ import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
 import type { OrganizerScopeGroup, OrganizerScopeOrg } from '@/lib/organizer/types'
 
+function formatScopeRole(role: string): string {
+  if (!role) return role
+  return role.charAt(0) + role.slice(1).toLowerCase()
+}
+
 function ScopeCard({
   title,
   slug,
@@ -33,7 +38,7 @@ function ScopeCard({
           <p className="mt-0.5 text-xs text-dc-muted">/{slug}</p>
         </div>
         <span className="shrink-0 rounded-full border border-dc-border bg-dc-elevated-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-dc-text-muted">
-          {role}
+          {formatScopeRole(role)}
         </span>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -90,7 +95,7 @@ export default function OrganizerHubPage() {
       try {
         const r = await fetch('/api/v1/organizer/scopes', { credentials: 'include' })
         if (!r.ok) {
-          if (!cancelled) setError(r.status === 401 ? 'Sign in to open the organizer console.' : 'Could not load your organizer scopes.')
+          if (!cancelled) setError(r.status === 401 ? 'Sign in to open the organizer dashboard.' : 'Could not load your organizer scopes.')
           return
         }
         const j = (await r.json()) as { orgs: OrganizerScopeOrg[]; groups: OrganizerScopeGroup[] }
@@ -180,7 +185,7 @@ export default function OrganizerHubPage() {
         : null}
 
         {groups && groups.length > 0 ?
-          <OrganizerPanel title="Groups" description="Subgroup and standalone group consoles.">
+          <OrganizerPanel title="Groups" description="Subgroup and standalone group dashboards.">
             <div className="grid gap-3 sm:grid-cols-2">
               {groups.map((g) => (
                 <ScopeCard

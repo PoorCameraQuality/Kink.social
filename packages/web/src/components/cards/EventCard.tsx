@@ -3,7 +3,7 @@ import TagLink from '@/components/TagLink'
 import EventSaveButton from '@/components/events/EventSaveButton'
 import Card from '@/components/ui/Card'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
-import { demoMockImageUrl } from '@/data/mock-data'
+import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import { filterPublicEventTags, formatEventLocationForDisplay } from '@/lib/events-page-utils'
 
 export type EventCardProps = {
@@ -41,7 +41,7 @@ export default function EventCard({ event }: EventCardProps) {
     isFeatured,
   } = event
   const isVirtual = eventFormat === 'virtual'
-  const heroSrc = imageUrl ?? bannerUrl ?? demoMockImageUrl(`event-hero-${String(id)}`, 960, 480)
+  const heroSrc = imageUrl ?? bannerUrl ?? null
   const fillPct = capacityLimit && capacityLimit > 0 ? Math.min(100, Math.round((rsvpCount / capacityLimit) * 100)) : Math.min(100, Math.round((rsvpCount / 100) * 100))
   const attendanceLabel = capacityLimit && capacityLimit > 0 ? `${rsvpCount}/${capacityLimit} going` : `${rsvpCount} going`
   const previewAvatars = connectionRsvpPreview.slice(0, 3)
@@ -50,7 +50,7 @@ export default function EventCard({ event }: EventCardProps) {
   const displayTags = filterPublicEventTags(tags)
 
   return (
-    <Card className="dc-card-polish relative min-w-0 overflow-hidden hover:border-dc-accent-border/40 transition-colors">
+    <Card interactive className="relative min-w-0 overflow-hidden p-0">
       <div className="relative aspect-[2/1] bg-dc-elevated-solid">
         <Link
           to={`/events/${id}`}
@@ -67,16 +67,7 @@ export default function EventCard({ event }: EventCardProps) {
               data-sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-dc-surface-muted to-dc-elevated-solid">
-              <svg className="w-12 h-12 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
+            <MediaSurfaceFallback variant="event" className="absolute inset-0" />
           )}
         </Link>
         <span className="c2k-event-date-badge absolute top-3 left-3 z-10 pointer-events-none">

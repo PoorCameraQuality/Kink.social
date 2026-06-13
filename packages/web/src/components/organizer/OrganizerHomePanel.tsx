@@ -83,7 +83,7 @@ export default function OrganizerHomePanel({ scopeKind, scopeName, items }: Prop
 
       <p className="text-xs text-dc-muted">
         <strong className="font-normal text-dc-text-muted">Kink Social</strong>. Private community (forums, chat, members).{' '}
-        <strong className="font-normal text-dc-text-muted">ECKE</strong>. Public listings and Dancecard. Configure here; members interact on the public hub.
+        <strong className="font-normal text-dc-text-muted">Public directory listing</strong>. Public listings and Dancecard. Configure here; members interact on the public hub.
       </p>
     </div>
   )

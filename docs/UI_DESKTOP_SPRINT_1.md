@@ -1,6 +1,6 @@
 # Desktop UI Sprint 1 — Foundation and Shell Stabilization
 
-**Status:** Checkpoint 3 complete — Checkpoint 4+ pending  
+**Status:** Checkpoint 8 complete — Sprint 1 closed  
 **Core principle:** **Desktop improvements must be additive, not a replacement of the mobile system.**
 
 The mobile UI was recently overhauled and is **protected**. Sprint 1 targets shell, tokens, directory templates, rails, empty states, and max-width behavior on desktop. It is **not** a reason to disturb finished mobile patterns.
@@ -12,11 +12,11 @@ The mobile UI was recently overhauled and is **protected**. Sprint 1 targets she
 | 1 | Chrome and breakpoint alignment | **Complete** |
 | 2 | Token, docs, stale config | **Complete** |
 | 3 | Desktop shell contract (lg+, 1600/1920) | **Complete** |
-| 4 | People → DirectoryTemplate | Pending |
-| 5 | EmptyState primitive | Pending |
-| 6 | Card/surface cleanup | Pending |
-| 7 | Copy + empty media | Pending |
-| 8 | Verification + mobile safety report | Pending |
+| 4 | People → DirectoryTemplate | **Complete** |
+| 5 | EmptyState primitive | **Complete** |
+| 6 | Card/surface cleanup | **Complete** |
+| 7 | Copy + empty media | **Complete** |
+| 8 | Verification + mobile safety report | **Complete** |
 
 ## Audit baseline
 
@@ -60,9 +60,84 @@ Authenticated **lg+ (1024px+)** layout uses shared width tokens from `packages/w
 
 Below **lg**, shells keep `max-w-7xl` behavior; mobile gutters and spacing unchanged.
 
-**Deferred:** Organizer shells, non-priority routes with hardcoded `max-w-[1600px]`, People → DirectoryTemplate (CP4).
+**Deferred:** Organizer shells, non-priority routes with hardcoded `max-w-[1600px]`, Groups/Orgs/Vendors directory migrations.
 
-**Checkpoint 1 rollback:** No `.git` directory in workspace — CP1 code state is uncommitted on disk; initialize git or copy the tree before CP3 if rollback is needed.
+## Checkpoint 4 (People → DirectoryTemplate)
+
+`/people` (`FindPeopleDiscoverPage`) now uses `DirectoryTemplate` with Events as reference. Custom `header` preserves mobile title/description behavior. `desktopAsideFrom="lg"` keeps the right rail visible at 1024px (Events remains `xl` default).
+
+## Checkpoint 5 (EmptyState primitive)
+
+Normalized `EmptyState` with `variant` (`card` | `inline` | `surface`), `actions[]`, `footer`, and `titleAs`. Presets in `empty-state-presets.tsx`. Tier A wrappers migrated: messaging, notifications, saved, connections (via NotificationsEmptyPanel), activity, my-posts. Media, education coming-soon, organizer, and onboarding panels untouched.
+
+## Checkpoint 6 (card/surface normalization)
+
+Shared surface tokens in `packages/web/src/lib/card-surface.ts`. `Card` gains optional `interactive` prop (delegates hover to `.dc-card-polish`). Normalized outer shells on `EventCard`, `PersonCard`, `FindPeopleProfileCard`, `LocalPostCard` (feed + default), `SectionCard`, home feed empty inline, and saved media episode link. No field, action, routing, or privacy changes.
+
+**Verification (CP6):** `npm run typecheck -w web` and `npm run build -w web` pass. Focused desktop route smoke: `/home`, `/events`, `/people`, `/messaging`, `/notifications`, `/saved` (5 passed; organizer/db routes skipped). Responsive screenshot matrix deferred to **CP8** per sprint plan.
+
+## Checkpoint 7 (copy cleanup + empty media fallbacks)
+
+Member-facing copy on listed routes: Command Bridge/console/ECKE/dev language replaced with dashboard/public-directory/preview wording where shown to members or organizers in scope. Removed `demoMockImageUrl` hero fallbacks on Tier A listing surfaces; missing media uses `MediaSurfaceFallback` (gradient + icon). No route, API, upload, or moderation changes.
+
+**Verification (CP7):** typecheck + build pass; focused desktop smoke on `/home`, `/events`, `/education`, `/explore`, `/vendors`, `/conventions`, `/organizer` (6 passed, 2 skipped). Screenshot matrix deferred to **CP8**.
+
+**CP7 commit:** `ed3dcf2`
+
+## Checkpoint 8 (Sprint 1 verification)
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck -w web` | Pass |
+| `npm run build -w web` | Pass |
+| `npm run test:e2e:smoke` | 76 passed, 5 failed, 3 skipped |
+| `npm run audit:ui-desktop` | Inventories refreshed; live screenshot capture requires `npm run dev` |
+| Screenshot matrix (375–1920) | Deferred to Sprint 2 CP8 |
+
+**Pre-existing smoke failures (not Sprint 1 regressions):** landing H1 copy (`Friends, Events…` vs smoke regex); public `/groups` and `/orgs` AuthGate expectations.
+
+**Sprint 1 rollback tag:** `desktop-ui-sprint-1-cp7-baseline` at `ed3dcf2`
+
+```powershell
+git reset --hard desktop-ui-sprint-1-cp7-baseline
+```
+
+**Sprint 2 continues on branch:** `desktop-ui-sprint-2-template-migration` — see [`UI_DESKTOP_SPRINT_2.md`](UI_DESKTOP_SPRINT_2.md).
+
+## Rollback safety (required before CP4+)
+
+Local git on branch `main`. Tags mark safe rollback points:
+
+| Tag | Commit | Scope |
+|-----|--------|-------|
+| `desktop-ui-sprint-1-cp3-baseline` | (see `git rev-parse`) | End of CP3 — shell contract |
+| `desktop-ui-sprint-1-cp4-baseline` | `d87cc65` | End of CP4 — People DirectoryTemplate |
+| `desktop-ui-sprint-1-cp5-baseline` | `0f7d360` | End of CP5 — EmptyState primitive |
+| `desktop-ui-sprint-1-cp6-baseline` | `0e8dd27` | End of CP6 — card surface normalization |
+| `desktop-ui-sprint-1-cp7-baseline` | `ed3dcf2` | **End of Sprint 1** — copy + media fallbacks |
+
+```powershell
+# Return to Sprint 1 baseline (before Sprint 2)
+git reset --hard desktop-ui-sprint-1-cp7-baseline
+
+# Return to post-CP5 state (discard CP6+ work)
+git reset --hard desktop-ui-sprint-1-cp5-baseline
+
+# Return to post-CP4 state (discard CP5+ work)
+git reset --hard desktop-ui-sprint-1-cp4-baseline
+
+# Return to post-CP3 state (discard CP4+ work)
+git reset --hard desktop-ui-sprint-1-cp3-baseline
+```
+
+```powershell
+# Return to initial monorepo import
+git reset --hard 17f0c71
+```
+
+If git is unavailable, copy the full tree to a timestamped folder before each checkpoint.
+
+**Rule:** No further implementation checkpoints without rollback safety documented and tagged.
 
 ## Sprint 1 scope (desktop-first)
 

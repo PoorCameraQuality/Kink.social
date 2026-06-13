@@ -45,7 +45,7 @@ export default function PersonCard({ person }: PersonCardProps) {
     [age != null ? `${age}` : null, location?.trim() || null].filter(Boolean).join(' · ') || null
 
   return (
-    <Card className="min-w-0 p-4 hover:border-dc-accent-border/40 transition-colors">
+    <Card interactive className="min-w-0 p-4">
       <Link to={`/profile/${username}`} className="block min-w-0">
       <div className="flex gap-3 min-w-0">
         <div className="relative flex-shrink-0">

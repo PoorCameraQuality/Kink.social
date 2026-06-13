@@ -1,6 +1,8 @@
 /**
- * Mobile Visual Polish Pass 4 — shared surface treatments.
- * Token-based gradients, card press states, empty-state glow. Respects prefers-reduced-motion.
+ * Protected mobile territory — Sprint 1 mobile overhaul utilities only.
+ * Do NOT add desktop atmosphere, card hover depth, or empty-state glow here.
+ * Desktop polish belongs in desktop-surfaces.css (lg+ gated).
+ * Any edit requires mobile screenshot verification (see UI_DESKTOP_SPRINT_3.md).
  */
 
 .c2k-profile-hero {

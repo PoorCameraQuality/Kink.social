@@ -4,7 +4,7 @@ import { RSVP_LABEL_INTERESTED } from '@c2k/shared'
 import Badge from '@/components/ui/Badge'
 import Card from '@/components/ui/Card'
 import CopyLinkOverflowMenu from '@/components/ui/CopyLinkOverflowMenu'
-import { demoMockImageUrl } from '@/data/mock-data'
+import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import { useAuth } from '@/contexts/AuthContext'
 import type { ApiEventListItem } from '@/lib/api-event-mapper'
 import type { FollowingFeedItem } from '@/lib/feed-types'
@@ -190,8 +190,7 @@ function EventFeedStoryCard({ item }: Props) {
   }, [event, isVirtual, metaLocation])
   const whenLine = startsAt ? formatEventWhen(startsAt, endsAt) : null
   const dateBadge = startsAt ? formatDateBadge(startsAt) : null
-  const heroSrc =
-    event?.imageUrl ?? metaImageUrl ?? (eventId ? demoMockImageUrl(`event-hero-${eventId}`, 960, 480) : null)
+  const heroSrc = event?.imageUrl ?? metaImageUrl ?? null
   const rsvpCount = event?.rsvpCount ?? 0
   const rsvpClosed = event?.rsvpOpen === false
   const copyPath = item.deepLink && item.deepLink !== '/home' ? item.deepLink : null
@@ -294,17 +293,7 @@ function EventFeedStoryCard({ item }: Props) {
           >
             {heroSrc ?
               <img src={heroSrc} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
-            : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-dc-surface-muted to-dc-elevated-solid">
-                <svg className="h-12 w-12 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-            }
+            : <MediaSurfaceFallback variant="event" className="absolute inset-0" />}
           </Link>
           {dateBadge ?
             <span className="pointer-events-none absolute left-3 top-3 z-10 rounded-lg bg-dc-elevated/95 px-2 py-1 text-xs font-medium text-dc-text backdrop-blur-sm">

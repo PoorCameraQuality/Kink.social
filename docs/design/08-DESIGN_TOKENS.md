@@ -31,7 +31,7 @@
 | `packages/web/src/styles/dancecard-tokens.css` | CSS fallback (coastal-slate) for `[data-dc-theme='event']` |
 | `packages/web/src/styles/dancecard-motion.css` | Tab/panel/skeleton motion |
 | `packages/web/src/app/globals.css` | Legacy `:root` `--c2k-*`, organizer vars, scrollbar/focus base rules |
-| `packages/web/tailwind.config.js` | **Active** Tailwind config — `dc.*` and `c2k.*` color/spacing utilities |
+| `packages/web/tailwind.config.js` | **Active** Tailwind config — `dc.*` and `c2k.*` color/spacing utilities; `maxWidth.shell-wide` (1920px), `shell-feed` (1440px) |
 | `tailwind.config.js` (repo root) | **Deprecated** — stale Next.js-era config; not used by Vite build |
 | `packages/web/src/components/landing/public-auth.css` | `--pub-*` tokens scoped to `.public-page` (landing / public auth) |
 

@@ -1,14 +1,7 @@
 import { Link } from 'react-router-dom'
+import RailCard from '@/components/ui/RailCard'
+import { railAsideClass } from '@/lib/card-surface'
 import type { EventsSectionMode } from '@/lib/events-section-mode'
-
-function RailCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-      <h3 className="mb-3 text-sm font-semibold text-dc-text">{title}</h3>
-      {children}
-    </div>
-  )
-}
 
 function ActionLink({ to, children }: { to: string; children: React.ReactNode }) {
   return (
@@ -29,7 +22,7 @@ export default function EventsPersonalRightRail({ mode }: Props) {
   const showCreate = mode === 'hosted'
 
   return (
-    <aside className="sticky top-24 space-y-4" aria-label="Next steps">
+    <aside className={railAsideClass} aria-label="Next steps">
       {showCreate ?
         <RailCard title="Create your first event">
           <p className="text-xs leading-relaxed text-dc-text-muted">

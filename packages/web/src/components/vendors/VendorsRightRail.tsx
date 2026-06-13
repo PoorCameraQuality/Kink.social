@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
+import RailCard from '@/components/ui/RailCard'
+import { railAsideClass } from '@/lib/card-surface'
 import { mockVendorInPersonRows } from '@/data/mock-home-surface'
 import type { MockVendor } from '@/data/types'
 import { vendorsFeatured, vendorsVendingSoon } from '@/lib/vendor-directory-utils'
@@ -8,15 +10,6 @@ import {
   vendorReputationTier,
   vendorReputationTierLabel,
 } from '@/lib/vendor-reputation-display'
-
-function RailCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-      <h3 className="mb-3 text-sm font-semibold text-dc-text">{title}</h3>
-      {children}
-    </div>
-  )
-}
 
 type Props = {
   vendors: MockVendor[]
@@ -29,7 +22,7 @@ export default function VendorsRightRail({ vendors, useDemoFallback }: Props) {
   const inPersonDemo = useDemoFallback ? mockVendorInPersonRows().slice(0, 4) : []
 
   return (
-    <aside className="sticky top-24 space-y-4" aria-label="Vendor directory info">
+    <aside className={railAsideClass} aria-label="Vendor directory info">
       <RailCard title="Vending soon">
         {vendingSoon.length === 0 && inPersonDemo.length === 0 ?
           <p className="text-xs text-dc-text-muted">No upcoming event appearances listed yet.</p>

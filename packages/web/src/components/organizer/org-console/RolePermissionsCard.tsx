@@ -3,7 +3,7 @@ import OrganizerPanel from '@/components/organizer/ui/OrganizerPanel'
 const ROLE_COPY: Record<string, { title: string; console: string; public: string }> = {
   OWNER: {
     title: 'Owner',
-    console: 'Full console access including settings, roles, branding, and publishing.',
+    console: 'Full dashboard access including settings, roles, branding, and publishing.',
     public: 'Shown as organization leadership on the public hub.',
   },
   ADMIN: {
@@ -37,7 +37,7 @@ export default function RolePermissionsCard({ viewerRole, showSettings }: Props)
   }
 
   return (
-    <OrganizerPanel title="Your role" description="What you can do in this console.">
+    <OrganizerPanel title="Your role" description="What you can do in this dashboard.">
       <p className="text-sm font-medium text-dc-text">{copy.title}</p>
       <p className="mt-2 text-sm text-dc-text-muted">{copy.console}</p>
       <p className="mt-2 text-dc-micro text-dc-muted">{copy.public}</p>

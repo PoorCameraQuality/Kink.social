@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { TrendingItemCardModel } from '@/components/home/TrendingItemCard'
+import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import { trendingKindLabel } from '@/lib/explore-hub'
-import { demoMockImageUrl } from '@/data/mock-data'
 
 type Props = {
   item: TrendingItemCardModel
@@ -9,7 +9,7 @@ type Props = {
 
 /** Hero-style featured trending card for Explore mobile curation. */
 export default function ExploreFeaturedTrendingCard({ item }: Props) {
-  const thumb = item.imageUrl ?? demoMockImageUrl(`trend-hero-${item.kind}-${item.id}`, 640, 360)
+  const thumb = item.imageUrl ?? null
 
   return (
     <Link
@@ -17,7 +17,9 @@ export default function ExploreFeaturedTrendingCard({ item }: Props) {
       className="group mb-2 block overflow-hidden rounded-2xl border border-dc-accent-border/30 bg-gradient-to-br from-dc-accent/10 via-dc-elevated-solid to-dc-surface-muted shadow-[var(--dc-shadow-soft)] transition-colors hover:border-dc-accent-border/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
     >
       <div className="relative aspect-[2/1] w-full overflow-hidden sm:aspect-[21/9]">
-        <img src={thumb} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" loading="lazy" />
+        {thumb ?
+          <img src={thumb} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" loading="lazy" />
+        : <MediaSurfaceFallback variant="generic" />}
         <div className="absolute inset-0 bg-gradient-to-t from-dc-bg/90 via-dc-bg/20 to-transparent" aria-hidden />
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
           <p className="text-[10px] font-bold uppercase tracking-wider text-dc-accent">{trendingKindLabel(item.kind)}</p>

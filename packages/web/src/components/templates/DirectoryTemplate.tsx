@@ -12,13 +12,29 @@ type Props = {
   resultSummary?: ReactNode
   /** Desktop left rail (filters, nav) */
   desktopSidebar?: ReactNode
-  /** Optional right rail on xl+ */
+  /** Optional right rail on xl+ (or lg+ when desktopAsideFrom is lg) */
   desktopAside?: ReactNode
+  /** When to show desktopAside — People uses lg; Events uses xl (default). */
+  desktopAsideFrom?: 'lg' | 'xl'
   children: ReactNode
   footer?: ReactNode
   className?: string
   /** Skip default PageHeader when custom header provided */
   header?: ReactNode
+}
+
+function directoryGridClass(desktopSidebar?: ReactNode, desktopAside?: ReactNode): string | null {
+  const base = 'grid grid-cols-1 gap-6'
+  if (desktopSidebar && desktopAside) {
+    return `${base} lg:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(260px,300px)]`
+  }
+  if (desktopSidebar) {
+    return `${base} lg:grid-cols-[minmax(240px,260px)_minmax(0,1fr)]`
+  }
+  if (desktopAside) {
+    return `${base} lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)]`
+  }
+  return null
 }
 
 /**
@@ -32,12 +48,14 @@ export default function DirectoryTemplate({
   resultSummary,
   desktopSidebar,
   desktopAside,
+  desktopAsideFrom = 'xl',
   children,
   footer,
   className,
   header,
 }: Props) {
-  const hasSidebars = desktopSidebar || desktopAside
+  const gridClass = directoryGridClass(desktopSidebar, desktopAside)
+  const asideVisibility = desktopAsideFrom === 'lg' ? 'hidden lg:block' : 'hidden xl:block'
 
   return (
     <div className={cn(shellDirectoryClass, 'py-6', className)}>
@@ -48,14 +66,14 @@ export default function DirectoryTemplate({
       {toolbar ? <div className="mb-4 space-y-3">{toolbar}</div> : null}
       {resultSummary ? <div className="mb-4 text-sm text-dc-muted">{resultSummary}</div> : null}
 
-      {hasSidebars ?
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(260px,300px)]">
+      {gridClass ?
+        <div className={gridClass}>
           {desktopSidebar ?
             <div className="hidden lg:block">{desktopSidebar}</div>
-          : <div className="hidden lg:block" />}
+          : null}
           <main className="min-w-0">{children}</main>
           {desktopAside ?
-            <div className="hidden xl:block">{desktopAside}</div>
+            <div className={asideVisibility}>{desktopAside}</div>
           : null}
         </div>
       : <main className="min-w-0">{children}</main>}

@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 
+import VendorProductFallback from '@/components/vendors/VendorProductFallback'
+
 export type VendorListingMiniCardProps = {
   vendorSlug: string
   shopName: string
@@ -37,9 +39,7 @@ export default function VendorListingMiniCard({
             className="h-full w-full object-cover object-center"
           />
         ) : (
-          <div className="flex h-full items-center justify-center px-2 text-center text-[11px] text-dc-muted">
-            No preview
-          </div>
+          <VendorProductFallback vendorName={shopName} compact className="h-full" />
         )}
       </div>
       <p className="mt-2 line-clamp-2 min-h-0 break-words font-medium leading-snug text-dc-text">{listingTitle}</p>

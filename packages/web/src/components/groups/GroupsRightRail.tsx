@@ -1,31 +1,9 @@
 import { Link } from 'react-router-dom'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
+import RailCard from '@/components/ui/RailCard'
+import { railAsideClass } from '@/lib/card-surface'
 import { GROUP_PURPOSE_FILTERS, countGroupsByPurpose } from '@/lib/groups-page-utils'
 import type { MockGroup } from '@/data/types'
-
-function RailCard({
-  title,
-  children,
-  footerHref,
-  footerLabel,
-}: {
-  title: string
-  children: React.ReactNode
-  footerHref?: string
-  footerLabel?: string
-}) {
-  return (
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-      <h3 className="mb-3 text-sm font-semibold text-dc-text">{title}</h3>
-      {children}
-      {footerHref && footerLabel ?
-        <Link to={footerHref} className="mt-3 inline-block text-xs font-medium text-dc-accent hover:underline">
-          {footerLabel}
-        </Link>
-      : null}
-    </div>
-  )
-}
 
 type Props = {
   allGroups: MockGroup[]
@@ -44,7 +22,7 @@ export default function GroupsRightRail({
   const suggestRows = (suggested.length > 0 ? suggested : allGroups).slice(0, 3)
 
   return (
-    <aside className="space-y-4 lg:sticky lg:top-24" aria-label="Groups discovery helpers">
+    <aside className={railAsideClass} aria-label="Groups discovery helpers">
       <RailCard title="Suggested for you" footerHref="/groups" footerLabel="View all">
         {suggestRows.length === 0 ?
           <p className="text-xs text-dc-text-muted">More groups appear as communities join Kink Social.</p>

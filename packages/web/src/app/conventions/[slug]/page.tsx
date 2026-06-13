@@ -1794,7 +1794,7 @@ export default function ConventionProgramPage() {
           <div className="border-t border-dc-border pt-4 space-y-3">
             <h4 className="text-sm font-semibold text-dc-text">Dancecard (East Coast) link</h4>
             <p className="text-xs text-dc-muted">
-              When enabled, program is edited on Kink Social and published outward to ECKE Dancecard (Event settings tab).
+              When enabled, program is edited on Kink Social and published outward to the public Dancecard directory (Event settings tab).
             </p>
             <label className="flex items-center gap-2 cursor-pointer text-dc-text-muted">
               <input
@@ -1813,7 +1813,7 @@ export default function ConventionProgramPage() {
             />
             <input
               type="url"
-              placeholder="ECKE host (optional, default production)"
+              placeholder="Public site host (optional, default production)"
               value={logisticsDraft.dancecardHost}
               onChange={(e) => setLogisticsDraft((p) => ({ ...p, dancecardHost: e.target.value }))}
               className="w-full px-3 py-2 rounded-xl bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
@@ -1849,7 +1849,7 @@ export default function ConventionProgramPage() {
           <section className="space-y-3 border-t border-dc-border pt-8">
             <h3 className="text-base font-semibold text-dc-text">Program &amp; venues</h3>
             <p className="text-xs text-dc-muted">
-              Full Dancecard organizer (program grid, venues, people, import, messaging) lives in the organizer console.
+              Full Dancecard organizer (program grid, venues, people, import, messaging) lives in the organizer dashboard.
               Use the link above or edit inline below.
             </p>
             <ConventionDancecardOrganizerClient

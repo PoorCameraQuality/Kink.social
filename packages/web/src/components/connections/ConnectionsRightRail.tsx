@@ -1,31 +1,9 @@
 import { Link } from 'react-router-dom'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
+import RailCard from '@/components/ui/RailCard'
+import { railAsideClass } from '@/lib/card-surface'
 import type { ConnectionRow } from '@/app/connections/connections-types'
 import type { SuggestedPerson } from '@/app/connections/connections-types'
-
-function RailCard({
-  title,
-  children,
-  footerHref,
-  footerLabel,
-}: {
-  title: string
-  children: React.ReactNode
-  footerHref?: string
-  footerLabel?: string
-}) {
-  return (
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-      <h3 className="mb-3 text-sm font-semibold text-dc-text">{title}</h3>
-      {children}
-      {footerHref && footerLabel ?
-        <Link to={footerHref} className="mt-3 inline-block text-xs font-medium text-dc-accent hover:underline">
-          {footerLabel}
-        </Link>
-      : null}
-    </div>
-  )
-}
 
 type Props = {
   incomingRequests: ConnectionRow[]
@@ -53,7 +31,7 @@ export default function ConnectionsRightRail({
   const suggestPreview = suggested.slice(0, 3)
 
   return (
-    <aside className="hidden space-y-4 lg:block lg:sticky lg:top-24" aria-label="Connections sidebar">
+    <aside className={`hidden lg:block ${railAsideClass}`} aria-label="Connections sidebar">
       <RailCard title="Connection requests" footerHref="/connections?tab=requests" footerLabel="View all">
         {preview.length === 0 ?
           <p className="text-xs leading-relaxed text-dc-text-muted">No pending requests right now.</p>

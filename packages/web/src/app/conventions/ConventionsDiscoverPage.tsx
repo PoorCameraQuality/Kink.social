@@ -6,9 +6,12 @@ import ConventionsListRow from '@/components/conventions/ConventionsListRow'
 import ConventionsSubmitCta from '@/components/conventions/ConventionsSubmitCta'
 import EmptyState from '@/components/ui/EmptyState'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
+import DirectoryTemplate, { DirectoryFilterButton } from '@/components/templates/DirectoryTemplate'
+import FilterSheet from '@/components/templates/FilterSheet'
 import { useAuth } from '@/contexts/AuthContext'
 import { mockHomeConventions } from '@/data/mock-data'
 import type { HomeConventionRow } from '@/hooks/useHomeSurface'
+import { cn } from '@/lib/cn'
 import {
   countConventionsByEventType,
   filterConventions,
@@ -16,6 +19,21 @@ import {
   pickFeaturedConventions,
   type ConventionEventType,
 } from '@/lib/conventions-page-utils'
+import { shellOuterClass } from '@/lib/shell-contract'
+
+function countConventionActiveFilters(args: {
+  searchQuery: string
+  selectedEventTypes: ConventionEventType[]
+  dateRange: { start: string; end: string }
+  locationRegion: string
+}): number {
+  let count = 0
+  if (args.searchQuery.trim()) count++
+  count += args.selectedEventTypes.length
+  if (args.dateRange.start || args.dateRange.end) count++
+  if (args.locationRegion.trim()) count++
+  return count
+}
 
 export default function ConventionsDiscoverPage() {
   const [searchParams] = useSearchParams()
@@ -29,7 +47,7 @@ export default function ConventionsDiscoverPage() {
 
   const [items, setItems] = useState<HomeConventionRow[] | null>(null)
   const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
@@ -95,11 +113,19 @@ export default function ConventionsDiscoverPage() {
     Boolean(dateRange.start || dateRange.end) ||
     Boolean(locationRegion)
 
+  const activeFilterCount = countConventionActiveFilters({
+    searchQuery,
+    selectedEventTypes,
+    dateRange,
+    locationRegion,
+  })
+
   const clearFilters = () => {
     setSearchQuery('')
     setSelectedEventTypes([])
     setDateRange({ start: '', end: '' })
     setLocationRegion('')
+    setFilterSheetOpen(false)
   }
 
   const toggleEventType = (t: ConventionEventType) => {
@@ -130,83 +156,76 @@ export default function ConventionsDiscoverPage() {
   const railProps = { filterState, eventTypeCounts }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8 c2k-mobile-scroll-pad">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(240px,260px)_minmax(0,1fr)]">
-        <div className="hidden lg:block">
-          <ConventionsLeftRail {...railProps} />
-        </div>
-
-        <main className="min-w-0">
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">{pageTitle}</h1>
-              <p className="mt-1 text-sm text-dc-text-muted">{pageSubtitle}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setFilterDrawerOpen(!filterDrawerOpen)}
-                className="inline-flex min-h-11 items-center rounded-xl border border-dc-border bg-dc-elevated-solid px-4 text-sm font-medium text-dc-accent lg:hidden"
-              >
-                Filters
-              </button>
-              <ConventionsSubmitCta variant="button" />
-            </div>
+    <div className={cn(shellOuterClass, 'c2k-mobile-scroll-pad')}>
+      <DirectoryTemplate
+        title={pageTitle}
+        description={pageSubtitle}
+        className="py-4 sm:py-6"
+        headerActions={<ConventionsSubmitCta variant="button" />}
+        toolbar={
+          <div className="flex justify-end lg:hidden">
+            <DirectoryFilterButton activeFilterCount={activeFilterCount} onClick={() => setFilterSheetOpen(true)} />
           </div>
-
-          {filterDrawerOpen ?
-            <div className="mb-6 rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 lg:hidden">
-              <ConventionsLeftRail {...railProps} />
-            </div>
-          : null}
-
-          {status === 'error' ?
-            <LoadErrorBanner message="Could not load conventions." onRetry={() => void load()} />
-          : status === 'loading' ?
-            <div className="space-y-3" aria-busy="true">
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                {[1, 2].map((i) => (
-                  <div key={i} className="aspect-[16/9] animate-pulse rounded-2xl bg-dc-elevated-muted" />
-                ))}
-              </div>
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 animate-pulse rounded-2xl bg-dc-elevated-muted" />
+        }
+        desktopSidebar={<ConventionsLeftRail {...railProps} />}
+      >
+        {status === 'error' ?
+          <LoadErrorBanner message="Could not load conventions." onRetry={() => void load()} />
+        : status === 'loading' ?
+          <div className="space-y-3" aria-busy="true">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {[1, 2].map((i) => (
+                <div key={i} className="aspect-[16/9] animate-pulse rounded-2xl bg-dc-elevated-muted" />
               ))}
             </div>
-          : filtered.length === 0 ?
-            <EmptyState
-              inline
-              title="No conventions match"
-              message={
-                hasActiveFilters ?
-                  'Try resetting filters or widening your search.'
-                : 'Nothing listed yet. Check back when organizers publish.'
-              }
-              actionLabel={hasActiveFilters ? 'Reset filters' : undefined}
-              onAction={hasActiveFilters ? clearFilters : undefined}
-            />
-          : <>
-              {!pastView && !mineView && featured.length > 0 ?
-                <ConventionsFeaturedRow featured={featured} />
-              : null}
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 animate-pulse rounded-2xl bg-dc-elevated-muted" />
+            ))}
+          </div>
+        : filtered.length === 0 ?
+          <EmptyState
+            inline
+            title="No conventions match"
+            message={
+              hasActiveFilters ?
+                'Try resetting filters or widening your search.'
+              : 'Nothing listed yet. Check back when organizers publish.'
+            }
+            actionLabel={hasActiveFilters ? 'Reset filters' : undefined}
+            onAction={hasActiveFilters ? clearFilters : undefined}
+          />
+        : <>
+            {!pastView && !mineView && featured.length > 0 ?
+              <ConventionsFeaturedRow featured={featured} />
+            : null}
 
-              {mineView ?
-                <p className="mb-4 text-sm text-dc-muted">
-                  My Conventions uses your organizer memberships. Full list coming soon. Showing browse results for now.
-                </p>
-              : null}
+            {mineView ?
+              <p className="mb-4 text-sm text-dc-muted">
+                My Conventions uses your organizer memberships. Full list coming soon. Showing browse results for now.
+              </p>
+            : null}
 
-              <div className="space-y-3">
-                {listRows.map((c) => (
-                  <ConventionsListRow key={c.id} convention={c} />
-                ))}
-              </div>
+            <div className="space-y-3">
+              {listRows.map((c) => (
+                <ConventionsListRow key={c.id} convention={c} />
+              ))}
+            </div>
 
-              <ConventionsSubmitCta />
-            </>
-          }
-        </main>
-      </div>
+            <ConventionsSubmitCta />
+          </>
+        }
+
+        <FilterSheet
+          open={filterSheetOpen}
+          onClose={() => setFilterSheetOpen(false)}
+          title="Convention filters"
+          activeFilterCount={activeFilterCount}
+          onClear={clearFilters}
+          liveApply
+        >
+          <ConventionsLeftRail {...railProps} />
+        </FilterSheet>
+      </DirectoryTemplate>
     </div>
   )
 }

@@ -532,7 +532,7 @@ export default function ProfilePageClient() {
               role="status"
             >
               <p>
-                This browser has saved demo profile edits that may be outdated. Your live profile comes from the server.
+                This browser has saved offline profile edits that may be outdated. Your live profile comes from the server.
               </p>
               <button
                 type="button"

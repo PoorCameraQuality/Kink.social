@@ -2,7 +2,7 @@
  * Education discover hub - mock learning paths, stats, and card mappers.
  * Extends existing article/presenter types; no new API tables.
  */
-import { demoMockImageUrl, mockPeople } from '@/data/mock-data'
+import { mockPeople } from '@/data/mock-data'
 import { getMockEducationCatalog, mockEducationExtras } from '@/data/mock-home-surface'
 import type { MockArticle } from '@/data/types'
 import type { ApiEducationArticle } from '@/hooks/useApiEducationArticles'
@@ -19,7 +19,7 @@ export type EducationLearningPath = {
   id: string
   title: string
   href: string
-  imageUrl: string
+  imageUrl?: string | null
   modules: { label: string; completed: boolean }[]
   progressPercent: number
 }
@@ -73,7 +73,6 @@ export const MOCK_LEARNING_PATHS: EducationLearningPath[] = [
     id: 'path-foundations',
     title: 'BDSM Foundations',
     href: '/education?view=paths',
-    imageUrl: demoMockImageUrl('c2k-edu-path-foundations', 640, 360),
     modules: [
       { label: 'Consent & negotiation', completed: true },
       { label: 'Roles & dynamics', completed: true },
@@ -86,7 +85,6 @@ export const MOCK_LEARNING_PATHS: EducationLearningPath[] = [
     id: 'path-rope',
     title: 'Rope Bondage Basics',
     href: '/education?view=paths',
-    imageUrl: demoMockImageUrl('c2k-edu-path-rope', 640, 360),
     modules: [
       { label: 'Single-column tie', completed: true },
       { label: 'Double-column tie', completed: false },
@@ -99,7 +97,6 @@ export const MOCK_LEARNING_PATHS: EducationLearningPath[] = [
     id: 'path-leadership',
     title: 'Dominance & Leadership',
     href: '/education?view=paths',
-    imageUrl: demoMockImageUrl('c2k-edu-path-leadership', 640, 360),
     modules: [
       { label: 'Ethical dominance', completed: false },
       { label: 'Communication under stress', completed: false },

@@ -933,7 +933,7 @@ export default function ConventionDancecardPanel({
         <section className="space-y-2 rounded-xl border border-dc-border bg-dc-elevated/95/50 p-3">
           <h3 className="text-sm font-semibold text-dc-text">Shift swap requests</h3>
           <p className="text-[11px] text-dc-muted">
-            Ask organizers to reassign a shift you cannot cover. Approval happens in command bridge.
+            Ask organizers to reassign a shift you cannot cover. Approval happens in the organizer dashboard.
           </p>
           {mySwaps.length > 0 ?
             <ul className={`space-y-1.5 ${scrollList}`}>
