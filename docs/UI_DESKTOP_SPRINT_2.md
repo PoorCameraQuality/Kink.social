@@ -490,7 +490,7 @@ Organizer/convention operations: separate shells, program grids, schedule canvas
 | `desktop-ui-sprint-2-cp2-baseline` | `43ad6f8` | After CP2 migrations |
 | `desktop-ui-sprint-2-cp3-baseline` | `b7d1c7e` | After CP3 migrations |
 | `desktop-ui-sprint-2-cp4-baseline` | `736a83b` | After CP4 audit |
-| `desktop-ui-sprint-2-visual-baseline` | closure commit | End of Sprint 2; start Sprint 3 from here |
+| `desktop-ui-sprint-2-visual-baseline` | `cfec28a` | End of Sprint 2; start Sprint 3 from here |
 
 ```powershell
 git reset --hard desktop-ui-sprint-2-visual-baseline  # undo Sprint 3 visual work
