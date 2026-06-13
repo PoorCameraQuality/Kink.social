@@ -17,6 +17,12 @@ type Props = {
   className?: string
 }
 
+const SCOPE_HELPER: Record<'following' | 'near-you' | 'trending', string> = {
+  following: 'Posts from people and groups you follow.',
+  'near-you': 'Local posts and activity near your area.',
+  trending: 'What the community is talking about right now.',
+}
+
 /**
  * Home feed scope tabs: Following, Near you, Trending.
  * Mobile/tablet: rendered inside CommunityNavBar (below lg).
@@ -25,10 +31,15 @@ type Props = {
 export default function HomeFeedScopeNav({ className = '' }: Props) {
   const { pathname, search } = useLocation()
   const { mode, tab } = resolveCommunityNavState(pathname, search)
+  const activeScope =
+    mode === 'following' ? 'following'
+    : mode === 'discover' && tab === 'Local' ? 'near-you'
+    : 'trending'
 
   return (
+    <div className={className}>
     <nav
-      className={`flex gap-1 overflow-x-auto pb-0.5 c2k-no-scrollbar ${className}`.trim()}
+      className="flex gap-1 overflow-x-auto pb-0.5 c2k-no-scrollbar"
       aria-label="Home feed scope"
       role="tablist"
     >
@@ -57,5 +68,9 @@ export default function HomeFeedScopeNav({ className = '' }: Props) {
         Trending
       </Link>
     </nav>
+    <p className="mt-2 hidden text-xs leading-relaxed text-dc-muted lg:block" id="home-feed-scope-helper">
+      {SCOPE_HELPER[activeScope]}
+    </p>
+    </div>
   )
 }

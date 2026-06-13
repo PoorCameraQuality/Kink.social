@@ -98,7 +98,7 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
           </Panel>
       </section>}
 
-      <FeedScopeTabs showHeading={feedShell} />
+      <FeedScopeTabs showHeading={feedShell} hideOnDesktop={feedShell} />
 
       {filterLoaded ?
         <TabShell className="mb-4 w-full max-w-full overflow-x-auto" aria-label="Following feed filters">

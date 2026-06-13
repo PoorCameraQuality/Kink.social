@@ -149,9 +149,12 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
   const navItems = omitHomeLink ? myC2k.filter((item) => item.label !== 'Home') : myC2k
 
   return (
-    <nav className="sticky top-[7.5rem] space-y-1" aria-label="My Kink Social">
+    <nav className="sticky top-[7.5rem] space-y-1" aria-label="Home shortcuts">
       <div className={railNavShellClass}>
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-dc-muted">My Kink Social</p>
+        <p className="mb-1 text-sm font-semibold text-dc-text">Shortcuts</p>
+        <p className="mb-3 hidden text-xs leading-relaxed text-dc-text-muted lg:block">
+          Jump to messages, saved posts, and your activity without leaving Home.
+        </p>
         <ul className="space-y-0.5">
           {navItems.map((item) => (
             <NavLink
@@ -168,8 +171,8 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
 
         {signedIn ?
           <div className="mt-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-dc-muted">Trust</p>
-            <p className="mt-1.5 text-sm font-semibold text-dc-text">Build your trust profile</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-dc-muted">Trust</p>
+            <p className="mt-1.5 text-sm font-semibold text-dc-text">Help people recognize you</p>
             <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">
               {loading ?
                 'Checking your profile essentials…'

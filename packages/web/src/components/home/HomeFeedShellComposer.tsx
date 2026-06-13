@@ -24,7 +24,7 @@ function CollapsedComposerTrigger({
     <button
       type="button"
       onClick={onActivate}
-      className="flex min-h-10 min-w-0 flex-1 items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-4 text-left text-sm text-dc-muted transition-colors hover:border-[rgba(214,178,59,0.28)] hover:bg-white/[0.06]"
+      className="flex min-h-10 min-w-0 flex-1 items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-4 text-left text-sm text-dc-muted transition-colors hover:border-[rgba(214,178,59,0.32)] hover:bg-white/[0.06] hover:text-dc-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface"
     >
       {placeholder}
     </button>

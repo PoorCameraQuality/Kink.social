@@ -526,7 +526,7 @@ export default function HomeFeedRichComposer({
 
       {!showQuickActions ? <PostComposerModeBar /> : null}
 
-      <Card padding="none" className="overflow-hidden border-dc-border bg-[var(--dc-input)]">
+      <Card padding="none" className="overflow-hidden border-dc-border bg-[var(--dc-input)] ring-1 ring-white/[0.05]">
 
         <EditorContent editor={editor} />
 

@@ -10,9 +10,11 @@ const SCOPES = [
 
 type Props = {
   showHeading?: boolean
+  /** When true, hidden at lg+ so HomeFeedScopeNav is the sole desktop scope control. */
+  hideOnDesktop?: boolean
 }
 
-export default function FeedScopeTabs({ showHeading = false }: Props) {
+export default function FeedScopeTabs({ showHeading = false, hideOnDesktop = false }: Props) {
   const [searchParams] = useSearchParams()
   const mode = searchParams.get('mode') ?? 'discover'
   const tab = searchParams.get('tab') ?? 'Local'
@@ -26,7 +28,7 @@ export default function FeedScopeTabs({ showHeading = false }: Props) {
     : 'foryou'
 
   return (
-    <div className={showHeading ? 'mb-4' : 'mb-2'}>
+    <div className={`${showHeading ? 'mb-4' : 'mb-2'}${hideOnDesktop ? ' lg:hidden' : ''}`}>
       {showHeading ?
         <div className="mb-2 flex min-h-11 items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-dc-text">Community activity</h2>

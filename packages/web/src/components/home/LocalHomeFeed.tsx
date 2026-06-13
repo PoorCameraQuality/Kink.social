@@ -70,7 +70,7 @@ export default function LocalHomeFeed({
   const feedLoading = isAuthenticated && !isFallback && !apiFeedSettled
   const composerName = viewerDisplayName ?? viewerUsername ?? 'there'
   const composerPlaceholder = feedShell
-    ? 'Share an update with your community…'
+    ? 'Share an update with people who follow you…'
     : `What's on your mind, ${composerName}?`
 
   const viewerInitial = viewerUsername ? viewerUsername.charAt(0).toUpperCase() : '?'
@@ -187,7 +187,7 @@ export default function LocalHomeFeed({
       composer={composerBlock}
       tabs={
         <>
-          <FeedScopeTabs showHeading={feedShell && !compactComposer} />
+          <FeedScopeTabs showHeading={feedShell && !compactComposer} hideOnDesktop={feedShell} />
           {!feedShell && showConventionPins ? <ConventionPinsCompact /> : null}
           {apiFeedSettled && !apiFeedOk && isAuthenticated && !isFallback && apiFeedError ?
             <LoadErrorBanner className="mb-4" message={apiFeedError} onRetry={onRefreshFeed} />

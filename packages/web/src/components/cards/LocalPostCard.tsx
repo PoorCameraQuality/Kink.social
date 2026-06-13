@@ -222,11 +222,16 @@ export default function LocalPostCard({
   return (
     <article className={cardClass}>
       {isRepost && feedLayout ?
-        <p className="mb-2 text-xs text-dc-muted">
-          <Link to={`/profile/${authorUsername}`} className="font-medium text-dc-accent hover:underline">
-            @{authorUsername}
-          </Link>
-          <span> reposted</span>
+        <p className="mb-2.5 flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1.5 text-xs text-dc-muted">
+          <svg className="h-3.5 w-3.5 shrink-0 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 4v5h5M20 20v-5h-5M5 19a9 9 0 0014-7M19 5a9 9 0 00-14 7" />
+          </svg>
+          <span>
+            <Link to={`/profile/${authorUsername}`} className="font-medium text-dc-accent hover:underline">
+              @{authorUsername}
+            </Link>
+            <span> reposted</span>
+          </span>
         </p>
       : kind === 'repost' && !feedLayout ?
         <p className="mb-2 text-xs font-medium text-dc-muted">
@@ -247,12 +252,18 @@ export default function LocalPostCard({
           />
         </Link>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-x-2 gap-y-1 flex-wrap">
+          <div
+            className={
+              feedLayout ?
+                'flex items-center gap-x-2 gap-y-1 flex-wrap border-b border-white/[0.06] pb-2.5'
+              : 'flex items-center gap-x-2 gap-y-1 flex-wrap'
+            }
+          >
             <Link
               to={`/profile/${headerUsername}`}
               className={`font-semibold text-dc-text hover:text-dc-accent truncate ${feedLayout ? 'text-base' : ''}`}
             >
-              {headerUsername}
+              {feedLayout ? `@${headerUsername}` : headerUsername}
             </Link>
             {showOrganizerBadge ?
               <span className="rounded-full border border-[rgba(214,178,59,0.25)] bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-dc-accent">
@@ -323,9 +334,14 @@ export default function LocalPostCard({
             ) : null}
           </div>
 
-          {feedLayout && contentBadge ?
-            <div className="mt-1">
-              <FeedPostTypeBadge badge={contentBadge} />
+          {feedLayout && (contentBadge || showFeedActivityLead) ?
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {contentBadge ?
+                <FeedPostTypeBadge badge={contentBadge} />
+              : null}
+              {showFeedActivityLead ?
+                <p className="text-xs text-dc-muted">{activityLead}</p>
+              : null}
             </div>
           : showFeedActivityLead ?
             <p className="mt-1 text-xs text-dc-muted">{activityLead}</p>
@@ -399,7 +415,7 @@ export default function LocalPostCard({
 
           {feedLayout ?
             <>
-              <div className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-1 border-t border-white/[0.06] pt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 border-t border-white/[0.06] pt-3">
                 <FeedReactionsRow
                   compact
                   reactionCounts={post.source === 'api' ? reactions.reactionCounts : { love: localLikes, respect: 0, sympathize: 0, helpful: 0 }}
@@ -411,7 +427,7 @@ export default function LocalPostCard({
                     else void reactions.toggleReaction(kind)
                   }}
                 />
-                <div className="ml-auto flex flex-wrap items-center gap-0.5" role="group" aria-label="Post actions">
+                <div className="ml-auto flex flex-wrap items-center gap-0.5 sm:gap-1" role="group" aria-label="Post actions">
                 {canShare ?
                   <Link
                     to={`/share/post/${post.id}#discuss`}

@@ -59,7 +59,9 @@ test.describe('smoke', () => {
       'Skipping: POST /api/auth/session failed (seed DB + RopeDreamer, or set E2E_DEMO_PASSWORD)',
     )
     await page.goto('/home?mode=discover&tab=Local')
-    await expect(page.getByRole('tablist', { name: 'Community activity scope' })).toBeVisible()
+    const homeScope = page.getByRole('tablist', { name: 'Home feed scope' })
+    await expect(homeScope).toBeVisible()
+    await expect(homeScope.getByRole('tab', { name: 'Near you' })).toBeVisible()
   })
 
   test('home shows following and near you when signed in', async ({ page }) => {
@@ -72,9 +74,10 @@ test.describe('smoke', () => {
       'Skipping: POST /api/auth/session failed (seed DB + RopeDreamer, or set E2E_DEMO_PASSWORD)',
     )
     await page.goto('/home')
-    await expect(page.getByRole('tablist', { name: 'Community activity scope' })).toBeVisible()
-    await expect(page.getByRole('tab', { name: 'Following' })).toBeVisible()
-    await expect(page.getByRole('tab', { name: 'Nearby' })).toBeVisible()
+    const homeScope = page.getByRole('tablist', { name: 'Home feed scope' })
+    await expect(homeScope).toBeVisible()
+    await expect(homeScope.getByRole('tab', { name: 'Following' })).toBeVisible()
+    await expect(homeScope.getByRole('tab', { name: 'Near you' })).toBeVisible()
   })
 
   test('following feed lists new post after create when API DB is seeded', async ({ page }) => {
@@ -106,7 +109,8 @@ test.describe('smoke', () => {
     expect(found).toBe(true)
 
     await page.goto('/home?mode=following')
-    await expect(page.getByRole('tab', { name: 'Following' })).toBeVisible()
+    const homeScope = page.getByRole('tablist', { name: 'Home feed scope' })
+    await expect(homeScope.getByRole('tab', { name: 'Following', selected: true })).toBeVisible()
     await expect(page.getByRole('tablist', { name: 'Following feed filters' })).toBeVisible({ timeout: 15_000 })
   })
 
