@@ -1,6 +1,6 @@
 /**
  * Desktop visual polish (Sprint 3) — lg+ gated unless noted.
- * Do not add rules here without mobile screenshot verification when classes are shared.
+ * Cross-breakpoint primitives: shared-surfaces.css. Mobile-only: mobile-polish.css.
  */
 
 /* Surface lift applies on desktop only; mobile cards keep baseline shadow from tokens. */

@@ -1,6 +1,6 @@
 /**
  * Shared card surface classes (Desktop UI Sprint 1 CP6; Sprint 3 CP2 depth polish).
- * Pair with `.dc-card-polish` (mobile-polish.css) for touch `:active`; lg+ hover/focus in desktop-surfaces.css.
+ * Pair with `.dc-card-polish` (shared-surfaces.css) for touch `:active`; lg+ hover/focus in desktop-surfaces.css.
  */
 
 export const cardSurfaceSolidClass =
