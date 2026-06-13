@@ -1,6 +1,6 @@
 # Sprint 3 Explore Research + Code Context Brief
 
-**Status:** Complete — awaiting review and acceptance  
+**Status:** Accepted — CP3 Explore polish complete  
 **Page group:** Explore discovery hub
 
 **Routes in scope for implementation:**

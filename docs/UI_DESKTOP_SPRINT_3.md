@@ -1,6 +1,6 @@
 # Desktop UI Sprint 3 — Visual Experience Polish
 
-**Status:** CP2.6 complete — CSS file ownership reconciled with docs. **CP3 Home + Events complete** for discovery polish; other page groups blocked until briefs.  
+**Status:** CP2.6 complete — CSS file ownership reconciled with docs. **CP3 Home + Explore complete** for discovery polish; other page groups blocked until briefs.  
 **Branch:** `desktop-ui-sprint-3-visual-polish` (recommended; may start from `desktop-ui-sprint-2-visual-baseline`)  
 **Baseline tag:** `desktop-ui-sprint-2-visual-baseline`  
 **Sprint 2 handoff:** Directory/detail template foundation complete enough — **do not continue CP6 migration unless regression found**  
@@ -54,7 +54,7 @@ Keep existing kink.social dark/gold brand. Polish through **product-appropriate 
 | 2 | Global atmosphere and surface polish | **Complete** (boundary repair in CP2.5) |
 | 2.5 | Mobile CSS boundary repair (revert CP2 desktop leaks) | **Complete** (superseded by CP2.6 file split) |
 | 2.6 | CSS file ownership reconciliation | **Complete** |
-| 3+ | Per-page-group polish | **Events + Home complete** — **Explore brief next** |
+| 3+ | Per-page-group polish | **Home + Explore complete** — **Groups brief next** |
 
 ---
 
@@ -381,7 +381,7 @@ Shared primitives (all groups): `components/templates/DirectoryTemplate.tsx`, `c
 | Page group | Brief status | Checkpoint |
 |------------|--------------|------------|
 | `/home` | **Complete** — [`UI_DESKTOP_SPRINT_3_HOME_BRIEF.md`](UI_DESKTOP_SPRINT_3_HOME_BRIEF.md) | **CP3 Home polish complete** |
-| `/explore` | **Complete — awaiting approval** — [`UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md`](UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md) | CP3 blocked until accepted |
+| `/explore` | **Complete** — [`UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md`](UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md) | **CP3 Explore polish complete** |
 | `/events` | **Complete** — [`UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md`](UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md) | **CP3 Events polish complete** |
 | `/groups` | **Not started** | — |
 | `/orgs` | **Not started** | — |
@@ -395,7 +395,38 @@ Shared primitives (all groups): `components/templates/DirectoryTemplate.tsx`, `c
 | `/settings/account` | **Not started** | — |
 | Organizer / convention | **Not started** | — |
 
-**Next action:** Review and accept [`UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md`](UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md). Explore implementation starts only after approval. Home CP3 + CP3.1 committed — see §Checkpoint 3 Home.
+**Next action:** Start **Groups** Research + Code Context Brief. Explore CP3 complete — see §Checkpoint 3 Explore.
+
+---
+
+## Checkpoint 3 Explore — Cross-site discovery hub (complete)
+
+**Status:** Complete  
+**Brief:** [`UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md`](UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md)
+
+### Changes
+
+| Area | Files | What changed |
+|------|-------|----------------|
+| Header | `ExploreHubHeader.tsx` | Discovery hub framing, search/filter/browse copy, filter icon, chip section labels |
+| Filters & chips | `ExploreActiveFilterPills.tsx`, `ExploreChipRow.tsx`, `ExploreFiltersPanel.tsx` | Active filter grouping, topic chip sizing, filter group helpers, trust panel emphasis |
+| Sections | `ExploreHubSection.tsx`, `ExploreDashboardPage.tsx` | Stronger descriptions, clearer View-all CTAs, section rhythm, sign-in prompt |
+| Trending | `ExploreFeaturedTrendingCard.tsx`, `ExploreCompactTrendingRow.tsx` | Active-signal framing, token-aligned accents, hierarchy |
+| Events row | `ExploreCompactEventRow.tsx` | Date/location/RSVP hierarchy aligned with Events CP3 |
+| Suggestions | `ExploreSuggestedRow.tsx` | Type label, reason visibility, consistent row accent |
+
+### Not touched (per brief)
+
+Routes, auth, API, filter logic, URL params, chip IDs, ranking, section visibility, FilterSheet behavior, `mobile-polish.css`.
+
+### Verification
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck -w web` | **Pass** |
+| `npm run build -w web` | **Pass** |
+| Public route smoke `/explore` (`route-smoke.desktop` explore) | **Pass** |
+| Full viewport screenshot matrix | **Deferred** |
 
 ---
 

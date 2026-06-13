@@ -225,9 +225,9 @@ export default function ExploreDashboardPage() {
     <ExploreHubSection
       className="order-4 lg:order-none lg:col-span-7 lg:row-start-1"
       title="Featured this week"
-      description="Curated highlights from across the community."
+      description="What the community is engaging with right now — opens the full Trending feed."
       href="/home?mode=discover&tab=Trending"
-      linkLabel="View all"
+      linkLabel="View all trending"
     >
       {homeTrendingLoading ?
         <ul className="space-y-2" aria-busy="true">
@@ -237,7 +237,7 @@ export default function ExploreDashboardPage() {
         </ul>
       : trending.length === 0 ?
         <p className="text-sm text-dc-muted">Nothing featured this week yet. Check back soon.</p>
-      : <div className="space-y-1">
+      : <div className="space-y-3">
           {featuredTrendingHero ?
             <ExploreFeaturedTrendingCard item={featuredTrendingHero} />
           : null}
@@ -264,8 +264,9 @@ export default function ExploreDashboardPage() {
     <ExploreHubSection
       className="order-5 lg:order-none lg:col-span-5 lg:col-start-8 lg:row-start-1"
       title="Upcoming events"
+      description="Time-and-place decisions — open the events directory for filters and RSVP."
       href="/events"
-      linkLabel="Browse events"
+      linkLabel="Browse all events"
     >
       {homeEventsLoading ?
         <ul className="space-y-2" aria-busy="true">
@@ -299,9 +300,9 @@ export default function ExploreDashboardPage() {
     <ExploreHubSection
       className="order-6 lg:order-none lg:col-span-7 lg:row-start-2"
       title="Popular groups"
-      description="Persistent spaces for munches, education, and regional community."
+      description="Persistent spaces for munches, education, and regional community — join or lurk."
       href="/groups"
-      linkLabel="Browse groups"
+      linkLabel="Browse all groups"
     >
       {homeGroupsLoading ?
         <div className="grid gap-4 sm:grid-cols-2" aria-busy="true">
@@ -337,7 +338,7 @@ export default function ExploreDashboardPage() {
     <ExploreHubSection
       className="order-7 lg:order-none lg:col-span-5 lg:col-start-8 lg:row-start-2"
       title="People to discover"
-      description="Members active in events, groups, and regional scenes."
+      description="Members active near you and in scenes you follow — connection decisions start here."
       href={PEOPLE_DIRECTORY_PATH}
       linkLabel="Open people directory"
     >
@@ -360,9 +361,9 @@ export default function ExploreDashboardPage() {
     <ExploreHubSection
       className="order-8 lg:order-none lg:col-span-7 lg:row-start-3"
       title="Featured organization"
-      description="Organizers powering events, conventions, and community infrastructure."
+      description="Legitimate organizers powering events, conventions, and community infrastructure."
       href="/orgs"
-      linkLabel="Browse organizations"
+      linkLabel="Browse all organizations"
     >
       {orgsApi.status === 'loading' ?
         <div className="space-y-3" aria-busy="true">
@@ -385,8 +386,9 @@ export default function ExploreDashboardPage() {
     <ExploreHubSection
       className="order-9 lg:order-none lg:col-span-7 lg:row-start-4"
       title="Vendors"
+      description="Shops and makers in the kink marketplace — browse listings or visit a store."
       href="/vendors"
-      linkLabel="Browse vendors"
+      linkLabel="Browse all vendors"
     >
       {vendors.length === 0 ?
         <p className="text-sm text-dc-muted">No vendors match your search.</p>
@@ -408,6 +410,7 @@ export default function ExploreDashboardPage() {
     <ExploreHubSection
       className="order-10 hidden lg:block lg:order-none lg:col-span-5 lg:col-start-8 lg:row-start-3"
       title="Suggested for you"
+      description="Personalized next steps from your region, connections, and activity — not paid placements."
     >
       {suggested.length === 0 ?
           <p className="text-sm text-dc-muted">Suggestions appear as you participate in events and groups.</p>
@@ -424,8 +427,9 @@ export default function ExploreDashboardPage() {
     <ExploreHubSection
       className="order-11 lg:order-none lg:col-span-7 lg:row-start-5"
       title="Education"
+      description="Articles, guides, and workshops from community educators."
       href="/education"
-      linkLabel="Open education"
+      linkLabel="Open education hub"
     >
       <Link
         to="/education"
@@ -461,7 +465,7 @@ export default function ExploreDashboardPage() {
         </div>
       }
     >
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-start lg:gap-x-8 lg:gap-y-10">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-start lg:gap-x-8 lg:gap-y-12">
         {featuredSection}
         {upcomingSection}
         {groupsSection}
@@ -473,8 +477,8 @@ export default function ExploreDashboardPage() {
       </div>
 
       {!isAuthenticated || isFallback ?
-        <p className="mt-8 text-center text-xs text-dc-muted">
-          Sign in for personalized suggestions. Directories stay available from the top navigation.
+        <p className="mt-10 rounded-xl border border-dc-border/60 bg-dc-elevated-solid/40 px-4 py-3 text-center text-sm text-dc-text-muted">
+          Sign in for personalized suggestions and saved filters. Public directories stay in the top navigation.
         </p>
       : null}
 
