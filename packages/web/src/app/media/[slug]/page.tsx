@@ -4,6 +4,7 @@ import MediaEpisodeList from '@/components/media/MediaEpisodeList'
 import MediaOutboundBar from '@/components/media/MediaOutboundBar'
 import ReportAction from '@/components/moderation/ReportAction'
 import { mediaShowTarget } from '@/lib/moderation/report-targets'
+import DetailTemplate from '@/components/templates/DetailTemplate'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
 import StatusBanner from '@/components/ui/StatusBanner'
 import { DancecardPanelSkeleton } from '@/components/ui/skeleton'
@@ -11,6 +12,8 @@ import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
 import { BOOKMARK_OBJECT_MEDIA_SHOW, useApiBookmarks } from '@/hooks/useApiBookmarks'
 import { useApiMediaShow } from '@/hooks/useApiMediaShows'
+
+const mediaDetailShellClass = 'max-w-3xl py-6 sm:px-8 lg:py-6'
 
 export default function MediaShowPage() {
   const params = useParams()
@@ -30,7 +33,7 @@ export default function MediaShowPage() {
 
   if (status === 'loading' || status === 'idle') {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
+      <div className={`mx-auto px-4 ${mediaDetailShellClass}`}>
         <DancecardPanelSkeleton lines={6} />
       </div>
     )
@@ -38,7 +41,7 @@ export default function MediaShowPage() {
 
   if (error || !show) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
+      <div className={`mx-auto px-4 ${mediaDetailShellClass}`}>
         <Link to="/media" className="text-sm text-dc-accent hover:underline">
           ← Media
         </Link>
@@ -50,67 +53,72 @@ export default function MediaShowPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8">
-      <Link to="/media" className="text-sm text-dc-accent hover:underline">
-        ← Media
-      </Link>
-      <div className="mt-6 flex flex-col gap-6 sm:flex-row">
-        <div className="h-40 w-40 shrink-0 overflow-hidden rounded-2xl bg-dc-elevated-muted sm:h-48 sm:w-48">
-          {show.coverImageUrl ?
-            <img src={show.coverImageUrl} alt="" className="h-full w-full object-cover" />
-          : null}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <h1 className="text-2xl font-bold text-dc-text">{show.title}</h1>
-            <div className="flex flex-wrap gap-2">
-              {isAuthenticated && !isFallback ?
-                <button
-                  type="button"
-                  onClick={() => void onToggleSave()}
-                  disabled={bookmarkApi.bookmarkBusy}
-                  className="rounded-lg border border-dc-border px-3 py-1.5 text-sm text-dc-text hover:border-dc-accent-border/50"
+    <DetailTemplate
+      className={mediaDetailShellClass}
+      hero={
+        <>
+          <Link to="/media" className="text-sm text-dc-accent hover:underline">
+            ← Media
+          </Link>
+          <div className="mt-6 flex flex-col gap-6 sm:flex-row">
+            <div className="h-40 w-40 shrink-0 overflow-hidden rounded-2xl bg-dc-elevated-muted sm:h-48 sm:w-48">
+              {show.coverImageUrl ?
+                <img src={show.coverImageUrl} alt="" className="h-full w-full object-cover" />
+              : null}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <h1 className="text-2xl font-bold text-dc-text">{show.title}</h1>
+                <div className="flex flex-wrap gap-2">
+                  {isAuthenticated && !isFallback ?
+                    <button
+                      type="button"
+                      onClick={() => void onToggleSave()}
+                      disabled={bookmarkApi.bookmarkBusy}
+                      className="rounded-lg border border-dc-border px-3 py-1.5 text-sm text-dc-text hover:border-dc-accent-border/50"
+                    >
+                      {saved ? 'Saved' : 'Save channel'}
+                    </button>
+                  : <Link to={buildLoginHref(`/media/${show.slug}`)} className="text-sm text-dc-accent hover:underline">
+                      Sign in to save
+                    </Link>
+                  }
+                  {isAuthenticated ?
+                    (() => {
+                      const target = mediaShowTarget(show.id)
+                      return (
+                        <ReportAction
+                          variant="button"
+                          targetType={target.targetType}
+                          targetId={target.targetId}
+                          targetLabel={show.title}
+                          surface="media_show"
+                          className="rounded-lg border border-dc-border px-3 py-1.5 text-sm text-dc-muted hover:border-dc-accent-border/50"
+                        />
+                      )
+                    })()
+                  : null}
+                </div>
+              </div>
+              <p className="mt-1 text-sm text-dc-muted">
+                <Link
+                  to={`/presenters/${encodeURIComponent(show.ownerUsername)}`}
+                  className="text-dc-accent hover:underline"
                 >
-                  {saved ? 'Saved' : 'Save channel'}
-                </button>
-              : <Link to={buildLoginHref(`/media/${show.slug}`)} className="text-sm text-dc-accent hover:underline">
-                  Sign in to save
+                  @{show.ownerUsername}
                 </Link>
-              }
-              {isAuthenticated ?
-                (() => {
-                  const target = mediaShowTarget(show.id)
-                  return (
-                    <ReportAction
-                      variant="button"
-                      targetType={target.targetType}
-                      targetId={target.targetId}
-                      targetLabel={show.title}
-                      surface="media_show"
-                      className="rounded-lg border border-dc-border px-3 py-1.5 text-sm text-dc-muted hover:border-dc-accent-border/50"
-                    />
-                  )
-                })()
+                {show.ownerDisplayName ? ` · ${show.ownerDisplayName}` : ''}
+              </p>
+              {show.description ?
+                <p className="mt-4 text-sm leading-relaxed text-dc-text-muted">{show.description}</p>
               : null}
             </div>
           </div>
-          <p className="mt-1 text-sm text-dc-muted">
-            <Link
-              to={`/presenters/${encodeURIComponent(show.ownerUsername)}`}
-              className="text-dc-accent hover:underline"
-            >
-              @{show.ownerUsername}
-            </Link>
-            {show.ownerDisplayName ? ` · ${show.ownerDisplayName}` : ''}
-          </p>
-          {show.description ?
-            <p className="mt-4 text-sm text-dc-text-muted leading-relaxed">{show.description}</p>
-          : null}
-        </div>
-      </div>
-
+        </>
+      }
+    >
       {show.contentWarnings.length > 0 ?
-        <StatusBanner tone="warning" className="mt-6">
+        <StatusBanner tone="warning" className="mt-0">
           Content warnings: {show.contentWarnings.join(', ')}
         </StatusBanner>
       : null}
@@ -134,7 +142,6 @@ export default function MediaShowPage() {
           <MediaEpisodeList show={show} episodes={episodes} />
         </div>
       </section>
-
-    </div>
+    </DetailTemplate>
   )
 }

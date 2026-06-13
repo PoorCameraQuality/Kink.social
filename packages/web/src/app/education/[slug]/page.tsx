@@ -2,10 +2,10 @@ import { useCallback } from 'react'
 import ReportAction from '@/components/moderation/ReportAction'
 import { educationArticleTarget } from '@/lib/moderation/report-targets'
 import { Link, Navigate, useParams } from 'react-router-dom'
-
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
 import EducationSeriesNav from '@/components/education/EducationSeriesNav'
 import EmptyState from '@/components/ui/EmptyState'
+import DetailTemplate from '@/components/templates/DetailTemplate'
 import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
 import {
@@ -13,6 +13,8 @@ import {
   useApiBookmarks,
 } from '@/hooks/useApiBookmarks'
 import { useApiEducationArticleBySlug } from '@/hooks/useApiEducationArticles'
+
+const educationArticleShellClass = 'max-w-4xl py-6 lg:py-6'
 
 export default function EducationArticlePage() {
   const { slug } = useParams()
@@ -47,11 +49,14 @@ export default function EducationArticlePage() {
     : null
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-      <Link to="/education" className="mb-6 inline-block text-sm text-dc-accent hover:underline">
-        ← Back to Education
-      </Link>
-
+    <DetailTemplate
+      className={educationArticleShellClass}
+      hero={
+        <Link to="/education" className="inline-block text-sm text-dc-accent hover:underline">
+          ← Back to Education
+        </Link>
+      }
+    >
       {error ?
         <EmptyState
           inline
@@ -160,7 +165,6 @@ export default function EducationArticlePage() {
             <div className="mb-10 rounded-2xl border border-dc-border bg-dc-elevated/95 p-5 shadow-[var(--dc-shadow-soft)] sm:p-8">
               <div
                 className="prose prose-invert max-w-none prose-headings:text-dc-text prose-p:text-dc-text-muted prose-li:text-dc-text-muted prose-a:text-dc-accent prose-strong:text-dc-text"
-                // HTML is sanitized on the API before persistence.
                 dangerouslySetInnerHTML={{ __html: bodyHtmlSafe }}
               />
             </div>
@@ -221,6 +225,6 @@ export default function EducationArticlePage() {
           </footer>
         </>
       : null}
-    </div>
+    </DetailTemplate>
   )
 }

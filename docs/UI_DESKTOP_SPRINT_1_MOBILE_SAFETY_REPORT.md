@@ -99,6 +99,17 @@ Docs-only audit. Detail routes with **special mobile patterns** to protect in CP
 
 No `DetailTemplate` code migrations in CP4. Full route tables in [`UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md`](UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md).
 
+## Sprint 2 Checkpoint 5 (complete)
+
+| Change | Breakpoint gate | Mobile impact |
+|--------|-----------------|---------------|
+| `/media/:slug` → `DetailTemplate` | `className` max-w-3xl; no `MobileActionBar` | **None** — same hero, save/report, episodes order |
+| `/education/:slug` → `DetailTemplate` | `className` max-w-4xl; `<article>` preserved | **None** — reading layout unchanged |
+| `/presenters/:username` → `DetailTemplate` | `className` max-w-3xl; hero in `hero` slot | **None** — single-column sections unchanged |
+| `DetailTemplate` API | No changes | **None** |
+
+**Screenshot matrix:** Deferred to CP8.
+
 ## Summary
 
 | Metric | Value |

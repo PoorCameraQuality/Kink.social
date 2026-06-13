@@ -1,7 +1,11 @@
 # Desktop UI Sprint 2 — Template Migration and Member Surface Polish
 
-**Status:** Checkpoint 4 complete — DetailTemplate audit (plan only)  
+**Status:** Checkpoint 5 complete — low-risk DetailTemplate pilots  
 **Branch:** `desktop-ui-sprint-2-template-migration`  
+**CP4 commit:** `736a83b`  
+**CP4 rollback tag:** `desktop-ui-sprint-2-cp4-baseline`  
+**CP4 rollback command:** `git reset --hard desktop-ui-sprint-2-cp4-baseline`  
+**CP4 audit:** [`UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md`](UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md)  
 **CP1 commit:** `c23fff3`  
 **CP1 rollback tag:** `desktop-ui-sprint-2-cp1-baseline`  
 **CP2 commit:** `43ad6f8`  
@@ -39,7 +43,7 @@
 | 2 | Low-risk directory migrations (vendors, presenters, groups) | **Complete** |
 | 3 | Higher-complexity directories (places, conventions, media, orgs, education) | **Complete** |
 | 4 | DetailTemplate audit + plan | **Complete** |
-| 5 | Low-risk detail migrations | Pending |
+| 5 | Low-risk detail migrations (media, education, presenters) | **Complete** |
 | 6 | Profile, group, org, event, convention detail refinement | Pending |
 | 7 | Desktop hierarchy polish (`lg+` only) | Pending |
 | 8 | Sprint 2 verification + screenshot matrix | Pending |
