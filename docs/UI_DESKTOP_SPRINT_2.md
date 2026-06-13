@@ -1,7 +1,10 @@
 # Desktop UI Sprint 2 — Template Migration and Member Surface Polish
 
-**Status:** Checkpoint 5 complete — low-risk DetailTemplate pilots  
+**Status:** **Closed** — directory/detail template foundation complete enough  
 **Branch:** `desktop-ui-sprint-2-template-migration`  
+**Visual baseline tag:** `desktop-ui-sprint-2-visual-baseline`  
+**Sprint 3:** [`UI_DESKTOP_SPRINT_3.md`](UI_DESKTOP_SPRINT_3.md) — Desktop Visual Experience Polish (CP1 audit complete)  
+**CP5 commit:** `bae939f`  
 **CP4 commit:** `736a83b`  
 **CP4 rollback tag:** `desktop-ui-sprint-2-cp4-baseline`  
 **CP4 rollback command:** `git reset --hard desktop-ui-sprint-2-cp4-baseline`  
@@ -44,9 +47,9 @@
 | 3 | Higher-complexity directories (places, conventions, media, orgs, education) | **Complete** |
 | 4 | DetailTemplate audit + plan | **Complete** |
 | 5 | Low-risk detail migrations (media, education, presenters) | **Complete** |
-| 6 | Profile, group, org, event, convention detail refinement | Pending |
-| 7 | Desktop hierarchy polish (`lg+` only) | Pending |
-| 8 | Sprint 2 verification + screenshot matrix | Pending |
+| 6 | Profile, group, org, event, convention detail refinement | **Cancelled** — diminishing returns; deferred unless regression |
+| 7 | Desktop hierarchy polish (`lg+` only) | **Superseded** by Sprint 3 visual polish |
+| 8 | Sprint 2 verification + screenshot matrix | **Complete** (closure gate; full matrix deferred to Sprint 3 CP7) |
 
 ---
 
@@ -184,6 +187,62 @@ Removes empty left grid track on aside-only routes. Existing 3-col migrations un
 4. `/vendors/:id` (last in batch, or shell-only if hero extension deferred)
 
 **Defer:** events, groups, orgs, conventions, profile.
+
+### CP4 rollback
+
+| Item | Value |
+|------|-------|
+| Commit | `736a83b` |
+| Tag | `desktop-ui-sprint-2-cp4-baseline` |
+| Rollback | `git reset --hard desktop-ui-sprint-2-cp4-baseline` |
+| Audit file | `docs/UI_DESKTOP_SPRINT_2_DETAIL_TEMPLATE_AUDIT.md` |
+
+---
+
+## Checkpoint 5 — DetailTemplate pilot migrations
+
+**Status:** Complete  
+**DetailTemplate API changes:** None — `className` width overrides only  
+**Routes migrated:** `/media/:slug`, `/education/:slug`, `/presenters/:username`  
+**Routes deliberately not migrated:** `/vendors/:id` (deferred — high risk, full-bleed hero)  
+
+### Per-route behavior preserved
+
+| Route | File | Preserved |
+|-------|------|-----------|
+| `/media/:slug` | `media/[slug]/page.tsx` | Cover, save/report, content warnings, owner status banner, outbound bar, episodes, signed/visibility behavior; no `MobileActionBar` added |
+| `/education/:slug` | `education/[slug]/page.tsx` | Semantic `<article>`, h1 in article header, series nav, content warnings, save/report, prose body, author aside, offerings, legal footer |
+| `/presenters/:username` | `presenters/[username]/page.tsx` | ScopePageMeta, hero header, all sections, runner-material gates, review flow, UNLISTED noIndex |
+
+### Width overrides
+
+| Route | `className` |
+|-------|-------------|
+| Media | `max-w-3xl py-6 sm:px-8 lg:py-6` |
+| Education | `max-w-4xl py-6 lg:py-6` |
+| Presenter | `max-w-3xl py-8 lg:py-8` |
+
+### Vendor deferral
+
+`/vendors/:id` **not migrated** in CP5. Full-bleed hero and shop adjacency remain high risk; candidate for CP5b/CP6 shell-only after pilot validation.
+
+### Verification (CP5)
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck -w web` | Pass |
+| `npm run build -w web` | Pass |
+| Mobile smoke (events, education, vendors, groups, people) | **Pass** (chromium-mobile) |
+| Desktop smoke | Mixed — pre-existing AuthGate/timeouts on parallel desktop workers |
+| Screenshot matrix | Deferred to CP8 |
+
+### Recommended CP6 order
+
+1. `/events/:id` — DetailTemplate fit (RSVP sidebar + MobileActionBar) with extreme care  
+2. `/groups/:id`, `/orgs/:slug` — shell alignment only; keep `CommunityHubShell`  
+3. `/vendors/:id` — shell-only if attempted; no full-bleed hero without ADR  
+4. `/conventions/:slug` — Sprint 3  
+5. `/profile/:username` — last
 
 ### CP4 audit order (reference)
 
@@ -396,9 +455,31 @@ Shell: `shellDirectoryClass` (no nested `max-w-[1600px]` islands). Parent pages 
 
 ---
 
-## Sprint 3 scope (deferred)
+## Sprint 2 closure — verification (2026-06-12)
 
-Organizer/convention operations: separate shells, program grids, schedule canvases, door mode. **Out of Sprint 2 scope** except public-facing org/event/convention **display** pages in CP6.
+| Check | Result | Notes |
+|-------|--------|-------|
+| `npm run typecheck -w web` | **Pass** | |
+| `npm run build -w web` | **Pass** | Chunk size warning only (pre-existing) |
+| `npm run test:e2e:smoke` | **69 passed**, 5 failed, 10 skipped | No Sprint 2 regressions identified |
+| `npm run audit:ui-desktop` | **Partial** | Inventories refreshed; preflight failed (dev server not running). Screenshot packet unchanged: 186 captures from Sprint 1 audit |
+
+### Known pre-existing failures (not Sprint 2 regressions)
+
+| Failure | Cause |
+|---------|-------|
+| Landing H1 copy drift | Tests expect `/Find events.*Learn safely/i`; live copy is “Friends, Events, Conventions & Education.” |
+| Desktop public `/groups`, `/orgs` | Unauthenticated visitors hit AuthGate; smoke expects public directory headings |
+| Intermittent desktop parallel timeouts | Parallel workers occasionally exceed 30s on auth/landing routes |
+| Audit screenshot timeouts | `/vendors` at 1280, `/profile` at 1440 in prior packet (runtime/load; not layout regression) |
+
+### Closure decision
+
+Sprint 2 achieved its architectural goal: shared `DirectoryTemplate` on member directories, inferred grid layout, low-risk `DetailTemplate` pilots, and CP4 risk audit. **CP6+ detail migrations paused** — further template work is diminishing returns. **Sprint 3** shifts to visual experience polish per [`UI_DESKTOP_SPRINT_3.md`](UI_DESKTOP_SPRINT_3.md).
+
+## Sprint 3 scope (deferred from Sprint 2)
+
+Organizer/convention operations: separate shells, program grids, schedule canvases, door mode. **Out of Sprint 2 scope.** High-risk detail routes (`/events/:id`, `/groups/:id`, `/orgs/:slug`, `/conventions/:slug`, `/profile`) remain on native shells until product prioritizes functional layout work.
 
 ## Rollback (Sprint 2)
 
@@ -408,8 +489,11 @@ Organizer/convention operations: separate shells, program grids, schedule canvas
 | `desktop-ui-sprint-2-cp1-baseline` | `c23fff3` | After CP0/CP1 docs; before CP2 code |
 | `desktop-ui-sprint-2-cp2-baseline` | `43ad6f8` | After CP2 migrations |
 | `desktop-ui-sprint-2-cp3-baseline` | `b7d1c7e` | After CP3 migrations |
+| `desktop-ui-sprint-2-cp4-baseline` | `736a83b` | After CP4 audit |
+| `desktop-ui-sprint-2-visual-baseline` | closure commit | End of Sprint 2; start Sprint 3 from here |
 
 ```powershell
+git reset --hard desktop-ui-sprint-2-visual-baseline  # undo Sprint 3 visual work
 git reset --hard desktop-ui-sprint-2-cp3-baseline  # undo CP4+ work, keep CP3 migrations
 git reset --hard desktop-ui-sprint-2-cp2-baseline  # undo CP3+ work, keep CP2 migrations
 git reset --hard desktop-ui-sprint-2-cp1-baseline  # undo CP2+ work, keep Sprint 2 plan
