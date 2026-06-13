@@ -63,85 +63,14 @@ function formatEducationReadMinutes(readingMinutes: number | null | undefined): 
   return `${readingMinutes} min read`
 }
 
-type HomeOrientationCopy = { title: string; description: string; next: string }
-
-const HOME_FEED_ORIENTATION: Record<'following' | 'near-you' | 'trending', HomeOrientationCopy> = {
-  following: {
-    title: 'Following',
-    description: 'Catch up with people and communities you chose.',
-    next: 'React, save, or jump into discussion on what matters to you.',
-  },
-  'near-you': {
-    title: 'Near you',
-    description: 'Nearby posts, events, groups, and people worth checking.',
-    next: 'Share a local update or see what is active around you.',
-  },
-  trending: {
-    title: 'Trending',
-    description: 'Active conversations and community signals across the network.',
-    next: 'Join a thread or follow people whose posts resonate.',
-  },
-}
-
-const HOME_DISCOVER_TAB_ORIENTATION: Partial<Record<HomeTab, HomeOrientationCopy>> = {
-  Events: {
-    title: 'Events',
-    description: 'Find munches, classes, conventions, and play parties worth your time.',
-    next: 'Compare by date and location, then RSVP when you are ready.',
-  },
-  Conventions: {
-    title: 'Conventions',
-    description: 'Multi-day gatherings and conference-style events in the community.',
-    next: 'Open a convention to see programming, vendors, and registration.',
-  },
-  Groups: {
-    title: 'Groups',
-    description: 'Communities to join, lurk in, or stay involved with over time.',
-    next: 'Browse groups near you or aligned with your interests.',
-  },
-  Vendors: {
-    title: 'Vendors',
-    description: 'Makers, shops, and creators serving the kink community.',
-    next: 'Visit a shop or save listings you want to revisit.',
-  },
-  Education: {
-    title: 'Education',
-    description: 'Guides and perspectives from community educators and writers.',
-    next: 'Read an article or follow authors whose work helps you grow.',
-  },
-  Media: {
-    title: 'Media',
-    description: 'Podcasts, shows, and channels from community creators.',
-    next: 'Listen or watch, then follow channels you want to keep up with.',
-  },
-}
-
-function resolveHomeOrientation(
-  homeMode: HomeMode,
-  activeTab: HomeTab,
-): HomeOrientationCopy | null {
-  if (homeMode === 'Following') return HOME_FEED_ORIENTATION.following
-  if (activeTab === 'Local') return HOME_FEED_ORIENTATION['near-you']
-  if (activeTab === 'Trending') return HOME_FEED_ORIENTATION.trending
-  return HOME_DISCOVER_TAB_ORIENTATION[activeTab] ?? null
-}
-
-function HomeOrientationBlock({ title, description, next }: HomeOrientationCopy) {
-  return (
-    <section
-      className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 lg:px-5"
-      aria-labelledby="home-orientation-title"
-    >
-      <h2 id="home-orientation-title" className="text-base font-semibold text-dc-text">
-        {title}
-      </h2>
-      <p className="mt-1 text-sm leading-relaxed text-dc-text-muted">{description}</p>
-      <p className="mt-2 text-xs leading-relaxed text-dc-muted">
-        <span className="font-medium text-dc-text-muted">Next: </span>
-        {next}
-      </p>
-    </section>
-  )
+const HOME_DISCOVER_TAB_BLURB: Partial<Record<HomeTab, string>> = {
+  Events: 'Find munches, classes, conventions, and play parties worth your time.',
+  Conventions: 'Multi-day gatherings and conference-style events in the community.',
+  Groups: 'Communities to join, lurk in, or stay involved with over time.',
+  Vendors: 'Makers, shops, and creators serving the kink community.',
+  Education: 'Guides and perspectives from community educators and writers.',
+  Media: 'Podcasts, shows, and channels from community creators.',
+  Trending: 'Active conversations and community signals across the network.',
 }
 
 export default function HomePageClient() {
@@ -718,8 +647,7 @@ export default function HomePageClient() {
   const showDevHeadline =
     import.meta.env.DEV && import.meta.env.VITE_SHOW_HOME_DEBUG === 'true' && surfaceHeadline.visible
 
-  const homeOrientation = resolveHomeOrientation(homeMode, activeTab)
-  const showHomeOrientation = homeOrientation != null
+  const discoverTabBlurb = HOME_DISCOVER_TAB_BLURB[activeTab] ?? null
 
   return (
     <div
@@ -796,15 +724,8 @@ export default function HomePageClient() {
           }`}
         >
           {showFeedThreeColumn ?
-            <div className="mb-4 hidden lg:block space-y-3">
-              {showHomeOrientation ?
-                <HomeOrientationBlock {...homeOrientation} />
-              : null}
-              <HomeFeedScopeNav />
-            </div>
-          : showHomeOrientation ?
             <div className="mb-4 hidden lg:block">
-              <HomeOrientationBlock {...homeOrientation} />
+              <HomeFeedScopeNav />
             </div>
           : null}
           {showFeedThreeColumn && !returningMember ?
@@ -827,7 +748,12 @@ export default function HomePageClient() {
           : null}
           <TabContentTransition tabKey={`${homeMode}-${activeTab}`}>
           {showDiscoverContent && activeTab !== 'Local' ?
-            <h2 className="mb-4 text-lg font-semibold text-dc-text">{HOME_TAB_LABELS[activeTab]}</h2>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-dc-text">{HOME_TAB_LABELS[activeTab]}</h2>
+              {discoverTabBlurb ?
+                <p className="mt-1 hidden text-sm text-dc-text-muted lg:block">{discoverTabBlurb}</p>
+              : null}
+            </div>
           : null}
           {showDiscoverContent && activeTab === 'Local' && (
             <>
