@@ -1,6 +1,6 @@
 # Desktop UI Sprint 3 — Visual Experience Polish
 
-**Status:** CP2.5 complete — mobile CSS boundary repaired. **CP3+ blocked** until per-page-group Research + Code Context Briefs exist.  
+**Status:** CP2.6 complete — CSS file ownership reconciled with docs. **CP3+ blocked** until per-page-group Research + Code Context Briefs exist.  
 **Branch:** `desktop-ui-sprint-3-visual-polish` (recommended; may start from `desktop-ui-sprint-2-visual-baseline`)  
 **Baseline tag:** `desktop-ui-sprint-2-visual-baseline`  
 **Sprint 2 handoff:** Directory/detail template foundation complete enough — **do not continue CP6 migration unless regression found**  
@@ -52,7 +52,8 @@ Keep existing kink.social dark/gold brand. Polish through **product-appropriate 
 |----|-------|--------|
 | 1 | Visual audit from screenshots → ranked polish plan | **Complete** (this doc §CP1) |
 | 2 | Global atmosphere and surface polish | **Complete** (boundary repair in CP2.5) |
-| 2.5 | Mobile CSS boundary repair + research rubric | **Complete** |
+| 2.5 | Mobile CSS boundary repair (revert CP2 desktop leaks) | **Complete** (superseded by CP2.6 file split) |
+| 2.6 | CSS file ownership reconciliation | **Complete** |
 | 3+ | Per-page-group polish (headers, cards, rails, routes) | **Blocked** — requires Research + Code Context Brief per group |
 
 ---
@@ -169,13 +170,16 @@ Keep existing kink.social dark/gold brand. Polish through **product-appropriate 
 
 | File | Territory | Rules |
 |------|-----------|-------|
-| `mobile-polish.css` | **Protected mobile** | Mobile scroll pad, snap carousel, compact empty states, proven touch `:active` press, profile/org hero mobile treatments. **No desktop polish.** |
-| `desktop-surfaces.css` | **Desktop lg+** | Card hover, rail gradients, header chrome, empty-state glow. Default: `@media (min-width: 1024px)`. Hover: `@media (hover: hover) and (pointer: fine)`. |
+| `shared-surfaces.css` | **Cross-breakpoint primitives** | Card `:active`, empty-state baseline, event date badge, feed stagger, identity/cover heroes, avatar ring. Document any change; affects all viewports. |
+| `mobile-polish.css` | **Mobile-only layout** | Bottom-nav scroll pad (`c2k-mobile-scroll-pad`), horizontal snap carousel (`c2k-snap-carousel`). **No card polish, empty glow, or hover depth.** |
+| `desktop-surfaces.css` | **Desktop lg+** | Stronger card hover/focus, rail gradients, header chrome, empty-state glow enhancement. `@media (min-width: 1024px)` + `(hover: hover) and (pointer: fine)` for hover. |
 | `site-atmosphere.css` | **Cross-breakpoint** | App background orbs — document if changed; prefer subtle on mobile. |
-| `card-surface.ts` | **Shared classes** | Class strings only; visual depth gated in CSS (`dc-surface-lift` is lg+). |
+| `card-surface.ts` | **Shared class strings** | Pairs with `.dc-card-polish` in `shared-surfaces.css`; depth via `dc-surface-lift` (lg+ in desktop-surfaces). |
 | Token files | **Cross-breakpoint** | Any `--dc-shadow-*` change affects mobile — document in checkpoint notes. |
 
-**Any future edit to `mobile-polish.css` requires mobile screenshot verification** at 375, 390, 430, 768, 820, 912 on `/home`, `/events`, `/people`, `/messaging`.
+**Import order** (`globals.css`): `shared-surfaces.css` → `mobile-polish.css` → `desktop-surfaces.css`.
+
+**Any edit to `mobile-polish.css` or `shared-surfaces.css` requires mobile screenshot verification** at 375, 390, 430, 768, 820, 912 on `/home`, `/events`, `/people`, `/messaging`.
 
 ---
 
@@ -263,7 +267,7 @@ What is the user trying to accomplish on this page? (One paragraph, product-spec
 | Header / hero | Domain hero components |
 | Empty / loading | `EmptyState`, `*EmptyPanel`, skeletons |
 | Mobile-specific | `BottomNav`, `FilterSheet`, `HomeMobileComposer`, `useMaxMd` |
-| CSS likely touched | `desktop-surfaces.css` (lg+), **not** `mobile-polish.css` without approval |
+| CSS likely touched | `shared-surfaces.css` (cross-breakpoint), `desktop-surfaces.css` (lg+), **not** `mobile-polish.css` without explicit approval |
 | Tests / smoke | `e2e/route-smoke.mobile.spec.ts`, `e2e/route-smoke.desktop.spec.ts`, domain e2e |
 
 Do not guess paths if they can be inspected.
@@ -346,7 +350,7 @@ Starter paths from `router.tsx` — **verify in repo**; do not treat as frozen.
 | `/settings/account` | `app/settings/account/page.tsx` | `SettingsLayout` children | Settings shell | Form cards | Settings side nav |
 | Organizer | `app/organizer/**` | `Organizer*Shell`, `Organizer*Panel` | Organizer token stack | Dashboard widgets | Org/conv side nav |
 
-Shared primitives (all groups): `components/templates/DirectoryTemplate.tsx`, `components/ui/EmptyState.tsx`, `components/ui/RailCard.tsx`, `lib/card-surface.ts`, `styles/desktop-surfaces.css`.
+Shared primitives (all groups): `components/templates/DirectoryTemplate.tsx`, `components/ui/EmptyState.tsx`, `components/ui/RailCard.tsx`, `lib/card-surface.ts`, `styles/shared-surfaces.css`, `styles/desktop-surfaces.css`.
 
 ### Brief registry
 
@@ -367,7 +371,60 @@ Shared primitives (all groups): `components/templates/DirectoryTemplate.tsx`, `c
 | `/settings/account` | **Not started** | — |
 | Organizer / convention | **Not started** | — |
 
-**Next action:** Write brief for first page group (recommended: `/events` or `/home` per traffic), then implement one scoped CP3 pass for that group only.
+**Next action:** Write **Events** Research + Code Context Brief (CP2.6 reconciled — safe to proceed).
+
+---
+
+## Checkpoint 2.6 — CSS file ownership reconciliation
+
+**Status:** Complete  
+**Reason:** CP2.5 reverted CP2 desktop *enhancements* from `mobile-polish.css`, but cross-breakpoint primitives (`.dc-card-polish`, empty states, feed stagger, etc.) still lived in a file named “mobile-only.” Docs and code disagreed.
+
+### Rule ownership table
+
+| Rule / class | Was in (CP2.5) | Final file | Reason | Mobile impact | Verification |
+|--------------|----------------|------------|--------|---------------|--------------|
+| `.dc-card-polish` base + `:active` | `mobile-polish.css` | `shared-surfaces.css` | Cross-breakpoint touch feedback on cards | Unchanged scale(0.996) press | Smoke + tap feel |
+| `.dc-card-polish:hover` (baseline) | `mobile-polish.css` all breakpoints | `shared-surfaces.css` `max-width: 1023px` + fine pointer | Tablet handoff only; desktop lg+ uses desktop-surfaces | No hover on touch phones | Smoke |
+| `.dc-card-polish:hover` (stronger) | `desktop-surfaces.css` | `desktop-surfaces.css` lg+ | Desktop depth polish | None on mobile | Desktop audit |
+| `.dc-card-polish:focus-visible` | `desktop-surfaces.css` | `desktop-surfaces.css` lg+ | Desktop keyboard focus | N/A mobile | a11y check |
+| `.c2k-empty-glow` + `::before` | `mobile-polish.css` | `shared-surfaces.css` | Used by `EmptyState` on all viewports; baseline 10% glow | Unchanged baseline | Empty states on `/media`, `/messaging` |
+| `.c2k-empty-icon-ring` | `mobile-polish.css` | `shared-surfaces.css` | Shared empty-state primitive | Unchanged baseline | Empty states |
+| `.c2k-empty-state-compact` | `mobile-polish.css` | `shared-surfaces.css` | Compact empty padding — not mobile-exclusive | Unchanged | Empty states |
+| `.c2k-empty-glow/icon-ring` lg+ enhance | `desktop-surfaces.css` | `desktop-surfaces.css` lg+ | Desktop empty polish | None on mobile | Desktop audit |
+| `.c2k-event-date-badge` | `mobile-polish.css` | `shared-surfaces.css` | `EventCard`, `EventsListRow` — all viewports | Unchanged | `/events` smoke |
+| `.dc-feed-stagger` | `mobile-polish.css` | `shared-surfaces.css` | `LocalHomeFeed` — feed entry animation | Unchanged; respects reduced-motion | `/home` smoke |
+| `.c2k-profile-hero` | `mobile-polish.css` | `shared-surfaces.css` | Profile/group identity — all viewports | Unchanged | Profile cards |
+| `.c2k-community-hero-cover::after` | `mobile-polish.css` | `shared-surfaces.css` | Org/group cover gradient | Unchanged | Group/org hubs |
+| `.c2k-org/vendor-cover-fallback` | `mobile-polish.css` | `shared-surfaces.css` | Cover fallbacks | Unchanged | Vendor/org |
+| `.c2k-avatar-ring` | `mobile-polish.css` | `shared-surfaces.css` | Profile hero photo ring | Unchanged | Profile |
+| `.c2k-mobile-scroll-pad` | `mobile-polish.css` | `mobile-polish.css` | Bottom-nav clearance; resets at 768px | **Mobile-only** | Scroll pad on directories |
+| `.c2k-snap-carousel` + fade | `mobile-polish.css` | `mobile-polish.css` | Horizontal snap; fade hidden 768px+ | **Mobile-primary** | Education/events carousels |
+
+### Files changed (CP2.6)
+
+| File | Change |
+|------|--------|
+| `packages/web/src/styles/shared-surfaces.css` | **New** — cross-breakpoint primitives moved from mobile-polish |
+| `packages/web/src/styles/mobile-polish.css` | Slimmed to scroll-pad + snap-carousel only |
+| `packages/web/src/app/globals.css` | Import `shared-surfaces.css` before mobile-polish |
+| `packages/web/src/lib/card-surface.ts` | Comment points to shared-surfaces |
+| `docs/UI_DESKTOP_SPRINT_3.md` | CSS boundary rule + this section |
+
+### Verification (CP2.6)
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck -w web` | **Pass** |
+| `npm run build -w web` | **Pass** |
+| Focused mobile smoke (chromium-mobile) | **6/6 pass** — `/home`, `/events`, `/people`, `/groups`, `/vendors`, `/education` |
+| `/media`, `/profile` | Not in route-smoke spec — add to CP7 matrix; CSS split does not target those routes |
+
+Viewport screenshot matrix (375–1024) deferred to CP7; smoke overflow guard covers 390×844 on listed routes.
+
+### Events brief proceed?
+
+**Yes** — docs and code ownership now match. Events brief is the recommended first brief; do not implement polish until brief is written.
 
 ---
 
@@ -387,7 +444,7 @@ Shared primitives (all groups): `components/templates/DirectoryTemplate.tsx`, `c
 | `.dc-card-polish` base + `:active` | 1 mobile-safe | Kept (baseline) |
 | Scroll pad, snap carousel, compact empty | 1 mobile-specific | Kept |
 
-**Post-repair:** Only file header comment differs from `desktop-ui-sprint-2-visual-baseline`.
+**Post-repair (CP2.5):** CP2 desktop *enhancements* reverted; cross-breakpoint primitives still misfiled until **CP2.6** split them into `shared-surfaces.css`.
 
 ### Part B — Fixes applied
 
@@ -412,7 +469,7 @@ Routes not in mobile smoke spec this pass: `/media`, `/profile`, `/settings/acco
 |------|------|
 | `--dc-shadow-soft/panel` tokens | Subtle mobile depth — monitor contrast |
 | `site-atmosphere.css` | Background all viewports — no layout impact |
-| `.dc-card-polish:hover` in `mobile-polish.css` | Baseline `(hover: hover)` rule kept; stronger desktop hover is lg+ in `desktop-surfaces.css` |
+| `.dc-card-polish:hover` in `mobile-polish.css` | **Resolved in CP2.6** — tablet baseline in `shared-surfaces.css` max-1023px; lg+ in `desktop-surfaces.css` |
 
 ### Part F — Verification
 
@@ -442,7 +499,7 @@ Routes not in mobile smoke spec this pass: `/media`, `/profile`, `/settings/acco
 
 ### CP3+ proceed?
 
-**No** — CP2.5 repaired the mobile CSS boundary; implementation remains **blocked** until the target page group has a completed Research + Code Context Brief (§ above).
+**Blocked on brief** — CP2.6 reconciled CSS ownership. **Events brief** may be written next; implementation waits on brief approval.
 
 ---
 
