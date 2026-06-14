@@ -336,10 +336,10 @@ export default function LocalPostCard({
           : null}
           {displayPost.bodyFormat === 'html' ?
             <div
-              className="text-[15px] leading-relaxed text-dc-text prose prose-invert max-w-none [&_a]:text-dc-accent"
+              className="text-dc-text prose prose-invert max-w-none [&_a]:text-dc-accent"
               dangerouslySetInnerHTML={{ __html: displayPost.body }}
             />
-          : <p className={`${centerFeedBody ? 'mx-auto max-w-[34ch] text-center' : ''} whitespace-pre-wrap text-[15px] leading-relaxed text-dc-text`}>
+          : <p className={`${centerFeedBody ? 'mx-auto max-w-[34ch] text-center' : ''} whitespace-pre-wrap text-dc-text`}>
               {displayPost.body}
             </p>}
           <MentionChips mentions={displayPost.mentions} />
