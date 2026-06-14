@@ -1,3 +1,4 @@
+import ReportAction from '@/components/moderation/ReportAction'
 import { copyCanonicalLink } from '@c2k/shared'
 import { useEffect, useId, useRef, useState } from 'react'
 
@@ -9,6 +10,11 @@ type Props = {
     busy?: boolean
     onToggle: () => void
   }
+  report?: {
+    targetType: string
+    targetId: string
+    targetLabel?: string
+  }
   extraMenuItems?: Array<{
     label: string
     onClick: () => void
@@ -16,7 +22,7 @@ type Props = {
   }>
 }
 
-export default function CopyLinkOverflowMenu({ path, className = '', bookmark, extraMenuItems }: Props) {
+export default function CopyLinkOverflowMenu({ path, className = '', bookmark, report, extraMenuItems }: Props) {
   const menuId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
@@ -83,8 +89,19 @@ export default function CopyLinkOverflowMenu({ path, className = '', bookmark, e
                 setOpen(false)
               }}
             >
-              {bookmark.saved ? 'Remove bookmark' : 'Bookmark'}
+              {bookmark.saved ? 'Remove bookmark' : 'Save'}
             </button>
+          : null}
+          {report ?
+            <ReportAction
+              variant="menu-item"
+              targetType={report.targetType}
+              targetId={report.targetId}
+              targetLabel={report.targetLabel}
+              surface="feed"
+              className="min-h-11 !px-3 !py-2 text-dc-danger"
+              onTrigger={() => setOpen(false)}
+            />
           : null}
           {extraMenuItems?.map((item) => (
             <button

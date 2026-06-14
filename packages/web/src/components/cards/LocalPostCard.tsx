@@ -283,20 +283,50 @@ export default function LocalPostCard({
               <Link to={`/profile/${headerUsername}`} className="feed-stream-post__user">
                 @{headerUsername}
               </Link>
-              {streamVerb ?
-                <span className="feed-stream-post__verb">{streamVerb}</span>
-              : null}
               <span className="feed-stream-post__time">{streamTime}</span>
-              {showOrganizerBadge ?
-                <span className="rounded-full border border-[rgba(214,178,59,0.25)] bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-dc-accent">
-                  Organizer
-                </span>
-              : null}
-              <AlphaTestBadge label={post.alphaLabel} />
               {canShare ?
-                <CopyLinkOverflowMenu path={`/share/post/${post.id}`} className="feed-stream-post__menu" />
+                <CopyLinkOverflowMenu
+                  path={`/share/post/${post.id}`}
+                  className="feed-stream-post__menu"
+                  bookmark={
+                    isAuthenticated ?
+                      {
+                        saved: postBookmarked,
+                        busy: bookmarkApi.bookmarkBusy,
+                        onToggle: () => {
+                          void bookmarkApi.toggleBookmark(BOOKMARK_OBJECT_FEED_POST, post.id)
+                        },
+                      }
+                    : undefined
+                  }
+                  report={
+                    isAuthenticated && !isOwnPost ?
+                      (() => {
+                        const target = feedPostTarget(post.id)
+                        return {
+                          targetType: target.targetType,
+                          targetId: target.targetId,
+                          targetLabel: 'feed post',
+                        }
+                      })()
+                    : undefined
+                  }
+                />
               : null}
             </div>
+            {streamVerb || showOrganizerBadge || post.alphaLabel ?
+              <div className="feed-stream-post__subtitle-row">
+                {streamVerb ?
+                  <span className="feed-stream-post__verb">{streamVerb}</span>
+                : null}
+                {showOrganizerBadge ?
+                  <span className="rounded-full border border-[rgba(214,178,59,0.25)] bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-dc-accent">
+                    Organizer
+                  </span>
+                : null}
+                <AlphaTestBadge label={post.alphaLabel} />
+              </div>
+            : null}
           </div>
         </header>
 
@@ -336,28 +366,6 @@ export default function LocalPostCard({
             commentDisabled={!canShare}
             shareHref={canShare ? `/share/post/${post.id}` : undefined}
             shareDisabled={!canShare}
-            bookmarked={postBookmarked}
-            bookmarkBusy={bookmarkApi.bookmarkBusy}
-            bookmarkDisabled={!canShare || !isAuthenticated}
-            onBookmarkToggle={
-              canShare && isAuthenticated ?
-                () => {
-                  void bookmarkApi.toggleBookmark(BOOKMARK_OBJECT_FEED_POST, post.id)
-                }
-              : undefined
-            }
-            report={
-              post.source === 'api' && isAuthenticated && !isOwnPost ?
-                (() => {
-                  const target = feedPostTarget(post.id)
-                  return {
-                    targetType: target.targetType,
-                    targetId: target.targetId,
-                    targetLabel: 'feed post',
-                  }
-                })()
-              : undefined
-            }
           />
           <ConnectionLikerStack preview={connectionPreview} />
         </div>

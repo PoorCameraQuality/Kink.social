@@ -21,6 +21,8 @@ export type ReportActionProps = {
   viewerUserId?: string | null
   contentAuthorId?: string | null
   onSubmitted?: () => void
+  /** Called when the user activates the report control (e.g. close parent menu). */
+  onTrigger?: () => void
 }
 
 function defaultContentLabel(targetType: string): string {
@@ -40,6 +42,7 @@ export default function ReportAction({
   viewerUserId,
   contentAuthorId,
   onSubmitted,
+  onTrigger,
 }: ReportActionProps) {
   const [open, setOpen] = useState<TsReportTarget | null>(null)
 
@@ -67,6 +70,7 @@ export default function ReportAction({
   const label = targetLabel ?? defaultContentLabel(targetType)
 
   const openModal = () => {
+    onTrigger?.()
     setOpen({ targetType, targetId, label, context: _context } as TsReportTarget & {
       context?: Record<string, unknown>
     })
