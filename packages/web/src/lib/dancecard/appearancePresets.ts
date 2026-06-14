@@ -7,6 +7,7 @@ import { enrichAppearanceVars, buildDarkCommunityVars } from '@/lib/dancecard/ap
 
 export type DancecardAppearanceId =
   | 'parchment'
+  | 'midnight-velvet'
   | 'midnight-brass'
   | 'lifted-ink'
   | 'coastal-slate'
@@ -88,7 +89,41 @@ const PARCHMENT_VARS: Record<string, string> = {
   '--dc-chip-hover-bg': 'var(--dc-accent-muted)',
 }
 
-/** Black Gold - product default (LinkedIn-for-alt-communities). */
+/**
+ * Midnight Velvet - default member social palette (charcoal + velvet rose).
+ * Copper/gold belong in optional themes (e.g. midnight-brass), not as the general active state.
+ * Teal/success tokens are reserved for trust, safety, privacy, and confirmed states.
+ */
+const MIDNIGHT_VELVET_VARS: Record<string, string> = {
+  ...buildDarkCommunityVars({
+    background: '#090A0F',
+    card: '#171923',
+    cardHover: '#262B3A',
+    input: '#12151E',
+    border: '#303644',
+    primary: '#E6638E',
+    text: '#F7F2EA',
+    bodyText: '#D6CDC1',
+    mutedText: '#968A9A',
+  }),
+  '--dc-surface-muted': '#11131A',
+  '--dc-elevated-solid': '#1F2330',
+  '--dc-text-subtle': '#AA9FB0',
+  '--dc-accent-hover': '#F07A9F',
+  '--dc-accent-muted': '#2A1722',
+  '--dc-accent-border': '#8A3650',
+  '--dc-accent-foreground': '#090A0F',
+  '--dc-border-strong': '#4A5367',
+  '--dc-danger': '#F87171',
+  '--dc-danger-muted': 'rgba(248, 113, 113, 0.12)',
+  '--dc-danger-border': 'rgba(248, 113, 113, 0.35)',
+  '--dc-success': '#6EE7B7',
+  '--dc-success-muted': 'rgba(110, 231, 183, 0.12)',
+  '--dc-warning': '#FBBF24',
+  '--dc-warning-muted': 'rgba(251, 191, 36, 0.12)',
+}
+
+/** Black Gold - luxury charcoal + gold alternate theme. */
 const MIDNIGHT_BRASS_VARS: Record<string, string> = buildDarkCommunityVars({
   background: '#121212',
   card: '#1e1e1e',
@@ -211,10 +246,18 @@ export const DANCECARD_APPEARANCE_PRESETS: readonly DancecardAppearancePreset[] 
     vars: PARCHMENT_VARS,
   },
   {
+    id: 'midnight-velvet',
+    name: 'Midnight Velvet',
+    tagline: 'Mature dark default',
+    bestFor: 'Community feed, events, profiles, messaging, and settings',
+    mode: 'dark',
+    vars: MIDNIGHT_VELVET_VARS,
+  },
+  {
     id: 'midnight-brass',
     name: 'Black Gold',
-    tagline: 'Luxury charcoal + gold (default)',
-    bestFor: 'Professional community platform. Matches product mockups',
+    tagline: 'Luxury charcoal + gold',
+    bestFor: 'Organizer dashboards and premium event branding',
     mode: 'dark',
     vars: MIDNIGHT_BRASS_VARS,
   },
@@ -413,11 +456,12 @@ export const DANCECARD_APPEARANCE_PRESETS: readonly DancecardAppearancePreset[] 
   },
 ] as const
 
-/** Member site default - charcoal + gold (ECKE product landing). */
-export const DEFAULT_DANCECARD_APPEARANCE: DancecardAppearanceId = 'midnight-brass'
+/** Sitewide default (member app, organizer embed, auth shells). */
+export const DEFAULT_DANCECARD_APPEARANCE: DancecardAppearanceId = 'midnight-velvet'
 
 /** Themes offered in member Settings (10 community palettes + legacy comfort themes). */
 export const MEMBER_SITE_APPEARANCE_IDS = [
+  'midnight-velvet',
   'midnight-brass',
   'midnight-teal',
   'obsidian-purple',
@@ -440,7 +484,7 @@ export const MEMBER_DANCECARD_APPEARANCE_PRESETS = DANCECARD_APPEARANCE_PRESETS.
 
 /** Curated presets for first-time onboarding (visual swatches, not the full settings list). */
 export const ONBOARDING_APPEARANCE_IDS = [
-  'midnight-brass',
+  'midnight-velvet',
   'midnight-teal',
   'obsidian-purple',
   'crimson-classic',
@@ -454,8 +498,8 @@ export const ONBOARDING_APPEARANCE_PRESETS = DANCECARD_APPEARANCE_PRESETS.filter
   (ONBOARDING_APPEARANCE_IDS as readonly string[]).includes(p.id),
 )
 
-/** Default for Kink Social embedded organizer console (data-heavy grids). */
-export const ORGANIZER_DANCECARD_APPEARANCE: DancecardAppearanceId = 'midnight-brass'
+/** Organizer embed uses the same default as the member app. */
+export const ORGANIZER_DANCECARD_APPEARANCE: DancecardAppearanceId = DEFAULT_DANCECARD_APPEARANCE
 
 export function getAppearancePreset(id: string): DancecardAppearancePreset {
   return DANCECARD_APPEARANCE_PRESETS.find((p) => p.id === id) ?? DANCECARD_APPEARANCE_PRESETS[0]

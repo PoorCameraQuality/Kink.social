@@ -135,9 +135,9 @@ export function enrichAppearanceVars(
   vars: Record<string, string>,
   mode: 'light' | 'dark',
 ): Record<string, string> {
-  const background = vars['--dc-surface'] ?? (mode === 'light' ? '#f4f0e8' : '#0c0c0c')
+  const background = vars['--dc-surface'] ?? (mode === 'light' ? '#f4f0e8' : '#090a0f')
   const card = vars['--dc-elevated-solid'] ?? vars['--dc-surface-muted'] ?? '#1e1e1e'
-  const primary = vars['--dc-accent'] ?? '#d4af37'
+  const primary = vars['--dc-accent'] ?? '#e6638e'
   return {
     ...vars,
     ...buildAtmosphereVars({ mode, background, card, primary }),

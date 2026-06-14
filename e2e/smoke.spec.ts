@@ -380,11 +380,11 @@ test.describe('smoke', () => {
     await expect(page.getByRole('heading', { name: 'Events on your profile', level: 2 })).toBeVisible()
   })
 
-  test('member chrome defaults to midnight-brass appearance', async ({ page }) => {
+  test('member chrome defaults to midnight-velvet appearance', async ({ page }) => {
     await page.goto('/')
     const chrome = page.locator('.dc-gold-chrome').first()
     await expect(chrome).toBeVisible({ timeout: 15_000 })
-    await expect(chrome).toHaveAttribute('data-dc-appearance', 'midnight-brass')
+    await expect(chrome).toHaveAttribute('data-dc-appearance', 'midnight-velvet')
   })
 
   test('settings appearance theme persists in localStorage', async ({ page }) => {

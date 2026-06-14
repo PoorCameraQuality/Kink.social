@@ -60,7 +60,7 @@ type ProviderProps = {
   className?: string
   chromeClassName?: string
   wrapChrome?: boolean
-  /** When localStorage has no saved theme, use this preset (organizer embed defaults to coastal-slate). */
+  /** When localStorage has no saved theme, use this preset (defaults to midnight-velvet sitewide). */
   defaultAppearanceId?: DancecardAppearanceId
   /** Subset for theme pickers (member site uses three comfort themes). */
   presets?: readonly DancecardAppearancePreset[]
