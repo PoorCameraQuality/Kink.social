@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { redactProfileForViewer } from './profile-field-redaction.js'
+import { redactProfileForViewer, redactListProfileIdentityFields } from './profile-field-redaction.js'
 
 const baseProfile = {
   gender: 'Non-binary',
@@ -33,7 +33,7 @@ const baseProfile = {
 } as const
 
 describe('redactProfileForViewer', () => {
-  it('returns full profile for owner', () => {
+  it('returns full profile for owner without public view', () => {
     const out = redactProfileForViewer({ ...baseProfile }, {
       viewerId: 'u1',
       targetUserId: 'u1',
@@ -43,6 +43,21 @@ describe('redactProfileForViewer', () => {
     assert.equal(out.birthDate, '1993-05-01')
     assert.deepEqual(out.notLookingFor, ['One-night stands'])
     assert.ok('fieldVisibility' in out)
+  })
+
+  it('redacts hidden fields for owner public profile view', () => {
+    const out = redactProfileForViewer({ ...baseProfile }, {
+      viewerId: 'u1',
+      targetUserId: 'u1',
+      friendIds: new Set(),
+    }, { asPublicProfileView: true })
+    assert.equal(out.gender, null)
+    assert.deepEqual(out.sexualOrientations, [])
+    assert.deepEqual(out.romanticOrientations, [])
+    assert.equal(out.pronouns, 'they/them')
+    assert.ok('fieldVisibility' in out)
+    assert.ok('discoverableInPeopleSearch' in out)
+    assert.equal(out.birthDate, null)
   })
 
   it('redacts hidden identity fields for strangers', () => {
@@ -79,5 +94,26 @@ describe('redactProfileForViewer', () => {
     assert.deepEqual(out.sexualOrientations, ['Pansexual'])
     assert.deepEqual(out.romanticOrientations, ['Demiromantic'])
     assert.equal(out.sexuality, 'Pansexual')
+  })
+})
+
+describe('redactListProfileIdentityFields', () => {
+  it('redacts hidden list fields for strangers', () => {
+    const out = redactListProfileIdentityFields(
+      {
+        userId: 'u1',
+        age: 32,
+        location: 'Portland, Oregon',
+        gender: 'Non-binary',
+        genders: ['Non-binary'],
+        fieldVisibility: { age: 'hidden', location: 'hidden', gender: 'hidden' },
+      },
+      'u2',
+      new Set(),
+    )
+    assert.equal(out.age, null)
+    assert.equal(out.location, null)
+    assert.equal(out.gender, null)
+    assert.deepEqual(out.genders, [])
   })
 })

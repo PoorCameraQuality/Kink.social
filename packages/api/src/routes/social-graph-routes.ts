@@ -5,7 +5,9 @@ import { normalizePrivacySettings } from '@c2k/shared'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { db, schema } from '../db/index.js'
+import { loadAcceptedFriendUserIds } from '../lib/accepted-friends.js'
 import { isBlockedPair, loadBlockedUserIds } from '../lib/blocks.js'
+import { redactListProfileIdentityFields } from '../lib/profile-field-redaction.js'
 import { loadFollowerUserIds, loadFollowingUserIds } from '../lib/follows.js'
 import { emitActivity } from '../lib/feed-activities.js'
 function useDatabase(): boolean {
@@ -337,6 +339,7 @@ export async function registerSocialGraphRoutes(app: FastifyInstance) {
         genders: schema.profiles.genders,
         roles: schema.profiles.roles,
         location: schema.profiles.location,
+        fieldVisibility: schema.profiles.fieldVisibility,
         blockedAt: schema.blocks.createdAt,
       })
       .from(schema.blocks)
@@ -353,19 +356,34 @@ export async function registerSocialGraphRoutes(app: FastifyInstance) {
           (u.displayName?.toLowerCase().includes(needle) ?? false)
       )
     }
+    const friendIds = await loadAcceptedFriendUserIds(user.userId)
     return reply.send({
-      items: items.map((u) => ({
-        userId: u.id,
-        username: u.username,
-        displayName: u.displayName,
-        avatarUrl: u.avatarUrl,
-        age: u.age,
-        gender: u.gender,
-        genders: u.genders ?? [],
-        roles: u.roles ?? [],
-        location: u.location,
-        blockedAt: u.blockedAt?.toISOString() ?? null,
-      })),
+      items: items.map((u) => {
+        const redacted = redactListProfileIdentityFields(
+          {
+            userId: u.id,
+            age: u.age,
+            gender: u.gender,
+            genders: u.genders ?? [],
+            location: u.location,
+            fieldVisibility: u.fieldVisibility,
+          },
+          user.userId,
+          friendIds,
+        )
+        return {
+          userId: u.id,
+          username: u.username,
+          displayName: u.displayName,
+          avatarUrl: u.avatarUrl,
+          age: redacted.age,
+          gender: redacted.gender,
+          genders: redacted.genders ?? [],
+          roles: u.roles ?? [],
+          location: redacted.location,
+          blockedAt: u.blockedAt?.toISOString() ?? null,
+        }
+      }),
     })
   })
 

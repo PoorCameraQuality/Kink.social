@@ -11,8 +11,7 @@ import { loadPresenterScheduleCredits } from '../lib/presenter-schedule-credits.
 import { loadPresenterTeachingCredits } from '../lib/presenter-teaching-credits.js'
 import { userAttendedEvent, userStaffCheckedInForEvent } from '../lib/attendance-gate.js'
 import { accountAgeDays } from '../lib/reputation-anti-gaming.js'
-import { REVIEW_MIN_ACCOUNT_AGE_DAYS } from '@c2k/shared'
-import { validatePresenterExternalUrl } from '@c2k/shared'
+import { formatPronounDisplay, visibleProfileIdentityFields } from '@c2k/shared'
 import {
   canSeePresenterOrganizerFields,
   offeringForViewer,
@@ -21,6 +20,8 @@ import {
 import { viewerCanSeeActivityHistory } from '../lib/activity-history-visibility.js'
 import { loadWritingPreviewForUser } from './education-articles-routes.js'
 import { canAccessPresenterRunnerMaterials } from '../lib/presenter-runner-access.js'
+import { loadAcceptedFriendUserIds } from '../lib/accepted-friends.js'
+import { enrichProfileIdentityRead } from './profile.js'
 import {
   loadPresenterFocusFields,
   loadPresenterFocusFieldsMap,
@@ -1054,12 +1055,24 @@ export async function registerPresenterProfileRoutes(app: FastifyInstance) {
     const counts = badgeCounts.get(user.id)
     const badges = counts ? derivePresenterBadges(counts, prof.profileKind) : []
 
+    const friendIds = viewerId ? await loadAcceptedFriendUserIds(viewerId) : new Set<string>()
+    const visiblePronouns =
+      p ?
+        formatPronounDisplay(
+          visibleProfileIdentityFields(enrichProfileIdentityRead(p), {
+            isOwner,
+            isFriend: friendIds.has(user.id),
+            asPublicProfileView: true,
+          }).pronounTags,
+        ) || null
+      : null
+
     return reply.send({
       userId: user.id,
       username: user.username,
       displayName: p?.displayName ?? null,
       avatarUrl: p?.avatarUrl ?? null,
-      pronouns: p?.pronouns ?? null,
+      pronouns: visiblePronouns,
       presenter: presenterProfileForViewer(prof, canSeeOrganizerFields),
       ...focusFields,
       badges,

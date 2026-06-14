@@ -385,6 +385,12 @@ export default function ProfileUsernamePage() {
   }, [loadPublicProfile])
 
   useEffect(() => {
+    const onPrivacySaved = () => void loadPublicProfile()
+    window.addEventListener('c2k:profile-privacy-saved', onPrivacySaved)
+    return () => window.removeEventListener('c2k:profile-privacy-saved', onPrivacySaved)
+  }, [loadPublicProfile])
+
+  useEffect(() => {
     if (!username) return
     let cancelled = false
     void (async () => {

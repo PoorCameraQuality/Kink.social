@@ -563,7 +563,7 @@ export function SettingsProfileFieldsPanel({
       <SectionHeader
         eyebrow="Profile"
         title="Profile field visibility"
-        description='Who can see optional fields on your profile. "Connections only" means people you have mutually accepted.'
+        description='Who can see optional fields on your profile. "Connections only" means people you have mutually accepted. Location visibility is configured above; both are saved together.'
       />
       {profSectionLoading ?
         <div className="mt-4">
@@ -604,8 +604,11 @@ export function SettingsProfileFieldsPanel({
           {profPrivacyError ? <StatusBanner tone="error">{profPrivacyError}</StatusBanner> : null}
           {profPrivacySaved ? <StatusBanner tone="success">Profile privacy saved.</StatusBanner> : null}
           <Button type="button" variant="secondary" disabled={profPrivacySaving} onClick={onSaveProfilePrivacy}>
-            {profPrivacySaving ? 'Saving…' : 'Save profile privacy'}
+            {profPrivacySaving ? 'Saving…' : 'Save profile field visibility'}
           </Button>
+          <p className="text-xs text-dc-muted">
+            Or use <strong className="font-medium text-dc-text-muted">Save settings</strong> at the bottom of this page to save everything at once.
+          </p>
         </div>
       }
     </Panel>

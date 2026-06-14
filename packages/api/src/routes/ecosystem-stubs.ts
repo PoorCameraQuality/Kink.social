@@ -54,7 +54,7 @@ import {
   virtualJoinLinkVisibleEventIds,
   viewerCanPatchEvent,
 } from '../lib/virtual-event-join-visibility.js'
-import { passesGenderDiscoveryFilter, toDiscoveryProfileCard } from '../lib/profile-field-redaction.js'
+import { passesGenderDiscoveryFilter, passesLocationDiscoveryFilter, redactListProfileIdentityFields, toDiscoveryProfileCard } from '../lib/profile-field-redaction.js'
 import { alphaUploadDisabledResponse, isAlphaUploadDisabled } from '../lib/alpha-upload-policy.js'
 import { touchGroupActivity } from '../lib/group-activity.js'
 import {
@@ -2054,6 +2054,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     const q = req.query as { source?: string; limit?: string }
     const limit = Math.min(30, Math.max(1, parseInt(String(q.limit ?? '12'), 10) || 12))
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+    const friendIds = await loadAcceptedFriendUserIds(viewerId)
 
     if (q.source === 'nearby') {
       const [vp] = await db
@@ -2075,6 +2076,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
           age: schema.profiles.age,
           avatarUrl: schema.profiles.avatarUrl,
           lastActiveAt: schema.profiles.updatedAt,
+          fieldVisibility: schema.profiles.fieldVisibility,
           privacySettings: schema.userSettings.privacySettings,
         })
         .from(schema.users)
@@ -2091,13 +2093,16 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         .orderBy(desc(schema.profiles.updatedAt))
         .limit(Math.min(80, limit * 4))
       const filtered = candidates
+        .filter((c) => passesLocationDiscoveryFilter(c, viewerId, friendIds))
         .filter((c) => normalizePrivacySettings(c.privacySettings ?? {}).appearInRegionalPeopleSuggestions)
         .filter(
           (c) =>
             normalizePrivacySettings(c.privacySettings ?? {}).feedActivityPrivacy.showInConnectionSuggestions,
         )
         .slice(0, limit)
-        .map(({ privacySettings: _p, ...rest }) => rest)
+        .map(({ privacySettings: _p, fieldVisibility: _fv, ...rest }) =>
+          redactListProfileIdentityFields(rest, viewerId, friendIds),
+        )
       return reply.send({ items: filtered })
     }
 
@@ -2125,6 +2130,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         age: schema.profiles.age,
         avatarUrl: schema.profiles.avatarUrl,
         lastActiveAt: schema.profiles.updatedAt,
+        fieldVisibility: schema.profiles.fieldVisibility,
         privacySettings: schema.userSettings.privacySettings,
         sharedCount: count(),
       })
@@ -2150,6 +2156,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         schema.profiles.age,
         schema.profiles.avatarUrl,
         schema.profiles.updatedAt,
+        schema.profiles.fieldVisibility,
         schema.userSettings.privacySettings,
       )
       .orderBy(desc(count()))
@@ -2161,7 +2168,9 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         (o) => normalizePrivacySettings(o.privacySettings ?? {}).feedActivityPrivacy.showInConnectionSuggestions,
       )
       .slice(0, limit)
-      .map(({ privacySettings: _p, ...rest }) => rest)
+      .map(({ privacySettings: _p, fieldVisibility: _fv, ...rest }) =>
+        redactListProfileIdentityFields(rest, viewerId, friendIds),
+      )
     return reply.send({ items: filtered })
   })
 

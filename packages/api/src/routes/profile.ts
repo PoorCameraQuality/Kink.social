@@ -287,12 +287,12 @@ export async function registerProfileRoutes(app: FastifyInstance) {
       return reply.status(404).send({ error: 'Not found' })
     }
     const friendIds =
-      viewerId && !isOwner ? await loadAcceptedFriendUserIds(viewerId) : new Set<string>()
+      viewerId ? await loadAcceptedFriendUserIds(viewerId) : new Set<string>()
     const enriched = profile ? enrichProfileIdentityRead(profile) : profile
     const safeProfile =
-      enriched && !isOwner
-        ? redactProfileForViewer(enriched, { viewerId, targetUserId: user.id, friendIds })
-        : enriched
+      enriched ?
+        redactProfileForViewer(enriched, { viewerId, targetUserId: user.id, friendIds }, { asPublicProfileView: true })
+      : enriched
 
     const payload: {
       user: { id: string; username: string; email?: string; memberSince: string }

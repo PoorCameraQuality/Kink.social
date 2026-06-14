@@ -67,7 +67,7 @@ export default function SettingsPrivacyPage() {
           onSaveProfilePrivacy={() => void ctx.saveProfilePrivacy()}
         />
         <SettingsPrivacyDataPanel />
-        <SettingsBundleSaveBar />
+        <SettingsBundleSaveBar profilePrivacyNote />
       </div>
       <aside className="mt-8 lg:mt-0">
         <SettingsPrivacySidebar />
