@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { PEOPLE_DIRECTORY_PATH } from '@/lib/app-routes'
 import { isHomeLeftRailHomeActive, isHomeLeftRailLinkActive } from '@/lib/home-left-rail-nav'
 import { useAuth } from '@/contexts/AuthContext'
 import { useConversationsPreview } from '@/hooks/useConversationsPreview'
@@ -15,6 +16,7 @@ import { railNavShellClass } from '@/lib/card-surface'
 import {
   NavIconConnections,
   NavIconEvents,
+  NavIconExplore,
   NavIconFeed,
   NavIconMessages,
   NavIconPosts,
@@ -69,7 +71,7 @@ function ChecklistIcon({ done }: { done: boolean }) {
 
 export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHomeLink?: boolean }) {
   const { pathname, search } = useLocation()
-  const { viewerUsername, isAuthenticated, isFallback } = useAuth()
+  const { isAuthenticated, isFallback } = useAuth()
   const { unreadCount: msgUnread } = useConversationsPreview()
   const { unreadCount: notifUnread } = useNotificationsList()
   const signedIn = isAuthenticated && !isFallback
@@ -105,7 +107,7 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
 
   const myC2k: NavItem[] = [
     { href: '/home?mode=discover&tab=Local', label: 'Home', icon: <NavIconFeed /> },
-    { href: '/events?mine=registrations', label: 'My Registrations', icon: <NavIconEvents /> },
+    { href: '/events?mine=registrations', label: 'My RSVPs & registrations', icon: <NavIconEvents /> },
     {
       href: '/messaging',
       label: 'Messages',
@@ -130,20 +132,7 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
     { href: '/connections', label: 'Connections', icon: <NavIconConnections /> },
     { href: '/saved', label: 'Saved', icon: <NavIconSaved /> },
     { href: '/my-posts', label: 'My Posts', icon: <NavIconPosts /> },
-    {
-      href: '/activity',
-      label: 'Activity',
-      icon: (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.75}
-            d="M13 10V3L4 14h7v7l9-11h-7z"
-          />
-        </svg>
-      ),
-    },
+    { href: PEOPLE_DIRECTORY_PATH, label: 'Find people', icon: <NavIconExplore /> },
   ]
 
   const navItems = omitHomeLink ? myC2k.filter((item) => item.label !== 'Home') : myC2k
@@ -153,7 +142,7 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
       <div className={railNavShellClass}>
         <p className="mb-1 text-sm font-semibold text-dc-text">Shortcuts</p>
         <p className="mb-3 hidden text-xs leading-relaxed text-dc-text-muted lg:block">
-          Jump to messages, saved posts, and your activity without leaving Home.
+          Jump to messages, connections, and discovery without leaving Home.
         </p>
         <ul className="space-y-0.5">
           {navItems.map((item) => (
@@ -169,15 +158,29 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
           ))}
         </ul>
 
-        {signedIn ?
+        {signedIn && profileComplete ?
+          <div className="mt-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-dc-muted">Support</p>
+            <p className="mt-1.5 text-sm font-semibold text-dc-text">Support kink.social</p>
+            <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">
+              Help keep the community platform running for organizers, educators, and members.
+            </p>
+            <button
+              type="button"
+              disabled
+              title="Payment options coming soon"
+              className="mt-3 inline-flex min-h-10 w-full cursor-not-allowed items-center justify-center rounded-xl bg-dc-accent px-3 text-sm font-semibold text-dc-accent-foreground opacity-60"
+            >
+              Support kink.social
+            </button>
+          </div>
+        : signedIn ?
           <div className="mt-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-dc-muted">Trust</p>
             <p className="mt-1.5 text-sm font-semibold text-dc-text">Help people recognize you</p>
             <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">
               {loading ?
                 'Checking your profile essentials…'
-              : profileComplete ?
-                'Your profile essentials are complete. Keep building trust in Profile Studio.'
               : `Add your ${missingLabel} so people can find and trust you.`}
             </p>
 
@@ -211,20 +214,12 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
               {loading ? 'Loading…' : `${completion}% essentials complete`}
             </p>
 
-            {profileComplete ?
-              <Link
-                to={viewerUsername ? `/profile/${encodeURIComponent(viewerUsername)}` : '/profile/edit'}
-                className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-dc-border px-3 text-sm font-semibold text-dc-text-muted hover:border-dc-accent-border hover:text-dc-text"
-              >
-                View profile
-              </Link>
-            : <Link
-                to={finishHref}
-                className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-dc-accent px-3 text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover"
-              >
-                Complete profile
-              </Link>
-            }
+            <Link
+              to={finishHref}
+              className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-dc-accent px-3 text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover"
+            >
+              Complete profile
+            </Link>
           </div>
         : null}
       </div>

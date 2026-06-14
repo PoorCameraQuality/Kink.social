@@ -12,7 +12,13 @@ export type RouteSpec = {
 }
 
 export const PUBLIC_ROUTES: RouteSpec[] = [
-  { path: '/', name: 'landing', expectHeading: /Find events.*Learn safely/i },
+  { path: '/', name: 'landing', expectHeading: 'Join free' },
+  { path: '/privacy', name: 'privacy' },
+  { path: '/terms', name: 'terms' },
+]
+
+/** Routes that redirect anonymous visitors to the landing login tab. */
+export const LOGIN_GATED_ROUTES: RouteSpec[] = [
   { path: '/explore', name: 'explore' },
   { path: '/events', name: 'events', expectHeading: 'Events' },
   { path: '/groups', name: 'groups', expectHeading: 'Groups' },
@@ -21,27 +27,31 @@ export const PUBLIC_ROUTES: RouteSpec[] = [
   { path: '/people', name: 'people' },
   { path: '/orgs', name: 'orgs', expectHeading: 'Organizations' },
   { path: '/conventions', name: 'conventions' },
-  { path: '/privacy', name: 'privacy' },
-  { path: '/terms', name: 'terms' },
 ]
-
-export function publicRoutesWithSeed(orgSlug: string, convSlug: string): RouteSpec[] {
-  return [
-    ...PUBLIC_ROUTES,
-    { path: `/orgs/${orgSlug}`, name: 'org-hub', auth: 'session', skipIfNoDb: true },
-    { path: `/conventions/${convSlug}`, name: 'convention-hub', auth: 'session', skipIfNoDb: true },
-    { path: '/conventions/nonexistent-e2e-slug', name: 'convention-missing' },
-  ]
-}
 
 export const AUTHENTICATED_ROUTES: RouteSpec[] = [
   { path: '/home', name: 'home', auth: 'session' },
+  { path: '/create', name: 'create', auth: 'session', expectHeading: 'Create', skipIfNoDb: true },
   { path: '/saved', name: 'saved', auth: 'session' },
   { path: '/settings', name: 'settings', auth: 'session', expectHeading: 'Settings' },
   { path: '/notifications', name: 'notifications', auth: 'session', expectHeading: 'Notifications' },
   { path: '/messaging', name: 'messaging', auth: 'session', expectHeading: 'Messages' },
   { path: '/connections', name: 'connections', auth: 'session', expectHeading: 'Connections' },
+  ...LOGIN_GATED_ROUTES.map((route) => ({ ...route, auth: 'session' as const })),
 ]
+
+export function publicRoutesWithSeed(_orgSlug: string, _convSlug: string): RouteSpec[] {
+  return PUBLIC_ROUTES
+}
+
+export function authenticatedRoutesWithSeed(orgSlug: string, convSlug: string): RouteSpec[] {
+  return [
+    ...AUTHENTICATED_ROUTES,
+    { path: `/orgs/${orgSlug}`, name: 'org-hub', auth: 'session', skipIfNoDb: true },
+    { path: `/conventions/${convSlug}`, name: 'convention-hub', auth: 'session', skipIfNoDb: true },
+    { path: '/conventions/nonexistent-e2e-slug', name: 'convention-missing', auth: 'session' },
+  ]
+}
 
 export function organizerRoutes(orgSlug: string, convSlug: string): RouteSpec[] {
   const base = `/organizer/orgs/${orgSlug}`

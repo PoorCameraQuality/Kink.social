@@ -25,6 +25,7 @@ import {
   publishProgramCandidates,
 } from '../lib/convention-organizer/scheduleImportPublish.js'
 import { toPublicConventionDto } from '../lib/convention-public-dto.js'
+import { withAlphaLabel, withAlphaLabels } from '../lib/alpha-seed-labels.js'
 import { filterStaffRowsForAttendeeAllowlist, getProgramStaffAttendeeRoleAllowlist } from '../lib/convention-staff-public.js'
 import { mintDancecardHandoffCode } from '../lib/dancecardHandoff.js'
 import {
@@ -382,8 +383,12 @@ export async function registerConventionRoutes(app: FastifyInstance) {
     const includeFullSettings = viewerUserId
       ? await userHasHubConventionRead(conv, viewerUserId, 'admin')
       : false
+    const convention = await withAlphaLabel(
+      'convention',
+      toPublicConventionDto(conv, { includeFullSettings }),
+    )
     return reply.send({
-      convention: toPublicConventionDto(conv, { includeFullSettings }),
+      convention,
       organizationSummary,
       anchorEventSummary,
       contributorsPreview,
@@ -958,7 +963,8 @@ export async function registerConventionRoutes(app: FastifyInstance) {
       )
       .digest('hex')
       .slice(0, 20)
-    return reply.send({ items: payload, scheduleRevision: rev })
+    const labeledPayload = await withAlphaLabels('schedule_slot', payload)
+    return reply.send({ items: labeledPayload, scheduleRevision: rev })
   })
 
   app.post('/api/v1/conventions/:key/slots/:slotId/materials', async (req, reply) => {

@@ -3,7 +3,7 @@
  * Applied via `data-dc-appearance` on `dc-gold-chrome` / `[data-dc-theme='event']` roots.
  */
 
-import { buildDarkCommunityVars } from '@/lib/dancecard/appearanceThemeBuilder'
+import { enrichAppearanceVars, buildDarkCommunityVars } from '@/lib/dancecard/appearanceThemeBuilder'
 
 export type DancecardAppearanceId =
   | 'parchment'
@@ -438,6 +438,22 @@ export const MEMBER_DANCECARD_APPEARANCE_PRESETS = DANCECARD_APPEARANCE_PRESETS.
   (MEMBER_SITE_APPEARANCE_IDS as readonly string[]).includes(p.id),
 )
 
+/** Curated presets for first-time onboarding (visual swatches, not the full settings list). */
+export const ONBOARDING_APPEARANCE_IDS = [
+  'midnight-brass',
+  'midnight-teal',
+  'obsidian-purple',
+  'crimson-classic',
+  'steel-blue',
+  'parchment',
+] as const satisfies readonly DancecardAppearanceId[]
+
+export type OnboardingAppearanceId = (typeof ONBOARDING_APPEARANCE_IDS)[number]
+
+export const ONBOARDING_APPEARANCE_PRESETS = DANCECARD_APPEARANCE_PRESETS.filter((p) =>
+  (ONBOARDING_APPEARANCE_IDS as readonly string[]).includes(p.id),
+)
+
 /** Default for Kink Social embedded organizer console (data-heavy grids). */
 export const ORGANIZER_DANCECARD_APPEARANCE: DancecardAppearanceId = 'midnight-brass'
 
@@ -445,8 +461,11 @@ export function getAppearancePreset(id: string): DancecardAppearancePreset {
   return DANCECARD_APPEARANCE_PRESETS.find((p) => p.id === id) ?? DANCECARD_APPEARANCE_PRESETS[0]
 }
 
-export function appearanceVarsToStyle(vars: Record<string, string>): Record<string, string> {
-  return vars
+export function appearanceVarsToStyle(
+  vars: Record<string, string>,
+  mode: 'light' | 'dark' = 'dark',
+): Record<string, string> {
+  return enrichAppearanceVars(vars, mode)
 }
 
 /** Apply theme tokens on `html` so body-portaled modals inherit `--dc-*` vars. */

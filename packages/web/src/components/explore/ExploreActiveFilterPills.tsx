@@ -13,11 +13,7 @@ export default function ExploreActiveFilterPills({ pills, onRemove }: Props) {
       <p className="text-[11px] font-medium uppercase tracking-wide text-dc-muted">Active filters</p>
       <div className="flex flex-wrap gap-2" role="list" aria-label="Active filters">
         {pills.map((pill) => (
-          <span
-            key={pill.id}
-            role="listitem"
-            className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-dc-accent-border/70 bg-dc-accent/10 px-3 py-1 text-xs font-medium text-dc-text"
-          >
+          <span key={pill.id} role="listitem" className="xpl-filter-pill">
             {pill.label}
             <button
               type="button"

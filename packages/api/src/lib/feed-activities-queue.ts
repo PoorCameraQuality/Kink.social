@@ -15,7 +15,14 @@ export function getFeedActivitiesQueue(): Queue {
 }
 
 function jobIdFor(params: EmitActivityParams): string {
-  return `feed-activity:${params.actorId}:${params.verb}:${params.objectType}:${params.objectId}`
+  // BullMQ custom job ids must not contain ':' — use a stable delimiter instead.
+  return [
+    'feed-activity',
+    params.actorId,
+    params.verb,
+    params.objectType,
+    params.objectId,
+  ].join('--')
 }
 
 /** Enqueue feed activity insert; inline fallback if queue unavailable (dev without Redis). */

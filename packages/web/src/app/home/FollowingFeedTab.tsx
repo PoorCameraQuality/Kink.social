@@ -1,7 +1,8 @@
+import { useMemo } from 'react'
 import LocalPostCard from '@/components/cards/LocalPostCard'
 
 import ActivityFeedCard from '@/components/home/ActivityFeedCard'
-
+import { followingFeedItemReason } from '@/lib/following-feed-present'
 import HomeFeedRichComposer from '@/components/home/HomeFeedRichComposer'
 import HomeMobileComposer from '@/components/home/HomeMobileComposer'
 import FeedScopeTabs from '@/components/home/FeedScopeTabs'
@@ -19,10 +20,13 @@ import { FeedCardSkeleton } from '@/components/ui/skeleton'
 
 
 import { useFollowingFeed } from '@/hooks/useApiFeed'
+import { presentFollowingFeedItems } from '@/lib/following-feed-demo'
 
 import {
 
   FOLLOWING_FILTERS,
+
+  isFollowingFilterComingSoon,
 
   useFollowingFeedCounts,
 
@@ -48,11 +52,16 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
 
   const { filter, setFilter, loaded: filterLoaded } = useFollowingFilterPrefs(true)
 
-  const feed = useFollowingFeed(true, filter)
+  const filterComingSoon = isFollowingFilterComingSoon(filter)
+
+  const feed = useFollowingFeed(!filterComingSoon, filter)
 
   const counts = useFollowingFeedCounts(true, feed.items.length)
 
-
+  const presentedItems = useMemo(
+    () => (feed.status === 'ready' ? presentFollowingFeedItems(feed.items) : []),
+    [feed.items, feed.status],
+  )
 
   const composerPlaceholder = feedShell
     ? 'Share an update with your community…'
@@ -98,7 +107,7 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
           </Panel>
       </section>}
 
-      <FeedScopeTabs showHeading={feedShell} hideOnDesktop={feedShell} />
+      {!feedShell ? <FeedScopeTabs showHeading /> : null}
 
       {filterLoaded ?
         <TabShell className="mb-4 w-full max-w-full overflow-x-auto" aria-label="Following feed filters">
@@ -114,18 +123,33 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
         </TabShell>
       : null}
 
-      {feed.status === 'loading' ? (
+      {filterComingSoon ?
+        <EmptyState
+          inline
+          variant="surface"
+          align="center"
+          className="rounded-2xl border border-dc-border/80 bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
+          title="Video feed coming soon"
+          message="A dedicated view for video from your connections is on the way. Browse all activity for now, or explore community media channels."
+          actions={[
+            { label: 'All activity', onClick: () => setFilter('all'), primary: true },
+            { label: 'Browse media', href: '/media' },
+          ]}
+        />
+      : null}
+
+      {!filterComingSoon && feed.status === 'loading' ? (
         <div className="mb-4 dc-panel-enter" aria-busy="true" aria-live="polite">
           <p className="mb-3 text-sm text-dc-muted">Loading your feed…</p>
           <FeedCardSkeleton count={4} />
         </div>
       ) : null}
 
-      {feed.status === 'error' && feed.error ? <LoadErrorBanner className="mb-4" message={feed.error} onRetry={() => feed.reload()} /> : null}
+      {!filterComingSoon && feed.status === 'error' && feed.error ? <LoadErrorBanner className="mb-4" message={feed.error} onRetry={() => feed.reload()} /> : null}
 
 
 
-      {feed.status === 'ready' && feed.items.length === 0 ?
+      {!filterComingSoon && feed.status === 'ready' && presentedItems.length === 0 ?
         feed.connectionCount === 0 ?
 
           <EmptyState
@@ -158,25 +182,34 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
 
       : null}
 
+      {!filterComingSoon && feed.status === 'ready' && presentedItems.length > 0 ?
+        <p className="mb-3 text-sm leading-relaxed text-dc-text-muted">
+          Updates from people you are connected with, newest first.
+        </p>
+      : null}
 
+      {!filterComingSoon ?
+        <div className="feed-stream dc-feed-stagger">
 
-      <div className="space-y-4">
-
-        {feed.items.map((item) =>
-
-          item.kind === 'post' ?
-
-            <LocalPostCard key={`post-${item.post.id}`} post={item.post} layout="feed" onRepost={onRepost} />
-
-          : <ActivityFeedCard key={`activity-${item.cursor}`} item={item} />,
-
-        )}
+        {presentedItems.map((item) => {
+          const key = item.kind === 'post' ? `post-${item.post.id}` : `activity-${item.cursor}`
+          return item.kind === 'post' ?
+              <LocalPostCard
+                key={key}
+                post={item.post}
+                layout="feed"
+                feedStreamReason={followingFeedItemReason(item)}
+                onRepost={onRepost}
+              />
+            : <ActivityFeedCard key={key} item={item} />
+        })}
 
       </div>
+      : null}
 
 
 
-      {feed.nextCursor ?
+      {!filterComingSoon && feed.nextCursor ?
 
         <div className="mt-6 flex justify-center">
 

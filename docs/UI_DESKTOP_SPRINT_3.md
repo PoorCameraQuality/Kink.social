@@ -1,6 +1,8 @@
 # Desktop UI Sprint 3 — Visual Experience Polish
 
-**Status:** CP2.6 complete — CSS file ownership reconciled with docs. **CP3 Home + Explore complete** for discovery polish; other page groups blocked until briefs.  
+> **PAUSED — Layout IA reset active.** Per-page visual polish is **frozen** until **research notes + layout contracts** are approved. Authority: [`UI_DESKTOP_SPRINT_3_LAYOUT_INFORMATION_ARCHITECTURE.md`](UI_DESKTOP_SPRINT_3_LAYOUT_INFORMATION_ARCHITECTURE.md). Research-backed layout strategy first — not box rearrangement or component polish.
+
+**Status:** CP2.6 complete — CSS file ownership reconciled with docs. **CP3 Home + Explore + Events complete** for discovery polish; **remaining CP3+ blocked** by layout IA reset (not by missing briefs alone).  
 **Branch:** `desktop-ui-sprint-3-visual-polish` (recommended; may start from `desktop-ui-sprint-2-visual-baseline`)  
 **Baseline tag:** `desktop-ui-sprint-2-visual-baseline`  
 **Sprint 2 handoff:** Directory/detail template foundation complete enough — **do not continue CP6 migration unless regression found**  
@@ -395,7 +397,7 @@ Shared primitives (all groups): `components/templates/DirectoryTemplate.tsx`, `c
 | `/settings/account` | **Not started** | — |
 | Organizer / convention | **Not started** | — |
 
-**Next action:** Start **Groups** Research + Code Context Brief. Explore CP3 complete — see §Checkpoint 3 Explore.
+**Next action:** Layout + IA reset — see [`UI_DESKTOP_SPRINT_3_LAYOUT_INFORMATION_ARCHITECTURE.md`](UI_DESKTOP_SPRINT_3_LAYOUT_INFORMATION_ARCHITECTURE.md). Do **not** start Groups visual polish until CP-LIA-4 is approved.
 
 ---
 

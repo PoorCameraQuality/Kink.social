@@ -7,6 +7,7 @@ import {
   filterPublicEventTags,
   formatEventListDateBlock,
   formatEventLocationForDisplay,
+  resolveEventHeroUrl,
 } from '@/lib/events-page-utils'
 import type { MockEvent } from '@/data/types'
 
@@ -16,7 +17,7 @@ type Props = {
 
 export default function EventsListRow({ event }: Props) {
   const { weekday, monthDay } = formatEventListDateBlock(event)
-  const heroSrc = event.imageUrl ?? event.bannerUrl ?? null
+  const heroSrc = resolveEventHeroUrl(event)
   const capacity = event.capacityLimit ?? 100
   const fillPct = Math.min(100, Math.round(((event.rsvpCount ?? 0) / Math.max(capacity, 1)) * 100))
   const isVirtual = event.eventFormat === 'virtual'
@@ -37,22 +38,22 @@ export default function EventsListRow({ event }: Props) {
         <EventSaveButton eventId={event.id} />
       </div>
 
-      <Link to={`/events/${event.id}`} className="relative mx-3 block overflow-hidden rounded-xl border border-dc-border bg-dc-surface-muted sm:mx-4 md:hidden">
+      <Link to={`/events/${event.id}`} className="c2k-event-list-thumb relative mx-3 block rounded-xl border border-dc-border sm:mx-4 md:hidden">
         <div className="aspect-[16/9] w-full">
           {heroSrc ?
-            <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
-          : <MediaSurfaceFallback variant="event" />}
+            <img src={heroSrc} alt="" loading="lazy" />
+          : <MediaSurfaceFallback variant="event" className="h-full w-full" />}
         </div>
       </Link>
 
       <div className="flex flex-col gap-2 p-3 pt-2 sm:p-4 sm:pt-3 md:flex-row md:gap-4">
         <Link
           to={`/events/${event.id}`}
-          className="relative hidden h-28 w-36 shrink-0 overflow-hidden rounded-xl border border-dc-border md:block lg:h-32 lg:w-40"
+          className="c2k-event-list-thumb relative hidden h-28 w-36 shrink-0 rounded-xl border border-dc-border md:block lg:h-32 lg:w-40"
         >
           {heroSrc ?
-            <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
-          : <MediaSurfaceFallback variant="event" />}
+            <img src={heroSrc} alt="" loading="lazy" />
+          : <MediaSurfaceFallback variant="event" className="h-full w-full" />}
         </Link>
 
         <div className="flex min-w-0 flex-1 flex-col">

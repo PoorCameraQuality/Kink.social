@@ -95,7 +95,7 @@ export default function Dialog({
         {variant === 'sheet' ?
           layout === 'wizard' ?
             <>
-              <div className="flex shrink-0 items-start justify-between gap-3 border-b border-dc-border px-5 py-4">
+              <div className="cf-wizard-header flex shrink-0 items-start justify-between gap-3 border-b border-dc-border px-5 py-4">
                 <div className="min-w-0 flex-1">
                   <h2 id={titleId} className="text-lg font-semibold text-dc-text">
                     {title}
@@ -108,11 +108,11 @@ export default function Dialog({
                 </div>
                 {headerExtra}
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 text-sm text-dc-text">
+              <div className="cf-wizard-body min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 text-sm text-dc-text">
                 {children}
               </div>
               {footer ?
-                <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-dc-border px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                <div className="cf-wizard-footer flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-dc-border px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
                   {footer}
                 </div>
               : null}

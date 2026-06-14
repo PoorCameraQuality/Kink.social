@@ -4,6 +4,7 @@ import EventCard from '@/components/cards/EventCard'
 import EventsCategoryChips from '@/components/events/EventsCategoryChips'
 import EventsFeaturedStrip from '@/components/events/EventsFeaturedStrip'
 import EventsDiscoverLeftRail from '@/components/events/EventsDiscoverLeftRail'
+import EventsPagination from '@/components/events/EventsPagination'
 import EventFiltersPanel, { type EventFilterState } from '@/components/events/EventFiltersPanel'
 import EventsListRow from '@/components/events/EventsListRow'
 import EventsRightRail from '@/components/events/EventsRightRail'
@@ -16,8 +17,8 @@ import FilterSheet from '@/components/templates/FilterSheet'
 import { mockEvents } from '@/data/mock-data'
 import { useAuth } from '@/contexts/AuthContext'
 import { useApiEvents, type ApiEventsFilters } from '@/hooks/useApiEvents'
+import { useEventsAgendaSidebar } from '@/hooks/useEventsAgendaSidebar'
 import { usePersistedGeoText } from '@/hooks/usePersistedGeoText'
-import { useApiMyRsvps } from '@/hooks/useApiMyRsvps'
 import { MAX_DISTANCE_MI, rankEvents } from '@/lib/discovery-utils'
 import {
   countEventsByCategory,
@@ -123,7 +124,7 @@ export default function EventsDiscoverPage() {
   const [searchParams] = useSearchParams()
   const pastView = searchParams.get('view') === 'past'
 
-  const { isAuthenticated, isFallback } = useAuth()
+  const { isAuthenticated } = useAuth()
   const homeDemoFallbackEnv = import.meta.env.VITE_HOME_DEMO_FALLBACK === 'true'
   const useDemoFallback = homeDemoFallbackEnv && !isAuthenticated
 
@@ -157,9 +158,7 @@ export default function EventsDiscoverPage() {
 
   const apiEvents = useApiEvents(apiListFilters)
   const apiBackedEvents = !useDemoFallback && apiEvents.status === 'ready'
-  const showApiAgenda = apiBackedEvents && isAuthenticated && !isFallback
-  const organizingEvents = useApiEvents({ hostId: 'me', enabled: showApiAgenda })
-  const myRsvps = useApiMyRsvps(showApiAgenda)
+  const agenda = useEventsAgendaSidebar({ enabled: apiBackedEvents })
 
   const eventSource = useMemo(() => {
     if (useDemoFallback) return mockEvents
@@ -320,64 +319,6 @@ export default function EventsDiscoverPage() {
     clearFilters,
   }
 
-  type AgendaRow = {
-    eventId: string
-    title: string
-    startsAt: string
-    status: string
-    organizing: boolean
-  }
-
-  const upcomingAgenda = useMemo(() => {
-    const now = Date.now()
-    const byId = new Map<string, AgendaRow>()
-    for (const r of myRsvps.items) {
-      byId.set(r.eventId, {
-        eventId: r.eventId,
-        title: r.title,
-        startsAt: r.startsAt,
-        status: r.status,
-        organizing: false,
-      })
-    }
-    if (organizingEvents.status === 'ready') {
-      for (const ev of organizingEvents.items) {
-        const id = String(ev.id)
-        const startsAt = ev.startsAt ?? ''
-        const existing = byId.get(id)
-        if (existing) byId.set(id, { ...existing, organizing: true })
-        else {
-          byId.set(id, {
-            eventId: id,
-            title: ev.title,
-            startsAt,
-            status: 'organizing',
-            organizing: true,
-          })
-        }
-      }
-    }
-    return [...byId.values()]
-      .filter((row) => {
-        const t = new Date(row.startsAt).getTime()
-        return !Number.isNaN(t) && t >= now
-      })
-      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
-  }, [myRsvps.items, organizingEvents.items, organizingEvents.status])
-
-  const pastRsvpCount = useMemo(() => {
-    const now = Date.now()
-    return myRsvps.items.filter((r) => {
-      const t = new Date(r.startsAt).getTime()
-      return !Number.isNaN(t) && t < now
-    }).length
-  }, [myRsvps.items])
-
-  const agendaLoading =
-    showApiAgenda &&
-    (myRsvps.status === 'loading' || (showApiAgenda && organizingEvents.status === 'loading'))
-  const agendaError = myRsvps.status === 'error' || organizingEvents.status === 'error'
-
   const pageTitle = pastView ? 'Past Public Events' : 'Events'
   const pageSubtitle =
     pastView ?
@@ -386,16 +327,19 @@ export default function EventsDiscoverPage() {
 
   const resultSummary =
     apiEvents.status === 'ready' && filteredEvents.length > 0 ?
-      buildEventsResultSummary({
-        count: filteredEvents.length,
-        pastView,
-        scopeTab,
-        searchQuery,
-        appliedFilterCount,
-        sortMode,
-        viewMode,
-        onClearFilters: clearFilters,
-      })
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {buildEventsResultSummary({
+          count: filteredEvents.length,
+          pastView,
+          scopeTab,
+          searchQuery,
+          appliedFilterCount,
+          sortMode,
+          viewMode,
+          onClearFilters: clearFilters,
+        })}
+        <EventsPagination variant="compact" page={page} totalPages={totalPages} onPageChange={setPage} className="shrink-0" />
+      </div>
     : null
 
   return (
@@ -405,7 +349,6 @@ export default function EventsDiscoverPage() {
       className="py-4 sm:py-6"
       header={
         <PageHeader
-          eyebrow={pastView ? 'Event archive' : 'Discover gatherings'}
           title={pageTitle}
           description={pageSubtitle}
           sticky={false}
@@ -416,16 +359,7 @@ export default function EventsDiscoverPage() {
         <EventsDiscoverLeftRail
           filterState={filterState}
           categoryCounts={categoryCounts}
-          agendaLoading={agendaLoading}
-          agendaError={agendaError}
-          onAgendaRetry={() => {
-            myRsvps.reload()
-            organizingEvents.reload()
-          }}
-          upcomingAgenda={upcomingAgenda}
-          pastRsvpCount={pastRsvpCount}
-          showAgenda={isAuthenticated && !isFallback && !useDemoFallback}
-          showMockAgenda={useDemoFallback}
+          {...agenda}
         />
       }
       desktopAside={<EventsRightRail allEvents={eventSource} suggested={filteredEvents} />}
@@ -555,40 +489,8 @@ export default function EventsDiscoverPage() {
         </div>
       }
 
-      {filteredEvents.length > 0 && totalPages > 1 ?
-        <nav className="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
-          <button
-            type="button"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="min-h-11 rounded-lg border border-dc-border px-3 text-sm disabled:opacity-40"
-          >
-            Previous
-          </button>
-          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => setPage(n)}
-              className={`min-h-11 min-w-11 rounded-lg border text-sm ${
-                page === n ?
-                  'border-dc-accent bg-dc-accent-muted text-dc-accent'
-                : 'border-dc-border text-dc-text-muted hover:text-dc-text'
-              }`}
-            >
-              {n}
-            </button>
-          ))}
-          {totalPages > 7 ? <span className="px-1 text-dc-muted">…</span> : null}
-          <button
-            type="button"
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="min-h-11 rounded-lg border border-dc-border px-3 text-sm disabled:opacity-40"
-          >
-            Next
-          </button>
-        </nav>
+      {filteredEvents.length > 0 ?
+        <EventsPagination variant="full" page={page} totalPages={totalPages} onPageChange={setPage} className="mt-8" />
       : null}
 
       <FilterSheet

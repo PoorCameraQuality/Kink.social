@@ -1,6 +1,8 @@
 import { normalizeFeedSettings } from '@c2k/shared'
 import { and, desc, eq, gte, inArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
+import { aggregateFollowingFeedItems } from './feed-activity-aggregate.js'
+import { actorFeedActivityAllowed, loadActorFeedPrivacy } from './feed-activity-privacy-filter.js'
 import {
   bucketForActivity,
   bucketForPost,
@@ -64,6 +66,18 @@ function deepLinkForActivity(verb: string, objectType: string, objectId: string,
     if (typeof orgSlug === 'string') return `/orgs/${orgSlug}`
   }
   if (verb === 'group_join' && objectType === 'group') return `/groups/${objectId}`
+  if (
+    (verb === 'loved' || verb === 'reacted' || verb === 'post_love') &&
+    objectType === 'feed_post'
+  ) {
+    return `/feed/posts/${objectId}`
+  }
+  if (verb === 'followed' && objectType === 'user') {
+    const username = metadata.targetUsername
+    if (typeof username === 'string' && username.trim()) {
+      return `/profile/${encodeURIComponent(username.trim())}`
+    }
+  }
   if (verb === 'presenter_assigned' && objectType === 'schedule_slot') {
     const conventionKey = metadata.conventionKey ?? metadata.conventionSlug
     if (typeof conventionKey === 'string') return `/conventions/${conventionKey}`
@@ -167,6 +181,7 @@ export async function getFollowingFeed(params: {
   if (!feedSettings.showConnectionShares) hideKinds.add('repost')
   if (!feedSettings.showConnectionLikes) hideKinds.add('connection_like')
   const mutedTagIds = await getMutedTagIds(params.viewerId)
+  const connectionSet = new Set(ids)
 
   const fetchLimit = Math.min(120, params.limit * 4)
 
@@ -209,6 +224,10 @@ export async function getFollowingFeed(params: {
     .orderBy(desc(schema.feedActivities.createdAt))
     .limit(fetchLimit)
 
+  const privacyByActor = await loadActorFeedPrivacy([
+    ...new Set([...postRows.map((p) => p.authorId), ...activityRows.map((a) => a.actorId)]),
+  ])
+
   const tagIdsByPostId = new Map<string, string[]>()
   for (const p of postRows) {
     tagIdsByPostId.set(p.id, extractTagIdsFromMentions(p.mentions))
@@ -221,6 +240,18 @@ export async function getFollowingFeed(params: {
   const merged: MergedRow[] = []
 
   for (const p of postRows) {
+    if (
+      !actorFeedActivityAllowed({
+        actorId: p.authorId,
+        verb: 'post',
+        source: 'post',
+        viewerId: params.viewerId,
+        viewerConnectionIds: connectionSet,
+        privacyByActor,
+      })
+    ) {
+      continue
+    }
     const inheritedTags = p.repostOfId ? tagIdsByPostId.get(p.repostOfId) : undefined
     if (postMatchesMutedTags(p.mentions, mutedTagIds, inheritedTags)) continue
     if (
@@ -254,6 +285,18 @@ export async function getFollowingFeed(params: {
   }
 
   for (const a of activityRows) {
+    if (
+      !actorFeedActivityAllowed({
+        actorId: a.actorId,
+        verb: a.verb,
+        source: 'activity',
+        viewerId: params.viewerId,
+        viewerConnectionIds: connectionSet,
+        privacyByActor,
+      })
+    ) {
+      continue
+    }
     if (!matchesFollowingFilter('activity', params.filter ?? 'all', hideKinds, {
       verb: a.verb,
       objectType: a.objectType,
@@ -306,6 +349,8 @@ export async function getFollowingFeed(params: {
     })
   }
 
+  items = aggregateFollowingFeedItems(items)
+
   const last = page[page.length - 1]
   const nextCursor =
     filtered.length > params.limit && last ?
@@ -351,6 +396,7 @@ export async function getFollowingFeedCounts(viewerId: string): Promise<Followin
   const postRows = await db
     .select({
       id: schema.feedPosts.id,
+      authorId: schema.feedPosts.authorId,
       kind: schema.feedPosts.kind,
       body: schema.feedPosts.body,
       bodyFormat: schema.feedPosts.bodyFormat,
@@ -371,7 +417,37 @@ export async function getFollowingFeedCounts(viewerId: string): Promise<Followin
     postRows.map((p) => p.repostOfId),
   )
 
+  const activityRows = await db
+    .select({
+      verb: schema.feedActivities.verb,
+      objectType: schema.feedActivities.objectType,
+      actorId: schema.feedActivities.actorId,
+      createdAt: schema.feedActivities.createdAt,
+    })
+    .from(schema.feedActivities)
+    .where(and(inArray(schema.feedActivities.actorId, ids), gte(schema.feedActivities.createdAt, since)))
+
+  const countConnectionSet = new Set(ids)
+  const countPrivacyByActor = await loadActorFeedPrivacy([
+    ...new Set([
+      ...postRows.map((p) => p.authorId),
+      ...activityRows.map((a) => a.actorId),
+    ]),
+  ])
+
   for (const p of postRows) {
+    if (
+      !actorFeedActivityAllowed({
+        actorId: p.authorId,
+        verb: 'post',
+        source: 'post',
+        viewerId,
+        viewerConnectionIds: countConnectionSet,
+        privacyByActor: countPrivacyByActor,
+      })
+    ) {
+      continue
+    }
     const inheritedTags = p.repostOfId ? tagIdsByPostId.get(p.repostOfId) : undefined
     if (postMatchesMutedTags(p.mentions, mutedTagIds, inheritedTags)) continue
     const shape = {
@@ -387,16 +463,19 @@ export async function getFollowingFeedCounts(viewerId: string): Promise<Followin
     if (bucket === 'photos' || bucket === 'video' || bucket === 'articles') counts[bucket]++
   }
 
-  const activityRows = await db
-    .select({
-      verb: schema.feedActivities.verb,
-      objectType: schema.feedActivities.objectType,
-      createdAt: schema.feedActivities.createdAt,
-    })
-    .from(schema.feedActivities)
-    .where(and(inArray(schema.feedActivities.actorId, ids), gte(schema.feedActivities.createdAt, since)))
-
   for (const a of activityRows) {
+    if (
+      !actorFeedActivityAllowed({
+        actorId: a.actorId,
+        verb: a.verb,
+        source: 'activity',
+        viewerId,
+        viewerConnectionIds: countConnectionSet,
+        privacyByActor: countPrivacyByActor,
+      })
+    ) {
+      continue
+    }
     if (!matchesFollowingFilter('activity', 'all', hideKinds, { verb: a.verb, objectType: a.objectType })) {
       continue
     }

@@ -18,6 +18,7 @@ import { z } from 'zod'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { db, schema } from '../db/index.js'
+import { getAlphaLabelForTarget } from '../lib/alpha-seed-labels.js'
 import { loadAcceptedFriendUserIds } from '../lib/accepted-friends.js'
 import { redactProfileForViewer } from '../lib/profile-field-redaction.js'
 import { canViewerReadIsoVisibility } from '../lib/iso-access.js'
@@ -376,7 +377,8 @@ export async function registerProfileRoutes(app: FastifyInstance) {
       payload.mutualConnections = social.mutualConnections
     }
 
-    return reply.send(payload)
+    const alphaLabel = await getAlphaLabelForTarget('user', user.id)
+    return reply.send(alphaLabel ? { ...payload, alphaLabel } : payload)
   })
 
   app.get('/api/profile/me', async (req, reply) => {

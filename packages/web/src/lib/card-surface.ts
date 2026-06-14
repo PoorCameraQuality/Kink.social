@@ -9,9 +9,13 @@ export const cardSurfaceSolidClass =
 export const cardSurfacePanelClass =
   'dc-surface-lift rounded-2xl border border-dc-border/85 bg-dc-elevated/[0.97] shadow-[var(--dc-shadow-soft)] backdrop-blur-md' as const
 
-/** Feed column inset border (home Following layout). */
+/** Feed column cards — match rail opacity; padding set per component. */
 export const cardSurfaceFeedClass =
-  'dc-surface-lift rounded-2xl border border-white/[0.08] bg-dc-elevated/[0.97] shadow-[var(--dc-shadow-soft)]' as const
+  'dc-rail-card rounded-2xl border border-dc-border/80 bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]' as const
+
+/** Activity / following feed cards in the home shell — opaque like rails. */
+export const cardSurfaceFeedActivityClass =
+  '!border-dc-border/80 !bg-dc-elevated-solid backdrop-blur-none dc-rail-card' as const
 
 /** Apply on interactive directory/discover cards — do not duplicate hover:border utilities. */
 export const cardSurfaceInteractiveClass = 'dc-card-polish min-w-0' as const

@@ -25,6 +25,15 @@ type ApiGroupDetail = {
   parentOrganization: { slug: string; displayName: string } | null
   leadershipVoteOpen: boolean
   groupOwnerId: string
+  viewerMember?: {
+    userId: string
+    username: string
+    role: string
+    memberListVisibility?: 'visible' | 'hidden'
+    showGroupOnProfile?: boolean
+    announceGroupJoinInFeed?: boolean
+  } | null
+  staffHiddenMemberCount?: number
 }
 
 export interface UseGroupDetailReturn {
@@ -55,6 +64,10 @@ export interface UseGroupDetailReturn {
   leadershipVoteOpen: boolean
   /** `groups.owner_id` when API-backed. */
   groupOwnerId: string | null
+  /** Viewer membership privacy fields when API-backed. */
+  viewerMembership: ApiGroupDetail['viewerMember']
+  /** Staff-only count of hidden regular members. */
+  staffHiddenMemberCount: number
   /** True while fetching group events list (API-backed UUID groups). */
   eventsLoading: boolean
   refreshPhotos: () => void
@@ -121,7 +134,10 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
             username: string
             role: string
             joinedAt: string
+            memberListHidden?: boolean
           }>
+          viewerMember?: ApiGroupDetail['viewerMember']
+          staffHiddenMemberCount?: number
         }
         if (cancelled) return
         const vis =
@@ -155,6 +171,7 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
           username: m.username,
           role: m.role as GroupRole,
           joinedAt: m.joinedAt,
+          ...(m.memberListHidden ? { memberListHidden: true } : {}),
         }))
         setApiDetail({
           group: mockGroup,
@@ -162,6 +179,8 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
           parentOrganization: data.parentOrganization ?? null,
           leadershipVoteOpen: Boolean(data.group.leadershipVoteOpen),
           groupOwnerId: data.group.ownerId,
+          viewerMember: data.viewerMember ?? null,
+          staffHiddenMemberCount: data.staffHiddenMemberCount ?? 0,
         })
         setApiMode('ready')
       } catch {
@@ -291,6 +310,8 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
 
   const leadershipVoteOpen = apiBacked && apiDetail ? apiDetail.leadershipVoteOpen : false
   const groupOwnerId = apiBacked && apiDetail ? apiDetail.groupOwnerId : null
+  const viewerMembership = apiBacked && apiDetail ? (apiDetail.viewerMember ?? null) : null
+  const staffHiddenMemberCount = apiBacked && apiDetail ? (apiDetail.staffHiddenMemberCount ?? 0) : 0
 
   return {
     group,
@@ -313,6 +334,8 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
     parentOrganization,
     leadershipVoteOpen,
     groupOwnerId,
+    viewerMembership,
+    staffHiddenMemberCount,
     eventsLoading,
     refreshPhotos,
     refreshChannels,

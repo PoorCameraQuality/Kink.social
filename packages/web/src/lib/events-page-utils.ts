@@ -1,4 +1,5 @@
 import type { MockEvent } from '@/data/types'
+import { mediaDisplayUrl } from '@/lib/media-display-url'
 
 function parseEventDate(dateStr: string): Date | null {
   if (/^\d{4}-\d{2}-\d{2}/.test(dateStr) || dateStr.includes('T')) {
@@ -115,4 +116,12 @@ export function paginateEvents<T>(items: T[], page: number, pageSize = EVENTS_PA
   const safePage = Math.min(Math.max(1, page), totalPages)
   const start = (safePage - 1) * pageSize
   return { slice: items.slice(start, start + pageSize), totalPages }
+}
+
+/** Cover photo for cards/lists — resolves uploaded `/uploads/…` paths via API base URL. */
+export function resolveEventHeroUrl(event: {
+  imageUrl?: string | null
+  bannerUrl?: string | null
+}): string | undefined {
+  return mediaDisplayUrl(event.imageUrl ?? event.bannerUrl ?? undefined)
 }

@@ -6,6 +6,7 @@ import {
 } from '@c2k/shared'
 import { and, count, eq, inArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
+import { emitActivity } from './feed-activities.js'
 import { loadFeedPostCommentCounts } from './feed-post-comments.js'
 import {
   loadConnectionLikerPreviewByPostIds,
@@ -165,6 +166,17 @@ export async function setPostReaction(
   kind: FeedReactionId,
 ): Promise<PostLikeMeta> {
   const now = new Date()
+  const [post] = await db
+    .select({
+      authorId: schema.feedPosts.authorId,
+      attachments: schema.feedPosts.attachments,
+      authorUsername: schema.users.username,
+    })
+    .from(schema.feedPosts)
+    .innerJoin(schema.users, eq(schema.feedPosts.authorId, schema.users.id))
+    .where(eq(schema.feedPosts.id, postId))
+    .limit(1)
+
   await db
     .insert(schema.postLikes)
     .values({ userId, postId, kind, createdAt: now })
@@ -172,6 +184,34 @@ export async function setPostReaction(
       target: [schema.postLikes.userId, schema.postLikes.postId],
       set: { kind, createdAt: now },
     })
+
+  if (post && post.authorId !== userId) {
+    const previewUrls: string[] = []
+    if (Array.isArray(post.attachments)) {
+      for (const entry of post.attachments) {
+        if (!entry || typeof entry !== 'object') continue
+        const url = (entry as { url?: string }).url
+        const type = (entry as { type?: string }).type
+        if (typeof url === 'string' && url.trim() && (type === 'image' || type === 'video' || !type)) {
+          previewUrls.push(url.trim())
+        }
+        if (previewUrls.length >= 4) break
+      }
+    }
+    emitActivity({
+      actorId: userId,
+      verb: kind === 'love' ? 'loved' : 'reacted',
+      objectType: 'feed_post',
+      objectId: postId,
+      metadata: {
+        postAuthorUsername: post.authorUsername,
+        reactionKind: kind,
+        previewUrls,
+        count: 1,
+      },
+    })
+  }
+
   const commentCount = (await loadFeedPostCommentCounts([postId])).get(postId) ?? 0
   const state = await loadPostReactionState(postId, userId)
   return { ...state, commentCount, connectionLikerPreview: [] }

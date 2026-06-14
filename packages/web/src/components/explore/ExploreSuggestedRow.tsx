@@ -16,7 +16,7 @@ export default function ExploreSuggestedRow({ item }: Props) {
     <li>
       <Link
         to={item.href}
-        className="flex items-center gap-3 rounded-xl border border-transparent border-l-[3px] border-l-dc-accent/50 p-2.5 transition-colors hover:border-dc-border/50 hover:bg-dc-elevated-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
+        className="xpl-suggest-row focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
       >
         <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-dc-border bg-dc-elevated-solid ring-1 ring-white/[0.06]">
           {thumb ?

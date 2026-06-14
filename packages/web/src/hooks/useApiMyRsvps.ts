@@ -5,6 +5,7 @@ export type ApiMyRsvpItem = {
   title: string
   startsAt: string
   status: 'going' | 'maybe' | 'waitlist' | string
+  rsvpApprovalStatus?: 'not_required' | 'pending' | 'approved' | 'rejected' | null
 }
 
 export type ApiMyRsvpsResult = {

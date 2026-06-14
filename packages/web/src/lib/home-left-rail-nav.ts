@@ -1,3 +1,4 @@
+import { PEOPLE_DIRECTORY_PATH } from '@/lib/app-routes'
 import { isAppHomeMainNavActive } from '@/lib/app-home-nav'
 import { navLinkIsActive } from '@/lib/nav-link-active'
 
@@ -10,8 +11,8 @@ export function isHomeLeftRailLinkActive(href: string, pathname: string, search:
     const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search)
     return pathname === '/events' && (params.get('mine') === 'registrations' || params.get('rsvp') === '1')
   }
-  if (href === '/activity') {
-    return pathname === '/activity' || pathname.startsWith('/activity/')
+  if (href === PEOPLE_DIRECTORY_PATH) {
+    return pathname === PEOPLE_DIRECTORY_PATH || pathname.startsWith(`${PEOPLE_DIRECTORY_PATH}/`)
   }
   if (href === '/my-posts') {
     return pathname === '/my-posts' || pathname.startsWith('/my-posts/')

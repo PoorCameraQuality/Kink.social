@@ -4,7 +4,7 @@ import { attachConsoleGuard, expectNoHorizontalOverflow, waitForPageSettled } fr
 import { SEED } from './helpers/fixtures'
 import {
   publicRoutesWithSeed,
-  AUTHENTICATED_ROUTES,
+  authenticatedRoutesWithSeed,
   organizerRoutes,
   type RouteSpec,
 } from './helpers/routes'
@@ -59,7 +59,7 @@ test.describe('route smoke. Desktop', () => {
       test.skip(!ok, 'demo login unavailable')
     })
 
-    for (const spec of AUTHENTICATED_ROUTES) {
+    for (const spec of authenticatedRoutesWithSeed(SEED.orgSlug, SEED.convSlug)) {
       test(spec.name, async ({ page }) => {
         await smokeRoute(page, spec, dbOk)
       })

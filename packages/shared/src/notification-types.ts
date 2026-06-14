@@ -34,6 +34,8 @@ export const NOTIFICATION_TYPES = {
   profileRelationshipAccepted: 'profile_relationship_accepted',
   profileRelationshipDeclined: 'profile_relationship_declined',
   vendorRunnerAdded: 'vendor_runner_added',
+  mailIntakeReceived: 'mail_intake_received',
+  adminDashboardAlert: 'admin_dashboard_alert',
 } as const
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES]

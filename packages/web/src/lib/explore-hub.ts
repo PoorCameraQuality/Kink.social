@@ -12,6 +12,7 @@ export const EXPLORE_CATEGORY_TABS = [
   'Organizations',
   'Education',
   'Vendors',
+  'Media',
 ] as const
 
 export type ExploreCategoryTab = (typeof EXPLORE_CATEGORY_TABS)[number]
@@ -34,6 +35,7 @@ export const EXPLORE_POPULAR_CATEGORIES: ExplorePopularCategory[] = [
   { id: 'leather', label: 'Leather', countLabel: '', href: '/groups', icon: 'leather' },
   { id: 'kink101', label: 'Kink 101', countLabel: '', href: '/education', icon: 'education' },
   { id: 'community', label: 'Community', countLabel: '', href: '/groups', icon: 'community' },
+  { id: 'places', label: 'Kinky Map', countLabel: '', href: '/places', icon: 'community' },
 ]
 
 export type ExploreSuggestedItem = {
@@ -235,6 +237,7 @@ export const EXPLORE_CONTENT_TYPES = [
   'Organizations',
   'Education',
   'Vendors',
+  'Media',
 ] as const
 
 export type ExploreContentType = (typeof EXPLORE_CONTENT_TYPES)[number]
@@ -322,6 +325,7 @@ const LEGACY_TAB_TO_CONTENT_TYPE: Record<string, ExploreContentType> = {
   Organizations: 'Organizations',
   Education: 'Education',
   Vendors: 'Vendors',
+  Media: 'Media',
 }
 
 function parseListParam(raw: string | null): string[] {
@@ -784,4 +788,27 @@ export function applyExploreTrendingFilters(
 ): TrendingItemCardModel[] {
   if (!filters.topics.length) return items
   return items.filter((i) => matchesTopics([i.title, i.subtitle ?? '', i.kind], filters.topics))
+}
+
+export function filterMedia<T extends { title: string; description?: string | null; tags?: string[] }>(
+  items: T[],
+  q: string,
+): T[] {
+  if (!q) return items
+  return items.filter(
+    (item) =>
+      matchesQuery(item.title, q) ||
+      matchesQuery(item.description ?? '', q) ||
+      (item.tags?.some((t) => matchesQuery(t, q)) ?? false),
+  )
+}
+
+export function applyExploreMediaFilters<T extends { title: string; description?: string | null; tags?: string[] }>(
+  items: T[],
+  filters: ExploreFilters,
+): T[] {
+  if (!filters.topics.length) return items
+  return items.filter((item) =>
+    matchesTopics([item.title, item.description ?? '', ...(item.tags ?? [])], filters.topics),
+  )
 }

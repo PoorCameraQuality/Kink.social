@@ -149,6 +149,30 @@ describe('password reset', { skip: !runDbTests }, () => {
     })
     assert.equal(res.message, PASSWORD_RESET_GENERIC_MESSAGE)
   })
+
+  test('logged-in password change rejects wrong current password', async () => {
+    const app = await buildCookieApp(async (a) => {
+      const { registerAuthRoutes } = await import('../routes/auth.js')
+      const { registerApiRateLimit } = await import('../lib/register-rate-limit.js')
+      await registerApiRateLimit(a)
+      await registerAuthRoutes(a)
+    })
+    const login = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { username, password },
+    })
+    assert.equal(login.statusCode, 200)
+    const cookie = login.headers['set-cookie']
+    const bad = await app.inject({
+      method: 'POST',
+      url: '/api/auth/password/change',
+      headers: { cookie: String(cookie) },
+      payload: { currentPassword: 'wrong-password', newPassword: 'NewPassword!234567' },
+    })
+    assert.equal(bad.statusCode, 401)
+    await app.close()
+  })
 })
 
 describe('password reset rate limit smoke', () => {

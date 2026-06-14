@@ -16,6 +16,11 @@ import {
   normalizeVendorCategory,
   vendorCategorySchema,
   normalizePrivacySettings,
+  mergePrivacySettings,
+  groupMemberListVisibilitySchema,
+  shouldEmitGroupJoinFeedActivity,
+  isGroupStaffRole,
+  type GroupMemberListVisibility,
   groupCategorySchema,
   groupRulesSchema,
   parseGroupRules,
@@ -50,14 +55,22 @@ import {
   viewerCanPatchEvent,
 } from '../lib/virtual-event-join-visibility.js'
 import { passesGenderDiscoveryFilter, toDiscoveryProfileCard } from '../lib/profile-field-redaction.js'
+import { alphaUploadDisabledResponse, isAlphaUploadDisabled } from '../lib/alpha-upload-policy.js'
 import { touchGroupActivity } from '../lib/group-activity.js'
+import {
+  MediaUploadValidationError,
+  promoteQuarantineToScopeBrandingUrl,
+} from '../lib/media-pipeline.js'
+import { zHttpOrRootMediaUrlNullable } from '../lib/media-url.js'
 import {
   canEditGroupSettings,
   canManageGroupEvents,
   canViewGroup,
   canViewerSeeGroupEvent,
+  filterGroupMembersForViewer,
   getGroupMembership,
   resolveGroupManagerRole,
+  viewerIsGroupStaff,
 } from '../lib/group-access.js'
 import { conversationIncludedInFolder, isIsoInboxThreadForViewer } from '../lib/iso-access.js'
 import { haversineDistanceMi, parseProfileGeoPoint } from '../lib/geo-distance.js'
@@ -70,6 +83,8 @@ import { viewerCanSeeActivityHistory } from '../lib/activity-history-visibility.
 import { loadConnectionRsvpPreviewByEventIds } from '../lib/connection-rsvp-preview.js'
 import { filterVendorVisibility, vendorVisibleForDetail } from '../lib/vendor-visibility.js'
 import { toPublicVendorDetail, toPublicVendorListItem, vendorProfileWriteFields } from '../lib/vendor-public-dto.js'
+import { withAlphaLabel, withAlphaLabels } from '../lib/alpha-seed-labels.js'
+import { ensureUserSettingsRow } from '../lib/user-settings-row.js'
 import {
   buildVendorFeedbackSummary,
   loadVendorVerifiedFeedbackCounts,
@@ -390,6 +405,11 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       .from(schema.users)
       .where(eq(schema.users.id, user.userId))
       .limit(1)
+    const [requester] = await db
+      .select({ username: schema.users.username })
+      .from(schema.users)
+      .where(eq(schema.users.id, c.requesterId))
+      .limit(1)
     try {
       await createNotification(c.requesterId, NOTIFICATION_TYPES.connectionAccepted, {
         accepterUsername: accepter?.username ?? '',
@@ -403,7 +423,10 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       verb: 'connection_accepted',
       objectType: 'connection',
       objectId: connectionId,
-      metadata: { partnerUserId: c.requesterId },
+      metadata: {
+        partnerUserId: c.requesterId,
+        partnerUsername: requester?.username ?? '',
+      },
     })
     return reply.send({ connection: updated })
   })
@@ -720,19 +743,35 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       parentOrganization = po ?? null
     }
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
-    const members = await db
+    const membersRaw = await db
       .select({
         id: schema.groupMembers.id,
         groupId: schema.groupMembers.groupId,
         userId: schema.groupMembers.userId,
         role: schema.groupMembers.role,
+        memberListVisibility: schema.groupMembers.memberListVisibility,
+        showGroupOnProfile: schema.groupMembers.showGroupOnProfile,
         username: schema.users.username,
       })
       .from(schema.groupMembers)
       .innerJoin(schema.users, eq(schema.groupMembers.userId, schema.users.id))
       .innerJoin(schema.profiles, eq(schema.groupMembers.userId, schema.profiles.userId))
       .where(and(eq(schema.groupMembers.groupId, groupId), gt(schema.profiles.updatedAt, oneYearAgo)))
-    const viewerMember = viewerId ? members.find((m) => m.userId === viewerId) : undefined
+    const viewerMember = viewerId ? membersRaw.find((m) => m.userId === viewerId) : undefined
+    const viewerMembership = viewerMember ? { role: viewerMember.role } : null
+    const isGroupStaff = viewerIsGroupStaff(g, viewerMembership, viewerId)
+    const members = filterGroupMembersForViewer(
+      membersRaw.map((m) => ({
+        ...m,
+        memberListVisibility: (m.memberListVisibility ?? 'visible') as GroupMemberListVisibility,
+      })),
+      {
+        viewerUserId: viewerId,
+        groupOwnerId: g.ownerId,
+        viewerMembership,
+        isSiteStaff: false,
+      },
+    )
     const placeMap = await loadPlaceLabels(g.placeId ? [g.placeId] : [])
     return reply.send({
       group: {
@@ -747,9 +786,22 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         username: m.username,
         role: m.role,
         joinedAt: '',
+        ...(isGroupStaff && m.memberListVisibility === 'hidden' ?
+          { memberListHidden: true as const }
+        : {}),
       })),
+      staffHiddenMemberCount:
+        isGroupStaff ?
+          membersRaw.filter((m) => m.memberListVisibility === 'hidden' && m.role === 'member').length
+        : undefined,
       viewerMember: viewerMember
-        ? { userId: viewerMember.userId, username: viewerMember.username, role: viewerMember.role }
+        ? {
+            userId: viewerMember.userId,
+            username: viewerMember.username,
+            role: viewerMember.role,
+            memberListVisibility: viewerMember.memberListVisibility,
+            showGroupOnProfile: viewerMember.showGroupOnProfile,
+          }
         : null,
     })
   })
@@ -760,9 +812,9 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     category: groupCategorySchema.nullable().optional(),
     tags: z.array(z.string().max(64)).max(20).optional().nullable(),
     visibility: z.enum(['public', 'private', 'invite-only', 'owner_absent']).optional(),
-    logoUrl: z.union([z.string().url().max(2000), z.literal('')]).nullable().optional(),
-    bannerUrl: z.union([z.string().url().max(2000), z.literal('')]).nullable().optional(),
-    shareImageUrl: z.union([z.string().url().max(2000), z.literal('')]).nullable().optional(),
+    logoUrl: z.union([zHttpOrRootMediaUrlNullable, z.literal('')]).optional(),
+    bannerUrl: z.union([zHttpOrRootMediaUrlNullable, z.literal('')]).optional(),
+    shareImageUrl: z.union([zHttpOrRootMediaUrlNullable, z.literal('')]).optional(),
     placeId: z.union([z.string().uuid(), z.null()]).optional(),
     serviceRadiusMi: z.number().int().min(5).max(500).optional(),
     emailSignupEnabled: z.boolean().optional(),
@@ -840,6 +892,59 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     return reply.send({ group: mapGroupWithPlace(updated, placeMap) })
   })
 
+  const groupBrandingAttachBody = z.object({
+    kind: z.enum(['banner', 'logo', 'share']),
+    quarantineKey: z.string().min(1).max(2048),
+  })
+
+  app.post('/api/v1/groups/:groupId/branding/attach', async (req, reply) => {
+    if (!requireDb(reply)) return
+    if (isAlphaUploadDisabled('group_branding')) {
+      return alphaUploadDisabledResponse(reply, 'group_branding')
+    }
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { groupId } = req.params as { groupId: string }
+    const [g] = await db.select().from(schema.groups).where(eq(schema.groups.id, groupId)).limit(1)
+    if (!g || g.disbandedAt) return reply.status(404).send({ error: 'Not found' })
+    if (!(await canEditGroupSettings(g, user.userId))) {
+      return reply.status(403).send({ error: 'Moderator access required' })
+    }
+    const parsed = groupBrandingAttachBody.safeParse(req.body)
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    let publicUrl: string
+    try {
+      publicUrl = await promoteQuarantineToScopeBrandingUrl({
+        userId: user.userId,
+        quarantineKey: parsed.data.quarantineKey,
+        scopePath: `groups/${groupId}`,
+        assetName: parsed.data.kind,
+      })
+    } catch (err) {
+      if (err instanceof MediaUploadValidationError) {
+        return reply.status(400).send({ error: err.message })
+      }
+      const e = err as { message?: string }
+      req.log?.error({ err }, 'group branding attach failed')
+      return reply.status(502).send({ error: e.message ?? 'Could not attach branding image' })
+    }
+    const field =
+      parsed.data.kind === 'banner' ? 'bannerUrl'
+      : parsed.data.kind === 'logo' ? 'logoUrl'
+      : 'shareImageUrl'
+    const [updated] = await db
+      .update(schema.groups)
+      .set({ [field]: publicUrl })
+      .where(eq(schema.groups.id, groupId))
+      .returning()
+    const placeMap = await loadPlaceLabels(updated.placeId ? [updated.placeId] : [])
+    return reply.send({
+      url: publicUrl,
+      kind: parsed.data.kind,
+      group: mapGroupWithPlace(updated, placeMap),
+    })
+  })
+
   const groupMemberPatchBody = z.object({
     role: z.enum(['owner', 'admin', 'moderator', 'event_host', 'member']),
   })
@@ -868,11 +973,75 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       .where(and(eq(schema.groupMembers.groupId, groupId), eq(schema.groupMembers.userId, targetUserId)))
       .limit(1)
     if (!target) return reply.status(404).send({ error: 'Member not found' })
+    const nextRole = parsed.data.role
+    const patch: {
+      role: typeof nextRole
+      memberListVisibility?: GroupMemberListVisibility
+      visibilityUpdatedAt?: Date
+      visibilityUpdatedByUserId?: string
+    } = { role: nextRole }
+    if (isGroupStaffRole(nextRole) && target.memberListVisibility === 'hidden') {
+      patch.memberListVisibility = 'visible'
+      patch.visibilityUpdatedAt = new Date()
+      patch.visibilityUpdatedByUserId = user.userId
+    }
     const [updated] = await db
       .update(schema.groupMembers)
-      .set({ role: parsed.data.role })
+      .set(patch)
       .where(eq(schema.groupMembers.id, target.id))
       .returning()
+    return reply.send({
+      member: updated,
+      visibilityForcedVisible: isGroupStaffRole(nextRole) && target.memberListVisibility === 'hidden',
+    })
+  })
+
+  const groupMembershipPrivacyBody = z.object({
+    memberListVisibility: groupMemberListVisibilitySchema.optional(),
+    showGroupOnProfile: z.boolean().optional(),
+    announceGroupJoinInFeed: z.boolean().optional(),
+  })
+
+  app.patch('/api/v1/groups/:groupId/membership', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { groupId } = req.params as { groupId: string }
+    const parsed = groupMembershipPrivacyBody.safeParse(req.body ?? {})
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+
+    const [mem] = await db
+      .select()
+      .from(schema.groupMembers)
+      .where(and(eq(schema.groupMembers.groupId, groupId), eq(schema.groupMembers.userId, user.userId)))
+      .limit(1)
+    if (!mem) return reply.status(404).send({ error: 'Not a member' })
+
+    const nextVisibility =
+      parsed.data.memberListVisibility ?
+        isGroupStaffRole(mem.role) ?
+          'visible'
+        : parsed.data.memberListVisibility
+      : (mem.memberListVisibility as GroupMemberListVisibility)
+
+    const [updated] = await db
+      .update(schema.groupMembers)
+      .set({
+        ...(parsed.data.memberListVisibility !== undefined ?
+          { memberListVisibility: nextVisibility }
+        : {}),
+        ...(parsed.data.showGroupOnProfile !== undefined ?
+          { showGroupOnProfile: parsed.data.showGroupOnProfile }
+        : {}),
+        ...(parsed.data.announceGroupJoinInFeed !== undefined ?
+          { announceGroupJoinInFeed: parsed.data.announceGroupJoinInFeed }
+        : {}),
+        visibilityUpdatedAt: new Date(),
+        visibilityUpdatedByUserId: user.userId,
+      })
+      .where(eq(schema.groupMembers.id, mem.id))
+      .returning()
+
     return reply.send({ member: updated })
   })
 
@@ -937,11 +1106,20 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     return reply.send({ group: g })
   })
 
+  const groupJoinBody = z.object({
+    memberListVisibility: groupMemberListVisibilitySchema.optional(),
+    showGroupOnProfile: z.boolean().optional(),
+    announceGroupJoinInFeed: z.boolean().optional(),
+    rememberAsDefault: z.boolean().optional(),
+  })
+
   app.post('/api/v1/groups/:groupId/join', async (req, reply) => {
     if (!requireDb(reply)) return
     const user = requireUser(req, reply)
     if (!user) return
     const { groupId } = req.params as { groupId: string }
+    const parsedJoin = groupJoinBody.safeParse(req.body ?? {})
+    const body = parsedJoin.success ? parsedJoin.data : {}
     const [g] = await db.select().from(schema.groups).where(eq(schema.groups.id, groupId)).limit(1)
     if (!g || g.disbandedAt) return reply.status(404).send({ error: 'Not found' })
     const [existing] = await db
@@ -950,19 +1128,69 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       .where(and(eq(schema.groupMembers.groupId, groupId), eq(schema.groupMembers.userId, user.userId)))
       .limit(1)
     if (existing) return reply.send({ member: existing, alreadyMember: true })
+
+    const settingsRow = await ensureUserSettingsRow(user.userId)
+    const privacy = normalizePrivacySettings(settingsRow.privacySettings)
+    const memberListVisibility: GroupMemberListVisibility =
+      body.memberListVisibility ??
+      (privacy.feedActivityPrivacy.defaultGroupMemberListVisibility === 'hidden' ? 'hidden'
+      : privacy.feedActivityPrivacy.defaultGroupMemberListVisibility === 'visible' ? 'visible'
+      : 'visible')
+    const showGroupOnProfile = body.showGroupOnProfile ?? privacy.feedActivityPrivacy.defaultShowGroupsOnProfile
+    const announceGroupJoinInFeed =
+      body.announceGroupJoinInFeed ?? privacy.feedActivityPrivacy.defaultAnnounceGroupJoins
+
     const [row] = await db
       .insert(schema.groupMembers)
-      .values({ groupId, userId: user.userId, role: 'member' })
+      .values({
+        groupId,
+        userId: user.userId,
+        role: 'member',
+        memberListVisibility,
+        showGroupOnProfile,
+        announceGroupJoinInFeed,
+        visibilityUpdatedAt: new Date(),
+        visibilityUpdatedByUserId: user.userId,
+      })
       .returning()
     await touchGroupActivity(groupId)
-    emitActivity({
-      actorId: user.userId,
-      verb: 'group_join',
-      objectType: 'group',
-      objectId: groupId,
-      metadata: { groupName: g.name },
-    })
-    return reply.send({ member: row })
+
+    if (body.rememberAsDefault) {
+      const nextPrivacy = mergePrivacySettings(settingsRow.privacySettings, {
+        feedActivityPrivacy: {
+          ...privacy.feedActivityPrivacy,
+          defaultGroupMemberListVisibility: memberListVisibility === 'hidden' ? 'hidden' : 'visible',
+          defaultShowGroupsOnProfile: showGroupOnProfile,
+          defaultAnnounceGroupJoins: announceGroupJoinInFeed,
+        },
+      })
+      await db
+        .update(schema.userSettings)
+        .set({ privacySettings: nextPrivacy, updatedAt: new Date() })
+        .where(eq(schema.userSettings.userId, user.userId))
+    }
+
+    if (
+      shouldEmitGroupJoinFeedActivity(
+        { memberListVisibility, announceGroupJoinInFeed },
+        'member',
+      )
+    ) {
+      emitActivity({
+        actorId: user.userId,
+        verb: 'group_join',
+        objectType: 'group',
+        objectId: groupId,
+        metadata: { groupName: g.name },
+      })
+    }
+
+    const confirmation =
+      memberListVisibility === 'hidden' ?
+        'You joined the group. Your name is hidden from the member list, except to group staff.'
+      : 'You joined the group. Your name is visible in the member list.'
+
+    return reply.send({ member: row, confirmation })
   })
 
   app.post('/api/v1/groups/:groupId/leave', async (req, reply) => {
@@ -1191,8 +1419,9 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     }
     const connectionRsvpPreviewByEvent = await loadConnectionRsvpPreviewByEventIds(viewerId, eventIds)
     const programMap = await getProgramSummariesForEventIds(rows.map((r) => r.id))
-    return reply.send({
-      items: rows.map((r) => {
+    const items = await withAlphaLabels(
+      'event',
+      rows.map((r) => {
         const p = programMap.get(r.id)
         const shaped = applyEventLocationRedaction(r, joinVisible, physicalVisible)
         return {
@@ -1207,7 +1436,8 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
           programSlotCount: p?.slotCount ?? 0,
         }
       }),
-    })
+    )
+    return reply.send({ items })
   })
 
   app.get('/api/v1/events/:eventId', async (req, reply) => {
@@ -1350,24 +1580,22 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     }
     const viewerCanManage = viewerId ? await viewerCanPatchEvent(viewerId, row) : false
     const connectionRsvpPreviewMap = await loadConnectionRsvpPreviewByEventIds(viewerId, [eventId])
-    return reply.send({
-      event: {
-        ...rowForClient,
-        featured: row.featured,
-        featuredUntil: row.featuredUntil?.toISOString?.() ?? row.featuredUntil ?? null,
-        isFeatured: isEventFeatured(row),
-        viewerRsvpStatus,
-        viewerRsvpApprovalStatus,
-        viewerMutualGoingCount,
-        connectionRsvpPreview: connectionRsvpPreviewMap.get(eventId) ?? [],
-        pendingRsvpApprovals,
-        viewerCanManage,
-        hasProgram: Boolean(program),
-        conventionSlug: program?.slug ?? null,
-        programSlotCount: program?.slotCount ?? 0,
-      },
-      program,
+    const event = await withAlphaLabel('event', {
+      ...rowForClient,
+      featured: row.featured,
+      featuredUntil: row.featuredUntil?.toISOString?.() ?? row.featuredUntil ?? null,
+      isFeatured: isEventFeatured(row),
+      viewerRsvpStatus,
+      viewerRsvpApprovalStatus,
+      viewerMutualGoingCount,
+      connectionRsvpPreview: connectionRsvpPreviewMap.get(eventId) ?? [],
+      pendingRsvpApprovals,
+      viewerCanManage,
+      hasProgram: Boolean(program),
+      conventionSlug: program?.slug ?? null,
+      programSlotCount: program?.slotCount ?? 0,
     })
+    return reply.send({ event, program })
   })
 
   app.get('/api/v1/events/:eventId/calendar.ics', async (req, reply) => {
@@ -1800,6 +2028,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         title: schema.events.title,
         startsAt: schema.events.startsAt,
         status: schema.eventRsvps.status,
+        rsvpApprovalStatus: schema.eventRsvps.rsvpApprovalStatus,
       })
       .from(schema.eventRsvps)
       .innerJoin(schema.events, eq(schema.events.id, schema.eventRsvps.eventId))
@@ -1863,6 +2092,10 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         .limit(Math.min(80, limit * 4))
       const filtered = candidates
         .filter((c) => normalizePrivacySettings(c.privacySettings ?? {}).appearInRegionalPeopleSuggestions)
+        .filter(
+          (c) =>
+            normalizePrivacySettings(c.privacySettings ?? {}).feedActivityPrivacy.showInConnectionSuggestions,
+        )
         .slice(0, limit)
         .map(({ privacySettings: _p, ...rest }) => rest)
       return reply.send({ items: filtered })
@@ -1892,11 +2125,13 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         age: schema.profiles.age,
         avatarUrl: schema.profiles.avatarUrl,
         lastActiveAt: schema.profiles.updatedAt,
+        privacySettings: schema.userSettings.privacySettings,
         sharedCount: count(),
       })
       .from(schema.eventRsvps)
       .innerJoin(schema.users, eq(schema.eventRsvps.userId, schema.users.id))
       .innerJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
+      .leftJoin(schema.userSettings, eq(schema.userSettings.userId, schema.users.id))
       .where(
         and(
           inArray(schema.eventRsvps.eventId, eventIds),
@@ -1914,12 +2149,19 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         schema.profiles.location,
         schema.profiles.age,
         schema.profiles.avatarUrl,
-        schema.profiles.updatedAt
+        schema.profiles.updatedAt,
+        schema.userSettings.privacySettings,
       )
       .orderBy(desc(count()))
       .limit(limit + 5)
 
-    const filtered = others.filter((o) => o.userId !== viewerId).slice(0, limit)
+    const filtered = others
+      .filter((o) => o.userId !== viewerId)
+      .filter(
+        (o) => normalizePrivacySettings(o.privacySettings ?? {}).feedActivityPrivacy.showInConnectionSuggestions,
+      )
+      .slice(0, limit)
+      .map(({ privacySettings: _p, ...rest }) => rest)
     return reply.send({ items: filtered })
   })
 
@@ -2296,12 +2538,14 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     }
 
     const verifiedCounts = await loadVendorVerifiedFeedbackCounts(filtered.map((row) => row.id))
-    return reply.send({
-      items: filtered.map((row) => ({
+    const items = await withAlphaLabels(
+      'vendor_profile',
+      filtered.map((row) => ({
         ...toPublicVendorListItem(row),
         verifiedFeedbackCount: verifiedCounts.get(row.id) ?? 0,
       })),
-    })
+    )
+    return reply.send({ items })
   })
 
   app.get('/api/v1/vendors/spotlight-listings', async (req, reply) => {
@@ -2927,8 +3171,9 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     const eventCredits = canSeeHistory ? await loadVendorEventCredits(row.id) : []
     const feedbackSummary = await loadVendorFeedbackSummary(row.id, row.rating)
     const people = await loadVendorShopPeople(row.id, row.userId)
+    const vendor = await withAlphaLabel('vendor_profile', toPublicVendorDetail(row))
     return reply.send({
-      vendor: toPublicVendorDetail(row),
+      vendor,
       owner: people.owner,
       coOwners: people.coOwners,
       history,

@@ -4,6 +4,7 @@
 import './load-dev-env.js'
 import { assertAuthFallbackSafeForStartup, assertProductionSecretsForStartup } from './lib/production-guard.js'
 import { assertFieldEncryptionConfigured } from './lib/field-encryption.js'
+import { assertMailConfiguredForPasswordReset } from './lib/mail-config.js'
 import { Worker } from 'bullmq'
 import { eq } from 'drizzle-orm'
 import { db, schema } from './db/index.js'
@@ -39,6 +40,7 @@ import { syncAllMediaShowFeeds, syncMediaShowRss } from './lib/media-rss-sync.js
 assertProductionSecretsForStartup()
 assertAuthFallbackSafeForStartup()
 assertFieldEncryptionConfigured()
+assertMailConfiguredForPasswordReset(console)
 
 const redisUrl = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
@@ -172,6 +174,14 @@ const lifecycleWorker = new Worker(
         const { runTrustDecaySweep } = await import('./lib/trust-decay.js')
         const r = await runTrustDecaySweep()
         console.log('[worker] trust decay sweep ok', r)
+      }
+      return
+    }
+    if (job.name === 'mail-intake-sweep') {
+      if (process.env.USE_DATABASE === 'true') {
+        const { runMailIntakeImportSweep } = await import('./lib/mail-intake-import.js')
+        const r = await runMailIntakeImportSweep(console)
+        console.log('[worker] mail intake sweep ok', r)
       }
       return
     }
@@ -374,6 +384,30 @@ async function scheduleVirtualEventReminderRepeat(): Promise<void> {
 }
 
 void scheduleVirtualEventReminderRepeat()
+
+async function scheduleMailIntakeRepeat(): Promise<void> {
+  if (process.env.C2K_MAIL_INTAKE_ENABLED !== 'true') {
+    console.log('[worker] mail intake repeat disabled (C2K_MAIL_INTAKE_ENABLED!=true)')
+    return
+  }
+  if (process.env.C2K_LIFECYCLE_DISABLE_REPEAT === 'true') {
+    console.log('[worker] mail intake repeat disabled (lifecycle repeat off)')
+    return
+  }
+  const every = Math.max(60_000, Number(process.env.C2K_MAIL_INTAKE_REPEAT_MS ?? 300_000))
+  try {
+    await getLifecycleQueue().add(
+      'mail-intake-sweep',
+      {},
+      { repeat: { every }, jobId: 'c2k-mail-intake-sweep' },
+    )
+    console.log('[worker] scheduled mail intake sweep every', every, 'ms')
+  } catch (e) {
+    console.warn('[worker] could not schedule mail intake repeat', e)
+  }
+}
+
+void scheduleMailIntakeRepeat()
 
 async function scheduleOrgDigestRepeat(): Promise<void> {
   if (

@@ -43,13 +43,15 @@ test.describe('smoke', () => {
     expect(body.viewer?.sub).toBeTruthy()
   })
 
-  test('landing shows hero heading', async ({ page }) => {
+  test('landing shows auth screen', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/Find events.*Learn safely/i)
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/connected to the community/i)
+    await expect(page.getByRole('link', { name: 'Kink Social home' })).toBeVisible()
+    await expect(page.getByRole('tab', { name: 'Join free' })).toBeVisible()
+    await expect(page.getByRole('tab', { name: 'Log in' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 2, name: 'Join free' })).toBeVisible()
   })
 
-  test('home feed shows community activity scope tabs', async ({ page }) => {
+  test('home feed shows Home feed scope tabs', async ({ page }) => {
     const login = await page.request.post('/api/auth/session', {
       headers: { 'Content-Type': 'application/json' },
       data: JSON.stringify({ username: 'RopeDreamer', password: demoPassword }),
@@ -62,6 +64,7 @@ test.describe('smoke', () => {
     const homeScope = page.getByRole('tablist', { name: 'Home feed scope' })
     await expect(homeScope).toBeVisible()
     await expect(homeScope.getByRole('tab', { name: 'Near you' })).toBeVisible()
+    await expect(page.getByRole('tablist', { name: 'Community activity scope' })).toHaveCount(0)
   })
 
   test('home shows following and near you when signed in', async ({ page }) => {

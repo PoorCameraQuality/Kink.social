@@ -2,7 +2,7 @@ import { DancecardPanelSkeleton } from '@/components/dancecard/organizer/ui/Danc
 
 function FeedCardSkeletonItem() {
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-dc-elevated/95 p-4 shadow-[var(--dc-shadow-soft)]">
+    <div className="rounded-2xl border border-dc-border/80 bg-dc-elevated-solid p-3 shadow-[var(--dc-shadow-soft)] lg:p-4">
       <div className="flex gap-3">
         <div className="dc-skeleton-bone h-11 w-11 flex-shrink-0 rounded-full" />
         <div className="min-w-0 flex-1 space-y-2.5">
@@ -12,7 +12,7 @@ function FeedCardSkeletonItem() {
           <div className="dc-skeleton-bone h-3 w-2/3 rounded-lg" />
         </div>
       </div>
-      <div className="mt-4 flex gap-2 border-t border-white/[0.06] pt-4">
+      <div className="mt-3 flex gap-2 border-t border-dc-border/50 pt-3 lg:mt-2.5 lg:pt-2.5">
         <div className="dc-skeleton-bone h-11 w-24 rounded-xl" />
         <div className="dc-skeleton-bone h-11 w-20 rounded-xl" />
         <div className="dc-skeleton-bone h-11 w-16 rounded-xl" />
@@ -24,7 +24,7 @@ function FeedCardSkeletonItem() {
 /** Feed rail / activity card placeholder grid. */
 export function FeedCardSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div className="dc-skeleton-stagger space-y-4">
+    <div className="dc-skeleton-stagger space-y-3 lg:space-y-4">
       {Array.from({ length: count }).map((_, i) => (
         <FeedCardSkeletonItem key={i} />
       ))}

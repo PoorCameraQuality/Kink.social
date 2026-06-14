@@ -20,6 +20,7 @@ import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { rateLimitRoute, passwordResetIdentifierKey } from '../lib/rate-limit-config.js'
 import { registrationIpPrefixFromRequest } from '../lib/client-ip.js'
 import { checkIdentityBan, isUserIdentityBanned } from '../lib/peer-reputation.js'
+import { changePasswordForUser } from '../lib/change-password.js'
 import {
   confirmPasswordReset,
   PASSWORD_RESET_GENERIC_MESSAGE,
@@ -386,4 +387,34 @@ export async function registerAuthRoutes(app: FastifyInstance) {
     enabled: isPasswordResetEnabled(),
     genericMessage: PASSWORD_RESET_GENERIC_MESSAGE,
   }))
+
+  const passwordChangeBody = z.object({
+    currentPassword: z.string().min(1).max(128),
+    newPassword: z.string().min(12).max(128),
+  })
+
+  app.post('/api/auth/password/change', { ...rateLimitRoute('passwordChange') }, async (req, reply) => {
+    if (!useDatabase()) {
+      return reply.status(503).send({ error: 'Password change requires USE_DATABASE=true' })
+    }
+    const v = resolveViewerFromRequest(req)
+    if (!v.authenticated || !v.payload?.sub) {
+      return reply.status(401).send({ error: 'Unauthorized' })
+    }
+    const userId = v.payload.sub
+    const parsed = passwordChangeBody.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.status(400).send({ error: 'Invalid body' })
+    }
+    const result = await changePasswordForUser({
+      userId,
+      currentPassword: parsed.data.currentPassword,
+      newPassword: parsed.data.newPassword,
+      log: req.log,
+    })
+    if (!result.ok) {
+      return reply.status(result.status).send({ error: result.error })
+    }
+    return reply.send({ ok: true })
+  })
 }

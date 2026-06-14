@@ -65,30 +65,21 @@ export default function ProfileBasicsPanel() {
           maxCount={PROFILE_PRONOUN_MAX}
         />
 
-        <div>
-          <label htmlFor="profile-short-bio" className="block text-sm font-medium text-dc-text mb-1">
-            Short bio
-          </label>
-          <p className="text-xs text-dc-text-muted mb-2">
-            A quick introduction near the top of your profile. Good bios usually answer who you are in the community,
-            what you enjoy or practice, and what kind of connections are welcome. For a longer story, use{' '}
-            <Link to="/profile/edit/about" className="text-dc-accent hover:underline">
-              Personality Prompts
-            </Link>
-            . Your role headline comes from{' '}
+        <div className="rounded-lg border border-dc-border/60 bg-dc-surface-muted/30 px-4 py-3">
+          <p className="text-sm text-dc-text-muted leading-relaxed">
+            Your profile story lives in one place — the{' '}
+            <Link to="/profile/edit/about" className="font-medium text-dc-accent hover:underline">
+              About
+            </Link>{' '}
+            section (rich text). The opening lines also feed your hero tagline. Your role headline comes from{' '}
             <Link to="/profile/edit/identity" className="text-dc-accent hover:underline">
               Identity & Community
             </Link>
             .
           </p>
-          <textarea
-            id="profile-short-bio"
-            rows={4}
-            value={ctx.bio}
-            onChange={(e) => ctx.setBio(e.target.value)}
-            placeholder="How you show up in the community. Events, roles, what you care about."
-            className="w-full px-4 py-3 bg-dc-surface-muted border border-dc-border rounded-lg text-dc-text text-sm resize-y min-h-[6rem]"
-          />
+          {ctx.bio.trim() ?
+            <p className="mt-2 line-clamp-2 text-xs text-dc-muted">{ctx.bio.replace(/\s+/g, ' ').trim()}</p>
+          : null}
         </div>
         </ProfileStudioInsetCard>
 

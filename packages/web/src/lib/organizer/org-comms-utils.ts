@@ -8,6 +8,13 @@ export function canManageOrgCommunications(orgRole: string | null): boolean {
   return MANAGE_ROLES.has(orgRole)
 }
 
+const GROUP_MANAGE_ROLES = new Set(['owner', 'admin', 'moderator'])
+
+export function canManageGroupCommunications(groupRole: string | null): boolean {
+  if (!groupRole) return false
+  return GROUP_MANAGE_ROLES.has(groupRole.toLowerCase())
+}
+
 export const FORUM_CATEGORY_SUGGESTIONS = [
   'Announcements',
   'Introductions',

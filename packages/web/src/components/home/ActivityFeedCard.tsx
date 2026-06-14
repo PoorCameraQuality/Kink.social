@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { RSVP_LABEL_INTERESTED } from '@c2k/shared'
+import FeedActivityRow from '@/components/feed/FeedActivityRow'
+import FeedConnectionActivityCard from '@/components/feed/FeedConnectionActivityCard'
+import FeedMediaStrip from '@/components/feed/FeedMediaStrip'
 import Badge from '@/components/ui/Badge'
 import Card from '@/components/ui/Card'
 import CopyLinkOverflowMenu from '@/components/ui/CopyLinkOverflowMenu'
@@ -8,7 +11,14 @@ import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import { useAuth } from '@/contexts/AuthContext'
 import type { ApiEventListItem } from '@/lib/api-event-mapper'
 import type { FollowingFeedItem } from '@/lib/feed-types'
+import { cardSurfaceFeedActivityClass } from '@/lib/card-surface'
 import { cn } from '@/lib/cn'
+import {
+  followingActivityVerbPhrase,
+  followingFeedDeepLinkLabel,
+  formatFeedTimeShort,
+  isCompactFollowingActivity,
+} from '@/lib/following-feed-present'
 
 type Props = {
   item: Extract<FollowingFeedItem, { kind: 'activity' }>
@@ -246,7 +256,7 @@ function EventFeedStoryCard({ item }: Props) {
     : storyLine
 
   return (
-    <Card padding="none" className="relative overflow-hidden transition-colors hover:border-dc-accent/25">
+    <Card padding="none" className={`relative overflow-hidden transition-colors hover:border-dc-accent/25 feed-stream-activity-card ${cardSurfaceFeedActivityClass}`}>
       {copyPath ?
         <CopyLinkOverflowMenu path={copyPath} className="absolute right-3 top-3 z-20" />
       : null}
@@ -432,7 +442,7 @@ function VendorShopFeedCard({ item }: Props) {
   const shopPath = slug ? `/vendors/${encodeURIComponent(slug)}` : item.deepLink
 
   return (
-    <Card padding="md" className="relative transition-colors hover:border-dc-accent/25">
+    <Card padding="md" className={`relative transition-colors hover:border-dc-accent/25 feed-stream-activity-card ${cardSurfaceFeedActivityClass}`}>
       {shopPath && shopPath !== '/home' ?
         <CopyLinkOverflowMenu path={shopPath} className="absolute right-3 top-3" />
       : null}
@@ -471,7 +481,114 @@ function VendorShopFeedCard({ item }: Props) {
   )
 }
 
+function CompactActivityFeedCard({ item }: Props) {
+  const object = item.object
+  const copyPath = item.deepLink && item.deepLink !== '/home' ? item.deepLink : null
+  const linkLabel = followingFeedDeepLinkLabel(item.verb)
+  const partnerUsername =
+    typeof object?.partnerUsername === 'string' && object.partnerUsername.trim() ?
+      object.partnerUsername.trim()
+    : null
+  const targetName =
+    typeof object?.groupName === 'string' && object.groupName.trim() ? object.groupName.trim()
+    : typeof object?.orgName === 'string' && object.orgName.trim() ? object.orgName.trim()
+    : typeof object?.title === 'string' && object.title.trim() ? object.title.trim()
+    : null
+
+  if (item.verb === 'connection_accepted') {
+    return (
+      <FeedConnectionActivityCard
+        username={item.actor.username}
+        verb={partnerUsername ? 'accepted a connection from' : 'accepted a connection'}
+        partnerUsername={partnerUsername}
+        timeLabel={item.createdAt ? formatFeedTimeShort(item.createdAt) : ''}
+        href={copyPath ?? undefined}
+        linkLabel={copyPath ? linkLabel : undefined}
+      />
+    )
+  }
+
+  const previewUrls = Array.isArray(object?.previewUrls) ?
+    object.previewUrls.filter((u): u is string => typeof u === 'string' && u.trim().length > 0)
+  : []
+  const followedUsernames = Array.isArray(object?.usernames) ?
+    object.usernames.filter((u): u is string => typeof u === 'string' && u.trim().length > 0)
+  : []
+
+  if (item.verb === 'followed' && followedUsernames.length > 0) {
+    return (
+      <FeedConnectionActivityCard
+        username={item.actor.username}
+        verb={followingActivityVerbPhrase(item.verb, object)}
+        timeLabel={item.createdAt ? formatFeedTimeShort(item.createdAt) : ''}
+      >
+        <div className="feed-connection-mini-list">
+          {followedUsernames.slice(0, 3).map((name) => (
+            <Link key={name} to={`/profile/${encodeURIComponent(name)}`} className="feed-connection-mini-list__chip">
+              <span className="feed-connection-mini-list__avatar">{name.charAt(0)}</span>
+              @{name}
+            </Link>
+          ))}
+        </div>
+      </FeedConnectionActivityCard>
+    )
+  }
+
+  if (item.verb === 'event_rsvp' && followedUsernames.length > 0) {
+    return (
+      <FeedConnectionActivityCard
+        username={item.actor.username}
+        verb={followingActivityVerbPhrase(item.verb, object)}
+        timeLabel={item.createdAt ? formatFeedTimeShort(item.createdAt) : ''}
+        href={copyPath ?? undefined}
+        linkLabel={copyPath ? linkLabel : undefined}
+      >
+        <div className="feed-connection-mini-list">
+          {followedUsernames.slice(0, 4).map((name) => (
+            <Link key={name} to={`/profile/${encodeURIComponent(name)}`} className="feed-connection-mini-list__chip">
+              <span className="feed-connection-mini-list__avatar">{name.charAt(0)}</span>
+              @{name}
+            </Link>
+          ))}
+        </div>
+      </FeedConnectionActivityCard>
+    )
+  }
+
+  const discussionExcerpt = typeof object?.excerpt === 'string' ? object.excerpt.trim() : ''
+
+  return (
+    <FeedActivityRow
+      username={item.actor.username}
+      verb={followingActivityVerbPhrase(item.verb, object)}
+      timeLabel={item.createdAt ? formatFeedTimeShort(item.createdAt) : ''}
+      href={copyPath ?? undefined}
+      linkLabel={copyPath ? linkLabel : undefined}
+    >
+      {discussionExcerpt && (item.verb === 'replied_discussion' || item.verb === 'created_discussion') ?
+        <p className="feed-activity-row__excerpt">{discussionExcerpt}</p>
+      : null}
+      {previewUrls.length > 0 ?
+        <FeedMediaStrip items={previewUrls.map((url) => ({ url }))} />
+      : targetName && copyPath ?
+        <Link to={copyPath} className="feed-activity-row__target">
+          <span className="feed-activity-row__target-avatar flex items-center justify-center text-xs font-semibold uppercase text-dc-accent">
+            {targetName.charAt(0)}
+          </span>
+          <span className="min-w-0">
+            <span className="feed-activity-row__target-name block truncate">{targetName}</span>
+          </span>
+        </Link>
+      : null}
+    </FeedActivityRow>
+  )
+}
+
 export default function ActivityFeedCard({ item }: Props) {
+  if (isCompactFollowingActivity(item.verb, item.object)) {
+    return <CompactActivityFeedCard item={item} />
+  }
+
   if (isEventStoryActivity(item.verb, item.object)) {
     return <EventFeedStoryCard item={item} />
   }
@@ -485,7 +602,7 @@ export default function ActivityFeedCard({ item }: Props) {
   return (
     <Card
       padding="md"
-      className="relative transition-colors hover:border-dc-accent/25"
+      className={`relative transition-colors hover:border-dc-accent/25 feed-stream-activity-card ${cardSurfaceFeedActivityClass}`}
     >
       {copyPath ?
         <CopyLinkOverflowMenu path={copyPath} className="absolute right-3 top-3" />

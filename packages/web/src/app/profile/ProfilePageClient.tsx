@@ -6,6 +6,7 @@ import { PROFILE_MEDIA_GALLERY_ID, scrollToProfileMediaGallery } from '@/lib/pro
 import ProfileExtendedSection from '@/components/profile/ProfileExtendedSection'
 import ProfileAttendedEventCard from '@/components/profile/ProfileAttendedEventCard'
 import ProfileWritingTab from '@/components/profile/tabs/ProfileWritingTab'
+import ProfileCommunityTab from '@/components/profile/tabs/ProfileCommunityTab'
 import ProfileReviewsTab from '@/components/profile/tabs/ProfileReviewsTab'
 import ProfileIsoTab from '@/components/profile/tabs/ProfileIsoTab'
 import ProfileConnectionsTab from '@/components/profile/tabs/ProfileConnectionsTab'
@@ -23,6 +24,7 @@ import ProfileMediaTabPanel from '@/components/profile/layout/ProfileMediaTabPan
 import {
   DEFAULT_PUBLIC_PROFILE_TAB,
   getVisiblePublicProfileTabs,
+  type CommunitySection,
   type PublicProfileTab,
   type PublicProfileTabCounts,
 } from '@/lib/public-profile-tabs'
@@ -127,14 +129,21 @@ export default function ProfilePageClient() {
   const { status: authStatus, isAuthenticated, isFallback } = useAuth()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const [activeTab, setActiveTabState] = usePublicProfileTabFromUrl()
+  const [activeTab, setActiveTabState, communitySection] = usePublicProfileTabFromUrl()
 
   const selectTab = useCallback(
-    (tab: PublicProfileTab) => {
+    (tab: PublicProfileTab, section?: CommunitySection) => {
       setActiveTabState(tab)
-      navigate(`${pathname}?tab=${encodeURIComponent(tab)}`)
+      const params = new URLSearchParams()
+      params.set('tab', tab)
+      if (tab === 'Community' && section) params.set('section', section)
+      navigate(`${pathname}?${params.toString()}`)
     },
     [pathname, navigate, setActiveTabState],
+  )
+  const selectCommunitySection = useCallback(
+    (section: CommunitySection) => selectTab('Community', section),
+    [selectTab],
   )
   const openPhotoGallery = useCallback(() => {
     selectTab('Media')
@@ -456,8 +465,13 @@ export default function ProfilePageClient() {
   const profileTabCounts = useMemo((): PublicProfileTabCounts | undefined => {
     const count = connectionsSummary?.totalCount
     if (count == null) return undefined
-    return { Connections: count }
+    return { Community: count }
   }, [connectionsSummary?.totalCount])
+
+  const communityVisibleSections = useMemo(
+    (): CommunitySection[] => ['relationships', 'connections', 'feedback'],
+    [],
+  )
 
   const visibleTabs = useMemo(
     () => getVisiblePublicProfileTabs(tabVisibility),
@@ -509,7 +523,7 @@ export default function ProfilePageClient() {
     pronounTags:
       profileMe.data?.profile?.pronounTags ??
       (p?.pronouns ? [p.pronouns] : undefined),
-    onAddReference: () => selectTab('Reviews'),
+    onAddReference: () => selectTab('Community', 'feedback'),
     heroActions: ownerHeroActions,
   }
 
@@ -563,25 +577,52 @@ export default function ProfilePageClient() {
           onSelect={selectTab}
           tabCounts={profileTabCounts}
         >
-            {activeTab === 'Relationships' && (
-              <EmptyState
-                title="Connections & relationships"
-                message="Relationship and D/s labels are managed in profile edit. They appear here publicly when you add them."
-                ctaLabel="Edit relationships"
-                ctaHref="/profile/edit/relationships"
-                inline
+            {activeTab === 'Community' && (
+              <ProfileCommunityTab
+                activeSection={communitySection}
+                onSectionChange={selectCommunitySection}
+                visibleSections={communityVisibleSections}
+                relationships={
+                  <EmptyState
+                    title="Connections & relationships"
+                    message="Relationship and D/s labels are managed in profile edit. They appear here publicly when you add them."
+                    ctaLabel="Edit relationships"
+                    ctaHref="/profile/edit/relationships"
+                    inline
+                  />
+                }
+                connections={
+                  viewerUsername ?
+                    <ProfileConnectionsTab
+                      username={viewerUsername}
+                      listVisible={connectionsSummary?.listVisible ?? true}
+                      totalCount={connectionsSummary?.totalCount ?? 0}
+                      mutualCount={connectionsSummary?.mutualCount ?? null}
+                      viewerIsOwner
+                    />
+                  : null
+                }
+                feedback={
+                  <ProfileReviewsTab
+                    viewerIsOwner
+                    username={viewerUsername ?? ''}
+                    viewerUsername={viewerUsername}
+                    isAuthenticated={isAuthenticated}
+                    references={[]}
+                    incoming={[]}
+                    loading={false}
+                    viewerHasPendingOrAccepted={false}
+                    refCategory="general"
+                    refNote=""
+                    refNoteId="owner-reviews"
+                    onRefCategoryChange={() => {}}
+                    onRefNoteChange={() => {}}
+                    onOfferReference={() => {}}
+                    onRespondIncoming={() => {}}
+                  />
+                }
               />
             )}
-
-            {activeTab === 'Connections' && viewerUsername ?
-              <ProfileConnectionsTab
-                username={viewerUsername}
-                listVisible={connectionsSummary?.listVisible ?? true}
-                totalCount={connectionsSummary?.totalCount ?? 0}
-                mutualCount={connectionsSummary?.mutualCount ?? null}
-                viewerIsOwner
-              />
-            : null}
 
             {activeTab === 'ISO' && (
               isAuthenticated && !isFallback && remote?.user ?
@@ -649,6 +690,9 @@ export default function ProfilePageClient() {
             {activeTab === 'Media' && (
               <ProfileMediaTabPanel
                 id={PROFILE_MEDIA_GALLERY_ID}
+                username={viewerUsername ?? ''}
+                apiBacked={signedInLive}
+                viewerIsOwner
                 writing={
                   !isAuthenticated || isFallback ?
                     <p className="text-sm text-dc-text-muted">Sign in with a full account to see your writing on the server.</p>
@@ -661,7 +705,7 @@ export default function ProfilePageClient() {
                       formatTeachingDate={formatTeachingCreditDate}
                     />
                 }
-                photos={
+                profilePhotosSlot={
                   <ProfilePhotoManager
                     apiBacked={signedInLive}
                     embedded
@@ -669,26 +713,6 @@ export default function ProfilePageClient() {
                     onPhotosChanged={refreshProfilePhotos}
                   />
                 }
-              />
-            )}
-
-            {activeTab === 'Reviews' && (
-              <ProfileReviewsTab
-                viewerIsOwner
-                username={viewerUsername ?? ''}
-                viewerUsername={viewerUsername}
-                isAuthenticated={isAuthenticated}
-                references={[]}
-                incoming={[]}
-                loading={false}
-                viewerHasPendingOrAccepted={false}
-                refCategory="general"
-                refNote=""
-                refNoteId="owner-reviews"
-                onRefCategoryChange={() => {}}
-                onRefNoteChange={() => {}}
-                onOfferReference={() => {}}
-                onRespondIncoming={() => {}}
               />
             )}
         </ProfileExtendedSection>

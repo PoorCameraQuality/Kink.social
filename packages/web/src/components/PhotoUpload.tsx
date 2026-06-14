@@ -18,6 +18,8 @@ type PhotoUploadProps = {
   guidelines?: Array<{ text: string; bold?: string }>
   uploading?: boolean
   uploadStage?: MediaUploadStage | null
+  /** Smaller drop zone and collapsible guidelines for inline profile editors. */
+  compact?: boolean
 }
 
 export default function PhotoUpload({
@@ -27,6 +29,7 @@ export default function PhotoUpload({
   guidelines,
   uploading = false,
   uploadStage = null,
+  compact = false,
 }: PhotoUploadProps) {
   const activeStage = uploadStage ?? (uploading ? 'uploading' : null)
   const inputId = useId()
@@ -86,11 +89,35 @@ export default function PhotoUpload({
     e.target.value = ''
   }
 
+  const guidelinesList =
+    guidelines && guidelines.length > 0 ?
+      <ul className={compact ? 'mt-2 space-y-1 pl-1 text-xs leading-snug text-dc-muted' : 'space-y-2 text-xs leading-snug text-dc-muted'}>
+        {guidelines.map((g, i) => (
+          <li key={i} className="flex gap-2">
+            <span className="mt-0.5 shrink-0 text-dc-accent" aria-hidden>
+              •
+            </span>
+            <span className="min-w-0 flex-1 text-dc-text-muted">
+              {g.bold ?
+                <>
+                  <strong className="font-semibold text-dc-text">{g.bold}</strong> {g.text}
+                </>
+              : g.text}
+            </span>
+          </li>
+        ))}
+      </ul>
+    : null
+
   return (
-    <div className="space-y-4">
+    <div className={compact ? 'space-y-2' : 'space-y-4'}>
       {pendingFile ? (
-        <div className="space-y-3 dc-panel-enter motion-reduce:animate-none">
-          <div className="relative aspect-video rounded-lg bg-dc-elevated-solid flex items-center justify-center overflow-hidden">
+        <div className={`dc-panel-enter motion-reduce:animate-none ${compact ? 'space-y-2' : 'space-y-3'}`}>
+          <div
+            className={`relative flex items-center justify-center overflow-hidden rounded-lg bg-dc-elevated-solid ${
+              compact ? 'max-h-32' : 'aspect-video'
+            }`}
+          >
             <img src={pendingFile.objectUrl} alt="" className="max-h-full object-contain" />
             {activeStage ?
               <MediaUploadProgressOverlay stage={activeStage} />
@@ -145,9 +172,11 @@ export default function PhotoUpload({
               setIsDragging(false)
             }}
             onDrop={handleDrop}
-            className={`rounded-lg border-2 border-dashed flex flex-col items-center justify-center transition-colors min-h-[8.5rem] sm:min-h-[10rem] ${
-              activeStage ? 'cursor-wait opacity-70' : 'cursor-pointer'
-            } ${
+            className={`rounded-lg border-2 border-dashed transition-colors ${
+              compact ?
+                'flex min-h-0 flex-row items-center gap-3 px-3 py-2.5'
+              : 'flex min-h-[8.5rem] flex-col items-center justify-center sm:min-h-[10rem]'
+            } ${activeStage ? 'cursor-wait opacity-70' : 'cursor-pointer'} ${
               isDragging ? 'border-dc-accent bg-dc-accent/10' : 'border-dc-border-strong bg-dc-elevated/95 hover:border-dc-accent-border/50'
             }`}
           >
@@ -160,7 +189,13 @@ export default function PhotoUpload({
               disabled={Boolean(activeStage)}
               className="sr-only"
             />
-            <svg className="w-12 h-12 text-dc-muted mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <svg
+              className={`shrink-0 text-dc-muted ${compact ? 'h-8 w-8' : 'mb-2 h-12 w-12'}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -168,27 +203,25 @@ export default function PhotoUpload({
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span className="text-dc-text-muted text-sm font-medium">Click or drag an image here</span>
-            <span className="text-dc-muted text-xs mt-1">JPG, PNG, or WebP · up to {Math.round(maxSize / 1024 / 1024)}MB</span>
+            <span className={compact ? 'min-w-0 text-left' : 'text-center'}>
+              <span className="block text-sm font-medium text-dc-text-muted">
+                {compact ? 'Choose or drag a photo' : 'Click or drag an image here'}
+              </span>
+              <span className={`block text-xs text-dc-muted ${compact ? 'mt-0.5' : 'mt-1'}`}>
+                JPG, PNG, or WebP · up to {Math.round(maxSize / 1024 / 1024)}MB
+              </span>
+            </span>
           </label>
-          {guidelines && guidelines.length > 0 && (
-            <ul className="space-y-2 text-xs leading-snug text-dc-muted">
-              {guidelines.map((g, i) => (
-                <li key={i} className="flex gap-2">
-                  <span className="mt-0.5 shrink-0 text-dc-accent" aria-hidden>
-                    •
-                  </span>
-                  <span className="min-w-0 flex-1 text-dc-text-muted">
-                    {g.bold ?
-                      <>
-                        <strong className="font-semibold text-dc-text">{g.bold}</strong> {g.text}
-                      </>
-                    : g.text}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+          {guidelinesList ?
+            compact ?
+              <details className="text-xs text-dc-muted">
+                <summary className="cursor-pointer select-none text-dc-text-muted hover:text-dc-text">
+                  Photo rules
+                </summary>
+                {guidelinesList}
+              </details>
+            : guidelinesList
+          : null}
         </>
       )}
       {error ?

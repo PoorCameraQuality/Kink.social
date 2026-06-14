@@ -37,6 +37,14 @@ describe('matchesFollowingFilter', () => {
       true,
     )
     assert.equal(
+      matchesFollowingFilter('activity', 'reactions', hide, { verb: 'loved', objectType: 'feed_post' }),
+      true,
+    )
+    assert.equal(
+      matchesFollowingFilter('activity', 'reactions', hide, { verb: 'followed', objectType: 'user' }),
+      true,
+    )
+    assert.equal(
       matchesFollowingFilter('activity', 'events', hide, { verb: 'convention_pin', objectType: 'convention' }),
       true,
     )

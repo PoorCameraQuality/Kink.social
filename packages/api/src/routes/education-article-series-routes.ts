@@ -93,6 +93,36 @@ async function requireOwnedSeries(id: string, userId: string, reply: FastifyRepl
 }
 
 export async function registerEducationArticleSeriesRoutes(app: FastifyInstance) {
+  app.get('/api/v1/education/series', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const viewerId = getViewerUserId(resolveViewerFromRequest(req).payload)
+
+    const seriesRows = await db
+      .select()
+      .from(schema.educationArticleSeries)
+      .where(eq(schema.educationArticleSeries.listInEducation, true))
+      .orderBy(desc(schema.educationArticleSeries.updatedAt))
+
+    const items: Array<
+      ReturnType<typeof shapeSeriesRow> & {
+        partCount: number
+        modules: Array<{ label: string; slug: string }>
+      }
+    > = []
+
+    for (const row of seriesRows) {
+      const visible = await loadVisibleSeriesItems(row.id, viewerId)
+      if (visible.length === 0) continue
+      items.push({
+        ...shapeSeriesRow(row),
+        partCount: visible.length,
+        modules: visible.map((item) => ({ label: item.title, slug: item.slug })),
+      })
+    }
+
+    return reply.send({ items })
+  })
+
   app.get('/api/v1/education/series/by-author/:username', async (req, reply) => {
     if (!requireDb(reply)) return
     const { username } = req.params as { username: string }

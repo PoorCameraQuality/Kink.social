@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import HomeFeedSuggestedPerson from '@/components/home/HomeFeedSuggestedPerson'
 import RailCard from '@/components/ui/RailCard'
+import { AlphaNotice } from '@/components/ui/primitives'
+import { fetchAlphaMode, isAlphaInviteMode } from '@/lib/alpha-mode'
 
 type Suggestion = {
   userId?: string | number
@@ -13,11 +16,17 @@ type Suggestion = {
 
 type UpcomingItem = { id: string; title: string; href: string; meta?: string }
 
+type MyGroupItem = { id: string; name: string; href: string; unreadCount?: number }
+
 type Props = {
   suggestions: Suggestion[]
   upcomingNearYou?: UpcomingItem[]
+  myGroups?: MyGroupItem[]
   trendingEvents?: { id: string; title: string; href: string; mentions?: string }[]
   spotlight?: { username: string; bio: string; href: string; role?: string }
+  /** desktop = full right rail; mobile-supplement = one block below feed on small viewports */
+  variant?: 'desktop' | 'mobile-supplement'
+  className?: string
 }
 
 function EmptyHint({ message }: { message: string }) {
@@ -28,17 +37,21 @@ function RailGroup({
   label,
   helper,
   children,
+  showHeader = true,
 }: {
   label: string
   helper: string
   children: ReactNode
+  showHeader?: boolean
 }) {
   return (
     <section className="space-y-3" aria-label={label}>
-      <div className="hidden lg:block">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-dc-muted">{label}</p>
-        <p className="mt-0.5 text-xs leading-relaxed text-dc-text-muted">{helper}</p>
-      </div>
+      {showHeader ?
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-dc-muted">{label}</p>
+          <p className="mt-0.5 text-xs leading-relaxed text-dc-text-muted">{helper}</p>
+        </div>
+      : null}
       <div className="space-y-4">{children}</div>
     </section>
   )
@@ -47,14 +60,56 @@ function RailGroup({
 export default function HomeFeedDiscoverRail({
   suggestions,
   upcomingNearYou = [],
+  myGroups = [],
   trendingEvents = [],
   spotlight,
+  variant = 'desktop',
+  className = '',
 }: Props) {
   const peopleList = suggestions.slice(0, 4)
+  const mobileSupplement = variant === 'mobile-supplement'
+  const [alphaMode, setAlphaMode] = useState(false)
+
+  useEffect(() => {
+    void fetchAlphaMode().then((m) => setAlphaMode(isAlphaInviteMode(m)))
+  }, [])
+
+  if (mobileSupplement) {
+    return (
+      <aside className={className} aria-label="Suggested next steps">
+        <RailGroup
+          label="Plan your week"
+          helper="Events near your saved location — open one if you are looking for something to do."
+        >
+          <RailCard title="Upcoming near you" footerHref="/events" footerLabel="Browse events →">
+            {upcomingNearYou.length > 0 ?
+              <ul className="space-y-2.5">
+                {upcomingNearYou.slice(0, 3).map((e) => (
+                  <li key={e.id}>
+                    <Link to={e.href} className="block rounded-lg p-1 hover:bg-dc-elevated-hover">
+                      <span className="block text-sm font-medium text-dc-text hover:text-dc-accent">{e.title}</span>
+                      {e.meta ? <span className="mt-0.5 block text-xs text-dc-muted">{e.meta}</span> : null}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            : <EmptyHint message="No events near you yet. Browse events to RSVP." />}
+          </RailCard>
+        </RailGroup>
+      </aside>
+    )
+  }
 
   return (
-    <aside className="dc-rail-aside sticky top-[7.5rem] space-y-6" aria-label="Discovery">
-      <RailGroup label="Plan your week" helper="Events and gatherings based on your area and RSVPs.">
+    <aside
+      className={`dc-rail-aside sticky top-[7.5rem] space-y-6 ${className}`.trim()}
+      aria-label="Discovery"
+    >
+      <RailGroup
+        label="Plan your week"
+        helper="Events and gatherings based on your area and RSVPs."
+        showHeader
+      >
         <RailCard title="Upcoming near you" footerHref="/events" footerLabel="See all →">
           <p className="mb-2.5 text-xs leading-relaxed text-dc-muted">
             From events near your saved location — not paid placements.
@@ -115,8 +170,29 @@ export default function HomeFeedDiscoverRail({
         : null}
       </RailGroup>
 
+      {myGroups.length > 0 ?
+        <RailGroup label="Your groups" helper="Groups you belong to with recent discussion activity.">
+          <RailCard title="Groups you are in" footerHref="/groups" footerLabel="All groups →">
+            <ul className="space-y-2">
+              {myGroups.slice(0, 4).map((g) => (
+                <li key={g.id}>
+                  <Link to={g.href} className="flex items-center justify-between gap-2 rounded-lg p-1 hover:bg-dc-elevated-hover">
+                    <span className="truncate text-sm font-medium text-dc-text hover:text-dc-accent">{g.name}</span>
+                    {g.unreadCount && g.unreadCount > 0 ?
+                      <span className="shrink-0 rounded-full bg-dc-accent-muted px-2 py-0.5 text-[10px] font-semibold text-dc-accent">
+                        {g.unreadCount}
+                      </span>
+                    : null}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </RailCard>
+        </RailGroup>
+      : null}
+
       <RailGroup label="See what is active" helper="Conversations and events gaining traction in the community.">
-        <RailCard title="Trending in the community" footerHref="/home?mode=discover&tab=Trending" footerLabel="See all →">
+        <RailCard title="Trending in the community" footerHref="/explore" footerLabel="See all →">
           <p className="mb-2.5 text-xs leading-relaxed text-dc-muted">
             Posts and events with recent engagement — open the Trending tab for the full list.
           </p>
@@ -141,6 +217,10 @@ export default function HomeFeedDiscoverRail({
           : <EmptyHint message="No trending activity yet." />}
         </RailCard>
       </RailGroup>
+
+      {alphaMode ?
+        <AlphaNotice />
+      : null}
     </aside>
   )
 }

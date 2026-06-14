@@ -2,18 +2,18 @@ import { TRUST_PILLS } from '@/components/landing/landing-content'
 
 export default function LandingTrustPillRow() {
   return (
-    <div className="trust-row" role="list" aria-label="Community trust signals">
-      {TRUST_PILLS.map((pill) => (
-        <div key={pill.title} className="trust-pill" role="listitem">
-          <span className="trust-icon" aria-hidden>
-            {pill.icon}
-          </span>
-          <div>
-            <p className="trust-title">{pill.title}</p>
-            <p className="trust-sub">{pill.subtitle}</p>
-          </div>
-        </div>
+    <ul className="hero-trust-strip" aria-label="Community trust signals">
+      {TRUST_PILLS.map((pill, index) => (
+        <li key={pill.title} className="hero-trust-strip__item">
+          {index > 0 ?
+            <span className="hero-trust-strip__sep" aria-hidden>
+              ·
+            </span>
+          : null}
+          <span className="hero-trust-strip__title">{pill.title}</span>
+          <span className="hero-trust-strip__sub">{pill.subtitle}</span>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

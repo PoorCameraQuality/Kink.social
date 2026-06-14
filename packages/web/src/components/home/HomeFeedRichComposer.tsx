@@ -27,14 +27,19 @@ import PostComposerModeBar from '@/components/home/PostComposerModeBar'
 import FeedComposerQuickActions from '@/components/home/FeedComposerQuickActions'
 
 import Button from '@/components/ui/Button'
-
 import Card from '@/components/ui/Card'
+import { cardSurfaceFeedActivityClass } from '@/lib/card-surface'
 
 import StatusBanner from '@/components/ui/StatusBanner'
 
 
 import type { FeedAttachment, FeedMention } from '@/lib/feed-types'
 import { uploadMediaFile } from '@/lib/upload-media'
+
+function feedAttachmentKey(a: FeedAttachment): string {
+  if (a.type === 'media') return `${a.type}:${a.mediaItemId}`
+  return `${a.type}:${a.url}`
+}
 
 
 
@@ -440,7 +445,7 @@ export default function HomeFeedRichComposer({
 
     for (const a of extraAttachments) {
 
-      const key = `${a.type}:${a.url}`
+      const key = feedAttachmentKey(a)
 
       if (seen.has(key)) continue
 
@@ -526,7 +531,7 @@ export default function HomeFeedRichComposer({
 
       {!showQuickActions ? <PostComposerModeBar /> : null}
 
-      <Card padding="none" className="overflow-hidden border-dc-border bg-[var(--dc-input)] ring-1 ring-white/[0.05]">
+      <Card padding="none" className={`overflow-hidden ring-1 ring-dc-border/40 ${cardSurfaceFeedActivityClass}`}>
 
         <EditorContent editor={editor} />
 
@@ -551,7 +556,7 @@ export default function HomeFeedRichComposer({
 
             <li
 
-              key={`${a.type}-${a.url}-${i}`}
+              key={`${feedAttachmentKey(a)}-${i}`}
 
               className="inline-flex items-center gap-1 rounded-md border border-dc-border bg-dc-elevated-muted px-2 py-1"
 

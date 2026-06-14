@@ -29,14 +29,38 @@ function requireUser(req: FastifyRequest, reply: FastifyReply): { userId: string
   return { userId }
 }
 
+async function userHasPushSubscription(userId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: schema.pushSubscriptions.id })
+    .from(schema.pushSubscriptions)
+    .where(eq(schema.pushSubscriptions.userId, userId))
+    .limit(1)
+  return Boolean(row)
+}
+
 /** C215 foundation - store Web Push subscriptions; send requires VAPID keys (future). */
 export async function registerPushRoutes(app: FastifyInstance) {
-  app.get('/api/v1/me/push/status', async (_req, reply) => {
+  app.get('/api/v1/me/push/status', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const actor = requireUser(req, reply)
+    if (!actor) return
+
     const configured = webPushConfigured()
+    const [prefs] = await db
+      .select({ pushEnabled: schema.userNotificationPreferences.pushEnabled })
+      .from(schema.userNotificationPreferences)
+      .where(eq(schema.userNotificationPreferences.userId, actor.userId))
+      .limit(1)
+
+    const subscribed = await userHasPushSubscription(actor.userId)
+
     return reply.send({
       configured,
       vapidPublicKey: vapidPublicKey(),
       transport: configured ? 'web-push' : 'disabled',
+      pushEnabled: prefs?.pushEnabled ?? false,
+      subscribed,
+      browserPermission: null,
     })
   })
 
@@ -44,6 +68,16 @@ export async function registerPushRoutes(app: FastifyInstance) {
     if (!requireDb(reply)) return
     const actor = requireUser(req, reply)
     if (!actor) return
+
+    const [prefs] = await db
+      .select({ pushEnabled: schema.userNotificationPreferences.pushEnabled })
+      .from(schema.userNotificationPreferences)
+      .where(eq(schema.userNotificationPreferences.userId, actor.userId))
+      .limit(1)
+    if (!prefs?.pushEnabled) {
+      return reply.status(403).send({ error: 'Enable push in notification settings first' })
+    }
+
     const parsed = z
       .object({
         endpoint: z.string().url(),
@@ -73,16 +107,38 @@ export async function registerPushRoutes(app: FastifyInstance) {
     if (!requireDb(reply)) return
     const actor = requireUser(req, reply)
     if (!actor) return
-    const parsed = z.object({ endpoint: z.string().url() }).safeParse(req.body)
+    const parsed = z.object({ endpoint: z.string().url().optional() }).safeParse(req.body ?? {})
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+
+    if (parsed.data.endpoint) {
+      await db
+        .delete(schema.pushSubscriptions)
+        .where(
+          and(
+            eq(schema.pushSubscriptions.userId, actor.userId),
+            eq(schema.pushSubscriptions.endpoint, parsed.data.endpoint),
+          ),
+        )
+    } else {
+      await db.delete(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.userId, actor.userId))
+    }
+
+    return reply.send({ ok: true })
+  })
+
+  app.post('/api/v1/me/push/disable', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const actor = requireUser(req, reply)
+    if (!actor) return
+
     await db
-      .delete(schema.pushSubscriptions)
-      .where(
-        and(
-          eq(schema.pushSubscriptions.userId, actor.userId),
-          eq(schema.pushSubscriptions.endpoint, parsed.data.endpoint),
-        ),
-      )
+      .insert(schema.userNotificationPreferences)
+      .values({ userId: actor.userId, pushEnabled: false, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: schema.userNotificationPreferences.userId,
+        set: { pushEnabled: false, updatedAt: new Date() },
+      })
+    await db.delete(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.userId, actor.userId))
     return reply.send({ ok: true })
   })
 }

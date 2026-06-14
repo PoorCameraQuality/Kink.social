@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom'
 import { formatMyRsvpLabel, type ApiMyRsvpItem } from '@/hooks/useApiMyRsvps'
+import { RSVP_LABEL_INTERESTED } from '@c2k/shared'
 
-const STATUS_LABEL: Record<string, string> = {
-  going: 'Going',
-  maybe: 'Maybe',
-  waitlist: 'Waitlist',
-}
-
-function statusLabel(status: string): string {
-  return STATUS_LABEL[status] ?? status.replace(/_/g, ' ')
+function registrationStatusLabel(item: ApiMyRsvpItem): string {
+  if (item.status === 'going' && item.rsvpApprovalStatus === 'pending') return 'Awaiting approval'
+  if (item.status === 'maybe') return RSVP_LABEL_INTERESTED
+  if (item.status === 'going') return 'Going'
+  if (item.status === 'waitlist') return 'Waitlist'
+  return item.status.replace(/_/g, ' ')
 }
 
 type Props = {
@@ -33,7 +32,7 @@ export default function PersonalRegistrationRow({ item, locationHint }: Props) {
         : null}
         <p className="mt-1 text-xs text-dc-muted">
           <span className="rounded-full bg-dc-surface-muted px-2 py-0.5 font-medium text-dc-text">
-            {statusLabel(item.status)}
+            {registrationStatusLabel(item)}
           </span>
         </p>
       </div>

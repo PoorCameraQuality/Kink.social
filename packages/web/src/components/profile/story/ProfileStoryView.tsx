@@ -22,7 +22,6 @@ import ProfileStudioStrengthCard from '../studio/ProfileStudioStrengthCard'
 import ProfileCommunitySnapshotCard from './ProfileCommunitySnapshotCard'
 import ProfileOrganizationsCard from './ProfileOrganizationsCard'
 import ProfileUpcomingEventsCard from './ProfileUpcomingEventsCard'
-import ProfileFeedbackCard from './ProfileFeedbackCard'
 
 export type ProfileStoryViewProps = {
   displayName: string
@@ -145,13 +144,6 @@ export default function ProfileStoryView(props: ProfileStoryViewProps) {
         viewerIsOwner={props.viewerIsOwner}
       />
       <ProfileOrganizationsCard ecosystem={props.ecosystem} username={props.username} />
-      <ProfileFeedbackCard
-        displayName={props.displayName}
-        referencesCount={props.referencesCount}
-        viewerIsOwner={props.viewerIsOwner}
-        onAddReference={props.onAddReference}
-        canOfferReference={props.canOfferReference}
-      />
     </>
   )
 
@@ -182,9 +174,7 @@ export default function ProfileStoryView(props: ProfileStoryViewProps) {
       memberSince={props.memberSince}
       roles={props.roles}
       lifestyleActivity={props.lifestyleActivity}
-      referencesCount={props.referencesCount}
       eventsAttended={props.eventsAttended}
-      educationContributions={props.educationContributions}
     />
   )
 

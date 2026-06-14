@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import EventMatchmakerPanel from '@/components/EventMatchmakerPanel'
 import EventDiscussionPanel from '@/components/events/EventDiscussionPanel'
 import EventSaveButton from '@/components/events/EventSaveButton'
+import AlphaTestBadge from '@/components/alpha/AlphaTestBadge'
 import ConventionProgramSchedulePanel from '@/components/conventions/ConventionProgramSchedulePanel'
 import ScopePageMeta from '@/components/seo/ScopePageMeta'
 import { Link } from 'react-router-dom'
@@ -16,6 +17,7 @@ import { getMockEventById, getMockGroupById, mockPeople, mockVendors } from '@/d
 import type { ApiEventListItem } from '@/lib/api-event-mapper'
 import { mapApiEventToMockEvent } from '@/lib/api-event-mapper'
 import { buildEventIcsDownloadUrl, buildGoogleCalendarUrl, buildWebcalSubscribeUrl } from '@/lib/event-calendar-links'
+import { mediaDisplayUrl } from '@/lib/media-display-url'
 import { isTicketEmbedUrlAllowed } from '@/lib/ticket-embed'
 import { isSocialStyleEventCategory, RSVP_LABEL_INTERESTED } from '@c2k/shared'
 import { useTabFromUrl } from '@/hooks/useTabFromUrl'
@@ -679,6 +681,10 @@ export default function EventDetailClient() {
   const pageDesc =
     apiEvent?.description?.replace(/<[^>]+>/g, '').slice(0, 300) ??
     mockEvent?.description?.slice(0, 300)
+  const eventCoverUrl =
+    mediaDisplayUrl(apiEvent?.imageUrl) ??
+    mediaDisplayUrl(mockEvent?.imageUrl) ??
+    mediaDisplayUrl(mockEvent?.bannerUrl)
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden pb-24 lg:pb-6">
@@ -686,8 +692,8 @@ export default function EventDetailClient() {
         title={pageTitle}
         description={pageDesc}
         path={`/events/${encodeURIComponent(id)}`}
-        heroImageUrl={apiEvent?.imageUrl ?? mockEvent?.imageUrl ?? null}
-        bannerUrl={apiEvent?.imageUrl ?? mockEvent?.bannerUrl ?? null}
+        heroImageUrl={eventCoverUrl ?? null}
+        bannerUrl={eventCoverUrl ?? null}
       />
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Main content. Reading column ~768px per design docs */}
@@ -695,9 +701,9 @@ export default function EventDetailClient() {
           {/* Hero banner — visible on all viewports; compact on mobile */}
           <div className="relative -mx-4 sm:mx-0 overflow-hidden mb-6 rounded-none sm:rounded-2xl">
             <div className="aspect-[16/9] sm:aspect-[2/1] max-h-52 sm:max-h-none relative bg-gradient-to-br from-dc-surface-muted to-dc-elevated-solid">
-              {apiMode === 'ready' && apiEvent?.imageUrl ? (
-                <img src={apiEvent.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
-              ) : (
+              {eventCoverUrl ?
+                <img src={eventCoverUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <svg className="w-16 h-16 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -707,6 +713,7 @@ export default function EventDetailClient() {
             </div>
             <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
               <div className="flex flex-wrap gap-2 mb-2">
+                <AlphaTestBadge label={apiEvent?.alphaLabel} />
                 {isConventionSurface ?
                   <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-dc-accent/25 text-dc-accent border border-dc-accent-border/30">
                     Convention

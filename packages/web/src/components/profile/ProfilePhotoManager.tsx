@@ -51,11 +51,11 @@ export default function ProfilePhotoManager({
   } = useProfilePhotos({ basePhotos, apiBacked, onPhotosChanged })
 
   useEffect(() => {
-    if (!autoOpenUploadWhenEmpty || loading || photos.length > 0) return
+    if (embedded || !autoOpenUploadWhenEmpty || loading || photos.length > 0) return
     if (typeof window === 'undefined') return
     if (!window.matchMedia('(min-width: 640px)').matches) return
     setAddPhotoOpen(true)
-  }, [autoOpenUploadWhenEmpty, loading, photos.length, setAddPhotoOpen])
+  }, [embedded, autoOpenUploadWhenEmpty, loading, photos.length, setAddPhotoOpen])
 
   const handleAddPhoto: typeof addPhoto = async (result) => {
     await addPhoto(result)
@@ -76,13 +76,7 @@ export default function ProfilePhotoManager({
 
   return (
     <>
-      <div
-        className={
-          embedded ?
-            'rounded-xl border border-dc-border bg-dc-elevated/95 p-4 shadow-[var(--dc-shadow-soft)] sm:rounded-2xl sm:p-5'
-          : 'rounded-2xl border border-dc-border bg-dc-elevated/95 p-4 shadow-[var(--dc-shadow-soft)] sm:p-6'
-        }
-      >
+      <div className={embedded ? 'min-w-0 space-y-4' : 'rounded-2xl border border-dc-border bg-dc-elevated/95 p-4 shadow-[var(--dc-shadow-soft)] sm:p-6'}>
         {!embedded ?
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -102,8 +96,8 @@ export default function ProfilePhotoManager({
             ) : null}
           </div>
         : !addPhotoOpen ?
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="text-xs text-dc-text-muted">Primary photo is the first image in your gallery.</p>
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="min-w-0 text-xs text-dc-text-muted">Primary photo is the first image in your gallery.</p>
             <button
               type="button"
               onClick={() => setAddPhotoOpen(true)}
@@ -117,18 +111,27 @@ export default function ProfilePhotoManager({
         {error ? <LoadErrorBanner className="mb-4" message={error} onRetry={() => void reload()} /> : null}
 
         {addPhotoOpen ? (
-          <div className="mb-4 rounded-xl border border-dc-border bg-dc-surface-muted p-3 sm:mb-6 sm:p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <p className="text-sm font-medium text-dc-text">Upload a photo</p>
+          <div
+            className={
+              embedded ?
+                'mb-3 rounded-lg border border-dc-border/80 bg-dc-surface-muted/50 p-2'
+              : 'mb-4 rounded-xl border border-dc-border bg-dc-surface-muted p-3 sm:mb-6 sm:p-4'
+            }
+          >
+            <div className={`flex items-center justify-between gap-2 ${embedded ? 'mb-2' : 'mb-3'}`}>
+              <p className={`font-medium text-dc-text ${embedded ? 'text-xs sm:text-sm' : 'text-sm'}`}>
+                Upload a photo
+              </p>
               <button
                 type="button"
                 onClick={() => setAddPhotoOpen(false)}
-                className="inline-flex min-h-9 shrink-0 items-center rounded-lg border border-dc-border px-3 text-xs font-medium text-dc-text-muted hover:bg-dc-elevated-muted hover:text-dc-text sm:text-sm"
+                className="inline-flex min-h-8 shrink-0 items-center rounded-lg border border-dc-border px-2.5 text-xs font-medium text-dc-text-muted hover:bg-dc-elevated-muted hover:text-dc-text"
               >
                 Close
               </button>
             </div>
             <PhotoUpload
+              compact={embedded}
               onSelect={handleAddPhoto}
               uploading={uploading}
               uploadStage={uploadStage}
@@ -189,21 +192,31 @@ export default function ProfilePhotoManager({
                 </div>
                 <div className="bg-dc-elevated-solid/50 p-2">
                   {editingId === photo.id ? (
-                    <div className="flex gap-1">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-1">
                       <input
                         type="text"
                         value={editingCaption}
                         onChange={(e) => setEditingCaption(e.target.value)}
                         placeholder="Write a caption…"
-                        className="flex-1 rounded border border-dc-border bg-dc-surface-muted px-2 py-1 text-xs text-dc-text"
+                        className="min-w-0 flex-1 rounded border border-dc-border bg-dc-surface-muted px-2 py-1.5 text-xs text-dc-text"
                         autoFocus
                       />
-                      <button type="button" onClick={handleSaveCaption} className="text-xs text-dc-accent">
-                        Save
-                      </button>
-                      <button type="button" onClick={cancelEdit} className="text-xs text-dc-muted">
-                        Cancel
-                      </button>
+                      <div className="flex shrink-0 gap-2">
+                        <button
+                          type="button"
+                          onClick={handleSaveCaption}
+                          className="inline-flex min-h-9 items-center text-xs font-medium text-dc-accent"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          className="inline-flex min-h-9 items-center text-xs text-dc-muted"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <>

@@ -583,19 +583,6 @@ export default function CreateFlowModal() {
     />
   )
 
-  const closeButton = (
-    <button
-      type="button"
-      onClick={handleClose}
-      className="shrink-0 rounded-lg p-2 text-dc-text-muted transition-colors hover:bg-dc-elevated-muted hover:text-dc-text focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ecke-focus-ring)]"
-      aria-label="Close create event"
-    >
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-  )
-
   return (
     <Dialog
       open={isOpen}
@@ -605,25 +592,34 @@ export default function CreateFlowModal() {
       variant="sheet"
       layout="wizard"
       maxWidthClass="max-w-2xl sm:rounded-2xl"
+      className="create-flow cf-wizard-panel"
       panelRef={dialogRef}
-      headerExtra={closeButton}
+      headerExtra={
+        <button
+          type="button"
+          onClick={handleClose}
+          className="cf-wizard-close shrink-0 rounded-lg p-2 text-dc-text-muted transition-colors hover:bg-dc-elevated-muted hover:text-dc-text focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ecke-focus-ring)]"
+          aria-label="Close create event"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      }
       footer={footer}
     >
       <CreateFlowStepper currentStep={eventStep} />
 
       {stepError ?
-        <div
-          className="mb-4 rounded-xl border border-dc-danger-border/40 bg-dc-danger/10 px-3 py-2 text-sm text-dc-danger"
-          role="alert"
-        >
+        <div className="cf-banner cf-banner--danger" role="alert">
           {stepError}
         </div>
       : null}
 
       {eventStep === 1 && (
-        <div className="space-y-5">
+        <div className="cf-step">
           {isMunchCategory ?
-            <p className="rounded-xl border border-dc-accent-border/30 bg-dc-accent/10 px-3 py-2 text-sm text-dc-text-muted">
+            <p className="cf-banner">
               Creating a <span className="font-medium text-dc-text">munch</span>
               {prefillGroupId ? ' for your group' : ''}. End time defaults to +2 hours; location often stays
               RSVP-only.
@@ -907,7 +903,7 @@ export default function CreateFlowModal() {
       )}
 
       {eventStep === 2 && (
-        <div className="space-y-5">
+        <div className="cf-step">
           <SectionCard title="Marketing" badge="Recommended">
             <EventCoverPhotoControl
               imageUrl={draft.imageUrl.trim() || null}
@@ -934,9 +930,9 @@ export default function CreateFlowModal() {
       )}
 
       {eventStep === 3 && (
-        <div className="space-y-5">
+        <div className="cf-step">
           {isConventionCreate ?
-            <p className="rounded-xl border border-dc-accent-border/30 bg-dc-accent/10 px-3 py-2 text-sm text-dc-text-muted">
+            <p className="cf-banner">
               You are creating an event with an optional <span className="font-medium text-dc-text">convention program shell</span>.
               Enable the program below when posting to an organization calendar.
             </p>
@@ -1021,12 +1017,9 @@ export default function CreateFlowModal() {
       )}
 
       {eventStep === 4 && publishPreview ?
-        <div className="space-y-5">
+        <div className="cf-step">
           {eventPublishError ?
-            <div
-              className="rounded-xl border border-red-500/30 bg-red-950/25 px-3 py-2 text-sm text-red-200"
-              role="alert"
-            >
+            <div className="cf-banner cf-banner--danger" role="alert">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <p className="flex-1">{eventPublishError}</p>
                 <button
@@ -1040,12 +1033,12 @@ export default function CreateFlowModal() {
             </div>
           : null}
           {!isAuthenticated ?
-            <p className="rounded-xl border border-dc-border bg-dc-surface px-3 py-2 text-sm text-dc-text-muted">
+            <p className="cf-banner">
               Log in to publish this event.
             </p>
           : null}
           {(publishPreview.titleMissing || publishPreview.whenMissing) && !eventPublishError ?
-            <p className="rounded-xl border border-dc-danger-border/40 bg-dc-danger/10 px-3 py-2 text-sm text-dc-danger" role="alert">
+            <p className="cf-banner cf-banner--danger" role="alert">
               Complete title and start time on the Basics step before publishing.
             </p>
           : null}

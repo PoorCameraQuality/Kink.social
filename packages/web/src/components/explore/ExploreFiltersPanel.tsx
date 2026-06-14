@@ -139,11 +139,7 @@ export default function ExploreFiltersPanel({
                 type="button"
                 aria-pressed={active}
                 onClick={() => setDate(active ? null : opt.value)}
-                className={`min-h-10 rounded-full border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent ${
-                  active ?
-                    'border-dc-accent bg-dc-accent text-dc-accent-foreground'
-                  : 'border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:text-dc-text'
-                }`}
+                className={`xpl-chip xpl-chip--topic ${active ? 'xpl-chip--active xpl-chip--accent-fill' : ''}`}
               >
                 {opt.label}
               </button>
@@ -195,11 +191,7 @@ export default function ExploreFiltersPanel({
                   else topics.push(topic)
                   onChange({ ...draft, topics })
                 }}
-                className={`min-h-10 rounded-full border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent ${
-                  active ?
-                    'border-dc-accent bg-dc-accent text-dc-accent-foreground'
-                  : 'border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:text-dc-text'
-                }`}
+                className={`xpl-chip xpl-chip--topic ${active ? 'xpl-chip--active xpl-chip--accent-fill' : ''}`}
               >
                 {topic}
               </button>

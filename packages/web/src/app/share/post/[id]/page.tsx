@@ -82,7 +82,7 @@ export default function SharePostPage() {
       : null}
       {post && !error ?
         <>
-          <div className="mt-6">
+          <div className="feed-stream mt-6">
             <LocalPostCard post={post} layout="feed" />
           </div>
           <FeedPostDiscussion postId={post.id} initialCount={post.comments} />

@@ -125,17 +125,22 @@ export function mediaAssetToPhotoDto(media: MediaAsset | null | undefined): Prof
   }
 }
 
-export async function createMediaAssetForProfilePhoto(params: {
+export async function createMediaAssetForUpload(params: {
   userId: string
-  profileId: string
-  url?: string
+  ownerType: string
+  ownerId: string
+  sourceSurface: string
   quarantineKey?: string
-  sha256Hash?: string
+  url?: string
   mimeType?: string
   sizeBytes?: number
   originalFilename?: string
+  sha256Hash?: string
   imageWidth?: number
   imageHeight?: number
+  videoWidth?: number
+  videoHeight?: number
+  durationSeconds?: number
   storageBucket?: string
 }): Promise<string> {
   const quarantineKey = params.quarantineKey ?? null
@@ -149,9 +154,9 @@ export async function createMediaAssetForProfilePhoto(params: {
     .insert(schema.mediaAssets)
     .values({
       uploaderUserId: params.userId,
-      ownerType: 'profile',
-      ownerId: params.profileId,
-      sourceSurface: 'profile_gallery',
+      ownerType: params.ownerType,
+      ownerId: params.ownerId,
+      sourceSurface: params.sourceSurface,
       storageKey,
       originalStorageKey: quarantineKey ?? legacyUrl,
       quarantineStorageKey: quarantineKey,
@@ -166,11 +171,44 @@ export async function createMediaAssetForProfilePhoto(params: {
       sha256Hash: params.sha256Hash ?? null,
       imageWidth: params.imageWidth ?? null,
       imageHeight: params.imageHeight ?? null,
+      videoWidth: params.videoWidth ?? null,
+      videoHeight: params.videoHeight ?? null,
+      durationSeconds: params.durationSeconds ?? null,
       uploadStatus: MEDIA_UPLOAD_STATUSES.pendingAttestation,
       scanStatus: SCAN_STATUSES.notRequired,
     })
     .returning({ id: schema.mediaAssets.id })
   return row!.id
+}
+
+export async function createMediaAssetForProfilePhoto(params: {
+  userId: string
+  profileId: string
+  url?: string
+  quarantineKey?: string
+  sha256Hash?: string
+  mimeType?: string
+  sizeBytes?: number
+  originalFilename?: string
+  imageWidth?: number
+  imageHeight?: number
+  storageBucket?: string
+}): Promise<string> {
+  return createMediaAssetForUpload({
+    userId: params.userId,
+    ownerType: 'profile',
+    ownerId: params.profileId,
+    sourceSurface: 'profile_gallery',
+    url: params.url,
+    quarantineKey: params.quarantineKey,
+    sha256Hash: params.sha256Hash,
+    mimeType: params.mimeType,
+    sizeBytes: params.sizeBytes,
+    originalFilename: params.originalFilename,
+    imageWidth: params.imageWidth,
+    imageHeight: params.imageHeight,
+    storageBucket: params.storageBucket,
+  })
 }
 
 export type SubmitMediaAttestationInput = {

@@ -11,6 +11,7 @@ type GroupMember = {
   userId: string
   username: string
   role: string
+  memberListHidden?: boolean
 }
 
 type Props = {
@@ -76,7 +77,12 @@ export default function GroupMemberRolePanel({ groupId, viewerRole }: Props) {
         viewerMember?: { role?: string } | null
       }
       const rows = j.members ?? []
-      setMembers(rows)
+      setMembers(
+        rows.map((m) => ({
+          ...m,
+          memberListHidden: (m as GroupMember).memberListHidden,
+        })),
+      )
       setResolvedViewerRole((prev) => viewerRole ?? j.viewerMember?.role ?? prev)
       setRoleDrafts(
         Object.fromEntries(
@@ -109,6 +115,19 @@ export default function GroupMemberRolePanel({ groupId, viewerRole }: Props) {
   async function saveRoles() {
     if (pendingChanges.length === 0) {
       setMsg('No role changes to save.')
+      return
+    }
+
+    const staffPromotions = pendingChanges.filter((m) => {
+      const role = roleDrafts[m.userId]
+      return (role === 'admin' || role === 'moderator') && m.memberListHidden
+    })
+    if (
+      staffPromotions.length > 0 &&
+      !window.confirm(
+        'Staff roles are visible for accountability. Accepting this role will show the member in the group member list. Continue?',
+      )
+    ) {
       return
     }
 

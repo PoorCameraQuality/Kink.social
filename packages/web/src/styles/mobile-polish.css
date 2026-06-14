@@ -29,12 +29,14 @@
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 1rem;
   padding-bottom: 0.25rem;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 .c2k-snap-carousel__track::-webkit-scrollbar {
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .c2k-snap-carousel__track > * {

@@ -14,13 +14,13 @@ type AlphaRoute = {
 }
 
 const ALPHA_ROUTES: AlphaRoute[] = [
-  { path: '/', name: 'landing', heading: /Find events.*Learn safely/i },
+  { path: '/', name: 'landing', heading: 'Join free' },
   { path: '/home', name: 'home', auth: true },
-  { path: '/events', name: 'events', heading: 'Events' },
-  { path: '/conventions', name: 'conventions' },
-  { path: '/groups', name: 'groups', heading: 'Groups' },
-  { path: '/orgs', name: 'orgs', heading: 'Organizations' },
-  { path: '/people', name: 'people' },
+  { path: '/events', name: 'events', auth: true, heading: 'Events' },
+  { path: '/conventions', name: 'conventions', auth: true },
+  { path: '/groups', name: 'groups', auth: true, heading: 'Groups' },
+  { path: '/orgs', name: 'orgs', auth: true, heading: 'Organizations' },
+  { path: '/people', name: 'people', auth: true },
   { path: '/profile/edit', name: 'profile-edit', auth: true },
   { path: '/settings/account', name: 'settings-account', auth: true, heading: 'Settings' },
   { path: '/settings/privacy', name: 'settings-privacy', auth: true, heading: 'Settings' },

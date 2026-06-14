@@ -1,4 +1,5 @@
 import webpush from 'web-push'
+import { platformMailboxEmail } from './mail-addresses.js'
 import { eq, inArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 
@@ -20,7 +21,7 @@ export function vapidPublicKey(): string | null {
 function ensureVapid(): boolean {
   const pub = process.env.VAPID_PUBLIC_KEY?.trim()
   const priv = process.env.VAPID_PRIVATE_KEY?.trim()
-  const subject = process.env.VAPID_SUBJECT?.trim() || 'mailto:admin@coasttocoastkink.local'
+  const subject = process.env.VAPID_SUBJECT?.trim() || `mailto:${platformMailboxEmail('admin')}`
   if (!pub || !priv) return false
   webpush.setVapidDetails(subject, pub, priv)
   return true
@@ -34,7 +35,14 @@ export async function sendWebPushToUsers(
   if (!webPushConfigured() || userIds.length === 0) return { sent: 0, failed: 0 }
   if (!ensureVapid()) return { sent: 0, failed: 0 }
 
-  const uniqueIds = [...new Set(userIds)]
+  const { isUserPushEnabled } = await import('./hub-push-preferences.js')
+  const eligible: string[] = []
+  for (const id of [...new Set(userIds)]) {
+    if (await isUserPushEnabled(id)) eligible.push(id)
+  }
+  if (eligible.length === 0) return { sent: 0, failed: 0 }
+
+  const uniqueIds = eligible
   const subs = await db
     .select()
     .from(schema.pushSubscriptions)

@@ -14,7 +14,7 @@ export default function ExploreCompactTrendingRow({ item }: Props) {
     <li>
       <Link
         to={item.href}
-        className="flex gap-3 rounded-xl border border-dc-border/50 border-l-[3px] border-l-dc-accent bg-dc-elevated-solid/40 p-2.5 transition-colors hover:border-dc-accent-border/40 hover:bg-dc-elevated-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
+        className="xpl-row-card xpl-row-card--subtle p-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
       >
         <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-dc-border bg-dc-elevated-solid">
           <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />

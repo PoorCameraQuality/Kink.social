@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
 import EventSaveButton from '@/components/events/EventSaveButton'
+import AutoScrollRow from '@/components/home/AutoScrollRow'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
 import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
-import { formatEventLocationForDisplay } from '@/lib/events-page-utils'
+import { formatEventLocationForDisplay, resolveEventHeroUrl } from '@/lib/events-page-utils'
 import type { MockEvent } from '@/data/types'
 
 function HighlightCard({ event, compact }: { event: MockEvent; compact?: boolean }) {
-  const heroSrc = event.imageUrl ?? event.bannerUrl ?? null
+  const heroSrc = resolveEventHeroUrl(event)
   const preview = event.connectionRsvpPreview?.slice(0, 3) ?? []
   const showFeaturedBadge = event.featured === true
   const isVirtual = event.eventFormat === 'virtual'
@@ -32,7 +33,7 @@ function HighlightCard({ event, compact }: { event: MockEvent; compact?: boolean
       <Link to={`/events/${event.id}`} className="block">
         <div className={`w-full bg-dc-surface-muted ${compact ? 'aspect-[2/1]' : 'aspect-[16/10]'}`}>
           {heroSrc ?
-            <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" />
+            <img src={heroSrc} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
           : <MediaSurfaceFallback variant="event" />}
         </div>
         <div className="p-2.5 sm:p-3">
@@ -79,13 +80,16 @@ export default function EventsFeaturedStrip({ events }: { events: MockEvent[] })
         <h2 className="text-sm font-semibold text-dc-text">Happening soon</h2>
         <p className="text-xs text-dc-text-muted">Quick picks to compare date, place, and who is going.</p>
       </div>
-      <div className="c2k-snap-carousel">
-        <div className="c2k-snap-carousel__track">
+      <div className="relative">
+        <AutoScrollRow aria-label="Featured upcoming events carousel" trackClassName="gap-3 scroll-smooth">
           {featured.map((event, i) => (
             <HighlightCard key={String(event.id)} event={event} compact={i > 0} />
           ))}
-        </div>
-        <div className="c2k-snap-carousel__fade" aria-hidden />
+        </AutoScrollRow>
+        <div
+          className="pointer-events-none absolute bottom-1 right-0 top-0 w-10 bg-gradient-to-l from-dc-surface to-transparent md:hidden"
+          aria-hidden
+        />
       </div>
     </section>
   )

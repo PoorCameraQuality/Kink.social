@@ -1,169 +1,106 @@
-import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
+import type { EducationTopicFilter } from '@/lib/education-discover-data'
 import { resolveEducationNavMatch, type EducationNavMatch } from '@/lib/education-section-mode'
 
-
-
 const NAV: ReadonlyArray<{
-
   href: string
-
   label: string
-
   match: EducationNavMatch
-
   soon?: boolean
-
 }> = [
-
   { href: '/education', label: 'Overview', match: 'overview' },
-
   { href: '/education?view=paths', label: 'Learning paths', match: 'paths' },
-
   { href: '/education?view=articles', label: 'Articles', match: 'articles' },
-
-  { href: '/media?format=video', label: 'Videos', match: 'videos' },
-
-  { href: '/media?format=podcast', label: 'Podcasts', match: 'podcasts' },
-
-  { href: '/education?view=library', label: 'Class library', match: 'library', soon: true },
-
+  { href: '/education?view=videos', label: 'Videos', match: 'videos' },
+  { href: '/education?view=podcasts', label: 'Podcasts', match: 'podcasts' },
+  { href: '/education?view=library', label: 'Class library', match: 'library' },
   { href: '/saved', label: 'Saved', match: 'saved' },
-
-  { href: '/education?view=progress', label: 'My progress', match: 'progress', soon: true },
-
-  { href: '/education?view=notes', label: 'Notes', match: 'notes', soon: true },
-
+  { href: '/education?view=progress', label: 'My progress', match: 'progress' },
 ]
 
-
-
-const FEATURED_TOPICS = [
-
-  { icon: '🛡️', label: 'Safety', count: 48, filter: 'Safety' },
-
-  { icon: '🪢', label: 'Rope', count: 36, filter: 'Gear' },
-
-  { icon: '🧠', label: 'Psychology', count: 29, filter: 'Psychology' },
-
-  { icon: '👑', label: 'Dominance', count: 22, filter: 'Advanced' },
-
-  { icon: '🤝', label: 'Consent', count: 41, filter: 'Beginner' },
-
-  { icon: '⚡', label: 'Dynamics', count: 18, filter: 'Event Etiquette' },
-
-] as const
-
-
-
 type Props = {
-
   selectedCategory: string | null
-
   onCategoryChange: (cat: string | null) => void
-
   onBrowseTopics: () => void
-
+  topicFilters?: EducationTopicFilter[]
+  embedded?: boolean
 }
 
-
-
-export default function EducationLeftRail({ selectedCategory, onCategoryChange, onBrowseTopics }: Props) {
-
+export default function EducationLeftRail({
+  selectedCategory,
+  onCategoryChange,
+  onBrowseTopics,
+  topicFilters = [],
+  embedded = false,
+}: Props) {
+  const navigate = useNavigate()
   const { pathname, search } = useLocation()
-
   const [searchParams, setSearchParams] = useSearchParams()
-
   const current = resolveEducationNavMatch(pathname, search)
+  const onEducationHub = pathname === '/education'
 
   const onArticlesNav = () => {
-
     if (pathname === '/education' && searchParams.get('view') === 'articles') {
-
       onBrowseTopics()
-
-      return
-
     }
-
   }
 
+  const applyTopicFilter = (category: string | null) => {
+    if (!onEducationHub) {
+      onCategoryChange(category)
+      navigate(category ? `/education?view=articles&category=${encodeURIComponent(category)}` : '/education?view=articles')
+      return
+    }
+    onCategoryChange(category)
+    const params = new URLSearchParams(searchParams)
+    params.set('view', 'articles')
+    if (category) params.set('category', category)
+    else params.delete('category')
+    setSearchParams(params, { replace: false })
+    onBrowseTopics()
+  }
 
+  const shellClass = embedded ? 'space-y-4' : 'space-y-4 lg:sticky lg:top-24 lg:self-start'
+  const Shell = embedded ? 'div' : 'aside'
 
   return (
-
-    <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-label="Education navigation">
-
-      <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-
+    <Shell className={shellClass} aria-label="Education navigation">
+      <div className="edu-rail-panel">
         <nav aria-label="Education sections">
-
           <ul className="space-y-0.5 border-b border-dc-border pb-4">
-
             {NAV.map((item) => {
-
               const active = item.match === current
-
               const isArticles = item.match === 'articles'
-
               return (
-
                 <li key={item.href}>
-
                   <Link
-
                     to={item.href}
-
                     onClick={isArticles ? onArticlesNav : undefined}
-
-                    className={`flex min-h-10 items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-
-                      active ?
-
-                        'bg-dc-accent-muted text-dc-accent'
-
-                      : 'text-dc-text-muted hover:bg-dc-elevated-hover hover:text-dc-text'
-
-                    }`}
-
+                    className={`edu-rail-nav-link ${active ? 'edu-rail-nav-link--active' : ''}`}
                   >
-
                     <span>{item.label}</span>
-
                     {item.soon ?
-
                       <span className="shrink-0 rounded-md border border-dc-border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-dc-muted">
-
                         Soon
-
                       </span>
-
                     : null}
-
                   </Link>
-
                 </li>
-
               )
-
             })}
-
           </ul>
-
         </nav>
-
       </div>
 
-
-
-      <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
+      <div className="edu-rail-panel">
         <h3 className="mb-2 text-sm font-semibold text-dc-text">My Learning</h3>
         <p className="text-xs leading-relaxed text-dc-muted">
-          Account progress and resume-in-place are not wired yet. Browse{' '}
-          <Link to="/education?view=paths" className="font-medium text-dc-accent hover:underline">
-            learning paths
-          </Link>{' '}
-          or saved articles on{' '}
+          Preview progress on{' '}
+          <Link to="/education?view=progress" className="font-medium text-dc-accent hover:underline">
+            My progress
+          </Link>
+          . Bookmarks live on{' '}
           <Link to="/saved" className="font-medium text-dc-accent hover:underline">
             Saved
           </Link>
@@ -171,77 +108,34 @@ export default function EducationLeftRail({ selectedCategory, onCategoryChange, 
         </p>
       </div>
 
-
-
-      <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-
-        <h3 className="mb-3 text-sm font-semibold text-dc-text">Featured Topics</h3>
-
-        <ul className="space-y-2 text-sm">
-
-          {FEATURED_TOPICS.map((topic) => {
-
-            const pressed = selectedCategory === topic.filter
-
-            return (
-
-              <li key={topic.label}>
-
-                <button
-
-                  type="button"
-
-                  aria-pressed={pressed}
-
-                  onClick={() => {
-
-                    const next = pressed ? null : topic.filter
-
-                    onCategoryChange(next)
-
-                    if (pathname !== '/education' || searchParams.get('view') !== 'articles') {
-
-                      setSearchParams({ view: 'articles' }, { replace: false })
-
-                    }
-
-                    onBrowseTopics()
-
-                  }}
-
-                  className={`flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left transition-colors ${
-
-                    pressed ?
-
-                      'bg-dc-accent-muted text-dc-accent'
-
-                    : 'text-dc-text-muted hover:bg-dc-elevated-hover hover:text-dc-text'
-
-                  }`}
-
-                >
-
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span aria-hidden>{topic.icon}</span>
-                    <span>{topic.label}</span>
-                  </span>
-
-                </button>
-
-              </li>
-
-            )
-
-          })}
-
-        </ul>
-
+      <div className="edu-rail-panel">
+        <h3 className="mb-1 text-sm font-semibold text-dc-text">Browse by topic</h3>
+        <p className="mb-3 text-[11px] leading-snug text-dc-muted">From article tags in the hub catalogue.</p>
+        {topicFilters.length === 0 ?
+          <p className="text-xs text-dc-muted">Topics appear as educators publish tagged articles.</p>
+        : <ul className="space-y-1.5 text-sm" aria-label="Topic filters">
+            {topicFilters.map((topic) => {
+              const pressed = selectedCategory?.toLowerCase() === topic.category.toLowerCase()
+              return (
+                <li key={topic.category}>
+                  <button
+                    type="button"
+                    aria-pressed={pressed}
+                    onClick={() => applyTopicFilter(pressed ? null : topic.category)}
+                    className={`edu-rail-topic-btn ${pressed ? 'edu-rail-topic-btn--active' : ''}`}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span aria-hidden>{topic.icon}</span>
+                      <span>{topic.label}</span>
+                    </span>
+                    <span className="shrink-0 tabular-nums text-xs text-dc-muted">{topic.count}</span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        }
       </div>
-
-    </aside>
-
+    </Shell>
   )
-
 }
-
-

@@ -7,6 +7,7 @@ import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { db, schema } from '../db/index.js'
 import { isBlockedPair, loadBlockedUserIds } from '../lib/blocks.js'
 import { loadFollowerUserIds, loadFollowingUserIds } from '../lib/follows.js'
+import { emitActivity } from '../lib/feed-activities.js'
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
 }
@@ -136,10 +137,24 @@ export async function registerSocialGraphRoutes(app: FastifyInstance) {
     if (!(await targetAllowsFollow(target.id))) {
       return reply.status(403).send({ error: 'This member is not accepting new followers' })
     }
-    await db
+    const [inserted] = await db
       .insert(schema.userFollows)
       .values({ followerId: user.userId, followingId: target.id })
       .onConflictDoNothing()
+      .returning({ followerId: schema.userFollows.followerId })
+    if (inserted) {
+      emitActivity({
+        actorId: user.userId,
+        verb: 'followed',
+        objectType: 'user',
+        objectId: target.id,
+        metadata: {
+          targetUsername: target.username,
+          usernames: [target.username],
+          count: 1,
+        },
+      })
+    }
     return reply.send({ ok: true })
   })
 

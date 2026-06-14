@@ -1,5 +1,8 @@
 # VPS overlay for kink.social — self-hosted SMTP + MinIO (S3-compatible uploads).
 # Usage: docker compose -f docker-compose.prod.yml -f docker-compose.prod.vps.yml up -d --build
+#
+# MAIL PORTS: Ensure VPS firewall AND provider allow inbound 25/587/465/993.
+# Many cloud providers block port 25 by default — request unblock before go-live.
 services:
   postgres:
     ports:
@@ -49,10 +52,12 @@ services:
     hostname: mail
     domainname: ${DOMAIN:-kink.social}
     restart: unless-stopped
+    # Inbound SMTP, submission, SMTPS, IMAPS — open on VPS firewall + provider.
     ports:
       - '25:25'
       - '587:587'
       - '465:465'
+      - '993:993'
     volumes:
       - ./docker/mailserver/data:/var/mail
       - ./docker/mailserver/state:/var/mail-state
@@ -64,6 +69,7 @@ services:
       - ENABLE_CLAMAV=0
       - ENABLE_FAIL2BAN=1
       - ENABLE_POSTGREY=0
+      - ENABLE_IMAP=1
       - ONE_DIR=1
       - PERMIT_DOCKER=connected-networks
       - SSL_TYPE=
@@ -76,6 +82,22 @@ services:
       timeout: 10s
       retries: 5
       start_period: 120s
+
+  roundcube:
+    image: roundcube/roundcubemail:latest
+    restart: unless-stopped
+    depends_on:
+      mailserver:
+        condition: service_healthy
+    volumes:
+      - c2k_roundcube_prod:/var/roundcube
+    environment:
+      ROUNDCUBEMAIL_DEFAULT_HOST: mailserver
+      ROUNDCUBEMAIL_DEFAULT_PORT: 143
+      ROUNDCUBEMAIL_SMTP_SERVER: mailserver
+      ROUNDCUBEMAIL_SMTP_PORT: 587
+      ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE: 5M
+      ROUNDCUBEMAIL_PRODUCT_NAME: ${DOMAIN:-kink.social} Webmail
 
   api:
     environment:
@@ -107,7 +129,9 @@ services:
       - web
       - api
       - minio
+      - roundcube
 
 volumes:
   c2k_minio_prod:
   c2k_clamdata_prod:
+  c2k_roundcube_prod:

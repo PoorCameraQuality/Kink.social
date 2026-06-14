@@ -19,7 +19,9 @@ import EducationSeriesManagePage from './app/education/series/manage/page'
 import EducationSeriesManageEditPage from './app/education/series/manage/[id]/page'
 import MediaPage from './app/media/page'
 import MediaShowPage from './app/media/[slug]/page'
+import MediaItemDetailPage from './app/media/item/[mediaItemId]/page'
 import MediaSubmitPage from './app/media/submit/page'
+import CreatePage from './app/create/page'
 import EventsPage from './app/events/page'
 import EventDetailPage from './app/events/[id]/page'
 import GroupsPage from './app/groups/page'
@@ -111,6 +113,7 @@ import ModerationCaseDetailPage from './app/moderation/cases/[caseId]/page'
 import ModerationLegalPage from './app/moderation/legal/page'
 import ModerationDmcaPage from './app/moderation/dmca/page'
 import ModerationContactPage from './app/moderation/contact/page'
+import ModerationMailIntakePage from './app/moderation/mail-intake/page'
 import OwnerInvestigationsIndexPage from './app/admin/owner/investigations/page'
 import OwnerInvestigationUserPage from './app/admin/owner/investigations/users/[userId]/page'
 import OrganizerHubPage from './app/organizer/page'
@@ -192,6 +195,7 @@ export const router = createBrowserRouter([
       { path: 'presenters/onboarding', element: <PresenterOnboardingPage /> },
       { path: 'presenters/:username', element: <PresenterProfilePage /> },
       { path: 'media', element: <MediaPage /> },
+      { path: 'media/item/:mediaItemId', element: <MediaItemDetailPage /> },
       { path: 'media/submit', element: <MediaSubmitPage /> },
       { path: 'media/:slug', element: <MediaShowPage /> },
       { path: 'education', element: <EducationPage /> },
@@ -237,6 +241,7 @@ export const router = createBrowserRouter([
       { path: 'saved', element: <SavedPage /> },
       { path: 'activity', element: <ActivityHubPage /> },
       { path: 'my-posts', element: <MyPostsPage /> },
+      { path: 'create', element: <CreatePage /> },
       { path: 'onboarding', element: <OnboardingPage /> },
       {
         path: 'settings',
@@ -281,6 +286,7 @@ export const router = createBrowserRouter([
           { path: 'legal', element: <ModerationLegalPage /> },
           { path: 'dmca', element: <ModerationDmcaPage /> },
           { path: 'contact', element: <ModerationContactPage /> },
+          { path: 'mail-intake', element: <ModerationMailIntakePage /> },
         ],
       },
       { path: 'organizer', element: <OrganizerHubPage /> },

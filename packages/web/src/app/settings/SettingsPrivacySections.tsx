@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react'
-import type { UserSettingsBundle } from '@c2k/shared'
-import type { ProfileFieldVisibilityLevel } from '@c2k/shared'
-import { USER_AUTO_DELETE_SELECT_OPTIONS, parseUserAutoDeleteSelectValue, DM_RETENTION_SELECT_OPTIONS, parseDmRetentionSelectValue } from '@c2k/shared'
+import type { UserSettingsBundle, ProfileFieldVisibilityLevel } from '@c2k/shared'
+import {
+  profileFieldVisibilityControlLabel,
+  USER_AUTO_DELETE_SELECT_OPTIONS,
+  parseUserAutoDeleteSelectValue,
+  DM_RETENTION_SELECT_OPTIONS,
+  parseDmRetentionSelectValue,
+} from '@c2k/shared'
 import { Link } from 'react-router-dom'
 import { Panel } from '@/components/dancecard/ui/Panel'
 import Button from '@/components/ui/Button'
@@ -574,10 +579,27 @@ export function SettingsProfileFieldsPanel({
             . Use the controls below for visibility only.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
-            <FieldVisibilitySelect label="Gender visibility" value={fvGender} onChange={onFvGenderChange} />
-            <FieldVisibilitySelect label="Age visibility" value={fvAge} onChange={onFvAgeChange} />
-            <FieldVisibilitySelect label="Sexuality visibility" value={fvSexuality} onChange={onFvSexualityChange} />
-            <FieldVisibilitySelect label="Pronouns visibility" value={fvPronouns} onChange={onFvPronounsChange} />
+            <FieldVisibilitySelect
+              label={profileFieldVisibilityControlLabel('gender')}
+              value={fvGender}
+              onChange={onFvGenderChange}
+            />
+            <FieldVisibilitySelect
+              label={profileFieldVisibilityControlLabel('age')}
+              value={fvAge}
+              onChange={onFvAgeChange}
+            />
+            <FieldVisibilitySelect
+              label={profileFieldVisibilityControlLabel('sexuality')}
+              value={fvSexuality}
+              onChange={onFvSexualityChange}
+              hint="Sexual and romantic orientation tags from Edit profile."
+            />
+            <FieldVisibilitySelect
+              label={profileFieldVisibilityControlLabel('pronouns')}
+              value={fvPronouns}
+              onChange={onFvPronounsChange}
+            />
           </div>
           {profPrivacyError ? <StatusBanner tone="error">{profPrivacyError}</StatusBanner> : null}
           {profPrivacySaved ? <StatusBanner tone="success">Profile privacy saved.</StatusBanner> : null}

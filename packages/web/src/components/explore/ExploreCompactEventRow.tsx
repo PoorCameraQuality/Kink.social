@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import type { MockEvent } from '@/data/mock-data'
 import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import { eventDateBlock } from '@/lib/explore-hub'
+import { resolveEventHeroUrl } from '@/lib/events-page-utils'
 
 type Props = {
   event: MockEvent
@@ -12,7 +13,7 @@ type Props = {
 
 export default function ExploreCompactEventRow({ event, hideThumb = false, className = '' }: Props) {
   const { month, day } = eventDateBlock(event.date)
-  const thumb = event.imageUrl ?? event.bannerUrl ?? null
+  const thumb = resolveEventHeroUrl(event)
   const goingLabel =
     event.capacityLimit && event.capacityLimit > 0 ?
       `${event.rsvpCount}/${event.capacityLimit} going`
@@ -22,9 +23,9 @@ export default function ExploreCompactEventRow({ event, hideThumb = false, class
     <li className={className}>
       <Link
         to={`/events/${encodeURIComponent(String(event.id))}`}
-        className="flex gap-4 rounded-xl border border-dc-border border-l-[3px] border-l-dc-accent bg-dc-elevated-solid p-3 transition-colors hover:border-dc-accent-border/40 hover:bg-dc-elevated-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
+        className="xpl-row-card gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
       >
-        <div className="flex h-14 w-12 shrink-0 flex-col items-center justify-center rounded-lg border border-dc-border bg-dc-surface-muted text-center shadow-sm">
+        <div className="xpl-date-badge">
           <span className="text-[10px] font-semibold uppercase tracking-wide text-dc-accent">{month}</span>
           <span className="text-lg font-bold leading-none text-dc-text">{day}</span>
         </div>

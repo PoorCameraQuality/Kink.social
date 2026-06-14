@@ -84,6 +84,23 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
+/** Event list / row thumbnails — fit logos without cropping. */
+.c2k-event-list-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--dc-surface-muted);
+}
+
+.c2k-event-list-thumb img {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.5rem;
+}
+
 .c2k-empty-glow {
   position: relative;
   overflow: hidden;

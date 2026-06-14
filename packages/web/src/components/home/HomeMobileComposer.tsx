@@ -23,7 +23,7 @@ export default function HomeMobileComposer({
   return (
     <section
       id="home-feed-composer"
-      className={`scroll-mt-24 rounded-2xl border border-white/[0.08] bg-dc-elevated-solid/95 shadow-[var(--dc-shadow-soft)] ${compact ? 'mb-2 p-2.5' : 'mb-3 p-3'}`}
+      className={`scroll-mt-24 dc-rail-card rounded-2xl border border-dc-border/80 bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)] ${compact ? 'mb-2 p-2.5' : 'mb-2.5 p-3'}`}
       aria-label="Share with the community"
     >
       <h2 className={`font-semibold text-dc-text ${compact ? 'sr-only' : 'mb-2.5 text-sm'}`}>Share with the community</h2>

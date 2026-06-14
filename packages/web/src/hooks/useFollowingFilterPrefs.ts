@@ -14,6 +14,13 @@ export type FollowingFeedCounts = {
   groups?: number
 }
 
+/** Filters that show a coming-soon panel instead of fetching feed rows. */
+export const FOLLOWING_FILTER_COMING_SOON = new Set<FollowingFilterId>(['video'])
+
+export function isFollowingFilterComingSoon(filter: FollowingFilterId): boolean {
+  return FOLLOWING_FILTER_COMING_SOON.has(filter)
+}
+
 /** SG-121 partial: content-type tabs on Following feed. */
 export const FOLLOWING_FILTERS: { id: FollowingFilterId; label: string }[] = [
   { id: 'all', label: 'All activity' },

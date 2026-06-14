@@ -16,6 +16,7 @@ const navPrimary = [
   { href: '/events', label: 'Events' },
   { href: '/groups', label: 'Groups' },
   { href: '/orgs', label: 'Organizations' },
+  { href: '/places', label: 'Places' },
   { href: '/vendors', label: 'Vendors' },
   { href: '/presenters', label: 'Presenters' },
   { href: '/messaging', label: 'Messaging' },
@@ -23,7 +24,8 @@ const navPrimary = [
 
 /** Source list for More - filtered against `navPrimary` at export (G3). */
 const navMoreSource = [
-  { href: '/dungeons', label: 'Dungeons' },
+  { href: '/places', label: 'Kinky Map' },
+  { href: '/places?category=dungeon_club', label: 'Dungeons & clubs' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ] as const
@@ -34,10 +36,11 @@ const navMoreSource = [
  */
 const navSecondarySource = [
   { href: '/home', label: 'My Home' },
+  { href: '/create', label: 'Share upload' },
   { href: '/messaging', label: 'Mailbox', badge: 'messaging' },
   { href: '/notifications', label: 'Notifications', badge: 'notifications' },
   { href: '/connections', label: 'Connections' },
-  { href: '/events?mine=registrations', label: 'My Registrations', badge: 'events' },
+  { href: '/events?mine=registrations', label: 'My RSVPs & registrations', badge: 'events' },
   { href: '/people', label: "Who's Online" },
 ] as const satisfies readonly NavSecondaryLink[]
 
@@ -110,7 +113,8 @@ export const siteConfig = {
       { href: '/people', label: 'People' },
       { href: '/events', label: 'Events' },
       { href: '/orgs', label: 'Organizations' },
-      { href: '/dungeons', label: 'Dungeons' },
+      { href: '/places', label: 'Kinky Map' },
+      { href: '/places?category=dungeon_club', label: 'Dungeons & clubs' },
       { href: '/education', label: 'Education' },
       { href: '/media', label: 'Media' },
       { href: '/vendors', label: 'Vendors' },

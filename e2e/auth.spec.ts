@@ -7,15 +7,14 @@ test.describe('auth', () => {
     attachConsoleGuard(page)
     await page.goto('/home')
     await expect(page).toHaveURL(/\/?(\?|&)login=1/, { timeout: 15_000 })
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/Find events.*Learn safely/i)
+    await expect(page.getByRole('heading', { level: 2, name: 'Welcome back' })).toBeVisible()
   })
 
-  test('public visitor can load landing and events', async ({ page }) => {
+  test('login-gated routes redirect anonymous visitors to login', async ({ page }) => {
     attachConsoleGuard(page)
-    await page.goto('/')
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/Find events.*Learn safely/i)
     await page.goto('/events')
-    await expect(page.getByRole('heading', { name: 'Events', level: 1 })).toBeVisible({ timeout: 15_000 })
+    await expect(page).toHaveURL(/\/?(\?|&)login=1/, { timeout: 15_000 })
+    await expect(page.getByRole('heading', { level: 2, name: 'Welcome back' })).toBeVisible()
   })
 
   test('login works and authenticated nav appears', async ({ page }) => {

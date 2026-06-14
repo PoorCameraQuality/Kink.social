@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { connectionsListVisibilitySchema } from './connections-list-visibility.js'
+import { feedActivityPrivacySchema, defaultFeedActivityPrivacy } from './feed-activity-privacy.js'
 import { ADULT_CONTENT_PREFERENCES, adultContentPreferenceSchema } from './media-types.js'
+import { defaultMediaSettings, mediaSettingsSchema } from './media-social.js'
 import { userAutoDeleteDaysSchema, dmRetentionDaysSchema } from './retention-policy.js'
 
 /** Privacy JSON (messaging / follow rules; profile card visibility stays on profiles.visibility). */
@@ -38,12 +40,16 @@ export const privacySettingsSchema = z.object({
   activityAutoDeleteDays: userAutoDeleteDaysSchema,
   /** DM conversation retention: 180 / 365 / 730 days, or null = keep until you delete. */
   dmRetentionDays: dmRetentionDaysSchema,
+  /** What actions appear in other people's activity feeds. */
+  feedActivityPrivacy: feedActivityPrivacySchema,
+  /** Uploaded photos/videos, tagging, albums, and media activity defaults. */
+  mediaSettings: mediaSettingsSchema,
 })
 
 export type PrivacySettings = z.infer<typeof privacySettingsSchema>
 
 export const defaultPrivacySettings: PrivacySettings = {
-  schemaVersion: 7,
+  schemaVersion: 9,
   whoCanMessage: 'connections_only',
   allowFollow: true,
   appearInRegionalPeopleSuggestions: true,
@@ -62,6 +68,8 @@ export const defaultPrivacySettings: PrivacySettings = {
   hubChatAutoDeleteDays: null,
   activityAutoDeleteDays: null,
   dmRetentionDays: 365,
+  feedActivityPrivacy: defaultFeedActivityPrivacy,
+  mediaSettings: defaultMediaSettings,
 }
 
 /** Push + email pair for notification matrix rows. */
@@ -263,8 +271,8 @@ export const feedSettingsSchema = z.object({
   emphasizedReactionsFrom: z.enum(['everyone', 'connections', 'friends']),
   /** ISO timestamp when member finished first-time onboarding. */
   onboardingCompletedAt: z.string().nullable().optional(),
-  /** Current onboarding wizard step (1-6). */
-  onboardingStep: z.number().int().min(1).max(6).optional(),
+  /** Current onboarding wizard step (1-7). */
+  onboardingStep: z.number().int().min(1).max(7).optional(),
   /** ISO timestamp when safety expectations were acknowledged. */
   onboardingSafetyAckAt: z.string().nullable().optional(),
   /** Selected onboarding intent tags (friends, events, etc.). */
@@ -315,6 +323,20 @@ export function normalizePrivacySettings(raw: unknown): PrivacySettings {
   if ((merged.schemaVersion ?? 0) < 7) {
     merged.schemaVersion = 7
     merged.connectionsListVisibility = merged.connectionsListVisibility ?? 'hidden'
+  }
+  if ((merged.schemaVersion ?? 0) < 8) {
+    merged.schemaVersion = 8
+    merged.feedActivityPrivacy = {
+      ...defaultFeedActivityPrivacy,
+      ...(isRecord(merged.feedActivityPrivacy) ? merged.feedActivityPrivacy : {}),
+    }
+  }
+  if ((merged.schemaVersion ?? 0) < 9) {
+    merged.schemaVersion = 9
+    merged.mediaSettings = {
+      ...defaultMediaSettings,
+      ...(isRecord(merged.mediaSettings) ? merged.mediaSettings : {}),
+    }
   }
   return privacySettingsSchema.parse(merged)
 }

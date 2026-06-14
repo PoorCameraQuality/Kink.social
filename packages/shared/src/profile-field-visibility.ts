@@ -7,6 +7,19 @@ export type ProfileFieldVisibilityLevel = z.infer<typeof profileFieldVisibilityL
 export const PROFILE_FIELD_VISIBILITY_KEYS = ['gender', 'age', 'sexuality', 'pronouns', 'location'] as const
 export type ProfileFieldVisibilityKey = (typeof PROFILE_FIELD_VISIBILITY_KEYS)[number]
 
+/** User-facing labels for profile field visibility controls (`sexuality` gates orientation tags). */
+export const PROFILE_FIELD_VISIBILITY_LABELS: Record<ProfileFieldVisibilityKey, string> = {
+  gender: 'Gender',
+  age: 'Age',
+  sexuality: 'Orientation',
+  pronouns: 'Pronouns',
+  location: 'Location',
+}
+
+export function profileFieldVisibilityControlLabel(key: ProfileFieldVisibilityKey): string {
+  return `${PROFILE_FIELD_VISIBILITY_LABELS[key]} visibility`
+}
+
 export const profileFieldVisibilityMapSchema = z
   .object({
     gender: profileFieldVisibilityLevelSchema.optional(),

@@ -4,7 +4,7 @@ import RailCard from '@/components/ui/RailCard'
 import { railAsideClass } from '@/lib/card-surface'
 import { EVENT_CATEGORY_VALUES } from '@c2k/shared'
 import type { MockEvent } from '@/data/types'
-import { countEventsByCategory } from '@/lib/events-page-utils'
+import { countEventsByCategory, resolveEventHeroUrl } from '@/lib/events-page-utils'
 
 const LOCATION_COUNTS = [
   { city: 'Philadelphia, PA', count: 46 },
@@ -36,7 +36,7 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
         <p className="mb-2 text-xs text-dc-text-muted">Compare these before you RSVP.</p>
         <ul className="space-y-3">
           {picks.map((ev) => {
-            const img = ev.imageUrl ?? ev.bannerUrl ?? null
+            const img = resolveEventHeroUrl(ev)
             return (
               <li key={String(ev.id)}>
                 <Link to={`/events/${ev.id}`} className="flex gap-2 rounded-lg p-1 hover:bg-dc-elevated-hover">

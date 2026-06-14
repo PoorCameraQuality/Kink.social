@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
 import TagLink from '@/components/TagLink'
+import AlphaTestBadge from '@/components/alpha/AlphaTestBadge'
+import type { AlphaContentLabel } from '@c2k/shared'
 import EventSaveButton from '@/components/events/EventSaveButton'
 import Card from '@/components/ui/Card'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
 import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
-import { filterPublicEventTags, formatEventLocationForDisplay } from '@/lib/events-page-utils'
+import { filterPublicEventTags, formatEventLocationForDisplay, resolveEventHeroUrl } from '@/lib/events-page-utils'
 
 export type EventCardProps = {
   event: {
@@ -21,6 +23,7 @@ export type EventCardProps = {
     tags?: string[]
     eventFormat?: 'in-person' | 'virtual'
     isFeatured?: boolean
+    alphaLabel?: AlphaContentLabel
   }
 }
 
@@ -34,14 +37,13 @@ export default function EventCard({ event }: EventCardProps) {
     capacityLimit,
     mutualGoingCount = 0,
     connectionRsvpPreview = [],
-    imageUrl,
-    bannerUrl,
     tags,
     eventFormat,
     isFeatured,
+    alphaLabel,
   } = event
   const isVirtual = eventFormat === 'virtual'
-  const heroSrc = imageUrl ?? bannerUrl ?? null
+  const heroSrc = resolveEventHeroUrl(event)
   const fillPct = capacityLimit && capacityLimit > 0 ? Math.min(100, Math.round((rsvpCount / capacityLimit) * 100)) : Math.min(100, Math.round((rsvpCount / 100) * 100))
   const attendanceLabel = capacityLimit && capacityLimit > 0 ? `${rsvpCount}/${capacityLimit} going` : `${rsvpCount} going`
   const previewAvatars = connectionRsvpPreview.slice(0, 3)
@@ -73,6 +75,11 @@ export default function EventCard({ event }: EventCardProps) {
         <span className="c2k-event-date-badge absolute left-3 top-3 z-10 max-w-[calc(100%-3.5rem)] pointer-events-none text-[11px] sm:text-xs">
           {date}
         </span>
+        {alphaLabel && (
+          <span className="absolute right-3 top-3 z-10 pointer-events-auto">
+            <AlphaTestBadge label={alphaLabel} />
+          </span>
+        )}
         {isFeatured && (
           <span className="absolute bottom-3 left-3 z-10 px-2 py-1 bg-emerald-600/90 rounded-lg text-xs font-semibold text-white pointer-events-none">
             Featured

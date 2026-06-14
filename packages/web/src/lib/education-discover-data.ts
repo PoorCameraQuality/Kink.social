@@ -6,6 +6,8 @@ import { mockPeople } from '@/data/mock-data'
 import { getMockEducationCatalog, mockEducationExtras } from '@/data/mock-home-surface'
 import type { MockArticle } from '@/data/types'
 import type { ApiEducationArticle } from '@/hooks/useApiEducationArticles'
+import type { ApiEducationSeries } from '@/hooks/useApiEducationSeries'
+import type { ApiMediaShowListItem } from '@/hooks/useApiMediaShows'
 import type { ApiPresenterListItem } from '@/hooks/useApiPresenters'
 
 export type EducationHubStats = {
@@ -49,6 +51,8 @@ export type EducationStripVideo = {
   category: string
   durationLabel: string
   thumbnailUrl: string | null
+  /** Defaults to `/education/:slug` when omitted. */
+  href?: string
 }
 
 export type EducationRecentTextItem = {
@@ -67,6 +71,70 @@ export const EDUCATION_CATEGORY_FILTERS = [
   'Gear',
   'Event Etiquette',
 ] as const
+
+export type EducationTopicFilter = {
+  /** Exact category string sent to the articles API. */
+  category: string
+  label: string
+  icon: string
+  count: number
+}
+
+const EDUCATION_TOPIC_ICONS: Record<string, string> = {
+  safety: '🛡️',
+  beginner: '🤝',
+  consent: '🤝',
+  psychology: '🧠',
+  gear: '🪢',
+  rope: '🪢',
+  advanced: '👑',
+  dominance: '👑',
+  'event etiquette': '⚡',
+  dynamics: '⚡',
+  etiquette: '⚡',
+  negotiation: '📝',
+  aftercare: '💜',
+  fundamentals: '📘',
+}
+
+function iconForEducationTopic(category: string): string {
+  const key = category.trim().toLowerCase()
+  if (EDUCATION_TOPIC_ICONS[key]) return EDUCATION_TOPIC_ICONS[key]
+  for (const [needle, icon] of Object.entries(EDUCATION_TOPIC_ICONS)) {
+    if (key.includes(needle)) return icon
+  }
+  return '📚'
+}
+
+type ArticleWithCategories = { categories?: string[] | null }
+
+/** Topic directory derived from published article category tags (grows with catalogue). */
+export function educationTopicFiltersFromArticles(articles: ArticleWithCategories[]): EducationTopicFilter[] {
+  const byKey = new Map<string, { category: string; count: number }>()
+
+  for (const article of articles) {
+    for (const raw of article.categories ?? []) {
+      const trimmed = raw.trim()
+      if (!trimmed) continue
+      const key = trimmed.toLowerCase()
+      const existing = byKey.get(key)
+      if (existing) {
+        existing.count += 1
+      } else {
+        byKey.set(key, { category: trimmed, count: 1 })
+      }
+    }
+  }
+
+  return Array.from(byKey.values())
+    .map(({ category, count }) => ({
+      category,
+      label: category,
+      icon: iconForEducationTopic(category),
+      count,
+    }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+}
 
 export const MOCK_LEARNING_PATHS: EducationLearningPath[] = [
   {
@@ -106,6 +174,19 @@ export const MOCK_LEARNING_PATHS: EducationLearningPath[] = [
   },
 ]
 
+export function hubSeriesToLearningPaths(series: ApiEducationSeries[]): EducationLearningPath[] {
+  return series.map((row) => {
+    const modules = row.modules ?? []
+    return {
+      id: row.id,
+      title: row.title,
+      href: `/education/series/${encodeURIComponent(row.slug)}`,
+      modules: modules.map((mod) => ({ label: mod.label, completed: false })),
+      progressPercent: 0,
+    }
+  })
+}
+
 const EDUCATOR_USERNAMES = ['RopeDreamer', 'ConsentCoach', 'TherapyKink', 'PresenterNova'] as const
 
 export function getMockFeaturedEducators(): EducationFeaturedEducator[] {
@@ -135,6 +216,87 @@ export function presenterToFeaturedEducator(p: ApiPresenterListItem): EducationF
     followerCount: Math.max(p.reviewCount * 12, p.reviewCount),
     endorsementCount: Math.round(p.ratingAvg * p.reviewCount) || 0,
   }
+}
+
+/** Fallback featured row when presenter directory is sparse but hub articles exist. */
+export function educatorsFromArticles(articles: ApiEducationArticle[]): EducationFeaturedEducator[] {
+  const byAuthor = new Map<
+    string,
+    { userId: string; username: string; displayName: string | null; count: number }
+  >()
+  for (const article of articles) {
+    const key = article.authorUsername
+    if (!key) continue
+    const existing = byAuthor.get(key)
+    if (existing) existing.count += 1
+    else {
+      byAuthor.set(key, {
+        userId: article.authorUserId,
+        username: key,
+        displayName: article.authorDisplayName,
+        count: 1,
+      })
+    }
+  }
+  return [...byAuthor.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 4)
+    .map((row, index) => ({
+      userId: row.userId,
+      username: row.username,
+      displayName: row.displayName ?? row.username,
+      handle: `@${row.username}`,
+      avatarUrl: null,
+      articleCount: row.count,
+      followerCount: 24 + index * 16,
+      endorsementCount: row.count * 4,
+    }))
+}
+
+export function topicCountsFromArticles(articles: ApiEducationArticle[]): Record<string, number> {
+  const counts: Record<string, number> = {}
+  for (const topic of educationTopicFiltersFromArticles(articles)) {
+    counts[topic.category] = topic.count
+  }
+  return counts
+}
+
+export function apiArticleToVideoStrip(article: ApiEducationArticle): EducationStripVideo | null {
+  const hasEmbed = /youtube\.com\/embed|player\.vimeo\.com\/video/i.test(article.bodyHtml ?? '')
+  if (!hasEmbed && !article.heroImageUrl) return null
+  return {
+    slug: article.slug,
+    title: article.title,
+    category: article.categories[0] ?? 'Workshop',
+    durationLabel: article.readingMinutes ? `${article.readingMinutes} min` : 'Workshop',
+    thumbnailUrl: article.heroImageUrl,
+    href: `/education/${encodeURIComponent(article.slug)}`,
+  }
+}
+
+export function mediaShowToEducationVideo(show: ApiMediaShowListItem): EducationStripVideo {
+  const formatLabel =
+    show.mediaFormat === 'podcast' ? 'Podcast'
+    : show.mediaFormat === 'hybrid' ? 'Hybrid'
+    : 'Channel'
+  return {
+    slug: show.slug,
+    title: show.title,
+    category: show.tags[0] ?? formatLabel,
+    durationLabel: formatLabel,
+    thumbnailUrl: show.coverImageUrl,
+    href: `/media/${encodeURIComponent(show.slug)}`,
+  }
+}
+
+export function pickVideoStripsFromArticles(articles: ApiEducationArticle[], limit = 8): EducationStripVideo[] {
+  const out: EducationStripVideo[] = []
+  for (const article of articles) {
+    const strip = apiArticleToVideoStrip(article)
+    if (strip) out.push(strip)
+    if (out.length >= limit) break
+  }
+  return out
 }
 
 function mockReadLabel(a: MockArticle): string {
@@ -209,12 +371,14 @@ export function computeEducationHubStats(
   educatorCount?: number,
 ): EducationHubStats {
   const catalog = getMockEducationCatalog()
-  const videos = videoCount ?? catalog.filter((a) => a.contentType === 'video').length + mockEducationExtras.length
+  const videos =
+    videoCount ??
+    catalog.filter((a) => a.contentType === 'video').length + mockEducationExtras.length
   const educators = educatorCount ?? getMockFeaturedEducators().length
   return {
     articles: articleCount > 0 ? articleCount : catalog.filter((a) => a.contentType !== 'video').length,
-    videos,
-    educators,
+    videos: videoCount != null && videoCount > 0 ? videoCount : videos,
+    educators: educatorCount != null && educatorCount > 0 ? educatorCount : educators,
     endorsements: 0,
   }
 }

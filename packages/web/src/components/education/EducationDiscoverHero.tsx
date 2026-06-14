@@ -11,11 +11,8 @@ type Props = {
 
 export default function EducationDiscoverHero({ stats, onBrowseTopics, apiBacked = false }: Props) {
   return (
-    <section
-      className="relative mb-6 overflow-hidden rounded-2xl border border-dc-border shadow-[var(--dc-shadow-soft)] sm:mb-10"
-      aria-label="Education hub hero"
-    >
-      <div className="absolute inset-0 bg-dc-surface-muted" aria-hidden>
+    <section className="edu-hero" aria-label="Education hub hero">
+      <div className="edu-hero__backdrop bg-dc-surface-muted" aria-hidden>
         <div className="absolute inset-0 bg-gradient-to-br from-dc-accent/15 via-dc-surface-muted to-violet-950/40" />
         <div className="absolute inset-0 bg-dc-surface/90" />
         <div className="absolute inset-0 bg-gradient-to-r from-dc-surface via-dc-surface/92 to-dc-surface/78" />
@@ -23,7 +20,7 @@ export default function EducationDiscoverHero({ stats, onBrowseTopics, apiBacked
         <div className="absolute inset-0 bg-gradient-to-br from-dc-accent/10 via-transparent to-transparent" />
       </div>
 
-      <div className="relative px-4 py-5 sm:px-8 sm:py-10">
+      <div className="edu-hero__content">
         <p className="text-xs font-semibold uppercase tracking-widest text-dc-accent">Education Hub</p>
         <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-dc-text sm:text-4xl">Learn. Practice. Grow.</h1>
         <p className="mt-1.5 max-w-xl text-sm text-dc-text-muted">
@@ -47,7 +44,10 @@ export default function EducationDiscoverHero({ stats, onBrowseTopics, apiBacked
         : null}
         {apiBacked ?
           <p className="mt-2 max-w-lg text-[11px] leading-snug text-dc-text-muted">
-            Video counts and educator stats are not wired yet. Article catalogue below is live.
+            {stats.videos > 0 ?
+              `${stats.videos.toLocaleString()} video workshops and channels · ${stats.educators} educators on hub.`
+            : `${stats.educators} educators publishing on the hub.`}{' '}
+            Article catalogue below is live.
           </p>
         : null}
 
