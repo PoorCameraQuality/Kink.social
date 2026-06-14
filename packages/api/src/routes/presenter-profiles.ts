@@ -11,7 +11,12 @@ import { loadPresenterScheduleCredits } from '../lib/presenter-schedule-credits.
 import { loadPresenterTeachingCredits } from '../lib/presenter-teaching-credits.js'
 import { userAttendedEvent, userStaffCheckedInForEvent } from '../lib/attendance-gate.js'
 import { accountAgeDays } from '../lib/reputation-anti-gaming.js'
-import { formatPronounDisplay, visibleProfileIdentityFields } from '@c2k/shared'
+import {
+  formatPronounDisplay,
+  REVIEW_MIN_ACCOUNT_AGE_DAYS,
+  validatePresenterExternalUrl,
+  visibleProfileIdentityFields,
+} from '@c2k/shared'
 import {
   canSeePresenterOrganizerFields,
   offeringForViewer,
