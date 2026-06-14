@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { siteConfig } from '@/config/site.config'
 import { isAppHomeMainNavActive } from '@/lib/app-home-nav'
@@ -54,8 +55,11 @@ export default function Header() {
 
   const createRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
+  const notifMobileRef = useRef<HTMLDivElement>(null)
   const msgRef = useRef<HTMLDivElement>(null)
   const profileRef = useRef<HTMLDivElement>(null)
+  const profileMobileRef = useRef<HTMLDivElement>(null)
+  const [mobileOverlaysMounted, setMobileOverlaysMounted] = useState(false)
 
   const {
     items: notifItems,
@@ -130,16 +134,43 @@ export default function Header() {
   const emailLabel = viewerEmail ?? (isFallback && !isAuthenticated ? 'Demo viewer' : '')
 
   useEffect(() => {
+    setMobileOverlaysMounted(true)
+  }, [])
+
+  useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       const t = e.target as Node
       if (createRef.current && !createRef.current.contains(t)) setCreateOpen(false)
-      if (notifRef.current && !notifRef.current.contains(t)) setNotifOpen(false)
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(t) &&
+        (!notifMobileRef.current || !notifMobileRef.current.contains(t))
+      ) {
+        setNotifOpen(false)
+      }
       if (msgRef.current && !msgRef.current.contains(t)) setMsgOpen(false)
-      if (profileRef.current && !profileRef.current.contains(t)) setIsProfileOpen(false)
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(t) &&
+        (!profileMobileRef.current || !profileMobileRef.current.contains(t))
+      ) {
+        setIsProfileOpen(false)
+      }
     }
     document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
+
+  useEffect(() => {
+    if (!notifOpen && !isProfileOpen) return
+    const prev = document.body.style.overflow
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [notifOpen, isProfileOpen])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -178,6 +209,7 @@ export default function Header() {
       const next = !open
       if (next) {
         setMsgOpen(false)
+        setIsProfileOpen(false)
         void reloadNotifs()
       }
       return next
@@ -196,6 +228,107 @@ export default function Header() {
   }, [reloadMsgs])
 
   const marketingHeader = !showAppNav
+
+  const profileMenuLinkClass =
+    'flex min-h-11 items-center rounded-lg px-3 py-2 text-sm text-dc-text hover:bg-dc-elevated-muted md:min-h-0 md:text-dc-text-muted md:hover:text-dc-text'
+
+  const profileMenuContent = (
+    <>
+      <div className="px-4 py-3 border-b border-dc-border">
+        <p className="font-medium text-dc-text">{sceneLabel}</p>
+        {emailLabel ? <p className="mt-0.5 break-all text-xs text-dc-text-muted">{emailLabel}</p> : null}
+        {isFallback && !isAuthenticated && (
+          <p className="text-xs text-dc-muted mt-1">Demo viewer (not signed in)</p>
+        )}
+      </div>
+      <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
+        <Link
+          to={viewerUsername ? `/profile/${encodeURIComponent(viewerUsername)}` : '/profile'}
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          View profile
+        </Link>
+        <Link
+          to="/profile/edit"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Edit profile
+        </Link>
+        <Link
+          to="/my-posts"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          My Posts
+        </Link>
+        <Link
+          to="/activity"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Activity
+        </Link>
+        <Link
+          to="/saved"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Saved
+        </Link>
+      </div>
+
+      {showModerationNav ?
+        <div className="px-2 py-2 border-b border-dc-border">
+          <PlatformStaffNavLinks variant="dropdown" onNavigate={() => setIsProfileOpen(false)} />
+        </div>
+      : null}
+
+      <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
+        <p className="px-3 text-[10px] font-semibold uppercase tracking-wide text-dc-muted mb-1">Manage</p>
+        <AccountManageNavLinks
+          variant="dropdown"
+          ecosystem={ecosystem}
+          loading={ecosystemLoading}
+          onNavigate={() => setIsProfileOpen(false)}
+        />
+      </div>
+
+      <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
+        <Link
+          to="/settings/account"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Account settings
+        </Link>
+        <Link
+          to="/settings/privacy"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Privacy settings
+        </Link>
+      </div>
+
+      <div className="px-2 py-2 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setIsProfileOpen(false)
+            void (async () => {
+              await logout()
+              navigate(buildLoginHref(), { replace: true })
+            })()
+          }}
+          className="inline-flex min-h-11 items-center px-3 py-2 text-sm text-dc-text-muted hover:text-dc-text md:min-h-0"
+        >
+          Log out
+        </button>
+      </div>
+    </>
+  )
 
   const logoLink = (
     <Link
@@ -234,9 +367,6 @@ export default function Header() {
       />
     </div>
   )
-
-  const profileMenuLinkClass =
-    'flex min-h-11 items-center rounded-lg px-3 py-2 text-sm text-dc-text hover:bg-dc-elevated-muted md:min-h-0 md:text-dc-text-muted md:hover:text-dc-text'
 
   const marketingNav = marketingHeader ?
     <nav className="hidden items-center gap-1 lg:flex" aria-label="Marketing">
@@ -380,16 +510,40 @@ export default function Header() {
                   </button>
                   {notifOpen && (
                     <>
-                      <div className="fixed inset-0 z-[90] bg-black/40 md:hidden" aria-hidden onClick={() => setNotifOpen(false)} />
                       <NotificationDropdownPanel
                         items={notifItems}
                         unreadCount={notifUnread}
                         onMarkRead={markNotifRead}
                         onMarkAllRead={markAllNotifsRead}
                         onClose={() => setNotifOpen(false)}
-                        mobileSheet
-                        className="fixed inset-x-0 bottom-0 z-[110] max-h-[min(75dvh,480px)] md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:top-full md:mt-2 md:w-[22rem] md:max-h-none md:pb-0"
+                        className="absolute right-0 top-full z-[110] mt-2 hidden w-[22rem] md:block"
                       />
+                      {mobileOverlaysMounted ?
+                        createPortal(
+                          <div
+                            ref={notifMobileRef}
+                            className="fixed inset-0 z-[90] flex flex-col justify-end md:hidden"
+                            role="presentation"
+                          >
+                            <button
+                              type="button"
+                              className="absolute inset-0 bg-black/40"
+                              aria-label="Close notifications"
+                              onClick={() => setNotifOpen(false)}
+                            />
+                            <NotificationDropdownPanel
+                              items={notifItems}
+                              unreadCount={notifUnread}
+                              onMarkRead={markNotifRead}
+                              onMarkAllRead={markAllNotifsRead}
+                              onClose={() => setNotifOpen(false)}
+                              mobileSheet
+                              className="relative z-[1] max-h-[min(75dvh,480px)] w-full"
+                            />
+                          </div>,
+                          document.body,
+                        )
+                      : null}
                     </>
                   )}
                 </div>
@@ -451,7 +605,10 @@ export default function Header() {
                 <div className="relative" ref={profileRef}>
                   <button
                     type="button"
-                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    onClick={() => {
+                      setNotifOpen(false)
+                      setIsProfileOpen((open) => !open)
+                    }}
                     className="flex min-h-11 items-center gap-0.5 rounded-full bg-dc-surface-muted p-1 transition-colors hover:ring-2 hover:ring-dc-accent/50"
                     aria-expanded={isProfileOpen}
                     aria-haspopup="true"
@@ -489,108 +646,40 @@ export default function Header() {
                   </button>
                   {isProfileOpen && (
                     <>
-                      <div className="fixed inset-0 z-[105] bg-black/40 md:hidden" aria-hidden onClick={() => setIsProfileOpen(false)} />
-                      <div className="fixed inset-x-0 bottom-0 z-[115] max-h-[min(88dvh,640px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)] md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:top-full md:z-[110] md:mt-2 md:w-72 md:max-h-[min(80vh,520px)] md:rounded-xl md:border md:pb-2" role="dialog" aria-modal="true" aria-label="Account menu">
-                        <div className="mx-auto mb-2 mt-1 h-1 w-10 shrink-0 rounded-full bg-dc-border/80 md:hidden" aria-hidden />
-                        <div className="px-4 py-3 border-b border-dc-border">
-                          <p className="font-medium text-dc-text">{sceneLabel}</p>
-                          {emailLabel ? <p className="mt-0.5 break-all text-xs text-dc-text-muted">{emailLabel}</p> : null}
-                          {isFallback && !isAuthenticated && (
-                            <p className="text-xs text-dc-muted mt-1">Demo viewer (not signed in)</p>
-                          )}
-                        </div>
-                        <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
-                          <Link
-                            to={viewerUsername ? `/profile/${encodeURIComponent(viewerUsername)}` : '/profile'}
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            View profile
-                          </Link>
-                          <Link
-                            to="/profile/edit"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Edit profile
-                          </Link>
-                          <Link
-                            to="/my-posts"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            My Posts
-                          </Link>
-                          <Link
-                            to="/activity"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Activity
-                          </Link>
-                          <Link
-                            to="/saved"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Saved
-                          </Link>
-                        </div>
-
-                        {showModerationNav ?
-                          <div className="px-2 py-2 border-b border-dc-border">
-                            <PlatformStaffNavLinks
-                              variant="dropdown"
-                              onNavigate={() => setIsProfileOpen(false)}
-                            />
-                          </div>
-                        : null}
-
-                        <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
-                          <p className="px-3 text-[10px] font-semibold uppercase tracking-wide text-dc-muted mb-1">
-                            Manage
-                          </p>
-                          <AccountManageNavLinks
-                            variant="dropdown"
-                            ecosystem={ecosystem}
-                            loading={ecosystemLoading}
-                            onNavigate={() => setIsProfileOpen(false)}
-                          />
-                        </div>
-
-                        <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
-                          <Link
-                            to="/settings/account"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Account settings
-                          </Link>
-                          <Link
-                            to="/settings/privacy"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Privacy settings
-                          </Link>
-                        </div>
-
-                        <div className="px-2 py-2 flex items-center justify-between gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsProfileOpen(false)
-                              void (async () => {
-                                await logout()
-                                navigate(buildLoginHref(), { replace: true })
-                              })()
-                            }}
-                            className="inline-flex min-h-11 items-center px-3 py-2 text-sm text-dc-text-muted hover:text-dc-text md:min-h-0"
-                          >
-                            Log out
-                          </button>
-                        </div>
+                      <div
+                        className="absolute right-0 top-full z-[110] mt-2 hidden w-72 max-h-[min(80vh,520px)] overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)] md:block"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Account menu"
+                      >
+                        {profileMenuContent}
                       </div>
+                      {mobileOverlaysMounted ?
+                        createPortal(
+                          <div
+                            ref={profileMobileRef}
+                            className="fixed inset-0 z-[90] flex flex-col justify-end md:hidden"
+                            role="presentation"
+                          >
+                            <button
+                              type="button"
+                              className="absolute inset-0 bg-black/40"
+                              aria-label="Close account menu"
+                              onClick={() => setIsProfileOpen(false)}
+                            />
+                            <div
+                              className="relative z-[1] max-h-[min(88dvh,640px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)]"
+                              role="dialog"
+                              aria-modal="true"
+                              aria-label="Account menu"
+                            >
+                              <div className="mx-auto mb-2 mt-1 h-1 w-10 shrink-0 rounded-full bg-dc-border/80" aria-hidden />
+                              {profileMenuContent}
+                            </div>
+                          </div>,
+                          document.body,
+                        )
+                      : null}
                     </>
                   )}
                 </div>
