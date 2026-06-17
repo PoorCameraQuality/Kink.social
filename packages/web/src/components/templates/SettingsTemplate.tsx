@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import PageHeader from '@/components/shell/PageHeader'
 import MobileActionBar, { type MobileActionBarAction } from '@/components/shell/MobileActionBar'
+import { cardSurfaceSolidClass } from '@/lib/card-surface'
 import { cn } from '@/lib/cn'
 
 type Props = {
@@ -48,8 +49,9 @@ export function SettingsSection({
   return (
     <section
       className={cn(
-        'rounded-2xl border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)] sm:p-5',
-        danger ? 'border-dc-danger/40' : 'border-dc-border',
+        cardSurfaceSolidClass,
+        'p-4 sm:p-5',
+        danger ? 'border-dc-danger/40' : '',
       )}
     >
       <h2 className="text-base font-semibold text-dc-text">{title}</h2>

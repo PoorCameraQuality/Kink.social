@@ -258,7 +258,7 @@ export default function LocalPostCard({
         feedStreamPostSurface(post, { isRepost: !!isRepost, streamVerb: feedStreamReason ?? null }),
       ),
     )
-  : `${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass} p-4 transition-colors hover:bg-[var(--dc-elevated-hover)]`
+  : `${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass} p-4 hover:bg-[var(--dc-elevated-hover)]`
 
   if (feedLayout) {
     return (

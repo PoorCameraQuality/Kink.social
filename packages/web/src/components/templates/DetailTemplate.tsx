@@ -25,7 +25,7 @@ export default function DetailTemplate({
   className,
 }: Props) {
   return (
-    <div className={cn('mx-auto max-w-[1280px] overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8 lg:py-10', className)}>
+    <div className={cn('dc-panel-enter mx-auto max-w-[1280px] overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8 lg:py-10', className)}>
       {hero}
       {tabs ? <div className="mt-6">{tabs}</div> : null}
       <div className={cn('mt-6', sidebar ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-8 lg:items-start' : '')}>

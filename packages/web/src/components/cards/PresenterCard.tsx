@@ -9,6 +9,7 @@ import CommunityTrustChip from '@/components/trust/CommunityTrustChip'
 import Badge from '@/components/ui/Badge'
 
 import { cn } from '@/lib/cn'
+import { cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 
 import type { PresenterBadgeKey } from '@/lib/presenter-badges-types'
 
@@ -128,7 +129,9 @@ export default function PresenterCard({ presenter, activeTag, onTagFilter }: Pre
 
       className={cn(
 
-        'flex h-full flex-col rounded-2xl border bg-dc-elevated/95 p-4 transition-colors hover:border-dc-accent/35',
+        'flex h-full flex-col p-4',
+        cardSurfaceSolidClass,
+        cardSurfaceInteractiveClass,
 
         tierBorderClasses[tier],
 

@@ -98,7 +98,7 @@ export function DirectoryFilterButton({
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex min-h-touch shrink-0 items-center justify-center rounded-xl border border-dc-border bg-dc-elevated-solid px-5 text-sm font-semibold text-dc-text hover:border-dc-accent-border/50 hover:bg-dc-elevated-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent lg:hidden',
+        'dc-premium-btn inline-flex min-h-touch shrink-0 items-center justify-center rounded-xl border border-dc-border-strong/80 bg-dc-elevated-solid px-5 text-sm font-semibold text-dc-text hover:border-[color-mix(in_srgb,var(--dc-accent)_22%,var(--dc-border-strong))] hover:bg-dc-elevated-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dc-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface lg:hidden',
         className,
       )}
     >
