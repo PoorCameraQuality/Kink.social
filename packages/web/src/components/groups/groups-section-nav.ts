@@ -1,13 +1,2 @@
-import type { GroupsSectionNavMatch } from '@/lib/groups-section-mode'
-
-export const GROUPS_SECTION_NAV: ReadonlyArray<{
-  href: string
-  label: string
-  match: GroupsSectionNavMatch
-}> = [
-  { href: '/groups', label: 'Discover Groups', match: 'discover' },
-  { href: '/groups?tab=my', label: 'My Groups', match: 'my' },
-  { href: '/groups?tab=invitations', label: 'Invitations', match: 'invitations' },
-  { href: '/groups?tab=posts', label: 'My Group Posts', match: 'posts' },
-  { href: '/groups?tab=saved', label: 'Saved Groups', match: 'saved' },
-]
+export { GROUPS_SECTION_NAV } from '@/lib/groups-section-nav-data'
+export type { GroupsSectionNavMatch } from '@/lib/groups-section-mode'

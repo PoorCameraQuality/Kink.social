@@ -1,5 +1,5 @@
-import type { MockNotification } from '@/data/mock-data'
-import { shortTime } from '@/lib/format-time'
+import type { MockNotification } from '../data/types.ts'
+import { shortTime } from './format-time.ts'
 
 export const READ_IDS_KEY = 'c2k_notifications_read_ids_v1'
 
