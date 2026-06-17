@@ -1,4 +1,4 @@
-export const PROFILE_ROLE_MAX = 5 as const
+export const PROFILE_ROLE_MAX = 10 as const
 
 export const PROFILE_ROLE_OTHER = 'Other (describe below)' as const
 

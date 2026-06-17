@@ -15,6 +15,7 @@ import AppShell from '@/components/shell/AppShell'
 import CreateFab from '@/components/shell/CreateFab'
 import CreateSheet from '@/components/shell/CreateSheet'
 import { CreateSheetProvider } from '@/contexts/CreateSheetContext'
+import { FeedComposerUiProvider, useFeedComposerEngaged } from '@/contexts/FeedComposerUiContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { hideMarketingFooterOnMobile } from '@/lib/community-nav'
 import { hideMockDataBannerForPath } from '@/lib/focused-personal-shell'
@@ -34,8 +35,13 @@ function RootLayoutInner() {
   const suppressBottomNav = suppressMobileBottomNav(pathname, searchParams)
   const useAppShell = showMemberChrome && isTierAAppShellRoute(pathname)
   const showMobileChrome = maxMd
+  const composerEngaged = useFeedComposerEngaged()
   const showCreateFab =
-    showMobileChrome && showMemberChrome && showCreateFabForPath(pathname) && !suppressBottomNav
+    showMobileChrome &&
+    showMemberChrome &&
+    showCreateFabForPath(pathname) &&
+    !suppressBottomNav &&
+    !(pathname === '/home' && composerEngaged)
 
   const mainMobilePadClass = showMemberChrome ? mobileMainPadClass(pathname, showCreateFab, searchParams) : 'pb-0'
 
@@ -88,7 +94,9 @@ export default function RootLayout() {
   return (
     <AppProviders>
       <CreateSheetProvider>
-        <RootLayoutInner />
+        <FeedComposerUiProvider>
+          <RootLayoutInner />
+        </FeedComposerUiProvider>
       </CreateSheetProvider>
     </AppProviders>
   )

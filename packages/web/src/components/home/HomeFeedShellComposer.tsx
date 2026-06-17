@@ -4,6 +4,7 @@ import HomeFeedMockComposer from '@/components/home/HomeFeedMockComposer'
 import HomeFeedRichComposer from '@/components/home/HomeFeedRichComposer'
 import FeedComposerQuickActions from '@/components/home/FeedComposerQuickActions'
 import ComposerAvatar from '@/components/home/ComposerAvatar'
+import { useFeedComposerEngagement } from '@/contexts/FeedComposerUiContext'
 
 type Props = {
   viewerUsername: string
@@ -55,6 +56,8 @@ export default function HomeFeedShellComposer({
   }, [onPosted])
 
   const collapsed = (shell === 'mobile' || shell === 'desktop') && !open
+
+  useFeedComposerEngagement(open)
 
   if (collapsed) {
     return (
