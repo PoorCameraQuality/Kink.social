@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { mockConversations } from '@/data/mock-data'
 import { shortTime } from '@/lib/format-time'
 import { useAuth } from '@/contexts/AuthContext'
+import { CONVERSATION_READ_EVENT } from '@/lib/mark-conversation-read'
 
 export type ConversationPreviewRow = {
   id: string
@@ -70,6 +71,14 @@ export function useConversationsPreview() {
     if (status !== 'ready') return
     void load()
   }, [status, load])
+
+  useEffect(() => {
+    const onConversationRead = () => {
+      void load()
+    }
+    window.addEventListener(CONVERSATION_READ_EVENT, onConversationRead)
+    return () => window.removeEventListener(CONVERSATION_READ_EVENT, onConversationRead)
+  }, [load])
 
   const items = useMemo(() => {
     if (isAuthenticated && apiItems !== null) return apiItems

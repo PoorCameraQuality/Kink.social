@@ -3383,6 +3383,17 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     return reply.send({ ok: true })
   })
 
+  app.post('/api/v1/conversations/:conversationId/mark-read', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { conversationId } = req.params as { conversationId: string }
+    const { markConversationReadForUser } = await import('../lib/conversation-mark-read.js')
+    const result = await markConversationReadForUser(user.userId, conversationId)
+    if (!result.ok) return reply.status(result.status).send({ error: result.error })
+    return reply.send({ ok: true, readAt: result.readAt })
+  })
+
   app.get('/api/v1/conversations', async (req, reply) => {
     if (!requireDb(reply)) return
     const user = requireUser(req, reply)

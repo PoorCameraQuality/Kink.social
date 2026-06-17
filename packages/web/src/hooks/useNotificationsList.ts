@@ -6,6 +6,7 @@ import {
   saveReadIdsToStorage,
   type ApiNotificationRow,
 } from '@/lib/notifications-display'
+import { CONVERSATION_READ_EVENT } from '@/lib/mark-conversation-read'
 import { useAuth } from '@/contexts/AuthContext'
 
 export function useNotificationsList() {
@@ -54,6 +55,14 @@ export function useNotificationsList() {
     if (status !== 'ready') return
     void load()
   }, [status, load])
+
+  useEffect(() => {
+    const onConversationRead = () => {
+      void load()
+    }
+    window.addEventListener(CONVERSATION_READ_EVENT, onConversationRead)
+    return () => window.removeEventListener(CONVERSATION_READ_EVENT, onConversationRead)
+  }, [load])
 
   const items = useMemo(() => {
     if (useApi) return apiItems ?? []

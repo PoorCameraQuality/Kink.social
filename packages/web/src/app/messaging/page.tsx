@@ -18,6 +18,7 @@ import { conversationTarget, messageTarget } from '@/lib/moderation/report-targe
 import { useAuth } from '@/contexts/AuthContext'
 import { useMaxMd } from '@/hooks/useMaxMd'
 import { useVisualViewportBottomInset } from '@/hooks/useVisualViewportBottomInset'
+import { markConversationRead } from '@/lib/mark-conversation-read'
 import { mockConversations } from '@/data/mock-data'
 import { getMockPersonByUsername } from '@/data/mock-seeds'
 
@@ -358,6 +359,10 @@ export default function MessagingPage() {
         }))
         setApiMessagesByConv((prev) => ({ ...prev, [convId]: mapped }))
         setMessagesFetchByConv((prev) => ({ ...prev, [convId]: 'loaded' }))
+        setApiConversations((prev) =>
+          prev?.map((c) => (c.id === convId ? { ...c, unread: false } : c)) ?? prev,
+        )
+        void markConversationRead(convId)
       } catch {
         setMessagesFetchByConv((prev) => ({ ...prev, [convId]: 'loaded' }))
       }
