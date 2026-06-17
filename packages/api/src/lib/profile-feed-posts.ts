@@ -7,6 +7,7 @@ import { withAlphaLabels } from './alpha-seed-labels.js'
 import { filterRowsForGlobalFeed } from './feed-post-access.js'
 import { filterQuotedPostsMediaForViewer } from './feed-media-attachments.js'
 import { enrichPostsWithLikeMeta } from './post-like-meta.js'
+import type { FeedPostCommentPreview } from './feed-post-comments.js'
 
 export type ProfileFeedPostRow = {
   id: string
@@ -27,6 +28,7 @@ export type ProfileFeedPostRow = {
   reactionCounts?: Record<string, number>
   viewerReaction?: string | null
   commentCount?: number
+  commentPreview?: FeedPostCommentPreview | null
 }
 
 function shapePostRow(row: {
@@ -106,6 +108,7 @@ async function attachLikeMeta(posts: ProfileFeedPostRow[], viewerId: string | nu
       reactionCounts: m.reactionCounts,
       viewerReaction: m.viewerReaction,
       commentCount: m.commentCount,
+      commentPreview: m.commentPreview,
     }
   })
 }

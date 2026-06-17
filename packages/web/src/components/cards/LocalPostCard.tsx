@@ -11,6 +11,7 @@ import { renderFeedAttachments, feedAttachmentHeroUrl } from '@/components/media
 import AlphaTestBadge from '@/components/alpha/AlphaTestBadge'
 import FeedPostDiscussion from '@/components/feed/FeedPostDiscussion'
 import FeedPostActionBar from '@/components/feed/FeedPostActionBar'
+import FeedPostCommentPreview from '@/components/feed/FeedPostCommentPreview'
 import { feedActivityLeadLine, inferFeedPostBadge } from '@/components/feed/feedPostBadge'
 import { formatFeedTimeShort } from '@/lib/following-feed-present'
 import {
@@ -25,6 +26,7 @@ import { BOOKMARK_OBJECT_FEED_POST, useApiBookmarks } from '@/hooks/useApiBookma
 import type { ConnectionLikerPreview, HomeFeedPost } from '@/lib/feed-types'
 import { cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 import { feedStreamPostSurface, feedStreamPostSurfaceClass } from '@/lib/feed-stream-surface'
+import { formatFeedCommentActionLabel } from '@/lib/feed-comment-label'
 import { cn } from '@/lib/cn'
 
 export type LocalPostCardProps = {
@@ -211,6 +213,8 @@ export default function LocalPostCard({
   const showMockActions = post.source === 'mock' && isOwnPost && onEdit && onDelete
   const postBookmarked = bookmarkApi.isBookmarked(BOOKMARK_OBJECT_FEED_POST, post.id)
   const commentCount = post.comments
+  const commentPreview = post.commentPreview ?? null
+  const discussHref = canShare ? `/share/post/${post.id}#discuss` : undefined
 
   const handleMockReaction = (_kind: FeedReactionId) => {
     setLocalLikes((n) => n + 1)
@@ -327,29 +331,34 @@ export default function LocalPostCard({
                 <AlphaTestBadge label={post.alphaLabel} />
               </div>
             : null}
+            <div className="feed-stream-post__body feed-stream-post__body--inline">
+              {displayPost.title ?
+                <h3 className="mb-1 font-display text-base font-semibold leading-snug text-dc-text">{displayPost.title}</h3>
+              : null}
+              {displayPost.bodyFormat === 'html' ?
+                <div
+                  className="text-dc-text prose prose-invert max-w-none [&_a]:text-dc-accent"
+                  dangerouslySetInnerHTML={{ __html: displayPost.body }}
+                />
+              : <p className={`${centerFeedBody ? 'max-w-[34ch]' : ''} whitespace-pre-wrap text-dc-text`}>
+                  {displayPost.body}
+                </p>}
+              <MentionChips mentions={displayPost.mentions} />
+            </div>
           </div>
         </header>
-
-        <div className="feed-stream-post__body">
-          {displayPost.title ?
-            <h3 className="mb-1.5 font-display text-base font-semibold leading-snug text-dc-text">{displayPost.title}</h3>
-          : null}
-          {displayPost.bodyFormat === 'html' ?
-            <div
-              className="text-dc-text prose prose-invert max-w-none [&_a]:text-dc-accent"
-              dangerouslySetInnerHTML={{ __html: displayPost.body }}
-            />
-          : <p className={`${centerFeedBody ? 'mx-auto max-w-[34ch] text-center' : ''} whitespace-pre-wrap text-dc-text`}>
-              {displayPost.body}
-            </p>}
-          <MentionChips mentions={displayPost.mentions} />
-        </div>
 
         {heroImageUrl ?
           <div className="feed-stream-post__media">
             <img src={heroImageUrl} alt="" loading="lazy" decoding="async" />
           </div>
         : null}
+
+        <FeedPostCommentPreview
+          preview={commentPreview}
+          commentCount={commentCount}
+          discussHref={discussHref}
+        />
 
         <div className="feed-stream-post__actions">
           <FeedPostActionBar
@@ -362,7 +371,7 @@ export default function LocalPostCard({
               else void reactions.toggleReaction(kind)
             }}
             commentCount={commentCount}
-            commentHref={canShare ? `/share/post/${post.id}#discuss` : undefined}
+            commentHref={discussHref}
             commentDisabled={!canShare}
             shareHref={canShare ? `/share/post/${post.id}` : undefined}
             shareDisabled={!canShare}
@@ -601,10 +610,7 @@ export default function LocalPostCard({
                       title="View and add comments"
                     >
                       <IconDiscuss className="h-4 w-4 shrink-0" />
-                      <span className="hidden sm:inline">{FEED_ACTION_LABELS.discuss}</span>
-                      {commentCount > 0 ?
-                        <span className="tabular-nums text-[10px] opacity-80">{commentCount}</span>
-                      : null}
+                      <span className="hidden sm:inline">{formatFeedCommentActionLabel(commentCount)}</span>
                     </FeedTapControl>
                   : (
                     <FeedTapControl
@@ -678,10 +684,7 @@ export default function LocalPostCard({
                   title="View and add comments"
                 >
                   <IconDiscuss className="h-4 w-4" />
-                  <span className="hidden sm:inline">{FEED_ACTION_LABELS.discuss}</span>
-                  {commentCount > 0 ?
-                    <span className="tabular-nums text-[11px] opacity-80">{commentCount}</span>
-                  : null}
+                  <span className="hidden sm:inline">{formatFeedCommentActionLabel(commentCount)}</span>
                 </Link>
               ) : (
                 <button

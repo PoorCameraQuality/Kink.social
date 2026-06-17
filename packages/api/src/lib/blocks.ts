@@ -32,3 +32,12 @@ export async function loadUserIdsWhoBlockedUser(userId: string): Promise<Set<str
     .where(eq(schema.blocks.blockedId, userId))
   return new Set(rows.map((r) => r.blockerId))
 }
+
+/** Either direction of a block hides the other user in social surfaces. */
+export async function loadBlockedPairUserIds(userId: string): Promise<Set<string>> {
+  const [blocked, blockers] = await Promise.all([
+    loadBlockedUserIds(userId),
+    loadUserIdsWhoBlockedUser(userId),
+  ])
+  return new Set([...blocked, ...blockers])
+}

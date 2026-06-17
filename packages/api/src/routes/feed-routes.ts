@@ -14,6 +14,7 @@ import {
   deleteFeedPostComment,
   listFeedPostComments,
   loadFeedPostCommentCount,
+  type FeedPostCommentPreview,
 } from '../lib/feed-post-comments.js'
 import {
   extractTagIdsFromMentions,
@@ -226,6 +227,7 @@ async function attachLikeMetaToPosts<T extends { id: string }>(
       reactionCounts: Record<FeedReactionId, number>
       viewerReaction: FeedReactionId | null
       commentCount: number
+      commentPreview?: FeedPostCommentPreview | null
       connectionLikerPreview?: { username: string; avatarUrl: string | null }[]
     }
   >
@@ -245,6 +247,7 @@ async function attachLikeMetaToPosts<T extends { id: string }>(
       reactionCounts: row?.reactionCounts ?? { love: 0, respect: 0, sympathize: 0, helpful: 0 },
       viewerReaction: row?.viewerReaction ?? null,
       commentCount: row?.commentCount ?? 0,
+      commentPreview: row?.commentPreview ?? null,
       ...(options?.includeConnectionPreview ?
         { connectionLikerPreview: row?.connectionLikerPreview ?? [] }
       : {}),

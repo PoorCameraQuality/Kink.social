@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { MockNotification } from '@/data/mock-data'
+import UserAvatar from '@/components/UserAvatar'
 import PersonalUtilityPageShell from '@/components/layout/PersonalUtilityPageShell'
 import NotificationsEmptyPanel from '@/components/notifications/NotificationsEmptyPanel'
 import { PresetEmptyState } from '@/components/ui/empty-state-presets'
@@ -44,6 +45,18 @@ function buildNotificationDayGroups(items: MockNotification[]): { heading: strin
   return groups
 }
 
+function NotificationKindFallback({ kind }: { kind: MockNotification['kind'] }) {
+  const label = kind === 'event' ? 'E' : kind === 'group' ? 'G' : kind === 'mention' ? 'M' : kind === 'rsvp' ? 'R' : '•'
+  return (
+    <span
+      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-dc-elevated-muted text-xs font-semibold uppercase text-dc-muted"
+      aria-hidden
+    >
+      {label}
+    </span>
+  )
+}
+
 function NotificationRow({
   n,
   onMarkRead,
@@ -55,25 +68,36 @@ function NotificationRow({
 
   const inner = (
     <div
-      className={`flex gap-3 rounded-2xl border p-4 transition-colors sm:gap-4 ${
+      className={`flex gap-2.5 rounded-xl border px-2.5 py-2.5 transition-colors sm:gap-3 sm:px-3 sm:py-3 ${
         n.read ?
           'border-dc-border bg-dc-elevated-solid/80'
         : 'border-dc-accent-border/30 border-l-2 border-l-dc-accent bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]'
       }`}
     >
-      <span
-        className={`mt-2 h-2 w-2 shrink-0 rounded-full ${n.read ? 'bg-transparent' : 'bg-dc-accent'}`}
-        aria-hidden
-      />
+      <div className="shrink-0 pt-0.5">
+        {n.actorUsername ?
+          <UserAvatar
+            avatarUrl={n.actorAvatarUrl}
+            alt=""
+            size="sm"
+            className="!h-9 !w-9 !min-h-9 !min-w-9 [&>svg]:!h-4 [&>svg]:!w-4"
+          />
+        : <NotificationKindFallback kind={n.kind} />}
+      </div>
       <div className="min-w-0 flex-1 text-left">
-        <div className="mb-1 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-dc-muted">{kindLabel(n.kind, n.title)}</span>
-          <span className="text-xs text-dc-muted">{n.timeAgo}</span>
+        <div className="mb-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-dc-muted sm:text-[11px]">
+            {kindLabel(n.kind, n.title)}
+          </span>
+          <span className="text-[11px] text-dc-muted">{n.timeAgo}</span>
+          {!n.read ?
+            <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-dc-accent" aria-hidden />
+          : null}
         </div>
-        <p className="text-sm font-medium text-dc-text sm:text-base">{n.title}</p>
-        <p className="mt-1 line-clamp-3 text-sm text-dc-text-muted">{n.body}</p>
+        <p className="text-sm font-medium leading-snug text-dc-text">{n.title}</p>
+        <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-dc-text-muted sm:text-sm">{n.body}</p>
         {n.href && actionLabel ?
-          <span className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-dc-accent/10 px-3 text-sm font-semibold text-dc-accent">
+          <span className="mt-1.5 inline-flex min-h-9 items-center text-xs font-semibold text-dc-accent sm:text-sm">
             {actionLabel}
           </span>
         : null}
@@ -87,7 +111,7 @@ function NotificationRow({
         <Link
           to={n.href}
           onClick={() => void onMarkRead(n.id)}
-          className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
+          className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
         >
           {inner}
         </Link>
@@ -100,7 +124,7 @@ function NotificationRow({
       <button
         type="button"
         onClick={() => void onMarkRead(n.id)}
-        className="w-full rounded-2xl text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
+        className="w-full rounded-xl text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
       >
         {inner}
       </button>

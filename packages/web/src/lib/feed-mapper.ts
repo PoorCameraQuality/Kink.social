@@ -3,7 +3,7 @@ import type { FeedReactionId, AlphaContentLabel } from '@c2k/shared'
 import { emptyFeedReactionCounts } from '@c2k/shared'
 import type { MockLocalPost } from '@/data/types'
 import { getMockPersonByUsername } from '@/data/mock-seeds'
-import type { ApiFeedHomeCard, ApiFollowingFeedItem, FeedAttachment, FeedMention, FollowingFeedItem, HomeFeedPost } from './feed-types'
+import type { ApiFeedHomeCard, ApiFollowingFeedItem, FeedAttachment, FeedMention, FeedPostCommentPreview, FollowingFeedItem, HomeFeedPost } from './feed-types'
 import type { FeedReactionCounts } from '@/hooks/useFeedPostReactions'
 function timeAgoFromIso(iso: string): string {
   const d = new Date(iso)
@@ -36,6 +36,7 @@ export type ApiFeedPost = {
   reactionCounts?: FeedReactionCounts
   viewerReaction?: FeedReactionId | null
   commentCount?: number
+  commentPreview?: FeedPostCommentPreview | null
   connectionLikerPreview?: Array<{ username: string; avatarUrl?: string | null }>
   alphaLabel?: AlphaContentLabel
 }
@@ -80,6 +81,7 @@ export function apiPostToHomeFeedPost(p: ApiFeedPost): HomeFeedPost {
     connectionLikerPreview: p.connectionLikerPreview ?? [],
     alphaLabel: p.alphaLabel,
     comments: p.commentCount ?? 0,
+    commentPreview: p.commentPreview ?? null,
     source: 'api',
   }
 }

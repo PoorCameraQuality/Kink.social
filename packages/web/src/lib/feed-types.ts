@@ -6,6 +6,15 @@ export type FeedMention = { type: string; id?: string; slug?: string; label: str
 
 export type ConnectionLikerPreview = { username: string; avatarUrl?: string | null }
 
+export type FeedPostCommentPreview = {
+  id: string
+  authorDisplayName: string
+  authorUsername?: string
+  authorAvatarUrl?: string | null
+  bodyPreview: string
+  createdAt: string
+}
+
 /** Unified post for home Local feed, trending, share page, and profile journal. */
 export type HomeFeedPost = {
   id: string
@@ -29,6 +38,7 @@ export type HomeFeedPost = {
   viewerReaction?: FeedReactionId | null
   connectionLikerPreview?: ConnectionLikerPreview[]
   comments: number
+  commentPreview?: FeedPostCommentPreview | null
   source: 'api' | 'mock'
   alphaLabel?: AlphaContentLabel
 }
