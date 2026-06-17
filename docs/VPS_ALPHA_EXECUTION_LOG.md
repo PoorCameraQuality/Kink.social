@@ -780,7 +780,7 @@ Script: `scripts/vps/promotion-readiness-pass1-smoke.mjs`
 | Branch | `desktop-ui-sprint-3-visual-polish` |
 | CI fix pushed | `7292fb1` (web test `@/` alias regressions) |
 | Activation commit | `91e5c5e` — public alpha activation journey |
-| Promotion commit | (see git log Pass 9 completion) |
+| Promotion commit | `6de2b7d` — promotion guide and smoke tests |
 
 ### VPS alignment
 
