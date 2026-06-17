@@ -11,6 +11,8 @@ Use this doc for operator sign-off and engineer verification before inviting a p
 
 **Web UX sign-off:** Every P0–P2 audit item is tracked in [`UI_UX_COMPLETION.md`](./UI_UX_COMPLETION.md) (100% closure 2026-06-01). Run the manual checks there before pilot UI walkthroughs.
 
+**Social platform alpha QA:** Human testers walking Home, People, Groups, Events, Messaging, and privacy scenarios should use [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md). Seeded accounts: [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md). **VPS operator prep:** [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md).
+
 ### Deployment posture
 
 | Mode | Status |

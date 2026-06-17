@@ -6,6 +6,8 @@ import { and, eq, inArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 
 export const ALPHA_ECKE_BATCH_KEY = 'alpha-ecke-demo'
+/** Fictional social-layer seed (users, posts, groups, DMs) — separate from ECKE import batch. */
+export const ALPHA_SOCIAL_BATCH_KEY = 'alpha-social-seed'
 
 export type AlphaSeedMarkInput = {
   targetType: string
