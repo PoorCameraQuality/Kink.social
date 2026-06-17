@@ -20,27 +20,28 @@ import { useAuth } from '@/contexts/AuthContext'
 import { hideMarketingFooterOnMobile } from '@/lib/community-nav'
 import { hideMockDataBannerForPath } from '@/lib/focused-personal-shell'
 import { isTierAAppShellRoute, showCreateFabForPath } from '@/lib/app-shell-routes'
-import { mobileMainPadClass, suppressMobileBottomNav } from '@/lib/mobile-chrome'
-import { useMaxMd } from '@/hooks/useMaxMd'
+import { mobileMainPadClass, suppressMobileBottomNav, suppressMobileCreateFab } from '@/lib/mobile-chrome'
+import { useMaxLg } from '@/hooks/useMaxLg'
 
 /** Must render under `AppProviders` / `AuthProvider` - see `RootLayout`. */
 function RootLayoutInner() {
   const { pathname } = useLocation()
   const [searchParams] = useSearchParams()
   const { isAuthenticated, isFallback } = useAuth()
-  const maxMd = useMaxMd()
+  const maxLg = useMaxLg()
   const showMemberChrome = isAuthenticated && !isFallback
   const hideFooterMobile = hideMarketingFooterOnMobile(pathname)
   const hideMarketingFooter = showMemberChrome
   const suppressBottomNav = suppressMobileBottomNav(pathname, searchParams)
   const useAppShell = showMemberChrome && isTierAAppShellRoute(pathname)
-  const showMobileChrome = maxMd
+  const showMobileChrome = maxLg
   const composerEngaged = useFeedComposerEngaged()
   const showCreateFab =
     showMobileChrome &&
     showMemberChrome &&
     showCreateFabForPath(pathname) &&
     !suppressBottomNav &&
+    !suppressMobileCreateFab(pathname) &&
     !(pathname === '/home' && composerEngaged)
 
   const mainMobilePadClass = showMemberChrome ? mobileMainPadClass(pathname, showCreateFab, searchParams) : 'pb-0'
@@ -73,7 +74,7 @@ function RootLayoutInner() {
       {!hideMockDataBannerForPath(pathname) ? <MockDataBanner /> : null}
       <main
         id="main-content"
-        className={`min-h-screen min-w-0 overflow-x-hidden md:pb-0 ${mainMobilePadClass}`}
+        className={`min-h-screen min-w-0 overflow-x-hidden lg:pb-0 ${mainMobilePadClass}`}
       >
         {pageContent}
       </main>

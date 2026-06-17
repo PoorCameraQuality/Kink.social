@@ -21,16 +21,20 @@
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  /* Main scroll column: room for fixed BottomNav on phones */
+  /* Main scroll column: room for fixed BottomNav on phones/tablets (until lg) */
   .c2k-main-mobile-pb {
     padding-bottom: var(--c2k-main-mobile-pb);
   }
   .c2k-mobile-nav-pb {
     padding-bottom: var(--c2k-mobile-nav-pb);
   }
-  @media (min-width: 768px) {
+  .c2k-main-mobile-pb-action {
+    padding-bottom: var(--c2k-main-mobile-pb-action);
+  }
+  @media (min-width: 1024px) {
     .c2k-main-mobile-pb,
-    .c2k-mobile-nav-pb {
+    .c2k-mobile-nav-pb,
+    .c2k-main-mobile-pb-action {
       padding-bottom: 0;
     }
   }
@@ -38,20 +42,29 @@
   .c2k-onboarding-no-bottom-nav .c2k-fixed-above-bottom-nav {
     bottom: 0;
   }
-  /* Fixed/sticky bars that must sit above BottomNav (md+ uses bottom-0) */
+  /* Fixed/sticky bars that must sit above BottomNav (lg+ uses bottom-0) */
   .c2k-fixed-above-bottom-nav {
-    bottom: var(--c2k-bottom-nav-total-h);
+    bottom: var(--c2k-mobile-sticky-action-bottom);
   }
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .c2k-fixed-above-bottom-nav {
       bottom: 0;
+    }
+  }
+  /* Mobile FAB — above bottom nav + safe area */
+  .c2k-fab-position {
+    bottom: var(--c2k-fab-bottom);
+  }
+  @media (min-width: 1024px) {
+    .c2k-fab-position {
+      bottom: auto;
     }
   }
   /* Toasts and floating pills above BottomNav */
   .c2k-toast-above-bottom-nav {
     bottom: calc(var(--c2k-bottom-nav-total-h) + 1rem);
   }
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .c2k-toast-above-bottom-nav {
       bottom: 1rem;
     }
@@ -60,7 +73,7 @@
   .c2k-sticky-above-bottom-nav {
     bottom: var(--c2k-bottom-nav-total-h);
   }
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .c2k-sticky-above-bottom-nav {
       bottom: 0;
     }
@@ -69,7 +82,7 @@
     height: var(--c2k-mobile-viewport-fill-h);
     margin-bottom: calc(-1 * var(--c2k-bottom-nav-total-h));
   }
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .c2k-mobile-viewport-fill {
       height: calc(100dvh - var(--c2k-sticky-below-header));
       margin-bottom: 0;
@@ -141,10 +154,13 @@
   /* Mobile bottom nav (BottomNav.tsx h-16 + home-indicator safe area) */
   --c2k-bottom-nav-h: 4rem;
   --c2k-bottom-nav-total-h: calc(var(--c2k-bottom-nav-h) + env(safe-area-inset-bottom, 0px));
-  --c2k-mobile-breathing: 3rem;
+  --c2k-mobile-fixed-gap: 0.75rem;
+  --c2k-mobile-breathing: 1.5rem;
+  --c2k-mobile-sticky-action-bottom: var(--c2k-bottom-nav-total-h);
   --c2k-bottom-nav-clearance: calc(var(--c2k-bottom-nav-total-h) + var(--c2k-mobile-breathing));
   --c2k-fab-size: 3.5rem;
-  --c2k-fab-gap: 1rem;
+  --c2k-fab-gap: var(--c2k-mobile-fixed-gap);
+  --c2k-fab-bottom: calc(var(--c2k-bottom-nav-total-h) + var(--c2k-mobile-fixed-gap));
   /* Nav + breathing room only (no FAB) */
   --c2k-mobile-nav-pb: var(--c2k-bottom-nav-clearance);
   /* Nav + FAB clearance for Tier-A create surfaces */
@@ -153,6 +169,14 @@
   --c2k-mobile-action-bar-h: 3.75rem;
   --c2k-mobile-action-bar-total-h: calc(
     var(--c2k-mobile-action-bar-h) + env(safe-area-inset-bottom, 0px)
+  );
+  --c2k-mobile-action-clearance: calc(
+    var(--c2k-bottom-nav-total-h) + var(--c2k-mobile-action-bar-total-h) + var(--c2k-mobile-breathing)
+  );
+  --c2k-main-mobile-pb-action: var(--c2k-mobile-action-clearance);
+  --c2k-mobile-sheet-max-height: min(
+    85dvh,
+    calc(100dvh - var(--c2k-header-h) - var(--c2k-bottom-nav-total-h) - 1rem)
   );
   --c2k-mobile-viewport-fill-h: calc(
     100dvh - var(--c2k-sticky-below-header) - var(--c2k-bottom-nav-clearance)

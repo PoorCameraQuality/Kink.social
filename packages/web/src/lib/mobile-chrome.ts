@@ -12,6 +12,20 @@ export function suppressMobileBottomNav(pathname: string, search?: URLSearchPara
   return false
 }
 
+/** Event (and similar) pages with a fixed MobileActionBar above bottom nav. */
+export function hasMobileStickyActionBar(pathname: string): boolean {
+  if (!pathname.startsWith('/events/')) return false
+  if (pathname === '/events/create' || pathname.startsWith('/events/create/')) return false
+  return true
+}
+
+/** Hide mobile FAB where a route supplies its own sticky bottom actions. */
+export function suppressMobileCreateFab(pathname: string): boolean {
+  if (pathname.startsWith('/profile/edit')) return true
+  if (hasMobileStickyActionBar(pathname)) return true
+  return false
+}
+
 /** Main `#main-content` padding class for mobile bottom clearance. */
 export function mobileMainPadClass(pathname: string, showCreateFab: boolean, search?: URLSearchParams | null): string {
   if (pathname.endsWith('/door')) return 'pb-0'
@@ -23,6 +37,9 @@ export function mobileMainPadClass(pathname: string, showCreateFab: boolean, sea
     Boolean(search?.get('c')?.trim())
   ) {
     return 'pb-0'
+  }
+  if (hasMobileStickyActionBar(pathname)) {
+    return 'c2k-main-mobile-pb-action'
   }
   return showCreateFab ? 'c2k-main-mobile-pb' : 'c2k-mobile-nav-pb'
 }

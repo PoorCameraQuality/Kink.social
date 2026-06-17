@@ -82,7 +82,7 @@ export default function MobileActionBar({ status, primary, secondary, trailing, 
   return (
     <div
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-30 border-t border-dc-border/80 bg-dc-surface/95 backdrop-blur-md safe-area-pb c2k-fixed-above-bottom-nav md:static md:z-auto md:border-t-0 md:bg-transparent md:backdrop-blur-none md:mt-6',
+        'fixed bottom-0 left-0 right-0 z-30 border-t border-dc-border/80 bg-dc-surface/95 backdrop-blur-md safe-area-pb c2k-fixed-above-bottom-nav lg:static lg:z-auto lg:border-t-0 lg:bg-transparent lg:backdrop-blur-none lg:mt-6',
         className,
       )}
     >

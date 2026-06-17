@@ -705,7 +705,7 @@ export default function EventDetailClient() {
     mediaDisplayUrl(mockEvent?.bannerUrl)
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden pb-24 lg:pb-6">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden lg:pb-6">
       <ScopePageMeta
         title={pageTitle}
         description={pageDesc}

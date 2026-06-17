@@ -7,13 +7,15 @@ export default function CreateSheet() {
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex flex-col justify-end bg-black/60 md:hidden"
+      className="fixed inset-0 z-[200] flex flex-col justify-end bg-black/60 lg:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Create"
     >
       <button type="button" className="min-h-0 flex-1" aria-label="Close" onClick={closeCreateSheet} />
-      <div className="max-h-[85vh] overflow-y-auto rounded-t-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-panel)] safe-area-pb sm:max-h-[70vh]">
+      <div
+        className="max-h-[var(--c2k-mobile-sheet-max-height)] overflow-y-auto rounded-t-2xl border border-dc-border bg-dc-elevated-solid p-4 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)] safe-area-pb"
+      >
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-dc-text">Create</h2>
           <button

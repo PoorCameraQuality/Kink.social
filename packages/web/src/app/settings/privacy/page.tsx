@@ -28,6 +28,11 @@ export default function SettingsPrivacyPage() {
   return (
     <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-8 lg:items-start">
       <div className="space-y-6">
+        <header className="lg:hidden">
+          <p className="text-sm leading-relaxed text-dc-muted">
+            Choose who can see your profile, activity, messages, and how you appear in search.
+          </p>
+        </header>
         <SettingsFollowingPanel privacy={ctx.privacy} onPrivacyChange={onPrivacyChange} />
         <SettingsRequestsPanel privacy={ctx.privacy} onPrivacyChange={onPrivacyChange} />
         <SettingsSearchDiscoveryPanel

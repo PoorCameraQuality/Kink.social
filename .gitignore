@@ -93,5 +93,5 @@ docker/mailserver/logs/
 docker/mailserver/config/
 k8s/base/secret.yaml
 
-# Local workstation helpers (optional; not part of repo)
-packages/api/scripts/tsx-web-paths.mjs
+# Local audit credentials (never commit)
+.kink-social-audit.local
