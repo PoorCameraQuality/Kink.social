@@ -5,6 +5,7 @@ import { safeInternalPath, validatePublicUsername } from '@c2k/shared'
 import { buildOnboardingHref, resolvePostAuthPath } from '@/lib/onboarding'
 import FormField from '@/components/ui/FormField'
 import { SIGNUP_REASSURANCE } from '@/components/landing/landing-content'
+import { LANDING_CTA_JOIN } from '@/lib/alpha-activation-copy'
 
 type Tab = 'signup' | 'login'
 
@@ -293,7 +294,7 @@ export default function LoginCard({
       {landing ?
         <div className="auth-card-header border-b border-white/10 px-6 pb-4 pt-5">
           <h2 className="text-lg font-extrabold text-[var(--pub-text)]">
-            {activeTab === 'signup' ? 'Join free' : 'Welcome back'}
+            {activeTab === 'signup' ? (landing ? LANDING_CTA_JOIN : 'Join free') : 'Welcome back'}
           </h2>
           <p className="mt-1 text-sm text-[var(--pub-text-muted)]">
             {activeTab === 'signup' ?
@@ -341,7 +342,7 @@ export default function LoginCard({
               }`
           }
         >
-          Join free
+          {landing ? LANDING_CTA_JOIN : 'Join free'}
         </button>
         <button
           type="button"
@@ -603,7 +604,7 @@ export default function LoginCard({
                 onClick={() => setActiveTab('signup')}
                 className={landing ? 'inline-flex min-h-touch items-center font-semibold text-[var(--pub-gold-bright)] hover:underline' : 'inline-flex min-h-touch items-center font-semibold text-dc-accent hover:underline'}
               >
-                Join free
+                {landing ? LANDING_CTA_JOIN : 'Join free'}
               </button>
             </p>
           </>

@@ -149,10 +149,10 @@ export function AlphaNotice({ className = '' }: { className?: string }) {
       className={`rounded-xl border border-dc-border bg-dc-elevated-muted px-4 py-3 text-sm text-dc-text-muted ${className}`.trim()}
       role="note"
     >
-      <p className="font-medium text-dc-text">Public alpha test environment</p>
+      <p className="font-medium text-dc-text">Public alpha</p>
       <p className="mt-1">
-        kink.social is in active alpha testing — features may be incomplete or change. Some areas use fictional
-        demo data. Use caution with sensitive personal information. Profile photos are supported; other uploads
+        kink.social is in active public alpha testing. Features may be incomplete or change. Some areas use demo
+        content for testing. Share only what you are comfortable with. Profile photos are supported; other uploads
         may be disabled for now.
       </p>
     </div>

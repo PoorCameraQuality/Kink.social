@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { PROFILE_COMPLETION_REASSURANCE } from '@/lib/alpha-activation-copy'
 import { profileCompletionPercent } from '@/lib/onboarding'
 import { ONBOARDING_FIRST_STEP_ACTIONS } from '@/lib/onboarding-first-steps'
 import { getProfileOnboardingGaps } from '@/lib/profile-onboarding'
@@ -46,7 +47,7 @@ export function ProfileCompletionCard({
     <SectionCard
       eyebrow="Profile"
       title={`Profile ${percent}% complete`}
-      description="A complete profile helps people recognize you and builds trust in the community."
+      description={PROFILE_COMPLETION_REASSURANCE}
       className={className}
     >
       <ul className="space-y-2">

@@ -9,32 +9,32 @@ export type OnboardingFirstStepAction = {
 
 export const ONBOARDING_FIRST_STEP_ACTIONS: readonly OnboardingFirstStepAction[] = [
   {
-    id: 'profile',
-    title: 'Complete your profile',
-    description: 'Add a photo, bio, interests, and boundaries so people know how to connect with you.',
-    href: '/profile/edit',
+    id: 'events',
+    title: 'Browse events',
+    description: 'See upcoming events near you or online. Save or RSVP when something fits.',
+    href: '/events',
+    intentBoost: ['events', 'organize'],
+  },
+  {
+    id: 'people',
+    title: 'Find people',
+    description: 'Follow someone to shape your feed. Connect when you want a mutual link.',
+    href: '/people',
     intentBoost: ['friends'],
   },
   {
     id: 'groups',
     title: 'Join a group',
-    description: 'Find communities around interests, identities, locations, and event scenes.',
+    description: 'Find communities around interests, locations, and event scenes.',
     href: '/groups',
     intentBoost: ['groups'],
   },
   {
-    id: 'events',
-    title: 'Find an event',
-    description: 'Browse upcoming events and discover organizations near you.',
-    href: '/events',
-    intentBoost: ['events', 'organize'],
-  },
-  {
-    id: 'orgs',
-    title: 'Follow an organization',
-    description: 'Keep up with organizers, venues, conventions, and community projects.',
-    href: '/orgs',
-    intentBoost: ['orgs', 'conventions'],
+    id: 'profile',
+    title: 'Complete your profile',
+    description: 'Add enough for people to recognize you. Keep sensitive details private until you are ready.',
+    href: '/profile/edit',
+    intentBoost: ['friends'],
   },
   {
     id: 'privacy',
@@ -42,6 +42,20 @@ export const ONBOARDING_FIRST_STEP_ACTIONS: readonly OnboardingFirstStepAction[]
     description: 'Adjust who can see you, message you, and interact with your profile.',
     href: '/settings/privacy',
     intentBoost: [],
+  },
+  {
+    id: 'feedback',
+    title: 'Send alpha feedback',
+    description: 'Report bugs, confusing flows, privacy concerns, or general feedback.',
+    href: '/support',
+    intentBoost: [],
+  },
+  {
+    id: 'orgs',
+    title: 'Follow an organization',
+    description: 'Keep up with organizers, venues, conventions, and community projects.',
+    href: '/orgs',
+    intentBoost: ['orgs', 'conventions'],
   },
 ] as const
 

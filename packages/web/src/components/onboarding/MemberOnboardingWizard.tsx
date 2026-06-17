@@ -18,8 +18,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext'
 import { useAppToast } from '@/components/ui/AppToast'
 import { useOnboardingState } from '@/hooks/useOnboardingState'
-import { fetchAlphaMode, isAlphaInviteMode } from '@/lib/alpha-mode'
 import { buildLoginHref } from '@/lib/auth-links'
+import { LANDING_ALPHA_FRAMING, ONBOARDING_COMPLETE_BODY, ONBOARDING_COMPLETE_HEADLINE } from '@/lib/alpha-activation-copy'
 import { orderOnboardingFirstSteps } from '@/lib/onboarding-first-steps'
 import ZipLocationCandidatePicker from '@/components/profile/ZipLocationCandidatePicker'
 import type { ZipPlaceCandidate } from '@/lib/profile-edit-location'
@@ -104,7 +104,6 @@ export default function MemberOnboardingWizard() {
   const toast = useAppToast()
 
   const [step, setStep] = useState(1)
-  const [alphaMode, setAlphaMode] = useState(false)
   const [safetyChecked, setSafetyChecked] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
@@ -121,10 +120,6 @@ export default function MemberOnboardingWizard() {
   const [localError, setLocalError] = useState<string | null>(null)
   const [photoUploading, setPhotoUploading] = useState(false)
   const [photoMessage, setPhotoMessage] = useState<string | null>(null)
-
-  useEffect(() => {
-    void fetchAlphaMode().then((m) => setAlphaMode(isAlphaInviteMode(m)))
-  }, [])
 
   useEffect(() => {
     if (feed.onboardingStep) setStep(feed.onboardingStep)
@@ -378,13 +373,13 @@ export default function MemberOnboardingWizard() {
 
       <FadeIn>
         {step === 1 ?
-          <OnboardingStepCard title="Build community. Organize events. Make friends.">
-            <p className="text-sm text-dc-text-muted">
-              kink.social is a consent-forward community platform for events, groups, and real connections.
+          <OnboardingStepCard title="Welcome to the public alpha">
+            <p className="text-sm text-dc-text-muted">{LANDING_ALPHA_FRAMING}</p>
+            <p className="mt-2 text-sm text-dc-text-muted">
+              This short setup covers identity, privacy comfort, and what you want to do first. You can skip optional
+              fields and share more when you are ready.
             </p>
-            {alphaMode ?
-              <AlphaNotice className="mt-4" />
-            : null}
+            <AlphaNotice className="mt-4" />
             <div className="mt-6 flex justify-end">
               <LoadingButton loading={saving} onClick={() => void goTo(2)}>
                 Continue
@@ -465,6 +460,9 @@ export default function MemberOnboardingWizard() {
                   </Link>
                   <Link to="/privacy" className="text-dc-accent hover:underline">
                     Privacy policy
+                  </Link>
+                  <Link to="/support" className="text-dc-accent hover:underline">
+                    Alpha feedback and reports
                   </Link>
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
@@ -870,9 +868,9 @@ export default function MemberOnboardingWizard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h2 className="text-xl font-semibold text-dc-text sm:text-2xl">You&apos;re ready to explore kink.social</h2>
+                  <h2 className="text-xl font-semibold text-dc-text sm:text-2xl">{ONBOARDING_COMPLETE_HEADLINE}</h2>
                   <p className="mt-2 max-w-prose text-sm leading-relaxed text-dc-text-muted">
-                    Your account is set up. Jump in now or pick a first step below.
+                    {ONBOARDING_COMPLETE_BODY}
                   </p>
                 </div>
 
