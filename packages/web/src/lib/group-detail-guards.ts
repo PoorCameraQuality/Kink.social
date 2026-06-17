@@ -1,5 +1,5 @@
-import { GROUPS_SECTION_NAV } from '@/components/groups/groups-section-nav'
-import type { GroupsSectionMode } from '@/lib/groups-section-mode'
+import { GROUPS_SECTION_NAV } from './groups-section-nav-data.ts'
+import type { GroupsSectionMode } from './groups-section-mode.ts'
 
 /** Personal library tabs without a backing API yet. */
 export const STUB_GROUPS_LIBRARY_MODES = new Set<GroupsSectionMode>(['invitations', 'posts', 'saved'])

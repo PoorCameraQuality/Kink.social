@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { shouldShowStartHere } from '@c2k/shared'
 import { useAuth } from '@/contexts/AuthContext'
@@ -6,9 +6,11 @@ import { useApiProfileMe } from '@/hooks/useApiProfileMe'
 import { useApiMyRsvps } from '@/hooks/useApiMyRsvps'
 import { useConversationsPreview } from '@/hooks/useConversationsPreview'
 import { useOnboardingState } from '@/hooks/useOnboardingState'
+import HomeActivationCard from '@/components/home/HomeActivationCard'
+import { buildHomeActivationItems } from '@/lib/home-activation'
 import { AlphaNotice, ProfileCompletionCard, StartHereCard } from '@/components/ui/primitives'
+import { EVENTS_ENTRY_HELPER, GROUPS_ENTRY_HELPER, PEOPLE_ENTRY_HELPER } from '@/lib/alpha-activation-copy'
 import { PresetEmptyState } from '@/components/ui/empty-state-presets'
-import { fetchAlphaMode, isAlphaInviteMode } from '@/lib/alpha-mode'
 import { buildProfileOnboardingHref, getProfileOnboardingGaps } from '@/lib/profile-onboarding'
 import HomeUpcomingEventCard from '@/components/home/HomeUpcomingEventCard'
 import { homeQuickActionChipClass } from '@/components/home/home-dashboard-styles'
@@ -26,11 +28,6 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
   const myRsvps = useApiMyRsvps(signedIn)
   const { unreadCount: msgUnread } = useConversationsPreview()
   const { feed, save } = useOnboardingState(signedIn)
-  const [alphaMode, setAlphaMode] = useState(false)
-
-  useEffect(() => {
-    void fetchAlphaMode().then((m) => setAlphaMode(isAlphaInviteMode(m)))
-  }, [])
 
   const dismissStartHere = useCallback(async () => {
     await save({ feed: { startHereDismissedAt: new Date().toISOString() } })
@@ -54,6 +51,16 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
   const profileIncomplete = profileGaps.length > 0
   const nextRsvp = myRsvps.status === 'ready' && myRsvps.items.length > 0 ? myRsvps.items[0] : null
 
+  const profileBasicsDone = (profile?.displayName ?? '').trim().length > 0 && ((profile?.bio ?? '').trim().length > 0 || photos > 0)
+  const privacyConfigured = !!feed.onboardingCompletedAt || (feed.onboardingStep ?? 0) >= 5
+  const hasEventRsvp = myRsvps.status === 'ready' && myRsvps.items.length > 0
+  const activationItems = buildHomeActivationItems({
+    profileBasicsDone,
+    joinedGroup: groups.length > 0,
+    hasEventRsvp,
+    privacyConfigured,
+  })
+
   const quickActions = [
     { label: 'Find people', href: '/people' },
     { label: 'Browse events', href: '/events' },
@@ -71,9 +78,7 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
         <p className="mt-1 text-sm text-dc-text-muted">
           Home is your community center — follow people, connect with friends, join groups, and RSVP to events.
         </p>
-        <p className="mt-2 text-xs leading-relaxed text-dc-muted">
-          Follow helps shape what you see. Connect is mutual and more personal.
-        </p>
+        <p className="mt-2 text-xs leading-relaxed text-dc-muted">{PEOPLE_ENTRY_HELPER}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {quickActions.map((action) => (
             <Link key={action.href} to={action.href} className={homeQuickActionChipClass}>
@@ -81,9 +86,7 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
             </Link>
           ))}
         </div>
-        {alphaMode ?
-          <AlphaNotice className="mt-4" />
-        : null}
+        <AlphaNotice className="mt-4" />
         {nextRsvp ?
           <div className="mt-4 border-t border-dc-border pt-4">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-dc-accent">Your calendar</p>
@@ -101,6 +104,8 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
         : null}
       </section>
 
+      <HomeActivationCard items={activationItems} />
+
       <ProfileCompletionCard
         displayName={profile?.displayName}
         bio={profile?.bio}
@@ -111,6 +116,7 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
 
       <section className="rounded-2xl border border-dc-border bg-dc-elevated-solid/90 p-5">
         <h3 className="text-base font-semibold text-dc-text">Groups to start finding your people</h3>
+        <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">{GROUPS_ENTRY_HELPER}</p>
         {groups.length > 0 ?
           <ul className="mt-3 space-y-2">
             {groups.slice(0, 3).map((g) => (
@@ -126,7 +132,8 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
       </section>
 
       <section className="rounded-2xl border border-dc-border bg-dc-elevated-solid/90 p-5">
-        <h3 className="text-base font-semibold text-dc-text">Events that can turn online connections into real community</h3>
+        <h3 className="text-base font-semibold text-dc-text">Upcoming events</h3>
+        <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">{EVENTS_ENTRY_HELPER}</p>
         {events.length > 0 ?
           <ul className="mt-3 space-y-2">
             {events.slice(0, 3).map((ev) => (
@@ -147,6 +154,10 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
 
       <p className="text-xs text-dc-text-muted">
         You control your visibility and can report concerns at any time.{' '}
+        <Link to="/support" className="text-dc-accent hover:underline">
+          Alpha feedback
+        </Link>
+        {' · '}
         <Link to="/settings/privacy" className="text-dc-accent hover:underline">
           Privacy settings
         </Link>

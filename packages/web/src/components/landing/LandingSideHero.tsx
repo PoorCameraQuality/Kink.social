@@ -1,9 +1,14 @@
 import { Link } from 'react-router-dom'
 import {
-  LANDING_BASIC_SLOGAN,
-  LANDING_BASIC_TRUST,
-  LANDING_SIDE_HERO_FEATURES,
-} from '@/components/landing/landing-content'
+  LANDING_18_PLUS,
+  LANDING_ALPHA_DISCLAIMER,
+  LANDING_ALPHA_FRAMING,
+  LANDING_CTA_EVENTS,
+  LANDING_CTA_GROUPS,
+  LANDING_CTA_PRIVACY,
+  LANDING_VALUE_HEADLINE,
+} from '@/lib/alpha-activation-copy'
+import { LANDING_BASIC_TRUST, LANDING_SIDE_HERO_FEATURES } from '@/components/landing/landing-content'
 
 export default function LandingSideHero() {
   return (
@@ -11,11 +16,24 @@ export default function LandingSideHero() {
       <div className="landing-side-hero__backdrop" aria-hidden />
 
       <div className="landing-side-hero__inner pub-animate">
-        <p className="landing-side-hero__eyebrow">Community platform</p>
-        <h2 className="landing-side-hero__headline">{LANDING_BASIC_SLOGAN}</h2>
-        <p className="landing-side-hero__lede">
-          Events, groups, education, vendors, and the people who make it happen — built for
-          consent-first adults.
+        <p className="landing-side-hero__eyebrow">
+          Public alpha · {LANDING_18_PLUS}
+        </p>
+        <h2 className="landing-side-hero__headline">{LANDING_VALUE_HEADLINE}</h2>
+        <p className="landing-side-hero__lede">{LANDING_ALPHA_FRAMING}</p>
+        <nav className="landing-side-hero__cta-row" aria-label="Explore before joining">
+          <Link to="/events" className="pub-secondary-cta landing-side-hero__cta">
+            {LANDING_CTA_EVENTS}
+          </Link>
+          <Link to="/groups" className="pub-secondary-cta landing-side-hero__cta">
+            {LANDING_CTA_GROUPS}
+          </Link>
+          <Link to="/privacy" className="pub-tertiary-cta">
+            {LANDING_CTA_PRIVACY}
+          </Link>
+        </nav>
+        <p className="landing-side-hero__alpha-note" role="note">
+          {LANDING_ALPHA_DISCLAIMER}
         </p>
 
         <nav className="landing-side-hero__nav" aria-label="Explore the platform">

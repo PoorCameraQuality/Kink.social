@@ -1,5 +1,8 @@
-import { demoMockImageUrl } from '@/data/mock-data'
-import type { FollowingFeedItem, HomeFeedPost } from '@/lib/feed-types'
+import type { FollowingFeedItem, HomeFeedPost } from './feed-types.ts'
+
+function demoMockImageUrl(seed: string, w: number, h: number): string {
+  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}`
+}
 
 const LANDING_IMAGES = {
   beach: '/landing/sonny-ravesteijn-nQeR7JIGpOk.jpg',

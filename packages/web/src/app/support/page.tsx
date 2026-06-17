@@ -7,9 +7,20 @@ export default function SupportPage() {
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-dc-text mb-2">Help &amp; support</h1>
         <p className="text-sm text-dc-text-muted leading-relaxed">
-          Safety resources, reporting, and where to get help on Kink Social.
+          Safety resources, alpha feedback, reporting, and where to get help on kink.social.
         </p>
       </header>
+
+      <section className="mb-8 rounded-2xl border border-dc-accent-border/40 bg-dc-accent-muted/20 p-6">
+        <h2 className="text-lg font-semibold text-dc-text">Public alpha feedback</h2>
+        <p className="mt-2 text-sm leading-relaxed text-dc-text-muted">
+          Testing the alpha? Tell us about bugs, confusing flows, privacy concerns, safety issues, or anything else that
+          would help us improve before wider launch.
+        </p>
+        <p className="mt-2 text-sm text-dc-text-muted">
+          Use the report form below. Choose the category that fits best. A human moderator reviews every submission.
+        </p>
+      </section>
 
       <section className="mb-8 space-y-4 rounded-2xl border border-dc-border bg-dc-elevated/95 p-6">
         <h2 className="text-lg font-semibold text-dc-text">Safety &amp; community</h2>
