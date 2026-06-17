@@ -370,3 +370,46 @@ Saved under Cursor screenshots temp path on operator workstation.
 | Ready for full public launch? | **No** |
 
 ---
+
+## Pass 4 — 2026-06-17 (Public Alpha Promotion Gate Pass 1)
+
+**Operator:** Cursor agent (browser automation + API probes)  
+**Target:** https://kink.social — public-facing alpha (open registration)  
+**Deployed commit:** `917e831`  
+**Seed batch:** `alpha-social-seed` present (seeded personas verified)  
+**Registration policy:** `{"registrationOpen":true,"inviteRequired":false}`  
+
+### Promotion gate blockers — status
+
+| Blocker | Status | Evidence |
+|--------|--------|----------|
+| Upload smoke | **Pass** (profile photo); feed media not tested | `POST /api/upload` + `POST /api/profile/me/photos` succeeded; profile now shows **1 photo**; anon fetch of image URL returned 200 |
+| Staff/moderation smoke | **Blocked** (no credentials in this pass) | Env UUID lists are unset; DB has `platform_staff` rows (`Brax`, `tarkiz`, `TestAdmin` as `SITE_ADMIN`, `RopeDreamer` as `MODERATOR`) but no passwords were provided |
+| Private group forum privacy | **Blocked / seed gap** | Private group `alpha-social-private-circle` is not discoverable via `/api/v1/groups` list, so we could not obtain its id for member vs non-member forum checks without privileged DB access |
+| Count-only attendee privacy | **Pass** (API) | `GET /api/v1/events/{id}/attendees` returns `attendeeListVisibility: "count_only"` and `items: []` for both authed and anon |
+| Seed marker evaluation | **Pass with caveat** | Seed tags like `[alpha_social_seed:…]` visible in feed/post bodies; `ALPHA TEST` badges visible on cards; acceptable for alpha honesty but should be reviewed before broad promotion |
+
+### Upload smoke (profile photos)
+
+- Verified upload pipeline: `POST /api/upload` (purpose `profile_photo`) → quarantined key
+- Verified attach: `POST /api/profile/me/photos` → 201 with `uploadStatus: "AUTO_APPROVED"`, `publishLane: "GREEN"`
+- Verified UI: profile now shows **1 photo** (screenshot captured: `promotion-gate-profile-after-upload.png`)
+- **Leak check:** direct image URL was reachable anonymously (HTTP 200). Photo visibility in API is `LOGGED_IN`, but storage URL is public.
+
+### Moderation staff discovery (read-only)
+
+- `.env.production` UUID lists: `C2K_SITE_OWNER_USER_IDS`, `C2K_SITE_ADMIN_USER_IDS`, `C2K_PLATFORM_MODERATOR_USER_IDS` were **unset** on VPS.
+- `platform_staff` table contains: `Brax` (SITE_ADMIN), `tarkiz` (SITE_ADMIN), `TestAdmin` (SITE_ADMIN), `RopeDreamer` (MODERATOR).
+- Non-staff (`alpha_social`) still blocked at `/moderation` with “not platform staff”.
+
+### Readiness verdict update (Pass 4)
+
+| Question | Answer |
+|----------|--------|
+| Public visitors allowed? | **Yes** |
+| Safe to leave visible? | **Yes with caveat** — profile photo URLs appear publicly reachable via direct link; review intended bucket/proxy privacy expectations |
+| Ready to actively promote for alpha testing? | **Not yet** — staff moderation login still blocked; private-group persona check still blocked; confirm whether public photo URL exposure is acceptable for open alpha |
+| Ready for structured tester QA? | **Yes** (seeded accounts, core flows, uploads functioning) |
+| Ready for full public launch? | **No** |
+
+---
