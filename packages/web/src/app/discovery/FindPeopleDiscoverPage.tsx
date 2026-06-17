@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useState } from 'react'
 import FindPeopleFiltersPanel from '@/components/find-people/FindPeopleFiltersPanel'
 import FindPeopleLeftRail from '@/components/find-people/FindPeopleLeftRail'
 import FindPeopleProfileCard from '@/components/find-people/FindPeopleProfileCard'
@@ -8,7 +8,6 @@ import type { FindPeopleFilterDraft } from '@/components/find-people/FindPeopleF
 import DirectoryTemplate, { DirectoryFilterButton } from '@/components/templates/DirectoryTemplate'
 import FilterSheet from '@/components/templates/FilterSheet'
 import EmptyState from '@/components/ui/EmptyState'
-import { mockPeople } from '@/data/mock-data'
 import { useApiPeopleSearch } from '@/hooks/useApiPeopleSearch'
 import { PEOPLE_STREAM_TABS } from '@/lib/people-search-constants'
 import type { CommunityRoleFilterId } from '@/lib/people-search-constants'
@@ -16,6 +15,12 @@ import { shellOuterClass } from '@/lib/shell-contract'
 import { cn } from '@/lib/cn'
 import { countPeopleActiveFilters } from '@/lib/people-directory-utils'
 import { toggleArrayItem } from '@/lib/utils/toggleArrayItem'
+import {
+  PEOPLE_EMPTY_NEW_ACCOUNT_BODY,
+  PEOPLE_EMPTY_NEW_ACCOUNT_TITLE,
+  PEOPLE_EMPTY_SEARCH_BODY,
+  PEOPLE_EMPTY_SEARCH_TITLE,
+} from '@/lib/social-graph-copy'
 
 function filtersFromHook(hook: ReturnType<typeof useApiPeopleSearch>): FindPeopleFilterDraft {
   return {
@@ -172,10 +177,8 @@ export default function FindPeopleDiscoverPage() {
     peopleBrowseUnfiltered &&
     displayPeople.length === 0
 
-  const suggestedPool = useMemo(
-    () => (useDemoFallback ? mockPeople : displayPeople),
-    [displayPeople, useDemoFallback],
-  )
+  const peopleEmptyIsNewAccountBrowse =
+    peopleApiBacked && peopleBrowseUnfiltered && !searchQuery.trim() && displayPeople.length === 0
 
   const appliedFilterCount = countPeopleActiveFilters(filtersFromHook(hook))
   const filterRailProps = {
@@ -253,7 +256,7 @@ export default function FindPeopleDiscoverPage() {
           </div>
         }
         desktopSidebar={<FindPeopleLeftRail {...filterRailProps} />}
-        desktopAside={<FindPeopleRightRail suggested={suggestedPool} useDemoFallback={useDemoFallback} />}
+        desktopAside={<FindPeopleRightRail peopleApiBacked={peopleApiBacked} useDemoFallback={useDemoFallback} />}
       >
         {!searchQuery.trim() ?
           <FindPeopleScopeTabs active={streamTab} onChange={setStreamTab} totalCount={totalCount} />
@@ -291,20 +294,30 @@ export default function FindPeopleDiscoverPage() {
             secondaryCtaHref="/groups"
           />
         : displayPeople.length === 0 ?
-          <EmptyState
-            inline
-            className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
-            title="No people found"
-            message={
-              peopleApiBacked && peopleBrowseUnfiltered ?
-                'No profiles in the directory yet. Complete your profile and check back as the community grows.'
-              : 'Try widening your location, removing a role filter, or searching for a broader term.'
-            }
-            actionLabel={peopleBrowseUnfiltered ? undefined : 'Reset filters'}
-            onAction={peopleBrowseUnfiltered ? undefined : resetAll}
-            secondaryCtaLabel="Browse events"
-            secondaryCtaHref="/events"
-          />
+          peopleEmptyIsNewAccountBrowse ?
+            <EmptyState
+              inline
+              className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+              title={PEOPLE_EMPTY_NEW_ACCOUNT_TITLE}
+              message={PEOPLE_EMPTY_NEW_ACCOUNT_BODY}
+              actions={[
+                { label: 'Browse people', href: '/people', primary: true },
+                { label: 'Explore groups', href: '/groups' },
+                { label: 'Browse events', href: '/events' },
+                { label: 'Edit profile', href: '/profile/edit' },
+              ]}
+            />
+          : <EmptyState
+              inline
+              className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+              title={PEOPLE_EMPTY_SEARCH_TITLE}
+              message={PEOPLE_EMPTY_SEARCH_BODY}
+              actions={[
+                { label: 'Clear filters', onClick: resetAll, primary: true },
+                { label: 'Browse groups', href: '/groups' },
+                { label: 'Browse events', href: '/events' },
+              ]}
+            />
         : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
             {displayPeople.map((person, index) => {

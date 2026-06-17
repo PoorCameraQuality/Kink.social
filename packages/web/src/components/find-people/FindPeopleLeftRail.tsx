@@ -5,6 +5,7 @@ import DiscoveryBrowseLinks from '@/components/discovery/DiscoveryBrowseLinks'
 import FindPeopleFiltersPanel, { type FindPeopleFilterDraft } from '@/components/find-people/FindPeopleFiltersPanel'
 
 import type { CommunityRoleFilterId } from '@/lib/people-search-constants'
+import { FOLLOW_VS_CONNECT_LONG } from '@/lib/social-graph-copy'
 
 
 
@@ -88,6 +89,11 @@ export default function FindPeopleLeftRail(props: Props) {
           </ul>
 
         </nav>
+
+        <div className="mb-4 rounded-xl border border-dc-border bg-dc-elevated-muted/40 p-3">
+          <p className="text-xs font-semibold text-dc-text">Follow vs Connect</p>
+          <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">{FOLLOW_VS_CONNECT_LONG}</p>
+        </div>
 
         <FindPeopleFiltersPanel
           idPrefix="fp-rail"

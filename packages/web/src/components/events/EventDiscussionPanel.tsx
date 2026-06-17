@@ -262,9 +262,9 @@ export default function EventDiscussionPanel({ eventId }: { eventId: string }) {
 
           inline
 
-          title="No threads yet"
+          title="Start the event conversation."
 
-          message="Start the conversation · RSVP attendees and the host can post."
+          message="Ask a logistics question, coordinate plans, or help others know what to expect."
 
         />
 

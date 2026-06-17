@@ -70,8 +70,12 @@ export default function LocalHomeFeed({
   const feedLoading = isAuthenticated && !isFallback && !apiFeedSettled
   const composerName = viewerDisplayName ?? viewerUsername ?? 'there'
   const composerPlaceholder = feedShell
-    ? 'Share an update with people who follow you…'
+    ? 'What do you want your local kink community to know?'
     : `What's on your mind, ${composerName}?`
+  const composerHint =
+    feedShell ?
+      'Post to your feed now. Group and event-specific posting can come later.'
+    : undefined
 
   const viewerInitial = viewerUsername ? viewerUsername.charAt(0).toUpperCase() : '?'
 
@@ -81,11 +85,15 @@ export default function LocalHomeFeed({
       viewerInitial={viewerInitial}
       useDbComposer={useDbComposer}
       composerPlaceholder={composerPlaceholder}
+      composerHint={composerHint}
       onPosted={onPosted}
       compact={compactComposer}
     />
   : (
-    <Panel className="mb-0 border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]">
+    <Panel id="local-home-feed-composer" className="mb-0 border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]">
+      <p className="mb-2 text-xs leading-relaxed text-dc-muted">
+        Share an update, ask a question, or start a conversation.
+      </p>
       <div className="flex gap-3">
         <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-dc-accent/25 text-sm font-semibold text-dc-accent ring-2 ring-dc-accent/40">
           {viewerInitial}
@@ -118,18 +126,44 @@ export default function LocalHomeFeed({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
         }
-        title={!isAuthenticated || isFallback ? 'Sign in to see your feed' : 'Nothing in your feed yet'}
+        title={
+          !isAuthenticated || isFallback ?
+            'Sign in to see your feed'
+          : apiFeedOk ?
+            'Nothing local has been posted yet.'
+          : 'Could not load your feed'
+        }
         message={
           !isAuthenticated || isFallback ?
             'Sign in to post and follow people, or use Explore to find events and groups.'
           : apiFeedOk ?
-            'Post something or follow people. Their updates will show up here.'
-          : 'Could not load your feed. Try again or browse events.'
+            'Be the first to start a conversation, or explore people, groups, and events while the local feed warms up.'
+          : 'Try again or browse events and groups.'
         }
-        ctaLabel="Browse events"
-        ctaHref="/events"
-        secondaryCtaLabel={!isAuthenticated || isFallback ? 'Sign in' : 'Find people'}
-        secondaryCtaHref={!isAuthenticated || isFallback ? buildLoginHref('/home') : '/people'}
+        actions={
+          !isAuthenticated || isFallback ?
+            [
+              { label: 'Sign in', href: buildLoginHref('/home'), primary: true },
+              { label: 'Browse events', href: '/events' },
+            ]
+          : apiFeedOk ?
+            [
+              {
+                label: 'Write a post',
+                onClick: () => {
+                  document.getElementById('local-home-feed-composer')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                },
+                primary: true,
+              },
+              { label: 'Find people', href: '/people' },
+              { label: 'Explore groups', href: '/groups' },
+              { label: 'Browse events', href: '/events' },
+            ]
+          : [
+              { label: 'Try again', onClick: onRefreshFeed, primary: true },
+              { label: 'Browse events', href: '/events' },
+            ]
+        }
       />
     : <div className="feed-stream dc-feed-stagger">
         {localFeedPosts.slice(0, 12).map((post) => (

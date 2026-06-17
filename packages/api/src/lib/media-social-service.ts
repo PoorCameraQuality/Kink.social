@@ -29,6 +29,7 @@ import { mediaContentProxyPath } from './media-pipeline.js'
 import { autoPublishProfileGalleryPhoto } from './profile-photo-policy.js'
 import { emitActivity } from './feed-activities.js'
 import { canViewerSeeMedia } from './media-visibility.js'
+import { viewerCanAccessScopedMediaItem } from './media-scoped-visibility.js'
 import { ensureUserSettingsRow } from './user-settings-row.js'
 
 async function loadUserPrivacySettings(userId: string) {
@@ -124,7 +125,7 @@ export async function canViewerSeeMediaItem(
   if (item.visibility === MEDIA_VISIBILITIES.staffOnly) {
     return opts?.isStaff === true
   }
-  return true
+  return viewerCanAccessScopedMediaItem(item, asset, viewerUserId)
 }
 
 export async function shapeMediaItemPreview(

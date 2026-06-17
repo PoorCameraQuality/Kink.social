@@ -4,8 +4,10 @@ import { z } from 'zod'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { db, schema } from '../db/index.js'
+import { shouldEmitGroupForumThreadFeedActivity, type GroupMemberListVisibility } from '@c2k/shared'
 import { getModerationQueue } from '../lib/moderation-queue.js'
 import { touchGroupActivity } from '../lib/group-activity.js'
+import { emitActivity } from '../lib/feed-activities.js'
 import { isUserScopeBanned } from '../lib/org-moderation-access.js'
 
 const UUID_RE =
@@ -236,6 +238,16 @@ export async function registerGroupForumRoutes(app: FastifyInstance) {
     }
     const parsed = forumThreadBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    const [g] = await db.select().from(schema.groups).where(eq(schema.groups.id, groupId)).limit(1)
+    if (!g) return reply.status(404).send({ error: 'Not found' })
+    const [membership] = await db
+      .select({
+        role: schema.groupMembers.role,
+        memberListVisibility: schema.groupMembers.memberListVisibility,
+      })
+      .from(schema.groupMembers)
+      .where(and(eq(schema.groupMembers.groupId, groupId), eq(schema.groupMembers.userId, user.userId)))
+      .limit(1)
     const [thread] = await db
       .insert(schema.forumThreads)
       .values({
@@ -264,6 +276,29 @@ export async function registerGroupForumRoutes(app: FastifyInstance) {
       /* optional */
     }
     await touchGroupActivity(groupId)
+    if (
+      membership &&
+      shouldEmitGroupForumThreadFeedActivity(
+        {
+          memberListVisibility: (membership.memberListVisibility ?? 'visible') as GroupMemberListVisibility,
+        },
+        membership.role,
+      )
+    ) {
+      emitActivity({
+        actorId: user.userId,
+        verb: 'group_thread_created',
+        objectType: 'forum_thread',
+        objectId: thread.id,
+        metadata: {
+          groupId,
+          groupName: g.name,
+          groupSlug: g.slug,
+          threadTitle: thread.title,
+          groupVisibility: g.visibility,
+        },
+      })
+    }
     return reply.send({ thread, post })
   })
 

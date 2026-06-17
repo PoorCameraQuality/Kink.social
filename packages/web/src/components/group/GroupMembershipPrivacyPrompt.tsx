@@ -39,8 +39,8 @@ export default function GroupMembershipPrivacyPrompt({
     <Dialog
       open={open}
       onClose={onCancel}
-      title="Show your name in this group's member list?"
-      description="Some groups can reveal location, identity, interests, or scene participation. You can choose whether other members can see you in the member list. Group owners and moderators can always see members for safety and moderation."
+      title="Choose how you appear in this group"
+      description="Some groups can reveal sensitive interests or location. You can join without showing your name on the public member list. Group owners and moderators may still see membership so they can keep the space safe."
       maxWidthClass="max-w-lg"
       footer={
         <div className="flex w-full flex-wrap justify-end gap-2">
@@ -71,7 +71,7 @@ export default function GroupMembershipPrivacyPrompt({
         </p>
 
         <fieldset className="space-y-2">
-          <legend className="text-sm font-medium text-dc-text">Member list visibility</legend>
+          <legend className="text-sm font-medium text-dc-text">Member list</legend>
           <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-dc-border p-3">
             <input
               type="radio"
@@ -81,8 +81,8 @@ export default function GroupMembershipPrivacyPrompt({
               className="mt-1"
             />
             <span>
-              <span className="block text-sm font-medium text-dc-text">Show me in the member list</span>
-              <span className="block text-xs text-dc-text-muted">Other members can see you joined.</span>
+              <span className="block text-sm font-medium text-dc-text">Show me on the member list</span>
+              <span className="block text-xs text-dc-text-muted">Other members can see you joined this group.</span>
             </span>
           </label>
           <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-dc-border p-3">
@@ -94,31 +94,42 @@ export default function GroupMembershipPrivacyPrompt({
               className="mt-1"
             />
             <span>
-              <span className="block text-sm font-medium text-dc-text">Keep me hidden from the member list</span>
-              <span className="block text-xs text-dc-text-muted">Group staff can still see you for moderation.</span>
+              <span className="block text-sm font-medium text-dc-text">Hide me from the member list</span>
+              <span className="block text-xs text-dc-text-muted">
+                You stay off the public list. Group staff can still see you for moderation and safety.
+              </span>
             </span>
           </label>
         </fieldset>
 
-        <label className="flex cursor-pointer items-start gap-2">
-          <input
-            type="checkbox"
-            checked={showGroupOnProfile}
-            onChange={(e) => setShowGroupOnProfile(e.target.checked)}
-            className="mt-1"
-          />
-          <span className="text-sm text-dc-text-muted">Show this group on my profile</span>
-        </label>
+        <fieldset className="space-y-2 border-t border-dc-border pt-3">
+          <legend className="text-sm font-medium text-dc-text">Profile and feed</legend>
+          <label className="flex cursor-pointer items-start gap-2">
+            <input
+              type="checkbox"
+              checked={showGroupOnProfile}
+              onChange={(e) => setShowGroupOnProfile(e.target.checked)}
+              className="mt-1"
+            />
+            <span className="text-sm text-dc-text-muted">
+              <span className="block font-medium text-dc-text">Show this group on my profile</span>
+              <span className="block text-xs">When off, the group stays off your public profile.</span>
+            </span>
+          </label>
 
-        <label className="flex cursor-pointer items-start gap-2">
-          <input
-            type="checkbox"
-            checked={announceGroupJoinInFeed}
-            onChange={(e) => setAnnounceGroupJoinInFeed(e.target.checked)}
-            className="mt-1"
-          />
-          <span className="text-sm text-dc-text-muted">Allow joining this group to appear in feed activity</span>
-        </label>
+          <label className="flex cursor-pointer items-start gap-2">
+            <input
+              type="checkbox"
+              checked={announceGroupJoinInFeed}
+              onChange={(e) => setAnnounceGroupJoinInFeed(e.target.checked)}
+              className="mt-1"
+            />
+            <span className="text-sm text-dc-text-muted">
+              <span className="block font-medium text-dc-text">Announce my join in feed activity</span>
+              <span className="block text-xs">When off, your join does not appear in others’ feeds.</span>
+            </span>
+          </label>
+        </fieldset>
 
         <label className="flex cursor-pointer items-start gap-2 border-t border-dc-border pt-3">
           <input
@@ -127,7 +138,7 @@ export default function GroupMembershipPrivacyPrompt({
             onChange={(e) => setRememberAsDefault(e.target.checked)}
             className="mt-1"
           />
-          <span className="text-sm text-dc-text-muted">Remember this as my default for future groups</span>
+          <span className="text-sm text-dc-text-muted">Remember these choices as my default for future groups</span>
         </label>
       </div>
     </Dialog>

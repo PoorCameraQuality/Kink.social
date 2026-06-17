@@ -10,14 +10,16 @@ import {
   getMockPendingPhotosForGroup,
   getMockResourcesForGroup,
 } from '@/data/mock-data'
-import { useViewerUsername } from '@/contexts/AuthContext'
+import { useAuth, useViewerUsername } from '@/contexts/AuthContext'
+import {
+  allowMockGroupExperience,
+  shouldFetchApiGroupDetail,
+} from '@/lib/group-detail-guards'
 import type { GroupRole } from '@/data/mock-data'
 import type { MockGroup, MockGroupChannel, MockGroupMember, MockEvent, MockGroupPhoto, MockResource } from '@/data/mock-data'
 import type { ApiEventListItem } from '@/lib/api-event-mapper'
 import { mapApiEventToMockEvent } from '@/lib/api-event-mapper'
 import { parseGroupRules, type GroupRule } from '@c2k/shared'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 type ApiGroupDetail = {
   group: MockGroup
@@ -69,6 +71,8 @@ export interface UseGroupDetailReturn {
   /** Staff-only count of hidden regular members. */
   staffHiddenMemberCount: number
   /** True while fetching group events list (API-backed UUID groups). */
+  /** Demo slug/id group blocked for signed-in real users (mock exists but gated). */
+  mockPreviewBlocked: boolean
   eventsLoading: boolean
   refreshPhotos: () => void
   refreshChannels: () => void
@@ -77,6 +81,7 @@ export interface UseGroupDetailReturn {
 }
 
 export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetailReturn {
+  const { isAuthenticated } = useAuth()
   const viewerUsername = useViewerUsername()
   const [photosRefreshKey, setPhotosRefreshKey] = useState(0)
   const [channelsRefreshKey, setChannelsRefreshKey] = useState(0)
@@ -89,10 +94,11 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
   const [eventsLoading, setEventsLoading] = useState(false)
   const [eventsRefreshKey, setEventsRefreshKey] = useState(0)
 
-  const isUuidParam = !!(groupIdOrSlug && UUID_RE.test(groupIdOrSlug))
+  const fetchApiDetail = shouldFetchApiGroupDetail(groupIdOrSlug, isAuthenticated)
+  const allowMock = allowMockGroupExperience(isAuthenticated)
 
   useEffect(() => {
-    if (!groupIdOrSlug || !UUID_RE.test(groupIdOrSlug)) {
+    if (!groupIdOrSlug || !fetchApiDetail) {
       setApiMode('idle')
       setApiDetail(null)
       return
@@ -193,10 +199,11 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
     return () => {
       cancelled = true
     }
-  }, [groupIdOrSlug, apiRefreshKey])
+  }, [groupIdOrSlug, apiRefreshKey, fetchApiDetail])
 
   useEffect(() => {
-    if (!groupIdOrSlug || !UUID_RE.test(groupIdOrSlug) || apiMode !== 'ready') {
+    const apiGroupId = apiDetail?.group.id ?? groupIdOrSlug
+    if (!apiGroupId || !fetchApiDetail || apiMode !== 'ready') {
       setApiEvents([])
       setEventsLoading(false)
       return
@@ -205,7 +212,7 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
     setEventsLoading(true)
     ;(async () => {
       try {
-        const r = await fetch(`/api/v1/events?groupId=${encodeURIComponent(groupIdOrSlug)}`, {
+        const r = await fetch(`/api/v1/events?groupId=${encodeURIComponent(apiGroupId)}`, {
           credentials: 'include',
         })
         if (!r.ok) {
@@ -225,38 +232,41 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
     return () => {
       cancelled = true
     }
-  }, [groupIdOrSlug, apiMode, eventsRefreshKey])
+  }, [groupIdOrSlug, apiDetail?.group.id, apiMode, eventsRefreshKey, fetchApiDetail])
 
-  const mockGroup = useMemo(() => {
+  const rawMockGroup = useMemo(() => {
     if (!groupIdOrSlug) return null
     return getMockGroupById(groupIdOrSlug) ?? getMockGroupBySlug(groupIdOrSlug) ?? null
   }, [groupIdOrSlug])
 
+  const mockGroup = allowMock ? rawMockGroup : null
+
   const group = useMemo(() => {
     if (!groupIdOrSlug) return null
-    if (isUuidParam && apiMode === 'ready' && apiDetail) return apiDetail.group
-    if (isUuidParam && (apiMode === 'loading' || apiMode === 'error' || apiMode === 'missing')) return null
+    if (fetchApiDetail && apiMode === 'ready' && apiDetail) return apiDetail.group
+    if (fetchApiDetail && (apiMode === 'loading' || apiMode === 'error' || apiMode === 'missing')) return null
     return mockGroup
-  }, [groupIdOrSlug, isUuidParam, apiMode, apiDetail, mockGroup])
+  }, [groupIdOrSlug, fetchApiDetail, apiMode, apiDetail, mockGroup])
 
-  const apiBacked = isUuidParam && apiMode === 'ready' && !!apiDetail
+  const apiBacked = fetchApiDetail && apiMode === 'ready' && !!apiDetail
+  const mockPreviewBlocked = fetchApiDetail && apiMode === 'missing' && !allowMock && !!rawMockGroup
 
   const refreshPhotos = useCallback(() => setPhotosRefreshKey((k) => k + 1), [])
   const refreshChannels = useCallback(() => setChannelsRefreshKey((k) => k + 1), [])
   const refreshResources = useCallback(() => setResourcesRefreshKey((k) => k + 1), [])
   const refreshMembers = useCallback(() => {
     setMembersRefreshKey((k) => k + 1)
-    if (groupIdOrSlug && UUID_RE.test(groupIdOrSlug)) {
+    if (groupIdOrSlug && fetchApiDetail) {
       setApiRefreshKey((k) => k + 1)
     }
-  }, [groupIdOrSlug])
+  }, [groupIdOrSlug, fetchApiDetail])
 
   const refreshDetail = useCallback(() => {
-    if (groupIdOrSlug && UUID_RE.test(groupIdOrSlug)) {
+    if (groupIdOrSlug && fetchApiDetail) {
       setApiRefreshKey((k) => k + 1)
       setEventsRefreshKey((k) => k + 1)
     }
-  }, [groupIdOrSlug])
+  }, [groupIdOrSlug, fetchApiDetail])
 
   const members = useMemo(() => {
     if (!group) return []
@@ -301,9 +311,9 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
   const canModerate = canManage || viewerRole === 'moderator'
   const isMember = !!viewerMember
 
-  const detailLoading = isUuidParam && apiMode === 'loading'
-  const detailError = isUuidParam && apiMode === 'error'
-  const detailNotFound = isUuidParam && apiMode === 'missing'
+  const detailLoading = fetchApiDetail && apiMode === 'loading'
+  const detailError = fetchApiDetail && apiMode === 'error'
+  const detailNotFound = fetchApiDetail && apiMode === 'missing' && !rawMockGroup
 
   const parentOrganization =
     apiBacked && apiDetail ? apiDetail.parentOrganization : null
@@ -336,6 +346,7 @@ export function useGroupDetail(groupIdOrSlug: string | undefined): UseGroupDetai
     groupOwnerId,
     viewerMembership,
     staffHiddenMemberCount,
+    mockPreviewBlocked,
     eventsLoading,
     refreshPhotos,
     refreshChannels,

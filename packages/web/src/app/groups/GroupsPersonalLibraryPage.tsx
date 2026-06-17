@@ -10,6 +10,7 @@ import { FeedCardSkeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/contexts/AuthContext'
 import { useApiMyGroups, type MyGroupListItem } from '@/hooks/useApiMyGroups'
 import type { GroupsSectionMode } from '@/lib/groups-section-mode'
+import { isStubGroupsLibraryMode } from '@/lib/group-detail-guards'
 import type { MockGroup } from '@/data/types'
 
 const META: Record<
@@ -31,6 +32,24 @@ const META: Record<
   saved: {
     title: 'Saved Groups',
     subtitle: 'Groups you bookmarked for later.',
+  },
+}
+
+const STUB_COPY: Record<Exclude<GroupsSectionMode, 'discover' | 'my'>, { title: string; message: string }> = {
+  invitations: {
+    title: 'Group invitations — coming later',
+    message:
+      'Invites and join requests are not available in the app yet. Browse discover to find groups to join today.',
+  },
+  posts: {
+    title: 'My group posts — coming later',
+    message:
+      'A personal list of your group forum threads and replies will appear here in a future update. Visit a group’s Forums tab to participate now.',
+  },
+  saved: {
+    title: 'Saved groups — coming later',
+    message:
+      'Bookmarking groups for later is not available yet. Use My Groups for communities you have already joined.',
   },
 }
 
@@ -79,6 +98,26 @@ export default function GroupsPersonalLibraryPage({ mode }: Props) {
   const [createOpen, setCreateOpen] = useState(false)
 
   const meta = META[mode]
+
+  if (showApi && isStubGroupsLibraryMode(mode)) {
+    const stub = STUB_COPY[mode as keyof typeof STUB_COPY]
+    return (
+      <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8">
+        <header className="mb-6">
+          <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">{stub.title}</h1>
+        </header>
+        <EmptyState
+          inline
+          title={stub.title}
+          message={stub.message}
+          ctaLabel="Discover groups"
+          ctaHref="/groups"
+          secondaryCtaLabel="My groups"
+          secondaryCtaHref="/groups?tab=my"
+        />
+      </div>
+    )
+  }
 
   const myCounts = useMemo(() => {
     const c = { joined: 0, moderating: 0, created: 0, archived: 0 }

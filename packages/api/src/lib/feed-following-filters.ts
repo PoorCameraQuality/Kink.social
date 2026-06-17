@@ -2,7 +2,7 @@
 
 export const REACTION_VERBS = new Set(['connection_accepted', 'loved', 'reacted', 'followed'])
 export const EVENT_VERBS = new Set(['event_created', 'event_rsvp', 'presenter_assigned', 'convention_pin'])
-export const GROUP_VERBS = new Set(['group_join', 'org_join', 'org_announcement'])
+export const GROUP_VERBS = new Set(['group_join', 'group_thread_created', 'org_join', 'org_announcement'])
 
 export type FollowingFilterId =
   | 'all'

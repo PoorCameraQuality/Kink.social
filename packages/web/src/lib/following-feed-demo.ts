@@ -298,8 +298,17 @@ export function demoFollowingFeedItems(): FollowingFeedItem[] {
   return [...activities.slice(0, 4), ...postItems, ...activities.slice(4)]
 }
 
-export function presentHomeFeedPosts(posts: HomeFeedPost[]): HomeFeedPost[] {
+export type PresentFeedOptions = {
+  /** When true, pad sparse/empty feeds with curated demo content (local layout QA only). */
+  allowDemoPadding?: boolean
+}
+
+export function presentHomeFeedPosts(posts: HomeFeedPost[], options?: PresentFeedOptions): HomeFeedPost[] {
   const real = filterAutomatedPosts(posts)
+  if (!options?.allowDemoPadding) {
+    return real
+  }
+
   const hadNoise = real.length < posts.length
 
   if (real.length === 0 || hadNoise) {
@@ -311,8 +320,15 @@ export function presentHomeFeedPosts(posts: HomeFeedPost[]): HomeFeedPost[] {
   return real
 }
 
-export function presentFollowingFeedItems(items: FollowingFeedItem[]): FollowingFeedItem[] {
+export function presentFollowingFeedItems(
+  items: FollowingFeedItem[],
+  options?: PresentFeedOptions,
+): FollowingFeedItem[] {
   const real = filterAutomatedFollowingItems(items)
+  if (!options?.allowDemoPadding) {
+    return real
+  }
+
   const hadNoise = real.length < items.length
 
   if (real.length === 0 || hadNoise) {

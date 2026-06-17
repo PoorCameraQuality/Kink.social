@@ -4,6 +4,7 @@ import {
   canViewerSeeGroupMemberInPublicList,
   effectiveGroupMemberListVisibility,
   shouldEmitGroupJoinFeedActivity,
+  shouldEmitGroupForumThreadFeedActivity,
 } from './group-membership-visibility.js'
 
 const regularMemberCtx = { isOwner: false, isGroupStaff: false, isSiteStaff: false, isSelf: false }
@@ -67,6 +68,21 @@ describe('group-membership-visibility', () => {
         { memberListVisibility: 'hidden', announceGroupJoinInFeed: true },
         'moderator',
       ),
+      true,
+    )
+  })
+
+  it('hidden members do not emit group forum thread feed activity', () => {
+    assert.equal(
+      shouldEmitGroupForumThreadFeedActivity({ memberListVisibility: 'hidden' }, 'member'),
+      false,
+    )
+    assert.equal(
+      shouldEmitGroupForumThreadFeedActivity({ memberListVisibility: 'visible' }, 'member'),
+      true,
+    )
+    assert.equal(
+      shouldEmitGroupForumThreadFeedActivity({ memberListVisibility: 'hidden' }, 'moderator'),
       true,
     )
   })

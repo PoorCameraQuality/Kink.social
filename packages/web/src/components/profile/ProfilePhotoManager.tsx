@@ -183,7 +183,7 @@ export default function ProfilePhotoManager({
                   ) : null}
                   {displayUrl ?
                     <ProfilePhotoImage
-                      src={photo.url}
+                      src={displayUrl}
                       alt={photo.caption ?? 'Profile photo'}
                       displaySettings={photo.displaySettings}
                       className="h-full w-full object-cover"

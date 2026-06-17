@@ -53,15 +53,12 @@ type PostRow = {
 
 
 type Props = {
-
   groupId: string
-
   members?: MockGroupMember[]
-
   groupOwnerId?: string | null
-
   isMember?: boolean
-
+  /** Open this thread when landing from a feed activity deep link. */
+  initialThreadId?: string | null
 }
 
 
@@ -99,6 +96,7 @@ export default function GroupForumsSection({
   members = [],
   groupOwnerId = null,
   isMember = false,
+  initialThreadId = null,
 }: Props) {
 
   const key = encodeURIComponent(groupId)
@@ -141,7 +139,20 @@ export default function GroupForumsSection({
 
   const [replyBody, setReplyBody] = useState('')
 
+  const THREAD_UUID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
+  useEffect(() => {
+    const raw = initialThreadId?.trim()
+    if (!raw || !THREAD_UUID_RE.test(raw)) return
+    setThreadId(raw)
+  }, [initialThreadId])
+
+  useEffect(() => {
+    if (!threadDetail || !threadId) return
+    const el = document.getElementById(`forum-thread-${threadId}`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }, [threadDetail, threadId])
 
   const loadCategories = useCallback(async () => {
 
@@ -251,7 +262,7 @@ export default function GroupForumsSection({
 
           setThreadDetail(null)
 
-          setThreadErr('Could not load thread.')
+          setThreadErr('This discussion is not available.')
 
           return
 
@@ -387,6 +398,15 @@ export default function GroupForumsSection({
 
     <div className="space-y-6">
 
+      <div>
+        <h2 className="text-lg font-semibold text-dc-text">Group discussions</h2>
+        <p className="mt-1 text-sm text-dc-text-muted">
+          {isMember ?
+            'Ask the group, share resources, or start a topic for members.'
+          : 'Read what members are discussing. Join to post and reply.'}
+        </p>
+      </div>
+
       {err ?
 
         <div
@@ -439,15 +459,23 @@ export default function GroupForumsSection({
         threads === null ? null
         : (threads ?? []).length === 0 && !composerOpen ?
           <div className="c2k-empty-glow c2k-empty-state-compact rounded-2xl border border-dc-border bg-dc-elevated/95 p-6 text-center">
-            <h3 className="text-lg font-semibold text-dc-text">No threads yet</h3>
-            <p className="mt-2 text-sm text-dc-text-muted">Start the first conversation for this group.</p>
+            <h3 className="text-lg font-semibold text-dc-text">Start the first real discussion.</h3>
+            <p className="mt-2 text-sm text-dc-text-muted">
+              Ask a question, share a resource, or introduce a topic for members of this group.
+            </p>
             <button
               type="button"
               onClick={() => setComposerOpen(true)}
               className="mt-4 min-h-11 rounded-xl bg-dc-accent px-5 py-2 text-sm font-medium text-dc-accent-foreground hover:bg-dc-accent-hover"
             >
-              Start a thread
+              Start a discussion
             </button>
+            <Link
+              to={`/groups/${key}?tab=Events`}
+              className="mt-3 inline-flex min-h-10 items-center text-sm font-medium text-dc-accent hover:underline"
+            >
+              Browse group events
+            </Link>
           </div>
         : <div className="rounded-2xl border border-dc-border bg-dc-elevated/95 p-4 pb-6 md:pb-4">
             {(threads ?? []).length === 0 ?
@@ -502,7 +530,7 @@ export default function GroupForumsSection({
             </button>
 
           </div>
-      : <p className="text-sm text-dc-muted">Join this group to start threads.</p>}
+      : <p className="text-sm text-dc-muted">Join this group to ask questions and reply in discussions.</p>}
 
 
 
@@ -600,7 +628,7 @@ export default function GroupForumsSection({
 
           : threadDetail ?
 
-            <>
+            <div id={threadId ? `forum-thread-${threadId}` : undefined}>
 
               <div className="mb-2 lg:hidden">
                 <button
@@ -688,7 +716,7 @@ export default function GroupForumsSection({
                 <p className="mt-3 text-sm text-dc-muted">Join this group to reply.</p>
               )}
 
-            </>
+            </div>
 
           :   <p className="text-dc-muted text-sm">Select a thread or create one.</p>}
 

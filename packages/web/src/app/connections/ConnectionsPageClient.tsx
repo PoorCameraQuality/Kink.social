@@ -16,6 +16,12 @@ import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
 import StatusBanner from '@/components/ui/StatusBanner'
 import type { ConnectionRow, FollowRow, SuggestedPerson } from '@/app/connections/connections-types'
 import { useAuth } from '@/contexts/AuthContext'
+import {
+  CONNECTIONS_EMPTY_BODY,
+  CONNECTIONS_EMPTY_TITLE,
+  FOLLOW_VS_CONNECT_LONG,
+  FOLLOW_VS_CONNECT_SHORT,
+} from '@/lib/social-graph-copy'
 
 const actionBtn =
   'inline-flex min-h-9 items-center rounded-lg border border-dc-border px-3 text-sm font-medium text-dc-text hover:border-dc-accent-border hover:bg-dc-elevated-muted'
@@ -582,7 +588,7 @@ export default function ConnectionsPageClient() {
       case 'ignored':
         return 'People you have ignored or hidden.'
       case 'requests':
-        return 'Incoming and outgoing connection requests.'
+        return 'Incoming and outgoing connection requests. Accept to connect, or ignore requests you do not want.'
       default:
         return null
     }
@@ -593,10 +599,11 @@ export default function ConnectionsPageClient() {
       case 'connections':
         return (
           <NotificationsEmptyPanel
-            title="No connections yet"
-            message="Connect with people you trust so messages can open more easily and your community graph can grow."
+            title={CONNECTIONS_EMPTY_TITLE}
+            message={CONNECTIONS_EMPTY_BODY}
             actions={[
-              { label: 'People', href: '/people', primary: true },
+              { label: 'Find people', href: '/people', primary: true },
+              { label: 'Explore groups', href: '/groups' },
               { label: 'Browse events', href: '/events' },
             ]}
           />
@@ -692,12 +699,9 @@ export default function ConnectionsPageClient() {
             <header className="mb-6">
               <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">Connections</h1>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-dc-text-muted">
-                People you trust enough to message directly. Following is one-way and helps shape your feed.{' '}
-                <span
-                  className="text-dc-accent"
-                  title="Mutual connections can message without a request. Following does not require a connection."
-                >
-                  Learn more
+                {FOLLOW_VS_CONNECT_SHORT}{' '}
+                <span className="text-dc-text-muted" title={FOLLOW_VS_CONNECT_LONG}>
+                  Pending requests need your response before you are mutually connected.
                 </span>
               </p>
               <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">

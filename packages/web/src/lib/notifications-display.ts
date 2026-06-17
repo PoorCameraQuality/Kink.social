@@ -64,9 +64,9 @@ export function mapApiToDisplay(row: ApiNotificationRow): MockNotification {
       typeof payload.requesterUsername === 'string' ? payload.requesterUsername : 'Someone'
     return {
       id: row.id,
-      kind: 'mention',
+      kind: 'system',
       title: 'Connection request',
-      body: `@${from} wants to connect with you.`,
+      body: `@${from} sent you a connection request.`,
       timeAgo: shortTime(row.createdAt),
       createdAtIso,
       read: !!row.readAt,
@@ -77,13 +77,13 @@ export function mapApiToDisplay(row: ApiNotificationRow): MockNotification {
     const from = typeof payload.accepterUsername === 'string' ? payload.accepterUsername : 'Someone'
     return {
       id: row.id,
-      kind: 'mention',
+      kind: 'system',
       title: 'Connection accepted',
       body: `@${from} accepted your connection request.`,
       timeAgo: shortTime(row.createdAt),
       createdAtIso,
       read: !!row.readAt,
-      href: '/connections',
+      href: `/profile/${encodeURIComponent(from)}`,
     }
   }
   if (row.type === 'profile_relationship_request') {
@@ -131,11 +131,15 @@ export function mapApiToDisplay(row: ApiNotificationRow): MockNotification {
   }
   if (row.type === 'dm_request') {
     const convId = typeof payload.conversationId === 'string' ? payload.conversationId.trim() : ''
+    const from =
+      typeof payload.senderUsername === 'string' ? payload.senderUsername
+      : 'Someone'
+    const displayName = from === 'Someone' ? 'Someone' : `@${from}`
     return {
       id: row.id,
       kind: 'mention',
       title: 'Message request',
-      body: 'Someone wants to start a conversation with you.',
+      body: `${displayName} sent you a message request.`,
       timeAgo: shortTime(row.createdAt),
       createdAtIso,
       read: !!row.readAt,
@@ -232,7 +236,7 @@ export function mapApiToDisplay(row: ApiNotificationRow): MockNotification {
       id: row.id,
       kind: 'mention',
       title: 'New message',
-      body: `${who}: ${preview}`,
+      body: preview ? `${who}: ${preview}` : `@${who} sent you a message.`,
       timeAgo: shortTime(row.createdAt),
       createdAtIso,
       read: !!row.readAt,
@@ -366,7 +370,10 @@ export function mapApiToDisplay(row: ApiNotificationRow): MockNotification {
   }
 }
 
-export function kindLabel(kind: MockNotification['kind']): string {
+export function kindLabel(kind: MockNotification['kind'], title?: string): string {
+  const t = title?.toLowerCase() ?? ''
+  if (t.includes('connection request') || t.includes('message request')) return 'Request'
+  if (t.includes('connection accepted')) return 'Connection'
   switch (kind) {
     case 'event':
       return 'Event'
@@ -385,10 +392,13 @@ export function kindLabel(kind: MockNotification['kind']): string {
 export function notificationActionLabel(n: MockNotification): string | null {
   if (!n.href) return null
   const title = n.title.toLowerCase()
+  if (title.includes('connection request') || title.includes('message request')) return 'Review request'
+  if (title.includes('connection accepted')) return 'View profile'
   if (title.includes('report') && title.includes('review')) return 'Review report'
   if (title.includes('moderation') || title.includes('escalated') || title.includes('urgent')) {
     return 'Open moderation'
   }
+  if (title.includes('new message') || title.includes('message from')) return 'Open message'
   if (title.includes('message') || n.kind === 'mention') return 'Open message'
   if (n.kind === 'event' || n.kind === 'rsvp') return 'View event'
   if (n.kind === 'group') return 'View group'

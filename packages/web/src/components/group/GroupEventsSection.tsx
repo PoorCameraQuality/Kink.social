@@ -7,12 +7,19 @@ import type { MockEvent } from '@/data/mock-data'
 
 const CATEGORY_FILTERS = ['All', 'Munch', 'Social', 'Workshop'] as const
 
+function isUpcomingEvent(event: MockEvent): boolean {
+  const t = event.startsAt ? new Date(event.startsAt).getTime() : Number.NaN
+  if (!Number.isNaN(t)) return t >= Date.now()
+  return true
+}
+
 interface GroupEventsSectionProps {
   events: MockEvent[]
   loading?: boolean
   groupId?: string
   groupName?: string
   canModerate?: boolean
+  apiBacked?: boolean
 }
 
 export default function GroupEventsSection({
@@ -21,13 +28,16 @@ export default function GroupEventsSection({
   groupId,
   groupName,
   canModerate = false,
+  apiBacked = false,
 }: GroupEventsSectionProps) {
   const [categoryFilter, setCategoryFilter] = useState<(typeof CATEGORY_FILTERS)[number]>('All')
 
+  const upcomingEvents = useMemo(() => events.filter(isUpcomingEvent), [events])
+
   const filtered = useMemo(() => {
-    if (categoryFilter === 'All') return events
-    return events.filter((e) => (e.category ?? '').toLowerCase() === categoryFilter.toLowerCase())
-  }, [events, categoryFilter])
+    if (categoryFilter === 'All') return upcomingEvents
+    return upcomingEvents.filter((e) => (e.category ?? '').toLowerCase() === categoryFilter.toLowerCase())
+  }, [upcomingEvents, categoryFilter])
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -56,10 +66,10 @@ export default function GroupEventsSection({
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-dc-text">Group calendar</h2>
+          <h2 className="text-lg font-semibold text-dc-text">Group events</h2>
           <p className="text-sm text-dc-muted mt-1">
             {groupName ?
-              `Munches and events hosted by ${groupName}.`
+              `Upcoming munches and events hosted by ${groupName}.`
             : 'Upcoming munches and events for this group.'}
           </p>
         </div>
@@ -83,32 +93,44 @@ export default function GroupEventsSection({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
-        {CATEGORY_FILTERS.map((label) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => setCategoryFilter(label)}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium border transition-colors ${
-              categoryFilter === label ?
-                'border-dc-accent-border/50 bg-dc-accent/15 text-dc-accent'
-              : 'border-dc-border text-dc-text-muted hover:text-dc-text hover:bg-dc-elevated-muted'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {upcomingEvents.length > 0 ?
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+          {CATEGORY_FILTERS.map((label) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => setCategoryFilter(label)}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium border transition-colors ${
+                categoryFilter === label ?
+                  'border-dc-accent-border/50 bg-dc-accent/15 text-dc-accent'
+                : 'border-dc-border text-dc-text-muted hover:text-dc-text hover:bg-dc-elevated-muted'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      : null}
 
       {sorted.length === 0 ?
-        <EmptyState
-          message={
-            events.length === 0 ? 'No events yet.'
-            : `No ${categoryFilter === 'All' ? '' : categoryFilter.toLowerCase() + ' '}events in this filter.`
-          }
-          ctaLabel={canModerate ? 'Create a munch' : 'Browse all events'}
-          ctaHref={canModerate ? createHref : '/events'}
-        />
+        apiBacked ?
+          <EmptyState
+            inline
+            title="No upcoming group events yet."
+            message="When this group hosts events, they will appear here according to each event’s privacy settings."
+            ctaLabel={canModerate ? 'Create a group event' : 'Browse all events'}
+            ctaHref={canModerate ? createHref : '/events'}
+            secondaryCtaLabel={groupId ? 'Group discussions' : undefined}
+            secondaryCtaHref={groupId ? `/groups/${encodeURIComponent(groupId)}?tab=Forums` : undefined}
+          />
+        : <EmptyState
+            message={
+              upcomingEvents.length === 0 && events.length === 0 ? 'No events yet.'
+              : `No ${categoryFilter === 'All' ? '' : categoryFilter.toLowerCase() + ' '}events in this filter.`
+            }
+            ctaLabel={canModerate ? 'Create a munch' : 'Browse all events'}
+            ctaHref={canModerate ? createHref : '/events'}
+          />
       : <>
           <GroupEventCalendar events={sorted} groupId={groupId} />
           <div>

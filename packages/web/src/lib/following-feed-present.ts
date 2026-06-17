@@ -22,6 +22,8 @@ export function followingFeedItemReason(item: FollowingFeedItem): string | null 
       return 'posted organizer news'
     case 'group_join':
       return 'joined a group'
+    case 'group_thread_created':
+      return 'started a group discussion'
     case 'vendor_shop_live':
       return 'published a vendor shop'
     default:
@@ -33,13 +35,14 @@ export function followingFeedActorUsername(item: FollowingFeedItem): string {
   return item.kind === 'post' ? item.post.authorUsername : item.actor.username
 }
 
-/** Low-signal activities — compact row instead of full story card. */
+/** Compact row instead of full story card. */
 export function isCompactFollowingActivity(verb: string, object?: Record<string, unknown>): boolean {
   if (
     verb === 'connection_accepted' ||
     verb === 'convention_pin' ||
     verb === 'org_join' ||
     verb === 'group_join' ||
+    verb === 'group_thread_created' ||
     verb === 'loved' ||
     verb === 'reacted' ||
     verb === 'followed' ||
@@ -70,12 +73,14 @@ export function followingFeedDeepLinkLabel(verb: string): string {
       return 'View organization'
     case 'group_join':
       return 'View group'
+    case 'group_thread_created':
+      return 'Read discussion'
     case 'vendor_shop_live':
       return 'View shop'
     case 'connection_accepted':
       return 'View profile'
     case 'presenter_assigned':
-      return 'View session'
+      return 'View program'
     default:
       return 'View details'
   }
@@ -99,13 +104,22 @@ export function followingActivityHeadline(
 
   switch (verb) {
     case 'convention_pin':
-      return title ? `@${actorUsername} pinned ${title}` : `@${actorUsername} pinned a convention`
+      return title ? `@${actorUsername} pinned something for ${title}` : `@${actorUsername} pinned a convention`
     case 'org_join':
       return title ? `@${actorUsername} joined ${title}` : `@${actorUsername} joined an organization`
     case 'org_announcement':
       return title ? `@${actorUsername} posted news in ${title}` : `@${actorUsername} posted organizer news`
     case 'group_join':
       return title ? `@${actorUsername} joined ${title}` : `@${actorUsername} joined a group`
+    case 'group_thread_created': {
+      const threadTitle =
+        typeof object?.threadTitle === 'string' && object.threadTitle.trim() ?
+          object.threadTitle.trim()
+        : null
+      if (title && threadTitle) return `@${actorUsername} started a discussion in ${title}: ${threadTitle}`
+      if (title) return `@${actorUsername} started a discussion in ${title}`
+      return `@${actorUsername} started a group discussion`
+    }
     case 'connection_accepted': {
       const partner =
         typeof object?.partnerUsername === 'string' && object.partnerUsername.trim() ?
@@ -115,8 +129,16 @@ export function followingActivityHeadline(
           `@${actorUsername} accepted a connection from @${partner}`
         : `@${actorUsername} accepted a connection`
     }
-    case 'presenter_assigned':
-      return title ? `@${actorUsername} is presenting ${title}` : `@${actorUsername} was assigned to a session`
+    case 'presenter_assigned': {
+      const conventionLabel =
+        typeof object?.conventionSlug === 'string' && object.conventionSlug.trim() ?
+          object.conventionSlug.trim()
+        : typeof object?.conventionKey === 'string' && object.conventionKey.trim() ?
+          object.conventionKey.trim()
+        : null
+      if (conventionLabel) return `@${actorUsername} was added to the program for ${conventionLabel}`
+      return `@${actorUsername} was added to the program`
+    }
     default:
       return `@${actorUsername} shared an update`
   }
@@ -144,15 +166,24 @@ export function followingActivityVerbPhrase(verb: string, object?: Record<string
       return partner ? `accepted a connection from ${partner}` : 'accepted a connection'
     }
     case 'convention_pin':
-      return title ? `pinned ${title}` : 'pinned a convention'
+      return title ? `pinned something for ${title}` : 'pinned a convention'
     case 'org_join':
       return title ? `joined ${title}` : 'joined an organization'
     case 'org_announcement':
       return title ? `posted news in ${title}` : 'posted organizer news'
     case 'group_join':
       return title ? `joined ${title}` : 'joined a group'
+    case 'group_thread_created': {
+      const threadTitle =
+        typeof object?.threadTitle === 'string' && object.threadTitle.trim() ?
+          object.threadTitle.trim()
+        : null
+      if (title && threadTitle) return `started a discussion in ${title}: ${threadTitle}`
+      if (title) return `started a discussion in ${title}`
+      return 'started a group discussion'
+    }
     case 'event_created':
-      return title ? `posted ${title}` : 'posted a new event'
+      return title ? `announced ${title}` : 'announced a new event'
     case 'event_rsvp':
       if (typeof object?.count === 'number' && object.count > 1) {
         return `RSVP'd interested in ${title ?? 'an event'}`
@@ -180,8 +211,17 @@ export function followingActivityVerbPhrase(verb: string, object?: Record<string
       if (title && count === 1) return `commented on ${title}`
       return count === 1 ? 'commented on a discussion' : `${count} discussion replies`
     }
+    case 'presenter_assigned': {
+      const conventionLabel =
+        typeof object?.conventionSlug === 'string' && object.conventionSlug.trim() ?
+          object.conventionSlug.trim()
+        : typeof object?.conventionKey === 'string' && object.conventionKey.trim() ?
+          object.conventionKey.trim()
+        : null
+      if (conventionLabel) return `was added to the program for ${conventionLabel}`
+      return 'was added to the program'
+    }
     case 'published_class':
-    case 'presenter_assigned':
       return title ? `posted a new class: ${title}` : 'posted a new class'
     case 'added_vendor_product':
     case 'vendor_shop_live':
@@ -213,4 +253,25 @@ export function formatFeedTimeShort(value: string | undefined | null): string {
   }
 
   return trimmed.replace(/\s+ago$/i, '')
+}
+
+const THREAD_UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+/** Resolve thread deep link for group_thread_created; falls back to Forums tab without thread. */
+export function resolveGroupThreadActivityDeepLink(
+  deepLink: string | undefined,
+  object?: Record<string, unknown>,
+): string | null {
+  const fallback = deepLink && deepLink !== '/home' ? deepLink : null
+  if (fallback?.includes('thread=')) return fallback
+
+  const threadId = typeof object?.id === 'string' ? object.id : null
+  const groupSlug = typeof object?.groupSlug === 'string' ? object.groupSlug.trim() : ''
+  const groupId = typeof object?.groupId === 'string' ? object.groupId.trim() : ''
+  const key = groupSlug || groupId
+  if (threadId && key && THREAD_UUID_RE.test(threadId)) {
+    return `/groups/${encodeURIComponent(key)}?tab=Forums&thread=${encodeURIComponent(threadId)}`
+  }
+  return fallback
 }

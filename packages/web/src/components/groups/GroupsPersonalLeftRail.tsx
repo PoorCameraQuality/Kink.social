@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import GroupsSectionNavLinks from '@/components/groups/GroupsSectionNavLinks'
+import { useAuth } from '@/contexts/AuthContext'
 
 type Props = {
   invitationBadge?: number
@@ -7,12 +8,19 @@ type Props = {
 
 export default function GroupsPersonalLeftRail({ invitationBadge }: Props) {
   const { pathname, search } = useLocation()
+  const { isAuthenticated, isFallback } = useAuth()
+  const showRealPersonalLibrary = isAuthenticated && !isFallback
 
   return (
     <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-label="Groups personal sections">
       <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-dc-muted">Groups</p>
-        <GroupsSectionNavLinks pathname={pathname} search={search} invitationBadge={invitationBadge} />
+        <GroupsSectionNavLinks
+          pathname={pathname}
+          search={search}
+          invitationBadge={invitationBadge}
+          showRealPersonalLibrary={showRealPersonalLibrary}
+        />
       </div>
 
       <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">

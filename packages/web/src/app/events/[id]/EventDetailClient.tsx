@@ -2,6 +2,8 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import EventMatchmakerPanel from '@/components/EventMatchmakerPanel'
 import EventDiscussionPanel from '@/components/events/EventDiscussionPanel'
+import EventRsvpPrivacyNote from '@/components/events/EventRsvpPrivacyNote'
+import EventSocialOrientation, { type EventTimingStatus } from '@/components/events/EventSocialOrientation'
 import EventSaveButton from '@/components/events/EventSaveButton'
 import AlphaTestBadge from '@/components/alpha/AlphaTestBadge'
 import ConventionProgramSchedulePanel from '@/components/conventions/ConventionProgramSchedulePanel'
@@ -492,6 +494,22 @@ export default function EventDetailClient() {
 
   const rsvpLocked = isApiEventRoute && !isAuthenticated
   const rsvpClosed = Boolean(isApiEventRoute && apiMode === 'ready' && apiEvent && apiEvent.rsvpOpen === false)
+
+  const eventTimingStatus = useMemo((): EventTimingStatus | null => {
+    if (apiMode !== 'ready' || !apiEvent) return null
+    if (startsInMs != null && startsInMs < 0) return 'past'
+    if (rsvpClosed) return 'rsvp_closed'
+    if (
+      typeof apiEvent.capacityMax === 'number' &&
+      apiEvent.capacityMax > 0 &&
+      event.rsvpCount >= apiEvent.capacityMax
+    ) {
+      return 'at_capacity'
+    }
+    return 'upcoming'
+  }, [apiMode, apiEvent, startsInMs, rsvpClosed, event.rsvpCount])
+
+  const hasDiscussionTab = eventTabs.includes('Discussion')
 
   const runApproval = useCallback(
     async (userId: string, decision: 'approve' | 'reject') => {
@@ -1043,6 +1061,20 @@ export default function EventDetailClient() {
               </details>
             : null}
           </div>
+
+          {apiMode === 'ready' && apiEvent ?
+            <EventSocialOrientation
+              hostUsername={hostUsername}
+              hostName={event.hostName}
+              orgSlug={orgSlug ?? null}
+              groupId={groupLinkId ?? null}
+              groupName={groupLinkId ? getMockGroupById(groupLinkId)?.name ?? null : null}
+              apiBacked={UUID_PARAM_RE.test(id)}
+              hasDiscussionTab={hasDiscussionTab}
+              timingStatus={eventTimingStatus}
+              onSelectTab={selectTab}
+            />
+          : null}
 
           {/* Tabs */}
           <div className="relative -mx-4 sm:mx-0">
@@ -1700,6 +1732,14 @@ export default function EventDetailClient() {
               <p className="text-xs text-violet-200 mt-2">
                 You’re on the waitlist. If a spot opens, you’ll be moved up automatically.
               </p>
+            : null}
+            {apiMode === 'ready' && apiEvent && !rsvpLocked ?
+              <EventRsvpPrivacyNote
+                className="mt-4"
+                attendeeListVisibility={apiEvent.attendeeListVisibility}
+                viewerIsHost={viewerIsHost}
+                viewerIsGoing={rsvpKind === 'going'}
+              />
             : null}
             <div className="flex flex-col gap-2 mt-4">
               <button

@@ -28,6 +28,7 @@ import FeedComposerQuickActions from '@/components/home/FeedComposerQuickActions
 
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
+import { useFeedComposerEngagement } from '@/contexts/FeedComposerUiContext'
 import { cardSurfaceFeedActivityClass } from '@/lib/card-surface'
 
 import StatusBanner from '@/components/ui/StatusBanner'
@@ -107,7 +108,8 @@ export default function HomeFeedRichComposer({
 
   const [extraAttachments, setExtraAttachments] = useState<FeedAttachment[]>([])
 
-
+  const composing = focused || hasDraft
+  useFeedComposerEngagement(!shellMode && composing)
 
   const editor = useEditor({
 
@@ -735,7 +737,7 @@ export default function HomeFeedRichComposer({
             disabled={posting}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => void submit()}
-            className="ml-auto shrink-0"
+            className={shellMode === 'mobile' ? 'w-full' : 'ml-auto shrink-0'}
           >
 
             {posting ? 'Posting…' : 'Post'}

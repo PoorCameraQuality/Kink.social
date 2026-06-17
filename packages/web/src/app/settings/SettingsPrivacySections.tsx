@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button'
 import SectionHeader from '@/components/ui/SectionHeader'
 import StatusBanner from '@/components/ui/StatusBanner'
 import SettingsMessagingPresets from '@/components/settings/SettingsMessagingPresets'
+import { SETTINGS_INBOX_EXPLAINER } from '@/lib/messaging-copy'
 import { DancecardPanelSkeleton } from '@/components/ui/skeleton'
 import { settingsCheckboxClass, settingsSelectClass } from '@/lib/settingsFormClasses'
 
@@ -403,6 +404,7 @@ export function SettingsInboxPanel({ privacy, onPrivacyChange }: PrivacyProps) {
           active={privacy.whoCanMessage}
           onSelect={(preset) => onPrivacyChange({ ...privacy, whoCanMessage: preset })}
         />
+        <p className="text-xs leading-relaxed text-dc-text-muted">{SETTINGS_INBOX_EXPLAINER}</p>
         <div className="rounded-xl border border-dashed border-dc-border bg-dc-elevated/30 px-4 py-3">
           <p className="text-sm font-medium text-dc-text-muted">Filters for new accounts &amp; unverified members</p>
           <p className="mt-1 text-xs text-dc-muted">

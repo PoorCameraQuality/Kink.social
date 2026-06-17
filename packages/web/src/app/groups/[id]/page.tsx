@@ -4,6 +4,7 @@ import ChannelPostsSection from '@/components/group/ChannelPostsSection'
 import EmptyState from '@/components/ui/EmptyState'
 import GroupEventCalendar from '@/components/GroupEventCalendar'
 import GroupEventsSection from '@/components/group/GroupEventsSection'
+import GroupCommunityHubIntro from '@/components/group/GroupCommunityHubIntro'
 import GroupCommunityShell, {
   API_GROUP_TABS,
   groupCommunityTabs,
@@ -57,6 +58,7 @@ export default function GroupDetailPage() {
     myPendingPhotos,
     resources: groupResources,
     viewerRole,
+    canManage,
     canModerate,
     isMember,
     detailLoading,
@@ -69,6 +71,7 @@ export default function GroupDetailPage() {
     groupOwnerId,
     viewerMembership,
     staffHiddenMemberCount,
+    mockPreviewBlocked,
     refreshPhotos,
     refreshChannels,
     refreshResources,
@@ -110,6 +113,27 @@ export default function GroupDetailPage() {
     }
   }, [group, canModerate, searchParams, navigate])
 
+  const forumThreadParam = searchParams.get('thread')
+  const THREAD_UUID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+  useEffect(() => {
+    if (!forumThreadParam || !apiBacked) return
+    const tid = forumThreadParam.trim()
+    if (!THREAD_UUID_RE.test(tid)) return
+    if (activeTab !== 'Forums') {
+      setActiveTabState('Forums')
+      setSearchParams(
+        (prev) => {
+          const p = new URLSearchParams(prev)
+          p.set('tab', 'Forums')
+          return p
+        },
+        { replace: true },
+      )
+    }
+  }, [forumThreadParam, apiBacked, activeTab, setActiveTabState, setSearchParams])
+
   /** UI state: channels tab, photo upload, resources form. */
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null)
   const [uploadPhotoOpen, setUploadPhotoOpen] = useState(false)
@@ -148,6 +172,14 @@ export default function GroupDetailPage() {
     }),
     [feedActivityPrivacy],
   )
+
+  const upcomingEventCount = useMemo(() => {
+    const now = Date.now()
+    return groupEvents.filter((e) => {
+      const t = e.startsAt ? new Date(e.startsAt).getTime() : Number.NaN
+      return !Number.isNaN(t) && t >= now
+    }).length
+  }, [groupEvents])
 
   useEffect(() => {
     if (channels.length > 0 && !selectedChannel) {
@@ -197,6 +229,19 @@ export default function GroupDetailPage() {
     )
   }
 
+  if (mockPreviewBlocked) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <EmptyState
+          title="This is a demo group preview"
+          message="Sample groups with fictional channels and photos are only available in signed-out demo mode. Discover real communities from the directory."
+          ctaLabel="Discover groups"
+          ctaHref="/groups"
+        />
+      </div>
+    )
+  }
+
   if (!group) {
     return (
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
@@ -216,8 +261,8 @@ export default function GroupDetailPage() {
   const contextValue = {
     group,
     viewerRole,
-    canManage: false,
-    canModerate: false,
+    canManage,
+    canModerate,
     isMember,
     refreshPhotos,
     refreshChannels,
@@ -273,6 +318,18 @@ export default function GroupDetailPage() {
     }
   }
 
+  const hubIntro =
+    group ?
+      <GroupCommunityHubIntro
+        group={group}
+        isMember={isMember}
+        apiBacked={apiBacked}
+        upcomingEventCount={upcomingEventCount}
+        canModerate={canModerate}
+        onGoToTab={selectTab}
+      />
+    : null
+
   return (
     <GroupDetailProvider value={contextValue}>
       <ScopePageMeta
@@ -292,6 +349,8 @@ export default function GroupDetailPage() {
         parentOrganization={parentOrganization}
         placeLabel={group.placeLabel}
         category={group.category}
+        visibility={group.visibility}
+        description={group.description ?? group.descriptionSnippet ?? null}
         tags={group.tags}
         viewerRole={viewerRole}
         isMember={isMember}
@@ -321,13 +380,16 @@ export default function GroupDetailPage() {
           })()
         }}
         beforeTabs={
-          apiBacked && leadershipVoteOpen ?
-            <GroupLeadershipElectionSection
-              groupId={group.id}
-              isMember={isMember}
-              onFinalized={() => refreshMembers()}
-            />
-          : undefined
+          <>
+            {hubIntro}
+            {apiBacked && leadershipVoteOpen ?
+              <GroupLeadershipElectionSection
+                groupId={group.id}
+                isMember={isMember}
+                onFinalized={() => refreshMembers()}
+              />
+            : null}
+          </>
         }
       >
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
@@ -361,6 +423,7 @@ export default function GroupDetailPage() {
                 members={groupMembers}
                 groupOwnerId={groupOwnerId}
                 isMember={isMember}
+                initialThreadId={forumThreadParam}
               />
             )}
 
@@ -414,6 +477,7 @@ export default function GroupDetailPage() {
                 groupId={apiBacked ? group.id : undefined}
                 groupName={group.name}
                 canModerate={canModerate}
+                apiBacked={apiBacked}
               />
             )}
 

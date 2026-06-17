@@ -23,3 +23,12 @@ export async function loadBlockedUserIds(blockerId: string): Promise<Set<string>
     .where(eq(schema.blocks.blockerId, blockerId))
   return new Set(rows.map((r) => r.blockedId))
 }
+
+/** Users who blocked `userId` (inverse of loadBlockedUserIds). */
+export async function loadUserIdsWhoBlockedUser(userId: string): Promise<Set<string>> {
+  const rows = await db
+    .select({ blockerId: schema.blocks.blockerId })
+    .from(schema.blocks)
+    .where(eq(schema.blocks.blockedId, userId))
+  return new Set(rows.map((r) => r.blockerId))
+}

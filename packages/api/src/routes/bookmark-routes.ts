@@ -1,6 +1,8 @@
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { applyEventLocationRedaction, physicalLocationDetailVisibleEventIds } from '../lib/physical-location-visibility.js'
 import { virtualJoinLinkVisibleEventIds } from '../lib/virtual-event-join-visibility.js'
+import { filterRowsForGlobalFeed, viewerCanAccessFeedPostById } from '../lib/feed-post-access.js'
+import { filterVisibleFeedAttachments } from '../lib/feed-media-attachments.js'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
@@ -88,12 +90,7 @@ async function assertBookmarkTarget(
   userId: string,
 ) {
   if (objectType === 'feed_post') {
-    const [row] = await db
-      .select({ id: schema.feedPosts.id })
-      .from(schema.feedPosts)
-      .where(eq(schema.feedPosts.id, objectId))
-      .limit(1)
-    return !!row
+    return viewerCanAccessFeedPostById(userId, objectId)
   }
   if (objectType === 'education_article') {
     const [row] = await db
@@ -182,8 +179,11 @@ export async function registerBookmarkRoutes(app: FastifyInstance) {
         .from(schema.feedPosts)
         .innerJoin(schema.users, eq(schema.feedPosts.authorId, schema.users.id))
         .where(inArray(schema.feedPosts.id, postIds))
-      for (const row of postRows) {
-        postsById.set(row.id, shapePostRow(row))
+      const visibleRows = await filterRowsForGlobalFeed(user.userId, postRows)
+      for (const row of visibleRows) {
+        const shaped = shapePostRow(row)
+        shaped.attachments = await filterVisibleFeedAttachments(user.userId, shaped.attachments)
+        postsById.set(row.id, shaped)
       }
     }
 

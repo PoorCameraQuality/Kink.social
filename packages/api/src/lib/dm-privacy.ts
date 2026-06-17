@@ -9,6 +9,28 @@ export type DmPrivacyDeny = { ok: false; status: 403; error: string }
 export type DmPrivacyAllow = { ok: true }
 export type DmPrivacyResult = DmPrivacyAllow | DmPrivacyDeny
 
+export type ProfileMessageHint =
+  | 'connect_first'
+  | 'limited'
+  | 'unavailable'
+  | 'request_pending'
+
+/** Safe profile copy when Message is hidden — never reveals blocks or private settings. */
+export function resolveProfileMessageHint(input: {
+  canMessage: boolean
+  gateError?: string
+  connected: boolean
+}): ProfileMessageHint | null {
+  if (input.canMessage) {
+    return input.connected ? null : 'request_pending'
+  }
+  const err = (input.gateError ?? '').toLowerCase()
+  if (err.includes('blocked')) return 'unavailable'
+  if (err.includes('connections')) return 'connect_first'
+  if (err.includes('shared groups') || err.includes('not accepting')) return 'limited'
+  return 'unavailable'
+}
+
 async function recipientPrivacySettings(recipientUserId: string): Promise<PrivacySettings> {
   const [row] = await db
     .select({ privacySettings: schema.userSettings.privacySettings })

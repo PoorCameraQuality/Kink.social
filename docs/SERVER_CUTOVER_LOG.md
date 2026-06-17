@@ -1,6 +1,8 @@
 # Server cutover log
 
-**Last updated:** 2026-06-12 (VPS alpha live at kink.social — pass 26 doc sync)
+**Last updated:** 2026-06-17 (VPS alpha execution pass 2 — deploy + alpha social seed)
+
+**Execution journal:** [`VPS_ALPHA_EXECUTION_LOG.md`](./VPS_ALPHA_EXECUTION_LOG.md) · **Operator checklist:** [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md)
 
 **Purpose:** Running journal of **prod-only delta** when leaving localhost. Not a blocker for local development (v3 §2).
 
@@ -77,6 +79,7 @@
 | First real pilot org (row **F**) | **Open** | Engineering dry run done locally; **7** prod users (invite alpha), no external pilot org yet |
 | Migrations on host | **Ad hoc** | Host `db:migrate-prod` can fail on hostname; incremental fixes applied in-container — see handoff § migrations |
 | ECKE prod publish | **Open** | C2K prod `ECKE_PUBLISH_*` + ECKE Vercel URL — unchanged from § ECKE below |
+| Alpha social seed on VPS | **Open** | Pass 1 (2026-06-17): not run — no SSH/backup; `alpha_social` login 401 — see [`VPS_ALPHA_EXECUTION_LOG.md`](./VPS_ALPHA_EXECUTION_LOG.md) |
 
 **Shipped on prod (2026-06-11 sessions):** profile social rail + follower/following APIs; photo upload VPS fix (Sharp downscale, insert-then-delete primary); mobile UX + auth gate; landing hero; account welcome mail. Detail: [`HANDOFF.md`](./HANDOFF.md) § 2026-06-11.
 

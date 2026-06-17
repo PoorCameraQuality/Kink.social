@@ -22,6 +22,7 @@ export function mapFeedVerbToPrivacyKey(verb: string, source: 'post' | 'activity
     case 'post_comment':
     case 'replied_discussion':
     case 'created_discussion':
+    case 'group_thread_created':
       return 'commented'
     case 'followed':
     case 'connection_accepted':

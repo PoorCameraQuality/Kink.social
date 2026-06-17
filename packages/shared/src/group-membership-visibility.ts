@@ -63,3 +63,14 @@ export function shouldEmitGroupJoinFeedActivity(
   }
   return membership.announceGroupJoinInFeed
 }
+
+/**
+ * Forum thread feed activities can reveal group affiliation. Hidden members do not emit.
+ * Join-specific `announceGroupJoinInFeed` does not apply — actor `showComments` is checked at read time.
+ */
+export function shouldEmitGroupForumThreadFeedActivity(
+  membership: Pick<GroupMembershipPrivacyFields, 'memberListVisibility'>,
+  role: string,
+): boolean {
+  return effectiveGroupMemberListVisibility(role, membership.memberListVisibility) !== 'hidden'
+}

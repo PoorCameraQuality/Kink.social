@@ -18,6 +18,16 @@ import { conversationTarget, messageTarget } from '@/lib/moderation/report-targe
 import { useAuth } from '@/contexts/AuthContext'
 import { useMaxMd } from '@/hooks/useMaxMd'
 import { useVisualViewportBottomInset } from '@/hooks/useVisualViewportBottomInset'
+import { markConversationRead } from '@/lib/mark-conversation-read'
+import {
+  MESSAGING_EMPTY_INBOX_BODY,
+  MESSAGING_EMPTY_INBOX_TITLE,
+  MESSAGING_INBOX_INTRO,
+  MESSAGING_REQUESTS_EMPTY_BODY,
+  MESSAGING_REQUESTS_EMPTY_TITLE,
+  MESSAGING_REQUESTS_FOLDER_HINT,
+} from '@/lib/messaging-copy'
+import { MESSAGE_REQUEST_WAITING_COPY } from '@/lib/notifications-copy'
 import { mockConversations } from '@/data/mock-data'
 import { getMockPersonByUsername } from '@/data/mock-seeds'
 
@@ -31,6 +41,7 @@ type ConvRow = {
   lastMessage: string
   date: string
   unread: boolean
+  awaitingPartnerAcceptance?: boolean
 }
 
 
@@ -146,6 +157,7 @@ export default function MessagingPage() {
           lastMessageBody: string | null
           lastMessageAt: string | null
           unreadCount: number
+          awaitingPartnerAcceptance?: boolean
         }>
       }
       setApiConversations(
@@ -160,6 +172,7 @@ export default function MessagingPage() {
           lastMessage: item.lastMessageBody ?? 'No messages yet',
           date: item.lastMessageAt ? shortTime(item.lastMessageAt) : '',
           unread: (item.unreadCount ?? 0) > 0,
+          awaitingPartnerAcceptance: item.awaitingPartnerAcceptance ?? false,
         }))
       )
     } catch {
@@ -358,6 +371,10 @@ export default function MessagingPage() {
         }))
         setApiMessagesByConv((prev) => ({ ...prev, [convId]: mapped }))
         setMessagesFetchByConv((prev) => ({ ...prev, [convId]: 'loaded' }))
+        setApiConversations((prev) =>
+          prev?.map((c) => (c.id === convId ? { ...c, unread: false } : c)) ?? prev,
+        )
+        void markConversationRead(convId)
       } catch {
         setMessagesFetchByConv((prev) => ({ ...prev, [convId]: 'loaded' }))
       }
@@ -517,9 +534,12 @@ export default function MessagingPage() {
     if (inboxFolder === 'requests') {
       return {
         icon: 'requests' as const,
-        title: 'No message requests',
-        message: 'When someone new messages you, requests will appear here until you accept them.',
-        actions: [{ label: 'People', href: '/people', primary: true }] as const,
+        title: MESSAGING_REQUESTS_EMPTY_TITLE,
+        message: MESSAGING_REQUESTS_EMPTY_BODY,
+        actions: [
+          { label: 'Find people', href: '/people', primary: true },
+          { label: 'View connections', href: '/connections' },
+        ] as const,
       }
     }
     if (inboxFolder === 'iso') {
@@ -532,12 +552,14 @@ export default function MessagingPage() {
     }
     return {
       icon: 'inbox' as const,
-      title: 'No messages yet',
-      message:
-        'Start by connecting with people you trust, or open a profile and send a message request.',
+      title: MESSAGING_EMPTY_INBOX_TITLE,
+      message: MESSAGING_EMPTY_INBOX_BODY,
       actions: [
-        { label: 'People', href: '/people', primary: true },
+        { label: 'Find people', href: '/people', primary: true },
         { label: 'View connections', href: '/connections' },
+        { label: 'Explore groups', href: '/groups' },
+        { label: 'Browse events', href: '/events' },
+        { label: 'Messaging settings', href: '/settings/privacy' },
       ] as const,
     }
   }, [convSearch, inboxFolder])
@@ -560,7 +582,7 @@ export default function MessagingPage() {
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-dc-text sm:text-2xl">Messages</h1>
-              <p className="mt-0.5 hidden text-sm text-dc-text-muted sm:block">Private conversations, requests, and ISO replies.</p>
+              <p className="mt-0.5 hidden text-sm text-dc-text-muted sm:block">{MESSAGING_INBOX_INTRO}</p>
             </div>
             <Link
               to="/support"
@@ -608,7 +630,7 @@ export default function MessagingPage() {
               active={inboxFolder}
               onChange={setFolderInUrl}
               counts={isAuthenticated ? folderCounts : undefined}
-              showHint={false}
+              showHint={!inboxHasMessages || inboxFolder !== 'main'}
             />
             <MessagingInboxFilters
               inboxFilter={inboxFilter}
@@ -745,7 +767,7 @@ export default function MessagingPage() {
             <>
               {isAuthenticated && apiConversations !== null && inboxFolder === 'requests' && (
                 <div className="px-4 py-3 border-b border-amber-500/30 bg-amber-500/10 text-sm text-amber-100 flex flex-wrap items-center justify-between gap-2">
-                  <span>Someone you aren&apos;t connected with messaged you. Accept to move this thread to Main and reply.</span>
+                  <span>{MESSAGING_REQUESTS_FOLDER_HINT} You can accept, ignore, block, or report from this thread.</span>
                   <button
                     type="button"
                     onClick={() => void acceptDm()}
@@ -755,6 +777,11 @@ export default function MessagingPage() {
                   </button>
                 </div>
               )}
+              {isAuthenticated && apiConversations !== null && inboxFolder === 'main' && activeConv?.awaitingPartnerAcceptance ?
+                <div className="px-4 py-3 border-b border-dc-border bg-dc-elevated-muted text-sm text-dc-text-muted">
+                  {MESSAGE_REQUEST_WAITING_COPY}
+                </div>
+              : null}
               <div className="flex items-center gap-3 p-4 border-b border-dc-border">
                 <button
                   type="button"

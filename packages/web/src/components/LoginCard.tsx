@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { safeInternalPath } from '@c2k/shared'
+import { safeInternalPath, validatePublicUsername } from '@c2k/shared'
 import { buildOnboardingHref, resolvePostAuthPath } from '@/lib/onboarding'
 import FormField from '@/components/ui/FormField'
 import { SIGNUP_REASSURANCE } from '@/components/landing/landing-content'
@@ -223,6 +223,11 @@ export default function LoginCard({
       setSignupError('Username, email, and password are required.')
       return
     }
+    const usernameError = validatePublicUsername(username, email)
+    if (usernameError) {
+      setSignupError(usernameError)
+      return
+    }
     if (signupPassword.length < 8) {
       setSignupError('Password must be at least 8 characters.')
       return
@@ -405,11 +410,16 @@ export default function LoginCard({
                   />
                 </FormField>
               : null}
-              <FormField id="signup-username" label="Username">
+              <FormField
+                id="signup-username"
+                label="Username"
+                hint="Your public @handle on profile URLs and mentions — not your email."
+              >
                 <input
                   id="signup-username"
                   type="text"
                   autoComplete="username"
+                  placeholder="e.g. MedusaMinded"
                   value={signupUsername}
                   onChange={(e) => setSignupUsername(e.target.value)}
                   className={textInputClass}

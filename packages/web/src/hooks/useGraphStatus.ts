@@ -1,10 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 
+export type ProfileMessageHint =
+  | 'connect_first'
+  | 'limited'
+  | 'unavailable'
+  | 'request_pending'
+
+export type DmRequestStatus = 'none' | 'pending_outgoing' | 'pending_incoming' | 'accepted'
+
 export type GraphStatus = {
   connectionStatus: string | null
   isFollowing: boolean
   isFollowedBy: boolean
   connectionId: string | null
+  canMessage?: boolean
+  messageHint?: ProfileMessageHint | null
+  dmRequestStatus?: DmRequestStatus
+  dmConversationId?: string | null
 }
 
 export function useGraphStatus(username: string | null, enabled: boolean) {

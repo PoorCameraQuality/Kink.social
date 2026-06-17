@@ -15,6 +15,7 @@ import {
 import { useNotificationsList } from '@/hooks/useNotificationsList'
 import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
+import { NOTIFICATIONS_PAGE_INTRO } from '@/lib/notifications-copy'
 
 type InboxFilter = 'all' | 'unread'
 
@@ -66,7 +67,7 @@ function NotificationRow({
       />
       <div className="min-w-0 flex-1 text-left">
         <div className="mb-1 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-dc-muted">{kindLabel(n.kind)}</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-dc-muted">{kindLabel(n.kind, n.title)}</span>
           <span className="text-xs text-dc-muted">{n.timeAgo}</span>
         </div>
         <p className="text-sm font-medium text-dc-text sm:text-base">{n.title}</p>
@@ -134,9 +135,7 @@ export default function NotificationsPageClient() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">Notifications</h1>
-            <p className="mt-2 text-sm leading-relaxed text-dc-text-muted">
-              Alerts about RSVPs, messages, connection updates, organizer changes, and convention activity.
-            </p>
+            <p className="mt-2 text-sm leading-relaxed text-dc-text-muted">{NOTIFICATIONS_PAGE_INTRO}</p>
             {allCaughtUp && (isAuthenticated || isFallback) ?
               <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-emerald-400/90" role="status">
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
