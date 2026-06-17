@@ -120,6 +120,7 @@ export function useHomeSurface({
   const [nearbyGroups, setNearbyGroups] = useState<{ id: string; name: string; description?: string; members: number }[] | null>(
     null,
   )
+  const [myGroups, setMyGroups] = useState<{ id: string; name: string; slug?: string | null }[] | null>(null)
 
   useEffect(() => {
     if (!isAuthenticated || isFallback || authStatus !== 'ready') {
@@ -191,6 +192,27 @@ export function useHomeSurface({
       cancelled = true
     }
   }, [apiBackedHome, authStatus])
+
+  useEffect(() => {
+    if (!apiBackedHome || authStatus !== 'ready') {
+      setMyGroups(null)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      const r = await fetch('/api/v1/me/groups', { credentials: 'include' })
+      if (cancelled) return
+      if (!r.ok) {
+        setMyGroups([])
+        return
+      }
+      const d = (await r.json()) as { items?: { id: string; name: string; slug?: string | null }[] }
+      setMyGroups(d.items ?? [])
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [apiBackedHome, authStatus, postsRefreshKey])
 
   useEffect(() => {
     if (!trendingUsesApi || activeTab !== 'Trending') {
@@ -482,6 +504,7 @@ export function useHomeSurface({
     apiVendors,
     apiGroups,
     nearbyPeople,
+    myGroups,
     displayCoSuggestions,
     displayConventions,
     multiDayConventions,

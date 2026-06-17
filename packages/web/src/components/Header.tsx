@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { siteConfig } from '@/config/site.config'
 import { isAppHomeMainNavActive } from '@/lib/app-home-nav'
 import { navLinkIsActive } from '@/lib/nav-link-active'
 import { useAuth } from '@/contexts/AuthContext'
 import CreateMenuDropdown from '@/components/CreateMenuDropdown'
-import { kindLabel } from '@/lib/notifications-display'
+import NotificationDropdownPanel from '@/components/notifications/NotificationDropdownPanel'
 import { useNotificationsList } from '@/hooks/useNotificationsList'
 import { useConversationsPreview } from '@/hooks/useConversationsPreview'
 import { useApiMyRsvps } from '@/hooks/useApiMyRsvps'
 import { useApiPlatformStaff } from '@/hooks/useApiPlatformStaff'
 import PlatformStaffNavLinks from '@/components/moderation/PlatformStaffNavLinks'
+import AccountManageNavLinks from '@/components/account/AccountManageNavLinks'
 import type { NavSecondaryBadge } from '@/lib/site-nav'
+import { fetchUserEcosystem, type UserEcosystemPayload } from '@/lib/user-ecosystem'
 import { pickPrimaryProfilePhoto } from '@c2k/shared'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
 import ProfilePhotoImage from '@/components/profile/ProfilePhotoImage'
@@ -23,14 +26,7 @@ import { buildLoginHref } from '@/lib/auth-links'
 import SiteWordmark from '@/components/brand/SiteWordmark'
 import { shellHeaderClass } from '@/lib/shell-contract'
 
-type EcosystemPayload = {
-  orgs: { slug: string; displayName: string; role: string }[]
-  groups: { id: string; slug: string; name: string }[]
-  vendor: { id: string; slug: string; displayName: string } | null
-  presenter: { headline: string | null; directoryVisibility: string; profileKind: string } | null
-}
-
-/** Legacy: CommunityNavBar no longer duplicates browse links - show full nav in mobile menu. */
+type EcosystemPayload = UserEcosystemPayload
 
 export default function Header() {
   const {
@@ -47,7 +43,7 @@ export default function Header() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [msgOpen, setMsgOpen] = useState(false)
   const [ecosystem, setEcosystem] = useState<EcosystemPayload | null>(null)
-  const [rsvpItems, setRsvpItems] = useState<{ eventId: string; title: string; startsAt: string; status: string }[]>([])
+  const [ecosystemLoading, setEcosystemLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const { pathname, search } = useLocation()
   const navigate = useNavigate()
@@ -59,8 +55,11 @@ export default function Header() {
 
   const createRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
+  const notifMobileRef = useRef<HTMLDivElement>(null)
   const msgRef = useRef<HTMLDivElement>(null)
   const profileRef = useRef<HTMLDivElement>(null)
+  const profileMobileRef = useRef<HTMLDivElement>(null)
+  const [mobileOverlaysMounted, setMobileOverlaysMounted] = useState(false)
 
   const {
     items: notifItems,
@@ -135,16 +134,43 @@ export default function Header() {
   const emailLabel = viewerEmail ?? (isFallback && !isAuthenticated ? 'Demo viewer' : '')
 
   useEffect(() => {
+    setMobileOverlaysMounted(true)
+  }, [])
+
+  useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       const t = e.target as Node
       if (createRef.current && !createRef.current.contains(t)) setCreateOpen(false)
-      if (notifRef.current && !notifRef.current.contains(t)) setNotifOpen(false)
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(t) &&
+        (!notifMobileRef.current || !notifMobileRef.current.contains(t))
+      ) {
+        setNotifOpen(false)
+      }
       if (msgRef.current && !msgRef.current.contains(t)) setMsgOpen(false)
-      if (profileRef.current && !profileRef.current.contains(t)) setIsProfileOpen(false)
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(t) &&
+        (!profileMobileRef.current || !profileMobileRef.current.contains(t))
+      ) {
+        setIsProfileOpen(false)
+      }
     }
     document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
+
+  useEffect(() => {
+    if (!notifOpen && !isProfileOpen) return
+    const prev = document.body.style.overflow
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [notifOpen, isProfileOpen])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -162,26 +188,16 @@ export default function Header() {
   useEffect(() => {
     if (!isProfileOpen || !viewerUsername || !isAuthenticated || isFallback) {
       setEcosystem(null)
-      setRsvpItems([])
+      setEcosystemLoading(false)
       return
     }
     let cancelled = false
+    setEcosystemLoading(true)
     void (async () => {
-      const [rEco, rRsvp] = await Promise.all([
-        fetch(`/api/v1/users/${encodeURIComponent(viewerUsername)}/ecosystem`, { credentials: 'include' }),
-        fetch('/api/v1/events/me/rsvps', { credentials: 'include' }),
-      ])
+      const data = await fetchUserEcosystem(viewerUsername)
       if (cancelled) return
-      if (rEco.ok) {
-        const d = (await rEco.json()) as EcosystemPayload
-        if (!cancelled) setEcosystem(d)
-      } else if (!cancelled) setEcosystem(null)
-      if (rRsvp.ok) {
-        const d = (await rRsvp.json()) as {
-          items: { eventId: string; title: string; startsAt: string; status: string }[]
-        }
-        if (!cancelled) setRsvpItems(d.items ?? [])
-      } else if (!cancelled) setRsvpItems([])
+      setEcosystem(data)
+      setEcosystemLoading(false)
     })()
     return () => {
       cancelled = true
@@ -193,6 +209,7 @@ export default function Header() {
       const next = !open
       if (next) {
         setMsgOpen(false)
+        setIsProfileOpen(false)
         void reloadNotifs()
       }
       return next
@@ -211,6 +228,107 @@ export default function Header() {
   }, [reloadMsgs])
 
   const marketingHeader = !showAppNav
+
+  const profileMenuLinkClass =
+    'flex min-h-11 items-center rounded-lg px-3 py-2 text-sm text-dc-text hover:bg-dc-elevated-muted md:min-h-0 md:text-dc-text-muted md:hover:text-dc-text'
+
+  const profileMenuContent = (
+    <>
+      <div className="px-4 py-3 border-b border-dc-border">
+        <p className="font-medium text-dc-text">{sceneLabel}</p>
+        {emailLabel ? <p className="mt-0.5 break-all text-xs text-dc-text-muted">{emailLabel}</p> : null}
+        {isFallback && !isAuthenticated && (
+          <p className="text-xs text-dc-muted mt-1">Demo viewer (not signed in)</p>
+        )}
+      </div>
+      <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
+        <Link
+          to={viewerUsername ? `/profile/${encodeURIComponent(viewerUsername)}` : '/profile'}
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          View profile
+        </Link>
+        <Link
+          to="/profile/edit"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Edit profile
+        </Link>
+        <Link
+          to="/my-posts"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          My Posts
+        </Link>
+        <Link
+          to="/activity"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Activity
+        </Link>
+        <Link
+          to="/saved"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Saved
+        </Link>
+      </div>
+
+      {showModerationNav ?
+        <div className="px-2 py-2 border-b border-dc-border">
+          <PlatformStaffNavLinks variant="dropdown" onNavigate={() => setIsProfileOpen(false)} />
+        </div>
+      : null}
+
+      <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
+        <p className="px-3 text-[10px] font-semibold uppercase tracking-wide text-dc-muted mb-1">Manage</p>
+        <AccountManageNavLinks
+          variant="dropdown"
+          ecosystem={ecosystem}
+          loading={ecosystemLoading}
+          onNavigate={() => setIsProfileOpen(false)}
+        />
+      </div>
+
+      <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
+        <Link
+          to="/settings/account"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Account settings
+        </Link>
+        <Link
+          to="/settings/privacy"
+          className={profileMenuLinkClass}
+          onClick={() => setIsProfileOpen(false)}
+        >
+          Privacy settings
+        </Link>
+      </div>
+
+      <div className="px-2 py-2 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setIsProfileOpen(false)
+            void (async () => {
+              await logout()
+              navigate(buildLoginHref(), { replace: true })
+            })()
+          }}
+          className="inline-flex min-h-11 items-center px-3 py-2 text-sm text-dc-text-muted hover:text-dc-text md:min-h-0"
+        >
+          Log out
+        </button>
+      </div>
+    </>
+  )
 
   const logoLink = (
     <Link
@@ -249,9 +367,6 @@ export default function Header() {
       />
     </div>
   )
-
-  const profileMenuLinkClass =
-    'flex min-h-11 items-center rounded-lg px-3 py-2 text-sm text-dc-text hover:bg-dc-elevated-muted md:min-h-0 md:text-dc-text-muted md:hover:text-dc-text'
 
   const marketingNav = marketingHeader ?
     <nav className="hidden items-center gap-1 lg:flex" aria-label="Marketing">
@@ -395,72 +510,40 @@ export default function Header() {
                   </button>
                   {notifOpen && (
                     <>
-                      <div className="fixed inset-0 z-[90] bg-black/40 md:hidden" aria-hidden onClick={() => setNotifOpen(false)} />
-                      <div className="fixed inset-x-0 bottom-0 z-[110] max-h-[min(75dvh,480px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)] md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:top-full md:z-[110] md:mt-2 md:w-80 md:max-h-none md:rounded-xl md:border md:pb-2 md:bg-dc-elevated-solid">
-                        <div className="mx-auto mb-2 mt-1 h-1 w-10 shrink-0 rounded-full bg-dc-border/80 md:hidden" aria-hidden />
-                        <p className="px-4 pb-2 text-xs font-semibold uppercase tracking-wide text-dc-muted md:px-3">Notifications</p>
-                        <ul className="max-h-[min(50dvh,16rem)] overflow-y-auto md:max-h-64">
-                          {notifItems.slice(0, 6).map((n) => {
-                            const row = (
-                              <div className="px-4 py-2.5 hover:bg-dc-elevated-muted md:px-3 md:py-2">
-                                <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-dc-text-muted">
-                                  <span>{kindLabel(n.kind)}</span>
-                                  <span>{n.timeAgo}</span>
-                                </div>
-                                <p className="text-sm font-medium text-dc-text truncate">{n.title}</p>
-                                <p className="text-xs text-dc-text-muted line-clamp-2">{n.body}</p>
-                              </div>
-                            )
-                            if (n.href) {
-                              return (
-                                <li key={n.id}>
-                                  <Link
-                                    to={n.href}
-                                    className="block"
-                                    onClick={() => {
-                                      void markNotifRead(n.id)
-                                      setNotifOpen(false)
-                                    }}
-                                  >
-                                    {row}
-                                  </Link>
-                                </li>
-                              )
-                            }
-                            return (
-                              <li key={n.id}>
-                                <button
-                                  type="button"
-                                  className="w-full text-left"
-                                  onClick={() => void markNotifRead(n.id)}
-                                >
-                                  {row}
-                                </button>
-                              </li>
-                            )
-                          })}
-                        </ul>
-                        <div className="mt-1 space-y-1 border-t border-dc-border px-2 pt-2">
-                          {notifUnread > 0 && (
+                      <NotificationDropdownPanel
+                        items={notifItems}
+                        unreadCount={notifUnread}
+                        onMarkRead={markNotifRead}
+                        onMarkAllRead={markAllNotifsRead}
+                        onClose={() => setNotifOpen(false)}
+                        className="absolute right-0 top-full z-[110] mt-2 hidden w-[22rem] md:block"
+                      />
+                      {mobileOverlaysMounted ?
+                        createPortal(
+                          <div
+                            ref={notifMobileRef}
+                            className="fixed inset-0 z-[90] flex flex-col justify-end md:hidden"
+                            role="presentation"
+                          >
                             <button
                               type="button"
-                              className="flex min-h-11 w-full items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-dc-text-muted hover:bg-dc-elevated-muted hover:text-dc-text md:min-h-0"
-                              onClick={() => {
-                                void markAllNotifsRead()
-                              }}
-                            >
-                              Mark all read
-                            </button>
-                          )}
-                          <Link
-                            to="/notifications"
-                            className="flex min-h-11 items-center justify-center rounded-lg px-3 py-2 text-center text-sm font-medium text-dc-accent hover:bg-dc-elevated-muted md:min-h-0"
-                            onClick={() => setNotifOpen(false)}
-                          >
-                            See all notifications
-                          </Link>
-                        </div>
-                      </div>
+                              className="absolute inset-0 bg-black/40"
+                              aria-label="Close notifications"
+                              onClick={() => setNotifOpen(false)}
+                            />
+                            <NotificationDropdownPanel
+                              items={notifItems}
+                              unreadCount={notifUnread}
+                              onMarkRead={markNotifRead}
+                              onMarkAllRead={markAllNotifsRead}
+                              onClose={() => setNotifOpen(false)}
+                              mobileSheet
+                              className="relative z-[1] max-h-[min(75dvh,480px)] w-full"
+                            />
+                          </div>,
+                          document.body,
+                        )
+                      : null}
                     </>
                   )}
                 </div>
@@ -522,7 +605,10 @@ export default function Header() {
                 <div className="relative" ref={profileRef}>
                   <button
                     type="button"
-                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    onClick={() => {
+                      setNotifOpen(false)
+                      setIsProfileOpen((open) => !open)
+                    }}
                     className="flex min-h-11 items-center gap-0.5 rounded-full bg-dc-surface-muted p-1 transition-colors hover:ring-2 hover:ring-dc-accent/50"
                     aria-expanded={isProfileOpen}
                     aria-haspopup="true"
@@ -560,171 +646,40 @@ export default function Header() {
                   </button>
                   {isProfileOpen && (
                     <>
-                      <div className="fixed inset-0 z-[90] bg-black/40 md:hidden" aria-hidden onClick={() => setIsProfileOpen(false)} />
-                      <div className="fixed inset-x-0 bottom-0 z-[110] max-h-[min(88dvh,640px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)] md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:top-full md:z-[110] md:mt-2 md:w-72 md:max-h-[min(80vh,520px)] md:rounded-xl md:border md:pb-2">
-                        <div className="mx-auto mb-2 mt-1 h-1 w-10 shrink-0 rounded-full bg-dc-border/80 md:hidden" aria-hidden />
-                        <div className="px-4 py-3 border-b border-dc-border">
-                          <p className="font-medium text-dc-text">{sceneLabel}</p>
-                          {emailLabel ? <p className="mt-0.5 break-all text-xs text-dc-text-muted">{emailLabel}</p> : null}
-                          {isFallback && !isAuthenticated && (
-                            <p className="text-xs text-dc-muted mt-1">Demo viewer (not signed in)</p>
-                          )}
-                        </div>
-                        <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
-                          <Link
-                            to={viewerUsername ? `/profile/${encodeURIComponent(viewerUsername)}` : '/profile'}
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            View profile
-                          </Link>
-                          <Link
-                            to="/profile/edit"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Edit profile
-                          </Link>
-                          <Link
-                            to="/my-posts"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            My Posts
-                          </Link>
-                          <Link
-                            to="/activity"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Activity
-                          </Link>
-                          <Link
-                            to="/saved"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Saved
-                          </Link>
-                        </div>
-
-                        {showModerationNav ?
-                          <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
-                            <p className="px-3 text-[10px] font-semibold uppercase tracking-wide text-dc-muted mb-1">
-                              Trust &amp; Safety
-                            </p>
-                            <PlatformStaffNavLinks
-                              variant="dropdown"
-                              onNavigate={() => setIsProfileOpen(false)}
-                            />
-                          </div>
-                        : null}
-
-                        <div className="px-3 py-2 border-b border-dc-border">
-                          <p className="text-[10px] font-semibold uppercase tracking-wide text-dc-muted mb-2">
-                            Events you RSVP&apos;d to
-                          </p>
-                          {rsvpItems.length === 0 ? (
-                            <Link
-                              to="/events?mine=registrations"
-                              className="text-sm text-dc-accent hover:underline"
-                              onClick={() => setIsProfileOpen(false)}
-                            >
-                              Browse events →
-                            </Link>
-                          ) : (
-                            <ul className="space-y-1">
-                              {rsvpItems.slice(0, 5).map((ev) => (
-                                <li key={ev.eventId}>
-                                  <Link
-                                    to={`/events/${encodeURIComponent(ev.eventId)}`}
-                                    className="text-sm text-dc-text-muted hover:text-dc-text line-clamp-2"
-                                    onClick={() => setIsProfileOpen(false)}
-                                  >
-                                    {ev.title}
-                                  </Link>
-                                </li>
-                              ))}
-                              <li>
-                                <Link
-                                  to="/events?mine=registrations"
-                                  className="text-xs font-medium text-dc-accent hover:underline"
-                                  onClick={() => setIsProfileOpen(false)}
-                                >
-                                  See all RSVPs
-                                </Link>
-                              </li>
-                            </ul>
-                          )}
-                        </div>
-
-                        <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
-                          <p className="px-3 text-[10px] font-semibold uppercase tracking-wide text-dc-muted mb-1">
-                            Manage
-                          </p>
-                          <Link
-                            to="/groups"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Groups you manage
-                          </Link>
-                          <Link
-                            to="/orgs"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Organizations
-                          </Link>
-                          <Link
-                            to={ecosystem?.vendor ? `/vendors/${encodeURIComponent(ecosystem.vendor.slug)}` : '/vendors/new'}
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            {ecosystem?.vendor ? 'Your vendor shop' : 'List your shop'}
-                          </Link>
-                          <Link
-                            to="/settings/ecosystem#presenter-catalog"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Presenter profile
-                          </Link>
-                        </div>
-
-                        <div className="px-2 py-2 border-b border-dc-border space-y-0.5">
-                          <Link
-                            to="/settings/account"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Account settings
-                          </Link>
-                          <Link
-                            to="/settings/privacy"
-                            className={profileMenuLinkClass}
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Privacy settings
-                          </Link>
-                        </div>
-
-                        <div className="px-2 py-2 flex items-center justify-between gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsProfileOpen(false)
-                              void (async () => {
-                                await logout()
-                                navigate(buildLoginHref(), { replace: true })
-                              })()
-                            }}
-                            className="inline-flex min-h-11 items-center px-3 py-2 text-sm text-dc-text-muted hover:text-dc-text md:min-h-0"
-                          >
-                            Log out
-                          </button>
-                        </div>
+                      <div
+                        className="absolute right-0 top-full z-[110] mt-2 hidden w-72 max-h-[min(80vh,520px)] overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)] md:block"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Account menu"
+                      >
+                        {profileMenuContent}
                       </div>
+                      {mobileOverlaysMounted ?
+                        createPortal(
+                          <div
+                            ref={profileMobileRef}
+                            className="fixed inset-0 z-[90] flex flex-col justify-end md:hidden"
+                            role="presentation"
+                          >
+                            <button
+                              type="button"
+                              className="absolute inset-0 bg-black/40"
+                              aria-label="Close account menu"
+                              onClick={() => setIsProfileOpen(false)}
+                            />
+                            <div
+                              className="relative z-[1] max-h-[min(88dvh,640px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)]"
+                              role="dialog"
+                              aria-modal="true"
+                              aria-label="Account menu"
+                            >
+                              <div className="mx-auto mb-2 mt-1 h-1 w-10 shrink-0 rounded-full bg-dc-border/80" aria-hidden />
+                              {profileMenuContent}
+                            </div>
+                          </div>,
+                          document.body,
+                        )
+                      : null}
                     </>
                   )}
                 </div>
@@ -911,15 +866,10 @@ export default function Header() {
                     <p className="text-xs font-semibold text-dc-muted uppercase mb-2">Account</p>
                     <div className="flex flex-col gap-1">
                       {showModerationNav ?
-                        <>
-                          <p className="px-4 pt-1 text-[10px] font-semibold uppercase tracking-wide text-dc-muted">
-                            Trust &amp; Safety
-                          </p>
-                          <PlatformStaffNavLinks
-                            variant="mobile"
-                            onNavigate={() => setIsMenuOpen(false)}
-                          />
-                        </>
+                        <PlatformStaffNavLinks
+                          variant="mobile"
+                          onNavigate={() => setIsMenuOpen(false)}
+                        />
                       : null}
                       {viewerUsername ?
                         <Link

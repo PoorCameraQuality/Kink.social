@@ -51,7 +51,7 @@ export async function registerUserEcosystemRoutes(app: FastifyInstance) {
       })
       .from(schema.groupMembers)
       .innerJoin(schema.groups, eq(schema.groupMembers.groupId, schema.groups.id))
-      .where(eq(schema.groupMembers.userId, u.id))
+      .where(and(eq(schema.groupMembers.userId, u.id), eq(schema.groupMembers.showGroupOnProfile, true)))
       .limit(24)
 
     const [vendor] = await db

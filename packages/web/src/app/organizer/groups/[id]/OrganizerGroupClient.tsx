@@ -284,13 +284,17 @@ export default function OrganizerGroupClient() {
         />
       : null}
       {tab === 'communications' ?
-        <OrganizerCommunicationsPanel scopeKind="group" groupId={id} />
+        <OrganizerCommunicationsPanel scopeKind="group" groupId={id} viewerRole={viewerRole} />
       : null}
       {tab === 'moderation' ?
         <OrganizerGroupModerationPanel groupId={id} />
       : null}
       {tab === 'settings' && showSettings ?
-        <OrganizerGroupSettingsPanel groupId={id} groupName={group.name} />
+        <OrganizerGroupSettingsPanel
+          groupId={id}
+          groupName={group.name}
+          onGroupChange={(patch) => setGroup((g) => (g ? { ...g, ...patch } : g))}
+        />
       : null}
       {tab === 'tools' ? <OrganizerToolsPanel groupId={id} /> : null}
     </OrganizerAppShell>

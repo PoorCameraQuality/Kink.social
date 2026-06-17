@@ -24,13 +24,14 @@ export default function AboutPanel() {
 
   return (
     <ProfileStudioSectionCard
-      title="Personality Prompts"
-      description="Conversation starters and profile depth — this feeds the public “A Few Things About Me” section when your bio is rich enough."
+      title="About"
+      description="Your profile story — intro, tagline, and depth. This is the only text field for how you describe yourself."
       icon={<IconUser />}
     >
-      <p className="text-sm text-dc-text-muted mb-4 leading-relaxed">
-        Use markdown for longer stories, teaching notes, or a Vanilla / Kink split. Your short bio on Profile Story still
-        appears in the hero tagline.
+      <p className="mb-4 text-sm leading-relaxed text-dc-text-muted">
+        Use the rich editor for your full story. The first sentence appears in your profile hero; the rest shows in your
+        About section. Markdown, headings, and lists are supported — try the Vanilla / Kink template if you want a
+        starting structure.
       </p>
 
       <ProfileStudioInsetCard className="space-y-4">

@@ -70,6 +70,9 @@ function ProfileEditLayoutInner() {
       ageLabel:
         ctx.profileMe.data?.profile.age != null ? String(ctx.profileMe.data.profile.age) : undefined,
       pronouns: formatPronounDisplay(ctx.pronounTags) || undefined,
+      genders: ctx.genders,
+      sexualOrientations: ctx.sexualOrientations,
+      romanticOrientations: ctx.romanticOrientations,
       roles: ctx.roles,
       lifestyleActivity: ctx.lifestyleActivity,
       lookingFor: ctx.lookingFor,

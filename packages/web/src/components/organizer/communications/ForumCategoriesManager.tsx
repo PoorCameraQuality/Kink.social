@@ -8,7 +8,8 @@ import { cn } from '@/lib/cn'
 import { FORUM_CATEGORY_SUGGESTIONS } from '@/lib/organizer/org-comms-utils'
 
 type Props = {
-  orgSlug: string
+  orgSlug?: string
+  groupId?: string
   categories: ForumCategory[] | null
   canManage: boolean
   publicForumsHref: string
@@ -16,8 +17,15 @@ type Props = {
   sectionId?: string
 }
 
+function forumCategoriesApiBase(orgSlug?: string, groupId?: string): string {
+  if (groupId) return `/api/v1/groups/${encodeURIComponent(groupId)}/forum/categories`
+  if (orgSlug) return `/api/v1/organizations/${encodeURIComponent(orgSlug)}/forum/categories`
+  throw new Error('ForumCategoriesManager requires orgSlug or groupId')
+}
+
 export default function ForumCategoriesManager({
   orgSlug,
+  groupId,
   categories,
   canManage,
   publicForumsHref,
@@ -25,7 +33,7 @@ export default function ForumCategoriesManager({
   sectionId = 'forum-categories',
 }: Props) {
   const { confirm, confirmDialog } = useConfirm()
-  const orgKey = encodeURIComponent(orgSlug)
+  const categoriesBase = forumCategoriesApiBase(orgSlug, groupId)
   const [newName, setNewName] = useState('')
   const [editId, setEditId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
@@ -42,7 +50,7 @@ export default function ForumCategoriesManager({
       setActionMsg(null)
       if (!newName.trim()) return
       try {
-        const r = await fetch(`/api/v1/organizations/${orgKey}/forum/categories`, {
+        const r = await fetch(categoriesBase, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -59,14 +67,14 @@ export default function ForumCategoriesManager({
         setActionMsg('Network error')
       }
     },
-    [newName, orgKey, onReload],
+    [categoriesBase, newName, onReload],
   )
 
   async function saveEdit() {
     if (!editId || !editName.trim()) return
     setActionMsg(null)
     try {
-      const r = await fetch(`/api/v1/organizations/${orgKey}/forum/categories/${encodeURIComponent(editId)}`, {
+      const r = await fetch(`${categoriesBase}/${encodeURIComponent(editId)}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -87,7 +95,7 @@ export default function ForumCategoriesManager({
     if (!(await confirm('Delete this category?', 'Threads will become uncategorized.', { destructive: true }))) return
     setActionMsg(null)
     try {
-      const r = await fetch(`/api/v1/organizations/${orgKey}/forum/categories/${encodeURIComponent(catId)}`, {
+      const r = await fetch(`${categoriesBase}/${encodeURIComponent(catId)}`, {
         method: 'DELETE',
         credentials: 'include',
       })

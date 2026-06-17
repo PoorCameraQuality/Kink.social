@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import HomePageClient from './HomePageClient'
 import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
+import { EXPLORE_DASHBOARD_PATH } from '@/lib/app-routes'
 
 function HomeFallback() {
   return (
@@ -30,6 +31,11 @@ export default function HomePage() {
 
   if (!isAuthenticated || isFallback) {
     return <Navigate to={buildLoginHref(`${pathname}${search}`)} replace />
+  }
+
+  const tab = new URLSearchParams(search).get('tab')
+  if (tab?.toLowerCase() === 'trending') {
+    return <Navigate to={EXPLORE_DASHBOARD_PATH} replace />
   }
 
   return (

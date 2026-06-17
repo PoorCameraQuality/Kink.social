@@ -26,6 +26,7 @@ import type { ZipPlaceCandidate } from '@/lib/profile-edit-location'
 import Button from '@/components/ui/Button'
 import TagMultiSelect from '@/components/ui/TagMultiSelect'
 import MobileActionBar from '@/components/shell/MobileActionBar'
+import OnboardingThemePicker from '@/components/onboarding/OnboardingThemePicker'
 import { onboardingStepIcon } from '@/components/onboarding/onboarding-step-icons'
 import {
   AlphaNotice,
@@ -43,7 +44,7 @@ import { SettingsPageSkeleton } from '@/components/ui/skeleton'
 import { ALPHA_UPLOAD_DISABLED_COPY } from '@/lib/alpha-mode'
 import { attachUploadedProfilePhoto, uploadProfilePhotoFile } from '@/lib/profile-photo-upload'
 
-const STEP_LABELS = ['Welcome', 'Safety', 'Profile', 'Privacy', 'Interests', 'First steps'] as const
+const STEP_LABELS = ['Welcome', 'Look & feel', 'Safety', 'Profile', 'Privacy', 'Interests', 'First steps'] as const
 
 const PRONOUN_PRESETS = ['He/Him', 'She/Her', 'They/Them', 'Ze/Zir', 'Any pronouns', 'Ask me']
 
@@ -349,7 +350,7 @@ export default function MemberOnboardingWizard() {
 
   async function continueFromProfileStep() {
     const ok = await saveProfileBasics()
-    if (ok) await goTo(4)
+    if (ok) await goTo(5)
   }
 
   async function skipProfileStep() {
@@ -362,11 +363,11 @@ export default function MemberOnboardingWizard() {
     }
     setLocalError(null)
     await saveProfileBasics()
-    await goTo(4)
+    await goTo(5)
   }
 
   return (
-    <PageShell maxWidth="lg" title="Welcome to kink.social" description="A short setup to help you get started." className={step === 6 ? 'pb-28 md:pb-6' : ''}>
+    <PageShell maxWidth="lg" title="Welcome to kink.social" description="A short setup to help you get started." className={step === 7 ? 'pb-[calc(var(--c2k-mobile-action-bar-total-h)+2rem)] md:pb-6' : ''}>
       <div className="mb-8">
         <OnboardingProgress step={step} total={ONBOARDING_STEP_COUNT} label={STEP_LABELS[step - 1]} />
       </div>
@@ -393,6 +394,26 @@ export default function MemberOnboardingWizard() {
         : null}
 
         {step === 2 ?
+          <OnboardingStepCard title="Choose your colors">
+            <p className="max-w-prose text-sm leading-relaxed text-dc-text-muted">
+              Pick a look that feels right. The site updates live as you tap a theme. You can change this anytime in
+              Settings.
+            </p>
+            <div className="mt-5">
+              <OnboardingThemePicker />
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
+              <Button variant="ghost" onClick={() => setStep(1)}>
+                Back
+              </Button>
+              <LoadingButton loading={saving} onClick={() => void goTo(3)}>
+                Continue
+              </LoadingButton>
+            </div>
+          </OnboardingStepCard>
+        : null}
+
+        {step === 3 ?
           <OnboardingStepCard title="Consent, privacy, and community safety">
             <div className="space-y-6">
               <div className="max-w-prose space-y-2">
@@ -447,14 +468,14 @@ export default function MemberOnboardingWizard() {
                   </Link>
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
-                  <Button variant="ghost" onClick={() => setStep(1)}>
+                  <Button variant="ghost" onClick={() => setStep(2)}>
                     Back
                   </Button>
                   <LoadingButton
                     loading={saving}
                     disabled={!safetyChecked}
                     onClick={() =>
-                      void goTo(3, { feed: { onboardingSafetyAckAt: new Date().toISOString() } })
+                      void goTo(4, { feed: { onboardingSafetyAckAt: new Date().toISOString() } })
                     }
                   >
                     Agree and continue
@@ -465,7 +486,7 @@ export default function MemberOnboardingWizard() {
           </OnboardingStepCard>
         : null}
 
-        {step === 3 ?
+        {step === 4 ?
           <OnboardingStepCard title="Profile basics">
             <p className="text-sm leading-relaxed text-dc-text-muted">
               Share what you are comfortable with now. Sensitive fields stay private until you choose otherwise on the
@@ -597,7 +618,7 @@ export default function MemberOnboardingWizard() {
               </div>
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
-              <Button variant="ghost" onClick={() => setStep(2)}>
+              <Button variant="ghost" onClick={() => setStep(3)}>
                 Back
               </Button>
               <div className="flex flex-wrap gap-2">
@@ -612,7 +633,7 @@ export default function MemberOnboardingWizard() {
           </OnboardingStepCard>
         : null}
 
-        {step === 4 ?
+        {step === 5 ?
           <OnboardingStepCard title="Set your privacy defaults">
             <div className="space-y-6">
               <p className="max-w-prose text-sm leading-relaxed text-dc-text-muted">
@@ -691,11 +712,105 @@ export default function MemberOnboardingWizard() {
                 </p>
               </div>
 
+              <section className="space-y-4 rounded-xl border border-dc-border px-4 py-4" aria-labelledby="onboarding-feed-activity-heading">
+                <div>
+                  <h3 id="onboarding-feed-activity-heading" className="text-sm font-semibold text-dc-text">
+                    How public should your activity be?
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-dc-text-muted">
+                    Recommended for alpha: show posts according to post privacy, ask before showing group joins, keep
+                    group memberships private by default, show reactions only to connections, and hide your connection
+                    list unless you change it.
+                  </p>
+                </div>
+
+                <label className="block text-sm">
+                  <span className="font-medium text-dc-text">Reactions and loves in feeds</span>
+                  <select
+                    value={privacy.feedActivityPrivacy.showReactions}
+                    onChange={(e) =>
+                      setPrivacy({
+                        ...privacy,
+                        feedActivityPrivacy: {
+                          ...privacy.feedActivityPrivacy,
+                          showReactions: e.target.value as typeof privacy.feedActivityPrivacy.showReactions,
+                        },
+                      })
+                    }
+                    className="mt-2 w-full rounded-xl border border-dc-border bg-dc-elevated px-3 py-2 text-dc-text"
+                  >
+                    <option value="connections_only">Connections only (recommended)</option>
+                    <option value="on">On</option>
+                    <option value="off">Off</option>
+                  </select>
+                </label>
+
+                <label className="block text-sm">
+                  <span className="font-medium text-dc-text">Group joins in feeds</span>
+                  <select
+                    value={privacy.feedActivityPrivacy.showGroupJoins}
+                    onChange={(e) =>
+                      setPrivacy({
+                        ...privacy,
+                        feedActivityPrivacy: {
+                          ...privacy.feedActivityPrivacy,
+                          showGroupJoins: e.target.value as typeof privacy.feedActivityPrivacy.showGroupJoins,
+                        },
+                      })
+                    }
+                    className="mt-2 w-full rounded-xl border border-dc-border bg-dc-elevated px-3 py-2 text-dc-text"
+                  >
+                    <option value="ask">Ask every time (recommended)</option>
+                    <option value="on">On</option>
+                    <option value="off">Off</option>
+                  </select>
+                </label>
+
+                <label className="block text-sm">
+                  <span className="font-medium text-dc-text">Default group member list visibility</span>
+                  <select
+                    value={privacy.feedActivityPrivacy.defaultGroupMemberListVisibility}
+                    onChange={(e) =>
+                      setPrivacy({
+                        ...privacy,
+                        feedActivityPrivacy: {
+                          ...privacy.feedActivityPrivacy,
+                          defaultGroupMemberListVisibility: e.target
+                            .value as typeof privacy.feedActivityPrivacy.defaultGroupMemberListVisibility,
+                        },
+                      })
+                    }
+                    className="mt-2 w-full rounded-xl border border-dc-border bg-dc-elevated px-3 py-2 text-dc-text"
+                  >
+                    <option value="ask">Ask when joining (recommended)</option>
+                    <option value="hidden">Keep me hidden by default</option>
+                    <option value="visible">Show me in member lists by default</option>
+                  </select>
+                </label>
+
+                <label className="flex cursor-pointer items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={privacy.connectionsListVisibility !== 'hidden'}
+                    onChange={(e) =>
+                      setPrivacy({
+                        ...privacy,
+                        connectionsListVisibility: e.target.checked ? 'connections_only' : 'hidden',
+                      })
+                    }
+                    className="mt-1"
+                  />
+                  <span className="text-sm text-dc-text-muted">
+                    Show my connection list on my profile (off by default for privacy)
+                  </span>
+                </label>
+              </section>
+
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-dc-border pt-6">
-                <Button variant="ghost" onClick={() => setStep(3)}>
+                <Button variant="ghost" onClick={() => setStep(4)}>
                   Back
                 </Button>
-                <LoadingButton loading={saving} onClick={() => void goTo(5, { privacy })}>
+                <LoadingButton loading={saving} onClick={() => void goTo(6, { privacy })}>
                   Save and continue
                 </LoadingButton>
               </div>
@@ -703,7 +818,7 @@ export default function MemberOnboardingWizard() {
           </OnboardingStepCard>
         : null}
 
-        {step === 5 ?
+        {step === 6 ?
           <OnboardingStepCard title="What brings you here?">
             <p className="text-sm text-dc-text-muted">Pick one or more. This helps us suggest a starting point.</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -732,17 +847,17 @@ export default function MemberOnboardingWizard() {
               })}
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
-              <Button variant="ghost" onClick={() => setStep(4)}>
+              <Button variant="ghost" onClick={() => setStep(5)}>
                 Back
               </Button>
-              <LoadingButton loading={saving} onClick={() => void goTo(6)}>
+              <LoadingButton loading={saving} onClick={() => void goTo(7)}>
                 Continue
               </LoadingButton>
             </div>
           </OnboardingStepCard>
         : null}
 
-        {step === 6 ?
+        {step === 7 ?
           <>
             <OnboardingStepCard title="">
               <div className="space-y-5 pb-4 md:pb-0">
@@ -787,7 +902,7 @@ export default function MemberOnboardingWizard() {
                 </section>
 
                 <div className="hidden flex-wrap items-center justify-between gap-3 border-t border-dc-border pt-6 md:flex">
-                  <Button variant="ghost" onClick={() => setStep(5)}>
+                  <Button variant="ghost" onClick={() => setStep(6)}>
                     Back
                   </Button>
                   <LoadingButton loading={saving} onClick={() => void finishOnboarding()} className="min-w-[12rem]">
@@ -804,7 +919,7 @@ export default function MemberOnboardingWizard() {
               }}
               secondary={{
                 label: 'Back',
-                onClick: () => setStep(5),
+                onClick: () => setStep(6),
                 variant: 'secondary',
               }}
             />

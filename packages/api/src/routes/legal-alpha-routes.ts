@@ -17,6 +17,8 @@ import { recordModerationAudit } from '../lib/moderation-audit.js'
 import { requireDb, requireUser } from '../lib/moderation-route-auth.js'
 import { isSiteAdmin } from '../lib/platform-staff.js'
 import { getEmailFromUserRow, userEmailSelect } from '../lib/user-email.js'
+import { rateLimitRoute } from '../lib/rate-limit-config.js'
+import { mailboxForContactCategory, sendContactFormOutboundEmail } from '../lib/outbound-form-mail.js'
 import { softDeleteUserAccount } from '../lib/deleted-account-sweep.js'
 
 const STEP_UP_ERROR = { error: 'step_up_required', code: 'step_up_required' }
@@ -251,7 +253,7 @@ export async function registerLegalAlphaRoutes(app: FastifyInstance) {
     return reply.status(201).send({ case: row })
   })
 
-  app.post('/api/v1/contact/intake', async (req, reply) => {
+  app.post('/api/v1/contact/intake', { ...rateLimitRoute('reports') }, async (req, reply) => {
     if (!requireDb(reply)) return
     const parsed = contactIntakeBody.safeParse(req.body)
     if (!parsed.success) {
@@ -271,6 +273,21 @@ export async function registerLegalAlphaRoutes(app: FastifyInstance) {
         status: 'RECEIVED',
       })
       .returning()
+
+    const mailboxKey = mailboxForContactCategory(body.category)
+    void sendContactFormOutboundEmail({
+      mailboxKey,
+      subject: body.subject,
+      senderName: body.senderName,
+      senderEmail: body.senderEmail,
+      message: body.message,
+      category: body.category,
+    }).then((sent) => {
+      if (!sent.ok) {
+        req.log.warn({ err: sent.error, inquiryId: row.id }, 'contact form outbound email failed')
+      }
+    })
+
     return reply.status(201).send({ inquiry: row })
   })
 

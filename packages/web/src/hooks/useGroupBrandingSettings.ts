@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import type { BrandingAssetKind } from '@/components/organizer/ScopeBrandingPanel'
+import { uploadGroupBrandingAsset } from '@/lib/group-branding-upload'
 
 export type GroupBrandingState = {
   bannerUrl: string | null
@@ -47,27 +48,18 @@ export function useGroupBrandingSettings(groupId: string, reload: () => Promise<
         setUploading(kind)
         setMsg(null)
         try {
-          const fd = new FormData()
-          fd.append('file', file)
-          const up = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
-          const data = (await up.json().catch(() => ({}))) as { url?: string; error?: string }
-          if (!up.ok || !data.url) {
-            setMsg(data.error ?? 'Upload failed')
-            return
-          }
-          const field =
-            kind === 'banner' ? 'bannerUrl'
-            : kind === 'logo' ? 'logoUrl'
-            : 'shareImageUrl'
-          const ok = await patchBranding({ [field]: data.url })
-          if (ok) setMsg(`${kind === 'share' ? 'Link preview' : kind} updated.`)
+          await uploadGroupBrandingAsset(groupId, kind, file)
+          await reload()
+          setMsg(`${kind === 'share' ? 'Link preview' : kind} updated.`)
+        } catch (err) {
+          setMsg(err instanceof Error ? err.message : 'Upload failed')
         } finally {
           setUploading(null)
         }
       }
       input.click()
     },
-    [patchBranding],
+    [groupId, reload],
   )
 
   const clearAsset = useCallback(

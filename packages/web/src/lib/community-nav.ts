@@ -50,6 +50,7 @@ export function normalizeHomeTab(raw: string | null): HomeTab | null {
 }
 
 export function homeDiscoverHref(tab: HomeTab): string {
+  if (tab === 'Trending') return EXPLORE_DASHBOARD_PATH
   const p = new URLSearchParams({ mode: 'discover', tab })
   return `/home?${p.toString()}`
 }
@@ -147,12 +148,16 @@ export function resolveCommunityNavState(pathname: string, search: string): Comm
   if (pathname === '/presenters' || pathname.startsWith('/presenters/')) {
     return { mode: 'discover', tab: 'Local' }
   }
+  if (pathname === '/places' || pathname.startsWith('/places/') || pathname === '/dungeons') {
+    return { mode: 'discover', tab: 'Local' }
+  }
 
   return { mode: 'discover', tab: 'Local' }
 }
 
 /** Whether a browse tab should appear selected (home discover tab or matching standalone route). */
 export function isBrowseTabActive(tab: HomeTab, pathname: string, search: string): boolean {
+  if (tab === 'Trending' && pathname === EXPLORE_DASHBOARD_PATH) return true
   const state = resolveCommunityNavState(pathname, search)
   return state.mode === 'discover' && state.tab === tab
 }

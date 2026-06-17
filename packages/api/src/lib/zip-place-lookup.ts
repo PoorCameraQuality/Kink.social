@@ -1,3 +1,4 @@
+import { formatPlaceDisplayName, formatPlaceLocationLabel } from '@c2k/shared'
 import { and, desc, eq, gte, ilike, like, lte, not } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { haversineDistanceMi } from './geo-distance.js'
@@ -188,7 +189,7 @@ async function findPopulousNearbyCandidates(params: {
         (zipLocalityNorm != null && normalizePlaceName(row.name) === zipLocalityNorm)
       return {
         placeId: row.id,
-        display: `${row.name}, ${stateName}`,
+        display: formatPlaceLocationLabel(row.name, stateName),
         population: row.population,
         distanceMi: Math.round(distanceMi * 10) / 10,
         isZipMatch,
@@ -230,7 +231,7 @@ async function findPopulousNearbyCandidates(params: {
           : null
       picked.unshift({
         placeId: primary.id,
-        display: `${primary.name}, ${stateName}`,
+        display: formatPlaceLocationLabel(primary.name, stateName),
         population: primary.population,
         distanceMi,
         isZipMatch: true,
@@ -330,7 +331,7 @@ export async function resolveZipPlace(zipRaw: string): Promise<ZipPlaceResult | 
         zip: cached.zip,
         placeId: cached.placeId,
         stateId: cached.stateId,
-        display: `${cached.placeName}, ${cached.stateName}`,
+        display: formatPlaceLocationLabel(cached.placeName, cached.stateName),
         lat: cached.lat,
         lng: cached.lng,
         countryName: cached.countryName,
@@ -434,7 +435,7 @@ export async function resolveZipPlace(zipRaw: string): Promise<ZipPlaceResult | 
       zip,
       placeId: placeRow.id,
       stateId: stateRow.id,
-      display: `${placeRow.name}, ${stateRow.name}`,
+      display: formatPlaceLocationLabel(placeRow.name, stateRow.name),
       lat: latVal,
       lng: lngVal,
       countryName: countryRow?.name ?? payload.country,

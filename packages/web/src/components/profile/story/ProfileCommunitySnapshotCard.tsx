@@ -11,9 +11,7 @@ type Props = {
   memberSince?: string | null
   roles: string[]
   lifestyleActivity?: string | null
-  referencesCount: number
   eventsAttended?: number
-  educationContributions?: number
 }
 
 type SnapshotStatProps = {
@@ -34,14 +32,13 @@ function SnapshotStat({ value, label, emptyHint }: SnapshotStatProps) {
   )
 }
 
+/** At-a-glance activity — references and writing live under Community / Media tabs. */
 export default function ProfileCommunitySnapshotCard({
   ecosystem,
   memberSince,
   roles,
   lifestyleActivity,
-  referencesCount,
   eventsAttended = 0,
-  educationContributions = 0,
 }: Props) {
   const upcoming = ecosystem?.upcomingEvents.length ?? 0
   const orgCount = ecosystem?.orgs.length ?? 0
@@ -62,16 +59,10 @@ export default function ProfileCommunitySnapshotCard({
   ].filter(Boolean)
 
   return (
-    <ProfileCard title="Community Snapshot" icon={<IconUsers />}>
+    <ProfileCard title="At a glance" icon={<IconUsers />}>
       <div className="grid grid-cols-2 gap-2.5">
         <SnapshotStat value={upcoming} label="Upcoming events" emptyHint="None listed publicly" />
         <SnapshotStat value={eventsAttended} label="Events attended" emptyHint="Not shared yet" />
-        <SnapshotStat value={referencesCount} label="References" emptyHint="No references yet" />
-        <SnapshotStat
-          value={educationContributions}
-          label="Educator credits"
-          emptyHint="No published work yet"
-        />
       </div>
 
       {affiliationParts.length > 0 ?

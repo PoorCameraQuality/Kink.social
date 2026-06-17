@@ -1,4 +1,6 @@
 /** City dropdown: state-only profile location */
+import { formatPlaceLocationLabel } from '@c2k/shared'
+
 export const PLACE_STATE_ONLY = '__state_only__'
 /** City dropdown: free-text town not in list */
 export const PLACE_CUSTOM = '__custom__'
@@ -22,7 +24,7 @@ export function formatProfileLocationDisplay(state: LocationState): string {
     if (placeSelect) {
       const pl = places.find((p) => p.id === placeSelect)
       const st = states.find((s) => s.id === stateId)
-      if (pl && st) return `${pl.name}, ${st.name}`
+      if (pl && st) return formatPlaceLocationLabel(pl.name, st.name)
     }
     return location
   }

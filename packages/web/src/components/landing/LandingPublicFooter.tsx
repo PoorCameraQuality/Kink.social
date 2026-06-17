@@ -9,9 +9,13 @@ const legalFooterLinks = [
   { href: '/policies', label: 'All policies' },
 ] as const
 
-export default function LandingPublicFooter() {
+type Props = {
+  compact?: boolean
+}
+
+export default function LandingPublicFooter({ compact = false }: Props) {
   return (
-    <footer className="landing-public-footer">
+    <footer className={`landing-public-footer${compact ? ' landing-public-footer--compact' : ''}`}>
       <div className="public-container">
         <div className="landing-footer-grid">
           <div className="landing-footer-brand">

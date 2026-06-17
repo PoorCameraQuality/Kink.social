@@ -1,6 +1,6 @@
 /** Following feed filter buckets - see docs/FETLIFE_CLASS_HOME.md §2.4 */
 
-export const REACTION_VERBS = new Set(['connection_accepted'])
+export const REACTION_VERBS = new Set(['connection_accepted', 'loved', 'reacted', 'followed'])
 export const EVENT_VERBS = new Set(['event_created', 'event_rsvp', 'presenter_assigned', 'convention_pin'])
 export const GROUP_VERBS = new Set(['group_join', 'org_join', 'org_announcement'])
 

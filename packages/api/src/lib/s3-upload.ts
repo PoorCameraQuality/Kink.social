@@ -60,6 +60,22 @@ export function publicUrlForKey(key: string, bucket = defaultBucket()): string |
   return `${publicBase.replace(/\/$/, '')}/${key.replace(/^\//, '')}`
 }
 
+/** True when a URL can be loaded by a member's browser (not loopback / internal hosts). */
+export function isBrowserReachablePublicUrl(url: string): boolean {
+  const trimmed = url.trim()
+  if (!trimmed) return false
+  if (trimmed.startsWith('/')) return true
+  try {
+    const { hostname, protocol } = new URL(trimmed)
+    if (protocol !== 'http:' && protocol !== 'https:') return false
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') return false
+    if (hostname.endsWith('.internal') || hostname.endsWith('.local')) return false
+    return true
+  } catch {
+    return false
+  }
+}
+
 /**
  * In dev (MinIO on localhost) we serve uploaded files straight from the S3
  * endpoint via `S3_PUBLIC_BASE_URL ?? S3_ENDPOINT/<bucket>`. MinIO buckets are

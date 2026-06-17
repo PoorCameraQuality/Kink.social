@@ -23,6 +23,6 @@ describe('privacySettingsWithAdultContentPreference', () => {
     const next = privacySettingsWithAdultContentPreference(defaultPrivacySettings, 'HIDE')
     assert.equal(next.adultContentPreference, 'HIDE')
     assert.equal(next.whoCanMessage, defaultPrivacySettings.whoCanMessage)
-    assert.equal(next.schemaVersion, 7)
+    assert.equal(next.schemaVersion, defaultPrivacySettings.schemaVersion)
   })
 })

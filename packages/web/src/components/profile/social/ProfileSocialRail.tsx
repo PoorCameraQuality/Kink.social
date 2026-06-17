@@ -6,7 +6,7 @@ import type {
   ProfileMutualConnections,
   SocialPersonPreview,
 } from '@/lib/profile-social-types'
-import type { PublicProfileTab } from '@/lib/public-profile-tabs'
+import type { PublicProfileTab, CommunitySection } from '@/lib/public-profile-tabs'
 import SocialAvatarGrid from './SocialAvatarGrid'
 
 type Props = {
@@ -16,7 +16,7 @@ type Props = {
   connections: ProfileConnectionsSummary | null | undefined
   follows: ProfileFollowsSummary | null | undefined
   mutualConnections: ProfileMutualConnections | null | undefined
-  onSelectTab?: (tab: PublicProfileTab) => void
+  onSelectTab?: (tab: PublicProfileTab, section?: CommunitySection) => void
 }
 
 function formatCount(n: number): string {
@@ -139,7 +139,7 @@ export default function ProfileSocialRail({
           people={mutualConnections?.preview ?? []}
           onViewAll={
             onSelectTab && connections?.listVisible ?
-              () => onSelectTab('Connections')
+              () => onSelectTab('Community', 'connections')
             : undefined
           }
           viewAllLabel="See connections"
@@ -154,7 +154,7 @@ export default function ProfileSocialRail({
         viewAllHref={viewerIsOwner ? ownerConnectionsHref : undefined}
         onViewAll={
           !viewerIsOwner && onSelectTab && connections?.listVisible ?
-            () => onSelectTab('Connections')
+            () => onSelectTab('Community', 'connections')
           : undefined
         }
       />

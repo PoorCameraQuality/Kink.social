@@ -3,7 +3,7 @@ import { db, schema } from '../db/index.js'
 
 export type HubPushChannel = 'announcements' | 'chat'
 
-/** Pinned convention user ids who opted in for this hub push channel (default on when no prefs row). */
+/** Pinned convention user ids who opted in for hub push (master pushEnabled + channel toggle). */
 export async function filterPinnedUsersForHubPush(
   userIds: string[],
   channel: HubPushChannel,
@@ -13,6 +13,7 @@ export async function filterPinnedUsersForHubPush(
   const prefs = await db
     .select({
       userId: schema.userNotificationPreferences.userId,
+      pushEnabled: schema.userNotificationPreferences.pushEnabled,
       announcements: schema.userNotificationPreferences.pushHubAnnouncements,
       chat: schema.userNotificationPreferences.pushHubChat,
     })
@@ -22,7 +23,17 @@ export async function filterPinnedUsersForHubPush(
   const prefByUser = new Map(prefs.map((p) => [p.userId, p]))
   return unique.filter((id) => {
     const row = prefByUser.get(id)
-    if (!row) return true
+    if (!row) return false
+    if (!row.pushEnabled) return false
     return channel === 'announcements' ? row.announcements : row.chat
   })
+}
+
+export async function isUserPushEnabled(userId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ pushEnabled: schema.userNotificationPreferences.pushEnabled })
+    .from(schema.userNotificationPreferences)
+    .where(eq(schema.userNotificationPreferences.userId, userId))
+    .limit(1)
+  return row?.pushEnabled === true
 }

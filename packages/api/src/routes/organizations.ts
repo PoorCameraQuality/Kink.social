@@ -39,6 +39,15 @@ import { emitActivity } from '../lib/feed-activities.js'
 import { canViewOrg, canViewOrgMemberContent, isOrgMember } from '../lib/org-visibility.js'
 import { isUserScopeBanned } from '../lib/org-moderation-access.js'
 import { canViewerSeeGroupEvent } from '../lib/group-access.js'
+import {
+  alphaUploadDisabledResponse,
+  isAlphaUploadDisabled,
+  type AlphaUploadCategory,
+} from '../lib/alpha-upload-policy.js'
+import {
+  MediaUploadValidationError,
+  promoteQuarantineToScopeBrandingUrl,
+} from '../lib/media-pipeline.js'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -676,6 +685,64 @@ export async function registerOrganizationRoutes(app: FastifyInstance) {
       .where(eq(schema.organizations.id, orgId))
       .returning()
     return reply.send({ organization: mapOrgRow(updated!) })
+  })
+
+  const orgBrandingAttachBody = z.object({
+    kind: z.enum(['banner', 'logo', 'share']),
+    quarantineKey: z.string().min(1).max(2048),
+  })
+
+  const orgBrandingAlphaCategory: Record<'banner' | 'logo' | 'share', AlphaUploadCategory> = {
+    banner: 'org_banner',
+    logo: 'org_logo',
+    share: 'org_share',
+  }
+
+  app.post('/api/v1/organizations/:orgKey/branding/attach', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { orgKey } = req.params as { orgKey: string }
+    const orgId = await resolveOrganizationId(orgKey)
+    if (!orgId) return reply.status(404).send({ error: 'Not found' })
+    if (!(await requireMinRole(orgId, user.userId, 'ADMIN', reply))) return
+    const parsed = orgBrandingAttachBody.safeParse(req.body)
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    const alphaCategory = orgBrandingAlphaCategory[parsed.data.kind]
+    if (isAlphaUploadDisabled(alphaCategory)) {
+      return alphaUploadDisabledResponse(reply, alphaCategory)
+    }
+    let publicUrl: string
+    try {
+      publicUrl = await promoteQuarantineToScopeBrandingUrl({
+        userId: user.userId,
+        quarantineKey: parsed.data.quarantineKey,
+        scopePath: `organizations/${orgId}`,
+        assetName: parsed.data.kind,
+      })
+    } catch (err) {
+      if (err instanceof MediaUploadValidationError) {
+        return reply.status(400).send({ error: err.message })
+      }
+      const e = err as { message?: string }
+      req.log?.error({ err }, 'org branding attach failed')
+      return reply.status(502).send({ error: e.message ?? 'Could not attach branding image' })
+    }
+    const field =
+      parsed.data.kind === 'banner' ? 'bannerUrl'
+      : parsed.data.kind === 'logo' ? 'logoUrl'
+      : 'shareImageUrl'
+    const [updated] = await db
+      .update(schema.organizations)
+      .set({ [field]: publicUrl })
+      .where(eq(schema.organizations.id, orgId))
+      .returning()
+    if (!updated) return reply.status(404).send({ error: 'Not found' })
+    return reply.send({
+      url: publicUrl,
+      kind: parsed.data.kind,
+      organization: mapOrgRow(updated),
+    })
   })
 
   app.post('/api/v1/organizations/:orgKey/join', async (req, reply) => {

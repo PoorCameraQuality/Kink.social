@@ -1,6 +1,8 @@
 /**
  * Rich dev seed from eastcoastkinkevents.com catalog - feed, vendors, photos, connections, activities.
  */
+import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import {
   defaultFeedSettings,
   defaultNotificationSettings,
@@ -10,6 +12,7 @@ import bcrypt from 'bcryptjs'
 import { and, eq } from 'drizzle-orm'
 import { insertFeedActivity } from '../lib/feed-activities.js'
 import { refreshEventRsvpCount } from '../lib/event-rsvp-helpers.js'
+import type { AlphaSeedMarker } from '../lib/alpha-seed-labels.js'
 import {
   ECKE_DUNGEONS,
   ECKE_PERSONAS,
@@ -21,8 +24,25 @@ import {
 } from './ecke-catalog.js'
 import { db, schema } from './index.js'
 import { resolveVendorCategoryTags } from '../lib/vendor-public-dto.js'
+import { resolveEastCoastRepoRoot, syncEckeDungeonLogo } from './ecke-seed-images.js'
 
 const DEMO_PASSWORD = () => process.env.DEMO_LOGIN_PASSWORD ?? 'demo'
+
+let alphaMarkFn: AlphaSeedMarker | undefined
+
+async function markAlpha(
+  targetType: string,
+  targetId: string,
+  opts: {
+    isSynthetic?: boolean
+    isPublicSource?: boolean
+    sourceSlug?: string
+    sourceType?: string
+  } = {},
+) {
+  if (!alphaMarkFn) return
+  await alphaMarkFn({ targetType, targetId, ...opts })
+}
 
 function hoursAgo(h: number): Date {
   return new Date(Date.now() - h * 60 * 60 * 1000)
@@ -47,7 +67,10 @@ async function stateIdByName(name: string): Promise<string | null> {
 
 async function ensurePersonaUser(p: EckePersonaRow): Promise<string> {
   const [ex] = await db.select().from(schema.users).where(eq(schema.users.username, p.username)).limit(1)
-  if (ex) return ex.id
+  if (ex) {
+    await markAlpha('user', ex.id, { isSynthetic: true, sourceType: 'ecke_persona', sourceSlug: p.username })
+    return ex.id
+  }
 
   const hash = await bcrypt.hash(DEMO_PASSWORD(), 10)
   const [user] = await db
@@ -77,6 +100,7 @@ async function ensurePersonaUser(p: EckePersonaRow): Promise<string> {
     notificationSettings: defaultNotificationSettings,
     feedSettings: defaultFeedSettings,
   })
+  await markAlpha('user', user.id, { isSynthetic: true, sourceType: 'ecke_persona', sourceSlug: p.username })
   return user.id
 }
 
@@ -87,34 +111,42 @@ export type EckeSeedContext = {
   shutterId: string
   orgId: string
   previewConventionId?: string
+  /** When set, every created entity is registered in alpha_seed_items. */
+  alphaMark?: AlphaSeedMarker
 }
 
 export async function seedEckeRichExperience(ctx: EckeSeedContext): Promise<void> {
   console.log(`ECKE rich seed. Catalog from ${ECKE_SOURCE}`)
+  alphaMarkFn = ctx.alphaMark
 
-  const personaIds: string[] = []
-  for (const p of ECKE_PERSONAS) {
-    personaIds.push(await ensurePersonaUser(p))
+  try {
+    const personaIds: string[] = []
+    for (const p of ECKE_PERSONAS) {
+      personaIds.push(await ensurePersonaUser(p))
+    }
+    const allUserIds = [ctx.braxId, ctx.ropeId, ctx.leatherId, ctx.shutterId, ...personaIds]
+
+    const eventIdByTitle = await seedEckeCalendarEvents(ctx.braxId, ctx.orgId)
+    if (!alphaMarkFn) {
+      await seedEckeCommunityPlaces(ctx.braxId)
+    }
+    await seedEckeVendorShops(personaIds)
+    await seedEckeProfilePhotos(allUserIds)
+    await seedEckeConnectionMesh(allUserIds)
+    await seedEckeRsvpsAndActivities(allUserIds, eventIdByTitle)
+    const postIds = await seedEckeFeedPosts(allUserIds, eventIdByTitle)
+    await seedEckePostActivities(postIds)
+    await seedEckeOrgForum(ctx.orgId, allUserIds)
+    if (ctx.previewConventionId) {
+      await seedEckeConventionHub(ctx.previewConventionId, allUserIds)
+    }
+
+    console.log(
+      `ECKE rich seed complete: ${ECKE_UPCOMING_EVENTS.length} events, ${ECKE_VENDORS.length} added vendors, ${postIds.length} feed posts, ${personaIds.length} personas.`,
+    )
+  } finally {
+    alphaMarkFn = undefined
   }
-  const allUserIds = [ctx.braxId, ctx.ropeId, ctx.leatherId, ctx.shutterId, ...personaIds]
-
-  const eventIdByTitle = await seedEckeCalendarEvents(ctx.braxId, ctx.orgId)
-  await seedEckeDungeonListings(ctx.braxId)
-  await seedEckeCommunityPlaces(ctx.braxId)
-  await seedEckeVendorShops(personaIds)
-  await seedEckeProfilePhotos(allUserIds)
-  await seedEckeConnectionMesh(allUserIds)
-  await seedEckeRsvpsAndActivities(allUserIds, eventIdByTitle)
-  const postIds = await seedEckeFeedPosts(allUserIds, eventIdByTitle)
-  await seedEckePostActivities(postIds)
-  await seedEckeOrgForum(ctx.orgId, allUserIds)
-  if (ctx.previewConventionId) {
-    await seedEckeConventionHub(ctx.previewConventionId, allUserIds)
-  }
-
-  console.log(
-    `ECKE rich seed complete: ${ECKE_UPCOMING_EVENTS.length} events, ${ECKE_VENDORS.length} added vendors, ${postIds.length} feed posts, ${personaIds.length} personas.`,
-  )
 }
 
 async function seedEckeCalendarEvents(
@@ -127,6 +159,11 @@ async function seedEckeCalendarEvents(
     const [ex] = await db.select().from(schema.events).where(eq(schema.events.title, row.title)).limit(1)
     if (ex) {
       map.set(row.title, ex.id)
+      await markAlpha('event', ex.id, {
+        isPublicSource: true,
+        sourceType: 'ecke_event',
+        sourceSlug: row.slug,
+      })
       continue
     }
     const [ev] = await db
@@ -149,6 +186,11 @@ async function seedEckeCalendarEvents(
       .returning()
     if (ev) {
       map.set(row.title, ev.id)
+      await markAlpha('event', ev.id, {
+        isPublicSource: true,
+        sourceType: 'ecke_event',
+        sourceSlug: row.slug,
+      })
       added++
     }
   }
@@ -156,50 +198,70 @@ async function seedEckeCalendarEvents(
   return map
 }
 
-async function seedEckeDungeonListings(hostId: string) {
-  let added = 0
-  for (const d of ECKE_DUNGEONS) {
-    const title = `${d.name} (ECKE listing)`
-    const [ex] = await db.select().from(schema.events).where(eq(schema.events.title, title)).limit(1)
-    if (ex) continue
-    await db.insert(schema.events).values({
-      hostId,
-      title,
-      description: `${d.description} Reference: ${ECKE_SOURCE}/dungeons/${d.slug}`,
-      location: d.location,
-      startsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      endsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000),
-      category: 'Dungeon',
-      tags: ['ecke-dungeon', d.category.toLowerCase().replace(/\s+/g, '-')],
-      eventFormat: 'in-person',
-    })
-    added++
+async function loadEastCoastDungeonLogoPaths(): Promise<Map<string, string>> {
+  const eckeRoot = resolveEastCoastRepoRoot()
+  if (!eckeRoot) return new Map()
+  try {
+    const mod = await import(pathToFileURL(path.join(eckeRoot, 'src/data/dungeons.js')).href)
+    const raw = (mod.getAllDungeons?.() ?? mod.dungeons ?? []) as { slug: string; logo?: string }[]
+    return new Map(raw.filter((d) => d.logo).map((d) => [d.slug, d.logo!]))
+  } catch {
+    return new Map()
   }
-  if (added > 0) console.log(`ECKE: ${added} dungeon/venue listings as events.`)
 }
 
 async function seedEckeCommunityPlaces(submittedByUserId: string) {
+  const eckeRoot = resolveEastCoastRepoRoot()
+  const logoPaths = await loadEastCoastDungeonLogoPaths()
   let added = 0
+  let updated = 0
   for (const d of ECKE_DUNGEONS) {
     const slug = `ecke-${d.slug}`
+    const logoPath = logoPaths.get(d.slug) ?? d.logoUrl ?? undefined
+    const logoUrl =
+      eckeRoot && logoPath ? syncEckeDungeonLogo(eckeRoot, d.slug, logoPath) : d.logoUrl ?? null
     const [ex] = await db
       .select()
       .from(schema.communityPlaces)
       .where(eq(schema.communityPlaces.slug, slug))
       .limit(1)
-    if (ex) continue
+    if (ex) {
+      if (logoUrl && logoUrl !== ex.logoUrl) {
+        await db
+          .update(schema.communityPlaces)
+          .set({ logoUrl })
+          .where(eq(schema.communityPlaces.id, ex.id))
+        updated++
+      }
+      continue
+    }
     await db.insert(schema.communityPlaces).values({
       name: d.name,
       slug,
       category: 'dungeon_club',
       description: d.description,
       city: d.location,
+      logoUrl: logoUrl ?? undefined,
       status: 'published',
       submittedByUserId,
     })
+    const [place] = await db
+      .select({ id: schema.communityPlaces.id })
+      .from(schema.communityPlaces)
+      .where(eq(schema.communityPlaces.slug, slug))
+      .limit(1)
+    if (place) {
+      await markAlpha('community_place', place.id, {
+        isPublicSource: true,
+        sourceType: 'ecke_dungeon',
+        sourceSlug: d.slug,
+      })
+    }
     added++
   }
-  if (added > 0) console.log(`ECKE: ${added} community places (dungeons).`)
+  if (added > 0 || updated > 0) {
+    console.log(`ECKE: ${added} new, ${updated} updated community places (dungeons).`)
+  }
 }
 
 async function ensureEckeVendorUser(v: EckeVendorRow): Promise<string> {
@@ -275,6 +337,18 @@ async function seedEckeVendorShops(_personaIds: string[]) {
         primaryImageUrl: `https://picsum.photos/seed/ecke-prod-${v.slug}-2/800/600`,
       },
     ])
+    await markAlpha('vendor_profile', vp.id, {
+      isPublicSource: true,
+      sourceType: 'ecke_vendor',
+      sourceSlug: v.slug,
+    })
+    const prods = await db
+      .select({ id: schema.products.id })
+      .from(schema.products)
+      .where(eq(schema.products.vendorId, vp.id))
+    for (const prod of prods) {
+      await markAlpha('product', prod.id, { isSynthetic: true, sourceType: 'ecke_vendor_product' })
+    }
     added++
   }
   if (added > 0) console.log(`ECKE: ${added} vendor shops with products.`)
@@ -504,6 +578,7 @@ async function seedEckeFeedPosts(
       .returning()
     if (row) {
       out.push({ id: row.id, authorId })
+      await markAlpha('feed_post', row.id, { isSynthetic: true, sourceType: 'ecke_feed' })
       h += 2 + (i % 5)
     }
   }
@@ -523,7 +598,10 @@ async function seedEckeFeedPosts(
         updatedAt: hoursAgo(1),
       })
       .returning()
-    if (repost) out.push({ id: repost.id, authorId: userIds[1] })
+    if (repost) {
+      out.push({ id: repost.id, authorId: userIds[1] })
+      await markAlpha('feed_post', repost.id, { isSynthetic: true, sourceType: 'ecke_feed' })
+    }
   }
 
   console.log(`ECKE: ${out.length} feed posts (status, articles, images, repost).`)
@@ -617,17 +695,26 @@ async function seedEckeOrgForum(orgId: string, userIds: string[]) {
       })
       .returning()
     if (!thread) continue
-    await db.insert(schema.forumPosts).values({
-      threadId: thread.id,
-      authorId: author,
-      body: th.body,
-    })
-    for (let r = 0; r < 2; r++) {
-      await db.insert(schema.forumPosts).values({
+    await markAlpha('forum_thread', thread.id, { isSynthetic: true, sourceType: 'ecke_forum' })
+    const [op] = await db
+      .insert(schema.forumPosts)
+      .values({
         threadId: thread.id,
-        authorId: userIds[(posts + r + 1) % userIds.length],
-        body: `Reply ${r + 1}: +1. See you on the calendar.`,
+        authorId: author,
+        body: th.body,
       })
+      .returning()
+    if (op) await markAlpha('forum_post', op.id, { isSynthetic: true, sourceType: 'ecke_forum' })
+    for (let r = 0; r < 2; r++) {
+      const [reply] = await db
+        .insert(schema.forumPosts)
+        .values({
+          threadId: thread.id,
+          authorId: userIds[(posts + r + 1) % userIds.length],
+          body: `Reply ${r + 1}: +1. See you on the calendar.`,
+        })
+        .returning()
+      if (reply) await markAlpha('forum_post', reply.id, { isSynthetic: true, sourceType: 'ecke_forum' })
     }
     posts++
   }
@@ -664,7 +751,10 @@ async function seedEckeConventionHub(conventionId: string, userIds: string[]) {
         .returning()
       row = ins
     }
-    if (row) channelIds.push(row.id)
+    if (row) {
+      channelIds.push(row.id)
+      await markAlpha('convention_hub_channel', row.id, { isSynthetic: true, sourceType: 'ecke_hub' })
+    }
   }
 
   const snippets = [
@@ -681,12 +771,16 @@ async function seedEckeConventionHub(conventionId: string, userIds: string[]) {
   for (let i = 0; i < snippets.length; i++) {
     const channelId = channelIds[i % channelIds.length]
     const senderId = userIds[i % userIds.length]
-    await db.insert(schema.conventionHubChannelMessages).values({
-      channelId,
-      senderId,
-      body: snippets[i],
-      createdAt: hoursAgo(24 - i * 2),
-    })
+    const [msg] = await db
+      .insert(schema.conventionHubChannelMessages)
+      .values({
+        channelId,
+        senderId,
+        body: snippets[i],
+        createdAt: hoursAgo(24 - i * 2),
+      })
+      .returning()
+    if (msg) await markAlpha('convention_hub_message', msg.id, { isSynthetic: true, sourceType: 'ecke_hub' })
     msgs++
   }
   if (msgs > 0) console.log(`ECKE: ${msgs} convention hub chat messages.`)

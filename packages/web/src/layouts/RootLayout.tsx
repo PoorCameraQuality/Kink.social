@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, useSearchParams } from 'react-router-dom'
 import AppProviders from '@/components/AppProviders'
 import AppRobotsMeta from '@/components/seo/AppRobotsMeta'
 import OnboardingGate from '@/components/onboarding/OnboardingGate'
@@ -10,6 +10,7 @@ import Header from '@/components/Header'
 import CommunityNavBar from '@/components/CommunityNavBar'
 import MockDataBanner from '@/components/MockDataBanner'
 import RouteNavigationPending from '@/components/RouteNavigationPending'
+import ScrollToTopOnNavigate from '@/components/ScrollToTopOnNavigate'
 import AppShell from '@/components/shell/AppShell'
 import CreateFab from '@/components/shell/CreateFab'
 import CreateSheet from '@/components/shell/CreateSheet'
@@ -24,18 +25,19 @@ import { useMaxMd } from '@/hooks/useMaxMd'
 /** Must render under `AppProviders` / `AuthProvider` - see `RootLayout`. */
 function RootLayoutInner() {
   const { pathname } = useLocation()
+  const [searchParams] = useSearchParams()
   const { isAuthenticated, isFallback } = useAuth()
   const maxMd = useMaxMd()
   const showMemberChrome = isAuthenticated && !isFallback
   const hideFooterMobile = hideMarketingFooterOnMobile(pathname)
   const hideMarketingFooter = showMemberChrome
-  const suppressBottomNav = suppressMobileBottomNav(pathname)
+  const suppressBottomNav = suppressMobileBottomNav(pathname, searchParams)
   const useAppShell = showMemberChrome && isTierAAppShellRoute(pathname)
   const showMobileChrome = maxMd
   const showCreateFab =
     showMobileChrome && showMemberChrome && showCreateFabForPath(pathname) && !suppressBottomNav
 
-  const mainMobilePadClass = showMemberChrome ? mobileMainPadClass(pathname, showCreateFab) : 'pb-0'
+  const mainMobilePadClass = showMemberChrome ? mobileMainPadClass(pathname, showCreateFab, searchParams) : 'pb-0'
 
   const pageContent = (
     <AuthGate>
@@ -59,6 +61,7 @@ function RootLayoutInner() {
         Skip to main content
       </a>
       {showMemberChrome ? <Header /> : null}
+      <ScrollToTopOnNavigate />
       <RouteNavigationPending />
       <CommunityNavBar />
       {!hideMockDataBannerForPath(pathname) ? <MockDataBanner /> : null}

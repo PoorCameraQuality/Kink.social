@@ -18,7 +18,13 @@ import GroupForumsSection from '@/components/group/GroupForumsSection'
 import GroupFeedbackSection from '@/components/group/GroupFeedbackSection'
 import GroupLeadershipElectionSection from '@/components/group/GroupLeadershipElectionSection'
 import GroupJoinRulesModal from '@/components/group/GroupJoinRulesModal'
+import GroupMembershipSettingsPanel from '@/components/group/GroupMembershipSettingsPanel'
+import GroupMembershipPrivacyPrompt, {
+  type GroupJoinPrivacyChoices,
+} from '@/components/group/GroupMembershipPrivacyPrompt'
 import ScopePageMeta from '@/components/seo/ScopePageMeta'
+import { useAppToast } from '@/components/ui/AppToast'
+import { defaultFeedActivityPrivacy, type FeedActivityPrivacy } from '@c2k/shared'
 import { GroupDetailProvider } from '@/contexts/GroupDetailContext'
 import { useGroupDetail } from '@/hooks/useGroupDetail'
 import { useTabFromUrl } from '@/hooks/useTabFromUrl'
@@ -61,6 +67,8 @@ export default function GroupDetailPage() {
     parentOrganization,
     leadershipVoteOpen,
     groupOwnerId,
+    viewerMembership,
+    staffHiddenMemberCount,
     refreshPhotos,
     refreshChannels,
     refreshResources,
@@ -114,7 +122,32 @@ export default function GroupDetailPage() {
   const [newResourceLink, setNewResourceLink] = useState('')
   const [newResourceType, setNewResourceType] = useState('Link')
   const [joinRulesOpen, setJoinRulesOpen] = useState(false)
+  const [joinPrivacyOpen, setJoinPrivacyOpen] = useState(false)
   const [joining, setJoining] = useState(false)
+  const [feedActivityPrivacy, setFeedActivityPrivacy] = useState<FeedActivityPrivacy>(defaultFeedActivityPrivacy)
+  const toast = useAppToast()
+
+  useEffect(() => {
+    if (!apiBacked) return
+    void fetch('/api/settings/me', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { privacy?: { feedActivityPrivacy?: FeedActivityPrivacy } } | null) => {
+        if (data?.privacy?.feedActivityPrivacy) {
+          setFeedActivityPrivacy(data.privacy.feedActivityPrivacy)
+        }
+      })
+      .catch(() => {})
+  }, [apiBacked])
+
+  const joinPrivacyDefaults = useMemo(
+    () => ({
+      memberListVisibility:
+        feedActivityPrivacy.defaultGroupMemberListVisibility === 'hidden' ? ('hidden' as const) : ('visible' as const),
+      showGroupOnProfile: feedActivityPrivacy.defaultShowGroupsOnProfile,
+      announceGroupJoinInFeed: feedActivityPrivacy.defaultAnnounceGroupJoins,
+    }),
+    [feedActivityPrivacy],
+  )
 
   useEffect(() => {
     if (channels.length > 0 && !selectedChannel) {
@@ -192,18 +225,48 @@ export default function GroupDetailPage() {
     refreshMembers,
   }
 
-  const performJoin = async () => {
+  const startJoinFlow = () => {
+    if (apiBacked && feedActivityPrivacy.defaultGroupMemberListVisibility === 'ask') {
+      setJoinPrivacyOpen(true)
+      return
+    }
+    void performJoin()
+  }
+
+  const performJoin = async (choices?: GroupJoinPrivacyChoices) => {
     if (apiBacked) {
       setJoining(true)
       try {
+        const body =
+          choices ?
+            {
+              memberListVisibility: choices.memberListVisibility,
+              showGroupOnProfile: choices.showGroupOnProfile,
+              announceGroupJoinInFeed: choices.announceGroupJoinInFeed,
+              rememberAsDefault: choices.rememberAsDefault,
+            }
+          : {
+              memberListVisibility:
+                feedActivityPrivacy.defaultGroupMemberListVisibility === 'hidden' ? 'hidden' : 'visible',
+              showGroupOnProfile: feedActivityPrivacy.defaultShowGroupsOnProfile,
+              announceGroupJoinInFeed: feedActivityPrivacy.defaultAnnounceGroupJoins,
+            }
         const r = await fetch(`/api/v1/groups/${encodeURIComponent(group.id)}/join`, {
           method: 'POST',
           credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
         })
-        if (r.ok) refreshMembers()
+        if (r.ok) {
+          const data = (await r.json()) as { confirmation?: string }
+          if (data.confirmation) toast.push(data.confirmation)
+          refreshMembers()
+          refreshDetail()
+        }
       } finally {
         setJoining(false)
         setJoinRulesOpen(false)
+        setJoinPrivacyOpen(false)
       }
     } else if (viewerUsername && addMockGroupMember({ groupId: group.id, username: viewerUsername })) {
       refreshMembers()
@@ -242,7 +305,7 @@ export default function GroupDetailPage() {
             setJoinRulesOpen(true)
             return
           }
-          void performJoin()
+          startJoinFlow()
         }}
         onLeave={() => {
           void (async () => {
@@ -354,7 +417,35 @@ export default function GroupDetailPage() {
               />
             )}
 
-            {activeTab === 'Members' && <GroupMembersSection members={groupMembers} />}
+            {activeTab === 'Members' && (
+              <>
+                <GroupMembersSection
+                  members={groupMembers}
+                  staffHiddenMemberCount={staffHiddenMemberCount}
+                  showStaffHiddenNote={canModerate}
+                />
+                {apiBacked && isMember ?
+                  <GroupMembershipSettingsPanel
+                    groupId={group.id}
+                    groupName={group.name}
+                    viewerMembership={viewerMembership ?? null}
+                    onUpdated={() => refreshDetail()}
+                    onLeave={() => {
+                      void (async () => {
+                        const r = await fetch(`/api/v1/groups/${encodeURIComponent(group.id)}/leave`, {
+                          method: 'POST',
+                          credentials: 'include',
+                        })
+                        if (r.ok) {
+                          refreshMembers()
+                          refreshDetail()
+                        }
+                      })()
+                    }}
+                  />
+                : null}
+              </>
+            )}
 
             {!apiBacked && activeTab === 'Resources' && (
               <GroupResourcesSection
@@ -440,7 +531,22 @@ export default function GroupDetailPage() {
             if (!joining) setJoinRulesOpen(false)
           }}
           onConfirm={() => {
-            void performJoin()
+            setJoinRulesOpen(false)
+            startJoinFlow()
+          }}
+        />
+      : null}
+      {joinPrivacyOpen ?
+        <GroupMembershipPrivacyPrompt
+          open={joinPrivacyOpen}
+          groupName={group.name}
+          defaults={joinPrivacyDefaults}
+          joining={joining}
+          onCancel={() => {
+            if (!joining) setJoinPrivacyOpen(false)
+          }}
+          onConfirm={(choices) => {
+            void performJoin(choices)
           }}
         />
       : null}

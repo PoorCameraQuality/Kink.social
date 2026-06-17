@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { ApiFollowingFeedItem, FollowingFeedItem } from '@/lib/feed-types'
-import { apiFollowingItemToFeedItem } from '@/lib/feed-mapper'
+import type { ApiFeedHomeCard, FollowingFeedItem } from '@/lib/feed-types'
+import { apiFeedHomeCardToFeedItem } from '@/lib/feed-mapper'
 
 export type FollowingFeedStatus = 'loading' | 'ready' | 'error'
 
@@ -14,6 +14,8 @@ export type UseFollowingFeedResult = {
   loadMore: () => void
   loadingMore: boolean
 }
+
+const FEED_HOME_PATH = '/api/v1/feed/home'
 
 export function useFollowingFeed(enabled: boolean, filter = 'all'): UseFollowingFeedResult {
   const [reloadToken, setReloadToken] = useState(0)
@@ -53,7 +55,7 @@ export function useFollowingFeed(enabled: boolean, filter = 'all'): UseFollowing
       try {
         const q = new URLSearchParams({ limit: '20' })
         if (filter && filter !== 'all') q.set('filter', filter)
-        const r = await fetch(`/api/v1/feed/following?${q}`, { credentials: 'include' })
+        const r = await fetch(`${FEED_HOME_PATH}?${q}`, { credentials: 'include' })
         if (r.status === 503) {
           if (!cancelled) {
             setStatus('error')
@@ -67,19 +69,19 @@ export function useFollowingFeed(enabled: boolean, filter = 'all'): UseFollowing
             setError(
               r.status === 401
                 ? 'Session expired. Sign out and sign in again (after a DB reset, use a seed account).'
-                : `Following feed unavailable (HTTP ${r.status}).`
+                : `Following feed unavailable (HTTP ${r.status}).`,
             )
           }
           return
         }
         const data = (await r.json()) as {
-          items?: ApiFollowingFeedItem[]
+          cards?: ApiFeedHomeCard[]
           nextCursor?: string | null
           connectionCount?: number
         }
         if (cancelled) return
-        const mapped = (data.items ?? [])
-          .map((row) => apiFollowingItemToFeedItem(row))
+        const mapped = (data.cards ?? [])
+          .map((row) => apiFeedHomeCardToFeedItem(row))
           .filter((x): x is FollowingFeedItem => x != null)
         setItems(mapped)
         setNextCursor(data.nextCursor ?? null)
@@ -108,19 +110,19 @@ export function useFollowingFeed(enabled: boolean, filter = 'all'): UseFollowing
       try {
         const q = new URLSearchParams({ limit: '20', cursor })
         if (filter && filter !== 'all') q.set('filter', filter)
-        const r = await fetch(`/api/v1/feed/following?${q}`, { credentials: 'include' })
+        const r = await fetch(`${FEED_HOME_PATH}?${q}`, { credentials: 'include' })
         if (cancelled) return
         if (!r.ok) {
           setError(`Could not load more (HTTP ${r.status}).`)
           return
         }
         const data = (await r.json()) as {
-          items?: ApiFollowingFeedItem[]
+          cards?: ApiFeedHomeCard[]
           nextCursor?: string | null
         }
         if (cancelled) return
-        const mapped = (data.items ?? [])
-          .map((row) => apiFollowingItemToFeedItem(row))
+        const mapped = (data.cards ?? [])
+          .map((row) => apiFeedHomeCardToFeedItem(row))
           .filter((x): x is FollowingFeedItem => x != null)
         setItems((prev) => {
           const seen = new Set(

@@ -22,6 +22,7 @@ import { registerOrganizationRoutes } from './routes/organizations.js'
 import { registerProfileKinksRoutes } from './routes/profile-kinks.js'
 import { registerProfilePhotosRoutes } from './routes/profile-photos.js'
 import { registerMediaAssetRoutes } from './routes/media-assets.js'
+import { registerUserMediaRoutes } from './routes/user-media-routes.js'
 import { registerProfileRoutes } from './routes/profile.js'
 import { registerProfileRelationshipRoutes } from './routes/profile-relationships.js'
 import { registerProfileConnectionRoutes } from './routes/profile-connections.js'
@@ -68,6 +69,7 @@ import { registerModerationActionsRoutes } from './routes/moderation-actions.js'
 import { registerModerationAdminRoutes } from './routes/moderation-admin.js'
 import { registerModerationTsAdminRoutes } from './routes/moderation-ts-admin.js'
 import { registerLegalAlphaRoutes } from './routes/legal-alpha-routes.js'
+import { registerMailIntakeRoutes } from './routes/mail-intake-routes.js'
 import { registerPrivacyDataRoutes } from './routes/privacy-data-routes.js'
 import { registerAdminPrivacyRoutes } from './routes/admin-privacy-routes.js'
 import { registerOwnerInvestigationRoutes } from './routes/owner-investigation-routes.js'
@@ -221,6 +223,7 @@ await registerKinkTagRoutes(app)
 await registerProfileKinksRoutes(app)
 await registerProfilePhotosRoutes(app)
 await registerMediaAssetRoutes(app)
+await registerUserMediaRoutes(app)
 await registerMutesRoutes(app)
 await registerUploadRoutes(app)
 await registerEcosystemStubRoutes(app)
@@ -273,6 +276,7 @@ await registerModerationActionsRoutes(app)
 await registerModerationAdminRoutes(app)
 await registerModerationTsAdminRoutes(app)
 await registerLegalAlphaRoutes(app)
+await registerMailIntakeRoutes(app)
 await registerPrivacyDataRoutes(app)
 await registerAdminPrivacyRoutes(app)
 await registerOwnerInvestigationRoutes(app)

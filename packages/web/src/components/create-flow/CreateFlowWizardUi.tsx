@@ -4,42 +4,35 @@ import Button from '@/components/ui/Button'
 
 export const CREATE_FLOW_STEPS = ['Basics', 'Details', 'Host', 'Publish'] as const
 
-export const fieldSelectClass = cn(
-  'w-full rounded-lg border border-dc-border bg-dc-elevated-solid px-3 py-2.5 text-sm text-dc-text',
-  'focus:border-dc-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ecke-focus-ring)]',
-)
+export const fieldSelectClass = 'cf-field'
 
-export const fieldTextareaClass = cn(
-  'w-full rounded-lg border border-dc-border bg-dc-elevated-solid px-3 py-2.5 text-sm text-dc-text placeholder:text-dc-muted',
-  'focus:border-dc-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ecke-focus-ring)]',
-)
+export const fieldTextareaClass = 'cf-field'
 
-export const fieldDatetimeClass = cn(
-  'w-full rounded-lg border border-dc-border bg-dc-elevated-solid px-3 py-2.5 text-sm text-dc-text',
-  '[color-scheme:dark] focus:border-dc-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ecke-focus-ring)]',
-)
+export const fieldDatetimeClass = cn('cf-field', '[color-scheme:dark]')
 
 export function CreateFlowStepper({ currentStep }: { currentStep: number }) {
   return (
-    <nav className="mb-5" aria-label="Create event steps">
-      <ol className="flex gap-1 sm:gap-2">
+    <nav className="cf-stepper" aria-label="Create event steps">
+      <ol className="cf-stepper__list">
         {CREATE_FLOW_STEPS.map((label, i) => {
           const stepNum = i + 1
           const active = currentStep === stepNum
           const done = currentStep > stepNum
           return (
-            <li key={label} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+            <li key={label} className="cf-stepper__item">
               <div
                 className={cn(
-                  'h-1 w-full rounded-full transition-colors',
-                  done || active ? 'bg-dc-accent' : 'bg-dc-border',
+                  'cf-stepper__track',
+                  active && 'cf-stepper__track--active',
+                  done && 'cf-stepper__track--done',
                 )}
                 aria-hidden
               />
               <span
                 className={cn(
-                  'truncate text-center text-[10px] font-medium uppercase tracking-wide sm:text-xs',
-                  active ? 'text-dc-accent' : done ? 'text-dc-text-muted' : 'text-dc-muted',
+                  'cf-stepper__label',
+                  active && 'cf-stepper__label--active',
+                  done && 'cf-stepper__label--done',
                 )}
               >
                 {label}
@@ -64,23 +57,14 @@ export function SectionCard({
   variant?: 'default' | 'highlight'
 }) {
   return (
-    <section
-      className={cn(
-        'rounded-2xl border p-4 sm:p-5',
-        variant === 'highlight' ?
-          'border-dc-accent-border/40 bg-dc-surface'
-        : 'border-dc-border bg-dc-elevated-solid',
-      )}
-    >
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-semibold text-dc-text">{title}</h3>
+    <section className={cn('cf-section', variant === 'highlight' && 'cf-section--highlight')}>
+      <div className="cf-section__head">
+        <h3 className="cf-section__title">{title}</h3>
         {badge ?
-          <span className="rounded-md border border-dc-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-dc-text-muted">
-            {badge}
-          </span>
+          <span className="cf-section__badge">{badge}</span>
         : null}
       </div>
-      <div className="space-y-4">{children}</div>
+      <div className="cf-section__body">{children}</div>
     </section>
   )
 }
@@ -93,11 +77,7 @@ export function FormatToggle({
   onChange: (v: 'in-person' | 'virtual') => void
 }) {
   return (
-    <div
-      className="flex rounded-xl border border-dc-border bg-dc-surface p-1"
-      role="group"
-      aria-label="Event format"
-    >
+    <div className="cf-format-toggle" role="group" aria-label="Event format">
       {(
         [
           { id: 'in-person' as const, label: 'In person' },
@@ -111,12 +91,7 @@ export function FormatToggle({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(opt.id)}
-            className={cn(
-              'min-h-11 flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ecke-focus-ring)]',
-              active ?
-                'bg-dc-accent/15 text-dc-accent shadow-[inset_0_0_0_1px_var(--dc-accent-border)]'
-              : 'text-dc-text-muted hover:bg-dc-elevated-muted hover:text-dc-text',
-            )}
+            className="cf-format-toggle__btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ecke-focus-ring)]"
           >
             {opt.label}
           </button>
@@ -144,10 +119,7 @@ export function WizardCheckbox({
   return (
     <label
       htmlFor={id}
-      className={cn(
-        'flex items-start gap-3 rounded-lg border border-transparent py-1',
-        disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-dc-border/50',
-      )}
+      className={cn('cf-check-row', disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer')}
     >
       <input
         id={id}
@@ -155,12 +127,12 @@ export function WizardCheckbox({
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-1 h-5 w-5 shrink-0 rounded border-dc-border-strong bg-dc-elevated-solid text-dc-accent focus:ring-[var(--ecke-focus-ring)]"
+        className="h-5 w-5 shrink-0 rounded border-dc-border-strong bg-dc-elevated-solid text-dc-accent focus:ring-[var(--ecke-focus-ring)]"
       />
       <span className="min-w-0">
         <span className="block text-sm font-medium text-dc-text">{label}</span>
         {description ?
-          <span className="mt-0.5 block text-dc-micro text-dc-text-muted">{description}</span>
+          <span className="cf-section__hint mt-0.5 block">{description}</span>
         : null}
       </span>
     </label>
@@ -185,7 +157,7 @@ export function StickyWizardFooter({
   primaryTestId?: string
 }) {
   return (
-    <div className="flex w-full flex-wrap items-center justify-between gap-3">
+    <div className="cf-footer-actions">
       <Button type="button" variant="ghost" size="md" onClick={onLeft} className="min-h-touch min-w-[5.5rem]">
         {leftLabel}
       </Button>
@@ -208,25 +180,27 @@ export const GROUP_CREATE_STEPS = ['Basics', 'Community', 'Review'] as const
 
 export function GroupCreateStepper({ currentStep }: { currentStep: number }) {
   return (
-    <nav className="mb-5" aria-label="Create group steps">
-      <ol className="flex gap-1 sm:gap-2">
+    <nav className="cf-stepper" aria-label="Create group steps">
+      <ol className="cf-stepper__list">
         {GROUP_CREATE_STEPS.map((label, i) => {
           const stepNum = i + 1
           const active = currentStep === stepNum
           const done = currentStep > stepNum
           return (
-            <li key={label} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+            <li key={label} className="cf-stepper__item">
               <div
                 className={cn(
-                  'h-1 w-full rounded-full transition-colors',
-                  done || active ? 'bg-dc-accent' : 'bg-dc-border',
+                  'cf-stepper__track',
+                  active && 'cf-stepper__track--active',
+                  done && 'cf-stepper__track--done',
                 )}
                 aria-hidden
               />
               <span
                 className={cn(
-                  'truncate text-center text-[10px] font-medium uppercase tracking-wide sm:text-xs',
-                  active ? 'text-dc-accent' : done ? 'text-dc-text-muted' : 'text-dc-muted',
+                  'cf-stepper__label',
+                  active && 'cf-stepper__label--active',
+                  done && 'cf-stepper__label--done',
                 )}
               >
                 {label}
@@ -251,7 +225,5 @@ export function PreviewRow({ label, value, missing }: { label: string; value: st
 }
 
 export function PreviewSummary({ children }: { children: ReactNode }) {
-  return (
-    <dl className="space-y-3 rounded-2xl border border-dc-border bg-dc-surface p-4">{children}</dl>
-  )
+  return <dl className="cf-preview">{children}</dl>
 }

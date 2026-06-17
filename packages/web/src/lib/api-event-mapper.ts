@@ -1,5 +1,7 @@
 import type { MockEvent } from '@/data/mock-data'
+import type { AlphaContentLabel } from '@c2k/shared'
 import { isEventFeatured } from '@/lib/event-featured'
+import { mediaDisplayUrl } from '@/lib/media-display-url'
 
 export type ApiEventListItem = {
   id: string
@@ -52,6 +54,7 @@ export type ApiEventListItem = {
   featuredUntil?: string | null
   isFeatured?: boolean
   rsvpOpen?: boolean | null
+  alphaLabel?: AlphaContentLabel
 }
 
 function formatEventDisplayDate(iso: string): string {
@@ -82,7 +85,7 @@ export function mapApiEventToMockEvent(row: ApiEventListItem): MockEvent {
     mutualGoingCount: row.viewerMutualGoingCount ?? undefined,
     connectionRsvpPreview: row.connectionRsvpPreview ?? undefined,
     hostVerified: !!row.hostVerified,
-    imageUrl: row.imageUrl ?? undefined,
+    imageUrl: mediaDisplayUrl(row.imageUrl ?? undefined),
     tags: row.tags ?? undefined,
     category: row.category ?? undefined,
     eventFormat: fmt,
@@ -91,5 +94,6 @@ export function mapApiEventToMockEvent(row: ApiEventListItem): MockEvent {
     featured: !!row.featured,
     featuredUntil: row.featuredUntil ?? null,
     isFeatured: row.isFeatured ?? isEventFeatured(row),
+    alphaLabel: row.alphaLabel,
   }
 }

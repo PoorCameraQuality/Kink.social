@@ -2,6 +2,7 @@ import {
   ageFromBirthDate,
   capArray,
   formatMemberSinceMonthYear,
+  formatPlaceLocationLabel,
   formatPronounDisplay,
   parseProfileFieldVisibility,
   parsePronounTags,
@@ -18,6 +19,7 @@ import { z } from 'zod'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { db, schema } from '../db/index.js'
+import { getAlphaLabelForTarget } from '../lib/alpha-seed-labels.js'
 import { loadAcceptedFriendUserIds } from '../lib/accepted-friends.js'
 import { redactProfileForViewer } from '../lib/profile-field-redaction.js'
 import { canViewerReadIsoVisibility } from '../lib/iso-access.js'
@@ -177,7 +179,7 @@ async function resolveLocationFromPatch(
     }
     return {
       ok: true,
-      location: `${row.placeName}, ${row.stateName}`,
+      location: formatPlaceLocationLabel(row.placeName, row.stateName),
       placeId: u.zipPlaceId,
       stateId: row.stateId,
       customLocation: null,
@@ -230,7 +232,7 @@ async function resolveLocationFromPatch(
     }
     return {
       ok: true,
-      location: `${row.placeName}, ${row.stateName}`,
+      location: formatPlaceLocationLabel(row.placeName, row.stateName),
       placeId: nextPlaceId,
       stateId: row.stateId,
       customLocation: null,
@@ -286,12 +288,12 @@ export async function registerProfileRoutes(app: FastifyInstance) {
       return reply.status(404).send({ error: 'Not found' })
     }
     const friendIds =
-      viewerId && !isOwner ? await loadAcceptedFriendUserIds(viewerId) : new Set<string>()
+      viewerId ? await loadAcceptedFriendUserIds(viewerId) : new Set<string>()
     const enriched = profile ? enrichProfileIdentityRead(profile) : profile
     const safeProfile =
-      enriched && !isOwner
-        ? redactProfileForViewer(enriched, { viewerId, targetUserId: user.id, friendIds })
-        : enriched
+      enriched ?
+        redactProfileForViewer(enriched, { viewerId, targetUserId: user.id, friendIds }, { asPublicProfileView: true })
+      : enriched
 
     const payload: {
       user: { id: string; username: string; email?: string; memberSince: string }
@@ -376,7 +378,8 @@ export async function registerProfileRoutes(app: FastifyInstance) {
       payload.mutualConnections = social.mutualConnections
     }
 
-    return reply.send(payload)
+    const alphaLabel = await getAlphaLabelForTarget('user', user.id)
+    return reply.send(alphaLabel ? { ...payload, alphaLabel } : payload)
   })
 
   app.get('/api/profile/me', async (req, reply) => {

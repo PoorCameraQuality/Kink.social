@@ -6,9 +6,8 @@ export const EVENTS_SECTION_NAV: ReadonlyArray<{
   match: EventsSectionNavMatch
 }> = [
   { href: '/events', label: 'Discover Events', match: 'discover' },
-  { href: '/events?mine=registrations', label: 'My Registrations', match: 'registrations' },
+  { href: '/events?mine=registrations', label: 'My RSVPs & registrations', match: 'registrations' },
   { href: '/events?host=me', label: 'My Hosted Events', match: 'hosted' },
   { href: '/events?mine=saved', label: 'Saved Events', match: 'saved' },
   { href: '/events?mine=past-attended', label: 'Past Attended', match: 'past-attended' },
-  { href: '/events?view=past', label: 'Past Public Events', match: 'past-public' },
 ]

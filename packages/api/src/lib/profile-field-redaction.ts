@@ -3,6 +3,7 @@ import {
   parseProfileFieldVisibility,
   viewerMayMatchDiscoveryField,
   viewerMaySeeProfileField,
+  visibleProfileIdentityFields,
   type ProfileFieldVisibilityKey,
 } from '@c2k/shared'
 
@@ -91,7 +92,62 @@ export function passesGenderDiscoveryFilter(
   return viewerMayMatchDiscoveryField(level, { isSelf, isFriend })
 }
 
-/** Full profile row: owner sees everything; others see redacted sensitive fields and no `fieldVisibility` / `discoverableInPeopleSearch`. */
+/** Regional / list surfaces: may this profile appear based on location visibility? */
+export function passesLocationDiscoveryFilter(
+  row: Pick<DiscoveryProfileDbRow, 'userId' | 'fieldVisibility'>,
+  viewerId: string | null,
+  friendIds: Set<string>
+): boolean {
+  const map = parseProfileFieldVisibility(row.fieldVisibility)
+  const level = effectiveFieldVisibility('location', map)
+  const isSelf = viewerId !== null && viewerId === row.userId
+  const isFriend = viewerId !== null && friendIds.has(row.userId)
+  return viewerMayMatchDiscoveryField(level, { isSelf, isFriend })
+}
+
+/** Redact age/location/gender/pronouns on list cards (home suggestions, blocks, etc.). */
+export function redactListProfileIdentityFields<
+  T extends {
+    userId: string
+    age?: number | null
+    location?: string | null
+    gender?: string | null
+    genders?: string[] | null
+    pronouns?: string | null
+    fieldVisibility?: unknown
+  },
+>(row: T, viewerId: string | null, friendIds: Set<string>): T {
+  const visible = visibleProfileIdentityFields(
+    {
+      gender: row.gender ?? null,
+      age: row.age ?? null,
+      sexuality: null,
+      pronouns: row.pronouns ?? null,
+      genders: row.genders,
+      location: row.location ?? null,
+      fieldVisibility: row.fieldVisibility,
+    },
+    {
+      isOwner: viewerId !== null && viewerId === row.userId,
+      isFriend: viewerId !== null && friendIds.has(row.userId),
+    },
+  )
+  return {
+    ...row,
+    age: visible.age,
+    location: visible.location,
+    gender: visible.gender,
+    genders: visible.genders,
+    pronouns: visible.pronouns,
+  }
+}
+
+export type RedactProfileForViewerOptions = {
+  /** When true, owners see field visibility the same way strangers do (public profile view). */
+  asPublicProfileView?: boolean
+}
+
+/** Full profile row: owner sees everything unless `asPublicProfileView`; others see redacted sensitive fields and no `fieldVisibility` / `discoverableInPeopleSearch`. */
 export function redactProfileForViewer<
   T extends {
     gender: string | null
@@ -104,26 +160,23 @@ export function redactProfileForViewer<
     pronounTags?: string[] | null
     fieldVisibility: unknown
     discoverableInPeopleSearch: boolean
+    location?: string | null
   },
->(prof: T, ctx: { viewerId: string | null; targetUserId: string; friendIds: Set<string> }): T | Omit<T, 'fieldVisibility' | 'discoverableInPeopleSearch'> {
+>(
+  prof: T,
+  ctx: { viewerId: string | null; targetUserId: string; friendIds: Set<string> },
+  options?: RedactProfileForViewerOptions
+): T | Omit<T, 'fieldVisibility' | 'discoverableInPeopleSearch'> {
   const isOwner = ctx.viewerId !== null && ctx.viewerId === ctx.targetUserId
-  if (isOwner) return prof
+  if (isOwner && !options?.asPublicProfileView) return prof
   const isFriend = ctx.viewerId !== null && ctx.friendIds.has(ctx.targetUserId)
-  const map = parseProfileFieldVisibility(prof.fieldVisibility)
-  const seeCtx = { isOwner: false, isFriend }
-  const pick = (key: ProfileFieldVisibilityKey, value: string | number | null): string | number | null => {
-    if (value === null || value === undefined) return null
-    const level = effectiveFieldVisibility(key, map)
-    return viewerMaySeeProfileField(level, seeCtx) ? value : null
-  }
-  const pickArray = (key: ProfileFieldVisibilityKey, values: string[] | null | undefined): string[] => {
-    if (!values?.length) return []
-    const level = effectiveFieldVisibility(key, map)
-    return viewerMaySeeProfileField(level, seeCtx) ? values : []
-  }
+  const visible = visibleProfileIdentityFields(prof, {
+    isOwner,
+    isFriend,
+    asPublicProfileView: options?.asPublicProfileView,
+  })
   const { fieldVisibility: _fv, discoverableInPeopleSearch: _di, ...base } = prof
   const extended = base as T & {
-    location?: string | null
     birthDate?: string | null
     homeZip?: string | null
     placeId?: string | null
@@ -132,20 +185,32 @@ export function redactProfileForViewer<
     lookingFor?: string[] | null
     notLookingFor?: string[] | null
   }
-  const genderVisible = pick('gender', prof.gender) as string | null
-  const sexualityVisible = pick('sexuality', prof.sexuality) as string | null
-  const pronounsVisible = pick('pronouns', prof.pronouns) as string | null
-  return {
+  const redacted = {
     ...extended,
-    location: pick('location', extended.location ?? null) as string | null,
-    gender: genderVisible,
-    age: pick('age', prof.age) as number | null,
-    sexuality: sexualityVisible,
-    pronouns: pronounsVisible,
-    genders: pickArray('gender', prof.genders),
-    sexualOrientations: pickArray('sexuality', prof.sexualOrientations),
-    romanticOrientations: pickArray('sexuality', prof.romanticOrientations),
-    pronounTags: pickArray('pronouns', prof.pronounTags),
+    location: visible.location,
+    gender: visible.gender,
+    age: visible.age,
+    sexuality: visible.sexuality,
+    pronouns: visible.pronouns,
+    genders: visible.genders,
+    sexualOrientations: visible.sexualOrientations,
+    romanticOrientations: visible.romanticOrientations,
+    pronounTags: visible.pronounTags,
+  }
+  if (isOwner && options?.asPublicProfileView) {
+    return {
+      ...redacted,
+      birthDate: null,
+      homeZip: null,
+      placeId: null,
+      stateId: null,
+      customLocation: null,
+      fieldVisibility: prof.fieldVisibility,
+      discoverableInPeopleSearch: prof.discoverableInPeopleSearch,
+    }
+  }
+  return {
+    ...redacted,
     birthDate: null,
     homeZip: null,
     placeId: null,

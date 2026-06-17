@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOrganizerOrgScopes } from '@/hooks/useOrganizerOrgScopes'
+import { homeNearYouHref } from '@/lib/community-nav'
 
 export type CreateMenuItem = {
   id: string
@@ -97,21 +98,21 @@ function useCreateMenuSections(): CreateSection[] {
         id: 'post',
         label: 'Post',
         description: 'Share an update with your community',
-        to: '/home?tab=Local#home-feed-composer',
+        to: `${homeNearYouHref()}#home-feed-composer`,
         icon: <ShareIcon />,
       },
       {
-        id: 'photo',
-        label: 'Photo',
-        description: 'Add a photo to your feed',
-        to: '/home?tab=Local#home-feed-composer',
+        id: 'upload',
+        label: 'Photo or video',
+        description: 'Upload pictures or videos with privacy controls',
+        to: '/create',
         icon: <PhotoIcon />,
       },
       {
         id: 'article',
         label: 'Article',
-        description: 'Write or link educational content',
-        to: '/home?tab=Local#home-feed-composer',
+        description: 'Write educational content',
+        to: '/education/write',
         icon: <ShareIcon />,
       },
     ],

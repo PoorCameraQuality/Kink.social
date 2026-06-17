@@ -14,8 +14,9 @@ type AgendaRow = {
 }
 
 type Props = {
-  filterState: EventFilterState
-  categoryCounts: Map<string, number>
+  showDiscoverFilters?: boolean
+  filterState?: EventFilterState
+  categoryCounts?: Map<string, number>
   agendaLoading: boolean
   agendaError: boolean
   onAgendaRetry: () => void
@@ -26,6 +27,7 @@ type Props = {
 }
 
 export default function EventsDiscoverLeftRail({
+  showDiscoverFilters = true,
   filterState,
   categoryCounts,
   agendaLoading,
@@ -37,36 +39,40 @@ export default function EventsDiscoverLeftRail({
   showMockAgenda,
 }: Props) {
   const { pathname, search } = useLocation()
-  const [filtersOpen, setFiltersOpen] = useState(filterState.hasActiveFilters)
+  const [filtersOpen, setFiltersOpen] = useState(filterState?.hasActiveFilters ?? false)
 
   return (
     <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-label="Events navigation and filters">
       <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-        <div className="border-b border-dc-border pb-4">
+        <div className={showDiscoverFilters ? 'border-b border-dc-border pb-4' : undefined}>
           <EventsSectionNavLinks pathname={pathname} search={search} />
         </div>
 
-        <div className="pt-4">
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((o) => !o)}
-            className="mb-3 flex w-full min-h-10 items-center justify-between rounded-xl px-2 text-sm font-semibold text-dc-text hover:bg-dc-elevated-hover"
-            aria-expanded={filtersOpen}
-          >
-            <span>Filters</span>
-            <span className="text-dc-muted" aria-hidden>
-              {filtersOpen ? '−' : '+'}
-            </span>
-          </button>
-          {filtersOpen ?
-            <EventFiltersPanel idPrefix="evt-rail" f={filterState} categoryCounts={categoryCounts} />
-          : null}
-        </div>
+        {showDiscoverFilters && filterState && categoryCounts ?
+          <div className="pt-4">
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((o) => !o)}
+              className="mb-1 flex w-full min-h-10 items-center justify-between rounded-xl px-2 text-sm font-semibold text-dc-text hover:bg-dc-elevated-hover"
+              aria-expanded={filtersOpen}
+            >
+              <span>Refine results</span>
+              <span className="text-dc-muted" aria-hidden>
+                {filtersOpen ? '−' : '+'}
+              </span>
+            </button>
+            <p className="mb-3 px-2 text-xs text-dc-text-muted">Date, format, category, and location.</p>
+            {filtersOpen ?
+              <EventFiltersPanel idPrefix="evt-rail" f={filterState} categoryCounts={categoryCounts} />
+            : null}
+          </div>
+        : null}
       </div>
 
       {showAgenda ?
         <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-          <h3 className="mb-3 text-sm font-semibold text-dc-text">My agenda</h3>
+          <h3 className="text-sm font-semibold text-dc-text">My agenda</h3>
+          <p className="mb-3 text-xs text-dc-text-muted">Upcoming RSVPs and events you are organizing.</p>
           {agendaLoading ?
             <ul className="space-y-2" aria-busy="true">
               {[1, 2, 3].map((i) => (

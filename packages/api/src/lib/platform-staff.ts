@@ -127,6 +127,21 @@ export async function listPlatformModeratorUserIds(): Promise<string[]> {
   return [...moderators]
 }
 
+export async function listSiteOwnerUserIds(): Promise<string[]> {
+  const { owners } = await loadStaffSets()
+  return [...owners]
+}
+
+export async function listSiteAdminOnlyUserIds(): Promise<string[]> {
+  const { admins, owners } = await loadStaffSets()
+  return [...new Set([...admins, ...owners])]
+}
+
+export async function listTrustSafetyAdminUserIds(): Promise<string[]> {
+  const { trustSafetyAdmins, admins, owners } = await loadStaffSets()
+  return [...new Set([...trustSafetyAdmins, ...admins, ...owners])]
+}
+
 export function invalidatePlatformStaffCache(): void {
   staffCache = null
 }

@@ -99,7 +99,7 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
         displayName={profile?.displayName}
         bio={profile?.bio}
         photoCount={photos}
-        privacyConfigured={!!feed.onboardingCompletedAt || (feed.onboardingStep ?? 0) >= 4}
+        privacyConfigured={!!feed.onboardingCompletedAt || (feed.onboardingStep ?? 0) >= 5}
         joinedOrFollowed={groups.length > 0}
       />
 

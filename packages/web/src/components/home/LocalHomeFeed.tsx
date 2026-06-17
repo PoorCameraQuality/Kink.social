@@ -70,7 +70,7 @@ export default function LocalHomeFeed({
   const feedLoading = isAuthenticated && !isFallback && !apiFeedSettled
   const composerName = viewerDisplayName ?? viewerUsername ?? 'there'
   const composerPlaceholder = feedShell
-    ? 'Share an update with your community…'
+    ? 'Share an update with people who follow you…'
     : `What's on your mind, ${composerName}?`
 
   const viewerInitial = viewerUsername ? viewerUsername.charAt(0).toUpperCase() : '?'
@@ -131,7 +131,7 @@ export default function LocalHomeFeed({
         secondaryCtaLabel={!isAuthenticated || isFallback ? 'Sign in' : 'Find people'}
         secondaryCtaHref={!isAuthenticated || isFallback ? buildLoginHref('/home') : '/people'}
       />
-    : <div className="dc-feed-stagger space-y-4">
+    : <div className="feed-stream dc-feed-stagger">
         {localFeedPosts.slice(0, 12).map((post) => (
           <LocalPostCard
             key={post.id}
@@ -187,7 +187,9 @@ export default function LocalHomeFeed({
       composer={composerBlock}
       tabs={
         <>
-          <FeedScopeTabs showHeading={feedShell && !compactComposer} />
+          {!feedShell ?
+            <FeedScopeTabs showHeading={!compactComposer} />
+          : null}
           {!feedShell && showConventionPins ? <ConventionPinsCompact /> : null}
           {apiFeedSettled && !apiFeedOk && isAuthenticated && !isFallback && apiFeedError ?
             <LoadErrorBanner className="mb-4" message={apiFeedError} onRetry={onRefreshFeed} />
@@ -195,7 +197,7 @@ export default function LocalHomeFeed({
         </>
       }
       footer={eventsFooter}
-      feedFirst={compactComposer && feedShell}
+      feedFirst={false}
     >
       {feedBody}
     </FeedTemplate>

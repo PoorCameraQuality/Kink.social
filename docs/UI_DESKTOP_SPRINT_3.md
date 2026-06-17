@@ -1,6 +1,8 @@
 # Desktop UI Sprint 3 — Visual Experience Polish
 
-**Status:** CP2.6 complete — CSS file ownership reconciled with docs. **CP3+ blocked** until per-page-group Research + Code Context Briefs exist.  
+> **PAUSED — Layout IA reset active.** Per-page visual polish is **frozen** until **research notes + layout contracts** are approved. Authority: [`UI_DESKTOP_SPRINT_3_LAYOUT_INFORMATION_ARCHITECTURE.md`](UI_DESKTOP_SPRINT_3_LAYOUT_INFORMATION_ARCHITECTURE.md). Research-backed layout strategy first — not box rearrangement or component polish.
+
+**Status:** CP2.6 complete — CSS file ownership reconciled with docs. **CP3 Home + Explore + Events complete** for discovery polish; **remaining CP3+ blocked** by layout IA reset (not by missing briefs alone).  
 **Branch:** `desktop-ui-sprint-3-visual-polish` (recommended; may start from `desktop-ui-sprint-2-visual-baseline`)  
 **Baseline tag:** `desktop-ui-sprint-2-visual-baseline`  
 **Sprint 2 handoff:** Directory/detail template foundation complete enough — **do not continue CP6 migration unless regression found**  
@@ -24,7 +26,7 @@ Sprint 3 polish means:
 
 ## Hard rules (all checkpoints)
 
-- **No page/section polish without a completed Research + Code Context Brief** for that page group
+- No page/section polish without a completed Research + Code Context Brief **and explicit approval** for that page group
 - No route, auth, API, schema, permission, onboarding, upload, payment, or moderation logic changes
 - No event registration or RSVP logic changes
 - No group/org/vendor/presenter membership or application logic changes
@@ -54,7 +56,7 @@ Keep existing kink.social dark/gold brand. Polish through **product-appropriate 
 | 2 | Global atmosphere and surface polish | **Complete** (boundary repair in CP2.5) |
 | 2.5 | Mobile CSS boundary repair (revert CP2 desktop leaks) | **Complete** (superseded by CP2.6 file split) |
 | 2.6 | CSS file ownership reconciliation | **Complete** |
-| 3+ | Per-page-group polish (headers, cards, rails, routes) | **Blocked** — requires Research + Code Context Brief per group |
+| 3+ | Per-page-group polish | **Home + Explore complete** — **Groups brief next** |
 
 ---
 
@@ -204,14 +206,38 @@ References: [NN/g information scent](https://www.nngroup.com/articles/informatio
 
 ## Research + Code Context Brief (required gate)
 
-**Hard rule:** No page or section polish may begin until its brief is written and reviewed.
+**Hard rule:** No page or section polish may begin until its brief is **written, handed back for review, and explicitly accepted**.
 
 Applies to every member surface, including:
 
 - `/home`, `/explore`, `/events`, `/groups`, `/orgs`, `/vendors`, `/education`, `/media`, `/people`, `/profile`, `/messaging`, `/notifications`, `/settings/account`
 - Any **organizer** or **convention** surface touched by polish
 
-One brief per **page group** (not one brief for the whole sprint). Write the brief **before** proposing or implementing visual changes.
+One brief per **page group** (not one brief for the whole sprint). **Stop after writing the brief.** Do not implement until approval.
+
+### Mandatory handback process (permanent)
+
+Every page group follows this workflow. No generic “make it pretty” prompts.
+
+| Step | Action | Who |
+|------|--------|-----|
+| 1 | **Inspect local code** on current branch — do not guess paths | Cursor |
+| 2 | **Write** Research + Code Context Brief (§ template below) | User + ChatGPT, filed by Cursor |
+| 3 | **Stop** — no implementation | Cursor |
+| 4 | **Hand back** to user and ChatGPT: brief path, files inspected, principles used, proposed implementation files, safe/risky/defer, mobile risks, verification plan | Cursor |
+| 5 | **Wait for approval** | User + ChatGPT |
+| 6 | **Implement one page group only** — one scoped commit | Cursor |
+| 7 | **Report back:** files changed, behavior preserved, mobile impact, verification, screenshots, regressions, next page group | Cursor |
+
+**Handback deliverable checklist:**
+
+- Brief file path (e.g. `docs/UI_DESKTOP_SPRINT_3_HOME_BRIEF.md`)
+- Files inspected (actual paths from repo)
+- Research principles applied
+- Exact implementation files proposed
+- Safe / risky / defer classification
+- Mobile risks
+- Verification plan
 
 ### Brief template (copy per page group)
 
@@ -356,9 +382,9 @@ Shared primitives (all groups): `components/templates/DirectoryTemplate.tsx`, `c
 
 | Page group | Brief status | Checkpoint |
 |------------|--------------|------------|
-| `/home` | **Not started** | — |
-| `/explore` | **Not started** | — |
-| `/events` | **Not started** | — |
+| `/home` | **Complete** — [`UI_DESKTOP_SPRINT_3_HOME_BRIEF.md`](UI_DESKTOP_SPRINT_3_HOME_BRIEF.md) | **CP3 Home polish complete** |
+| `/explore` | **Complete** — [`UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md`](UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md) | **CP3 Explore polish complete** |
+| `/events` | **Complete** — [`UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md`](UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md) | **CP3 Events polish complete** |
 | `/groups` | **Not started** | — |
 | `/orgs` | **Not started** | — |
 | `/vendors` | **Not started** | — |
@@ -371,7 +397,108 @@ Shared primitives (all groups): `components/templates/DirectoryTemplate.tsx`, `c
 | `/settings/account` | **Not started** | — |
 | Organizer / convention | **Not started** | — |
 
-**Next action:** Write **Events** Research + Code Context Brief (CP2.6 reconciled — safe to proceed).
+**Next action:** Layout + IA reset — see [`UI_DESKTOP_SPRINT_3_LAYOUT_INFORMATION_ARCHITECTURE.md`](UI_DESKTOP_SPRINT_3_LAYOUT_INFORMATION_ARCHITECTURE.md). Do **not** start Groups visual polish until CP-LIA-4 is approved.
+
+---
+
+## Checkpoint 3 Explore — Cross-site discovery hub (complete)
+
+**Status:** Complete  
+**Brief:** [`UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md`](UI_DESKTOP_SPRINT_3_EXPLORE_BRIEF.md)
+
+### Changes
+
+| Area | Files | What changed |
+|------|-------|----------------|
+| Header | `ExploreHubHeader.tsx` | Discovery hub framing, search/filter/browse copy, filter icon, chip section labels |
+| Filters & chips | `ExploreActiveFilterPills.tsx`, `ExploreChipRow.tsx`, `ExploreFiltersPanel.tsx` | Active filter grouping, topic chip sizing, filter group helpers, trust panel emphasis |
+| Sections | `ExploreHubSection.tsx`, `ExploreDashboardPage.tsx` | Stronger descriptions, clearer View-all CTAs, section rhythm, sign-in prompt |
+| Trending | `ExploreFeaturedTrendingCard.tsx`, `ExploreCompactTrendingRow.tsx` | Active-signal framing, token-aligned accents, hierarchy |
+| Events row | `ExploreCompactEventRow.tsx` | Date/location/RSVP hierarchy aligned with Events CP3 |
+| Suggestions | `ExploreSuggestedRow.tsx` | Type label, reason visibility, consistent row accent |
+
+### Not touched (per brief)
+
+Routes, auth, API, filter logic, URL params, chip IDs, ranking, section visibility, FilterSheet behavior, `mobile-polish.css`.
+
+### Verification
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck -w web` | **Pass** |
+| `npm run build -w web` | **Pass** |
+| Public route smoke `/explore` (`route-smoke.desktop` explore) | **Pass** |
+| Full viewport screenshot matrix | **Deferred** |
+
+---
+
+## Checkpoint 3 Home — Social command center (complete)
+
+**Status:** Complete  
+**Brief:** [`UI_DESKTOP_SPRINT_3_HOME_BRIEF.md`](UI_DESKTOP_SPRINT_3_HOME_BRIEF.md)  
+**Constraint:** Desktop-first polish; `LocalPostCard`, composer, and `HomeFeedScopeNav` treated as shared cross-breakpoint (helper/orientation copy hidden below `lg` where needed).
+
+### Changes
+
+| Area | Files | What changed |
+|------|-------|----------------|
+| Orientation header | `HomePageClient.tsx` | Compact lg+ mode framing (Following / Near you / Trending / discover tabs): what, why, next — no new API calls |
+| Feed scope | `HomeFeedScopeNav.tsx` | Active-scope helper copy; `lg+` only |
+| Scope dedup (CP3.1) | `FeedScopeTabs.tsx`, `FollowingFeedTab.tsx`, `LocalHomeFeed.tsx`, `e2e/smoke.spec.ts` | Hide legacy underline tabs at `lg+` when feed shell active; desktop smoke scoped to `Home feed scope` |
+| Composer framing | `LocalHomeFeed.tsx`, `HomeFeedShellComposer.tsx`, `HomeFeedRichComposer.tsx` | Warmer placeholder, calmer collapsed trigger, subtle editor ring |
+| Feed cards | `LocalPostCard.tsx` | Stronger actor row, repost banner, badge/activity row, calmer action spacing |
+| Right rail | `HomeFeedDiscoverRail.tsx`, `HomeFeedSuggestedPerson.tsx` | Job-grouped sections with “why here” copy |
+| Left rail | `HomeDashboardLeftRail.tsx` | “Shortcuts” orientation; softer trust panel headline |
+
+### Not touched (per brief)
+
+Feed hooks, API calls, ranking, routing, auth/onboarding, `mobile-polish.css`, `BottomNav`, `CommunityNavBar`, post creation/upload/moderation logic.
+
+### Verification
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck -w web` | **Pass** |
+| `npm run build -w web` | **Pass** |
+| Desktop smoke `/home` (`smoke.spec.ts` home + following) | **Pass** (CP3.1 — single `Home feed scope` control) |
+| Mobile smoke `/home` (`route-smoke.mobile` home-mobile) | **Pass** |
+| Full viewport screenshot matrix | **Deferred** — visual review recommended at lg+ breakpoints |
+
+### CP3.1 — Duplicate desktop scope tabs
+
+**Cause:** Three-column feed shell rendered both `HomeFeedScopeNav` (Sprint 3 pills, `lg+` in `HomePageClient`) and `FeedScopeTabs` (legacy underline “Community activity scope”) inside `FollowingFeedTab` / `LocalHomeFeed` when `feedShell` was true.
+
+**Fix:** `FeedScopeTabs` accepts `hideOnDesktop`; when `feedShell`, wrapper uses `lg:hidden`. Mobile keeps both `CommunityNavBar` + in-feed `FeedScopeTabs` unchanged. Desktop smoke queries scoped to `Home feed scope` tablist.
+
+---
+
+## Checkpoint 3 Events — Discovery information scent (complete)
+
+**Status:** Complete  
+**Brief:** [`UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md`](UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md)
+
+### Changes
+
+| Area | Files | What changed |
+|------|-------|----------------|
+| Header + result context | `EventsDiscoverPage.tsx` | Eyebrow, decision-oriented subtitle, dynamic result summary with clear-filters |
+| Featured strip | `EventsFeaturedStrip.tsx` | “Happening soon” framing; date, location, format, social proof on highlight cards |
+| Grid cards | `EventCard.tsx` | Stronger date/location/format hierarchy; in-person badge |
+| List rows | `EventsListRow.tsx` | Date block layout; location emphasis; primary View details on lg+ |
+| Right rail | `EventsRightRail.tsx` | Decision-support section titles; muted Social+ panel |
+| Left rail | `EventsDiscoverLeftRail.tsx` | “Refine results” + agenda helper copy |
+
+### Not touched (per brief)
+
+`page.tsx`, `EventDetailClient.tsx`, hooks, RSVP/register/filter logic, mobile FilterSheet.
+
+### Verification
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck -w web` | **Pass** |
+| `npm run build -w web` | **Pass** |
+| Mobile smoke `/events`, `/home` | **2/2 pass** |
 
 ---
 
@@ -424,7 +551,7 @@ Viewport screenshot matrix (375–1024) deferred to CP7; smoke overflow guard co
 
 ### Events brief proceed?
 
-**Yes** — docs and code ownership now match. Events brief is the recommended first brief; do not implement polish until brief is written.
+**Yes — accepted.** Implementation may start per [`UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md`](UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md). Event detail (`/events/:id`) remains audit-only.
 
 ---
 
@@ -499,7 +626,7 @@ Routes not in mobile smoke spec this pass: `/media`, `/profile`, `/settings/acco
 
 ### CP3+ proceed?
 
-**Blocked on brief** — CP2.6 reconciled CSS ownership. **Events brief** may be written next; implementation waits on brief approval.
+**Events unblocked** — brief accepted. Other page groups remain blocked until their briefs exist. See [`UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md`](UI_DESKTOP_SPRINT_3_EVENTS_BRIEF.md).
 
 ---
 

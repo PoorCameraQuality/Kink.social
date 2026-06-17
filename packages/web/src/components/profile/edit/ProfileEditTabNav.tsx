@@ -56,6 +56,20 @@ export const PROFILE_EDIT_TABS: {
 
   {
 
+    id: 'about',
+
+    label: 'About',
+
+    description: 'Your profile story — intro, tagline, and depth.',
+
+    path: '/profile/edit/about',
+
+    mobileLabel: 'About',
+
+  },
+
+  {
+
     id: 'identity',
 
     label: 'Identity & Community',
@@ -93,20 +107,6 @@ export const PROFILE_EDIT_TABS: {
     path: '/profile/edit/interests',
 
     mobileLabel: 'Interests',
-
-  },
-
-  {
-
-    id: 'about',
-
-    label: 'Personality Prompts',
-
-    description: 'Conversation starters and profile depth.',
-
-    path: '/profile/edit/about',
-
-    mobileLabel: 'Personality',
 
   },
 

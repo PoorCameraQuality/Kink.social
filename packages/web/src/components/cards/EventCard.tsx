@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
 import TagLink from '@/components/TagLink'
+import AlphaTestBadge from '@/components/alpha/AlphaTestBadge'
+import type { AlphaContentLabel } from '@c2k/shared'
 import EventSaveButton from '@/components/events/EventSaveButton'
 import Card from '@/components/ui/Card'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
 import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
-import { filterPublicEventTags, formatEventLocationForDisplay } from '@/lib/events-page-utils'
+import { filterPublicEventTags, formatEventLocationForDisplay, resolveEventHeroUrl } from '@/lib/events-page-utils'
 
 export type EventCardProps = {
   event: {
@@ -21,6 +23,7 @@ export type EventCardProps = {
     tags?: string[]
     eventFormat?: 'in-person' | 'virtual'
     isFeatured?: boolean
+    alphaLabel?: AlphaContentLabel
   }
 }
 
@@ -34,14 +37,13 @@ export default function EventCard({ event }: EventCardProps) {
     capacityLimit,
     mutualGoingCount = 0,
     connectionRsvpPreview = [],
-    imageUrl,
-    bannerUrl,
     tags,
     eventFormat,
     isFeatured,
+    alphaLabel,
   } = event
   const isVirtual = eventFormat === 'virtual'
-  const heroSrc = imageUrl ?? bannerUrl ?? null
+  const heroSrc = resolveEventHeroUrl(event)
   const fillPct = capacityLimit && capacityLimit > 0 ? Math.min(100, Math.round((rsvpCount / capacityLimit) * 100)) : Math.min(100, Math.round((rsvpCount / 100) * 100))
   const attendanceLabel = capacityLimit && capacityLimit > 0 ? `${rsvpCount}/${capacityLimit} going` : `${rsvpCount} going`
   const previewAvatars = connectionRsvpPreview.slice(0, 3)
@@ -70,9 +72,14 @@ export default function EventCard({ event }: EventCardProps) {
             <MediaSurfaceFallback variant="event" className="absolute inset-0" />
           )}
         </Link>
-        <span className="c2k-event-date-badge absolute top-3 left-3 z-10 pointer-events-none">
+        <span className="c2k-event-date-badge absolute left-3 top-3 z-10 max-w-[calc(100%-3.5rem)] pointer-events-none text-[11px] sm:text-xs">
           {date}
         </span>
+        {alphaLabel && (
+          <span className="absolute right-3 top-3 z-10 pointer-events-auto">
+            <AlphaTestBadge label={alphaLabel} />
+          </span>
+        )}
         {isFeatured && (
           <span className="absolute bottom-3 left-3 z-10 px-2 py-1 bg-emerald-600/90 rounded-lg text-xs font-semibold text-white pointer-events-none">
             Featured
@@ -83,17 +90,22 @@ export default function EventCard({ event }: EventCardProps) {
         </div>
       </div>
       <Link to={`/events/${id}`} className="block p-4 pt-3.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-display font-semibold text-dc-text line-clamp-2 flex-1 min-w-0 text-[15px] sm:text-base">{title}</h3>
-          {isVirtual && (
-            <span className="shrink-0 text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-200 border border-sky-400/35">
-              Virtual
-            </span>
-          )}
-        </div>
-        <p className="mt-1 text-sm text-dc-text-muted flex items-center gap-1">
+        <div className="flex flex-wrap items-start gap-2">
+          <h3 className="min-w-0 flex-1 font-display text-[15px] font-semibold leading-snug text-dc-text line-clamp-2 sm:text-base">
+            {title}
+          </h3>
           {isVirtual ?
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <span className="shrink-0 rounded-full border border-sky-400/35 bg-sky-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-200">
+              Online
+            </span>
+          : <span className="shrink-0 rounded-full border border-dc-border bg-dc-surface-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-dc-text-muted">
+              In person
+            </span>
+          }
+        </div>
+        <p className="mt-1.5 flex items-start gap-1.5 text-sm font-medium text-dc-text">
+          {isVirtual ?
+            <svg className="mt-0.5 h-4 w-4 shrink-0 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -101,21 +113,25 @@ export default function EventCard({ event }: EventCardProps) {
                 d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
               />
             </svg>
-          : <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          : <svg className="mt-0.5 h-4 w-4 shrink-0 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             </svg>
           }
-          <span className="min-w-0 break-words [overflow-wrap:anywhere]">{displayLocation === location && isVirtual && (location === 'TBA' || !location.trim()) ? 'Online. Tap for details' : displayLocation}</span>
+          <span className="min-w-0 break-words [overflow-wrap:anywhere]">
+            {displayLocation === location && isVirtual && (location === 'TBA' || !location.trim()) ?
+              'Online. Tap for details'
+            : displayLocation}
+          </span>
         </p>
         {displayTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2">
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {displayTags.slice(0, 3).map((t) => (
               <TagLink key={t} tag={t} />
             ))}
           </div>
         )}
-        <div className="mt-2 flex flex-wrap gap-2">
-          <span className="inline-flex items-center rounded-md border border-dc-border bg-dc-elevated-solid px-2 py-0.5 text-xs text-dc-text-muted">
+        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-md border border-dc-border bg-dc-elevated-solid px-2 py-0.5 text-xs font-medium text-dc-text">
             {attendanceLabel}
           </span>
           {mutualGoingCount > 0 ? (

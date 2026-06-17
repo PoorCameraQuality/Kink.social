@@ -17,11 +17,11 @@ export default function EducationDiscoverSection({
   className = '',
 }: Props) {
   return (
-    <section className={`mb-10 ${className}`.trim()} aria-labelledby={`edu-section-${title.replace(/\s+/g, '-')}`}>
-      <div className="mb-3 flex items-center justify-between gap-3">
+    <section className={`edu-block ${className}`.trim()} aria-labelledby={`edu-section-${title.replace(/\s+/g, '-')}`}>
+      <div className="edu-block__head mb-3 flex items-center justify-between gap-3">
         <h2
           id={`edu-section-${title.replace(/\s+/g, '-')}`}
-          className="text-sm font-semibold uppercase tracking-wide text-dc-text"
+          className="edu-discover-section__title"
         >
           {title}
         </h2>

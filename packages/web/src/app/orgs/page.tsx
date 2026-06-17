@@ -1,7 +1,8 @@
 import { useId, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import OrgDirectoryCard from '@/components/orgs/OrgDirectoryCard'
-import OrganizationsHero from '@/components/orgs/OrganizationsHero'
 import OrganizationsRightRail from '@/components/orgs/OrganizationsRightRail'
+import PageHeader from '@/components/shell/PageHeader'
 import EmptyState from '@/components/ui/EmptyState'
 import { CardSkeleton } from '@/components/ui/skeleton'
 import TextInput from '@/components/ui/TextInput'
@@ -65,7 +66,33 @@ export default function OrgsListPage() {
         title="Organizations"
         className="py-4 sm:py-6"
         desktopAsideFrom="lg"
-        header={<OrganizationsHero hasOrganizerAccess={hasAnyScope} scopesLoading={scopesLoading} />}
+        header={
+          <PageHeader
+            title="Organizations"
+            description="Browse communities that host events, run groups, and coordinate conventions."
+            sticky={false}
+            className="mb-4 lg:mb-6"
+            actions={
+              <>
+                <Link
+                  to="/orgs/new"
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl bg-dc-accent px-4 text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover"
+                >
+                  Create organization
+                </Link>
+                {!scopesLoading && hasAnyScope ?
+                  <Link
+                    to="/organizer"
+                    className="inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border border-dc-accent-border px-4 text-sm font-semibold text-dc-accent hover:bg-dc-accent-muted/25"
+                  >
+                    Dashboard
+                    <span aria-hidden>→</span>
+                  </Link>
+                : null}
+              </>
+            }
+          />
+        }
         toolbar={
           <section aria-labelledby="browse-orgs-heading">
             <h2 id="browse-orgs-heading" className="text-lg font-semibold text-dc-text">

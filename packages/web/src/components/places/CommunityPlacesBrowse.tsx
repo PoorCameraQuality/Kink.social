@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import EmptyState from '@/components/ui/EmptyState'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
+import { mediaDisplayUrl } from '@/lib/media-display-url'
 
 const CATEGORIES = [
   { value: '', label: 'All' },
@@ -17,9 +19,18 @@ type PlaceRow = {
   slug: string
   category: string
   description: string | null
+  logoUrl?: string | null
   city: string | null
   region: string | null
   country: string | null
+  linkedOrganization?: { slug: string; displayName: string } | null
+}
+
+function placeInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase()
+  return `${parts[0]![0] ?? ''}${parts[1]![0] ?? ''}`.toUpperCase()
 }
 
 type BrowseProps = {
@@ -186,20 +197,49 @@ export default function CommunityPlacesBrowse({
         <EmptyState inline title="No places yet" message="Be the first to suggest a venue for the community directory." />
       : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {items.map((p) => (
-            <li key={p.id} className="rounded-2xl border border-dc-border bg-dc-elevated/95 p-4">
-              <h3 className="font-semibold text-dc-text">{p.name}</h3>
-              <p className="mt-1 text-xs capitalize text-dc-muted">{p.category.replace(/_/g, ' ')}</p>
-              {(p.city || p.region || p.country) ?
-                <p className="mt-2 text-sm text-dc-text-muted">
-                  {[p.city, p.region, p.country].filter(Boolean).join(', ')}
-                </p>
-              : null}
-              {p.description ?
-                <p className="mt-2 line-clamp-3 text-sm text-dc-text-muted">{p.description}</p>
-              : null}
-            </li>
-          ))}
+          {items.map((p) => {
+            const logoSrc = mediaDisplayUrl(p.logoUrl)
+            return (
+              <li key={p.id} className="rounded-2xl border border-dc-border bg-dc-elevated/95 p-4">
+                <div className="flex items-start gap-3">
+                  {logoSrc ?
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dc-border bg-dc-elevated-solid">
+                      <img
+                        src={logoSrc}
+                        alt=""
+                        className="h-full w-full object-contain"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                  : <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-dc-border bg-dc-elevated-solid text-xs font-semibold text-dc-muted">
+                      {placeInitials(p.name)}
+                    </div>
+                  }
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-dc-text">{p.name}</h3>
+                    <p className="mt-1 text-xs capitalize text-dc-muted">{p.category.replace(/_/g, ' ')}</p>
+                    {p.linkedOrganization ?
+                      <Link
+                        to={`/orgs/${encodeURIComponent(p.linkedOrganization.slug)}`}
+                        className="mt-2 inline-flex text-xs font-semibold text-dc-accent hover:underline"
+                      >
+                        Managed organization · {p.linkedOrganization.displayName}
+                      </Link>
+                    : null}
+                  </div>
+                </div>
+                {(p.city || p.region || p.country) ?
+                  <p className="mt-3 text-sm text-dc-text-muted">
+                    {[p.city, p.region, p.country].filter(Boolean).join(', ')}
+                  </p>
+                : null}
+                {p.description ?
+                  <p className="mt-2 line-clamp-3 text-sm text-dc-text-muted">{p.description}</p>
+                : null}
+              </li>
+            )
+          })}
         </ul>
       )}
 

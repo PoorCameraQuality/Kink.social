@@ -1,22 +1,24 @@
-import { useId, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
+import { useId, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import EventCard from '@/components/cards/EventCard'
 import EventsCategoryChips from '@/components/events/EventsCategoryChips'
 import EventsFeaturedStrip from '@/components/events/EventsFeaturedStrip'
 import EventsDiscoverLeftRail from '@/components/events/EventsDiscoverLeftRail'
+import EventsPagination from '@/components/events/EventsPagination'
 import EventFiltersPanel, { type EventFilterState } from '@/components/events/EventFiltersPanel'
 import EventsListRow from '@/components/events/EventsListRow'
 import EventsRightRail from '@/components/events/EventsRightRail'
 import EventsScopeTabs from '@/components/events/EventsScopeTabs'
 import EmptyState from '@/components/ui/EmptyState'
+import PageHeader from '@/components/shell/PageHeader'
 import { EventSkeleton } from '@/components/ui/skeleton'
 import DirectoryTemplate, { DirectoryFilterButton } from '@/components/templates/DirectoryTemplate'
 import FilterSheet from '@/components/templates/FilterSheet'
 import { mockEvents } from '@/data/mock-data'
 import { useAuth } from '@/contexts/AuthContext'
 import { useApiEvents, type ApiEventsFilters } from '@/hooks/useApiEvents'
+import { useEventsAgendaSidebar } from '@/hooks/useEventsAgendaSidebar'
 import { usePersistedGeoText } from '@/hooks/usePersistedGeoText'
-import { useApiMyRsvps } from '@/hooks/useApiMyRsvps'
 import { MAX_DISTANCE_MI, rankEvents } from '@/lib/discovery-utils'
 import {
   countEventsByCategory,
@@ -27,6 +29,64 @@ import {
 } from '@/lib/events-page-utils'
 type ViewMode = 'list' | 'grid'
 type SortMode = 'upcoming' | 'relevance' | 'new'
+
+const SCOPE_SUMMARY_LABEL: Record<EventsScopeTab, string> = {
+  all: 'events',
+  'for-you': 'events picked for you',
+  weekend: 'events this weekend',
+  next7: 'events in the next 7 days',
+  month: 'events this month',
+}
+
+const SORT_SUMMARY_LABEL: Record<SortMode, string> = {
+  upcoming: 'sorted by soonest',
+  relevance: 'sorted by popularity',
+  new: 'sorted by newest',
+}
+
+function buildEventsResultSummary({
+  count,
+  pastView,
+  scopeTab,
+  searchQuery,
+  appliedFilterCount,
+  sortMode,
+  viewMode,
+  onClearFilters,
+}: {
+  count: number
+  pastView: boolean
+  scopeTab: EventsScopeTab
+  searchQuery: string
+  appliedFilterCount: number
+  sortMode: SortMode
+  viewMode: ViewMode
+  onClearFilters: () => void
+}): ReactNode {
+  const scopeNoun = pastView ? 'past public events' : SCOPE_SUMMARY_LABEL[scopeTab]
+  const parts = [`${count} ${scopeNoun}`]
+  const q = searchQuery.trim()
+  if (q) parts.push(`matching “${q}”`)
+  if (appliedFilterCount > 0) {
+    parts.push(`${appliedFilterCount} filter${appliedFilterCount === 1 ? '' : 's'} active`)
+  }
+  parts.push(SORT_SUMMARY_LABEL[sortMode])
+  parts.push(`${viewMode} view`)
+
+  return (
+    <p className="text-sm text-dc-text-muted">
+      <span>Showing {parts.join(' · ')}</span>
+      {appliedFilterCount > 0 || q ?
+        <>
+          {' '}
+          <button type="button" onClick={onClearFilters} className="font-medium text-dc-accent hover:underline">
+            Clear filters
+          </button>
+        </>
+      : null}
+    </p>
+  )
+}
 
 type EventFilterDraft = {
   eventFormatFilter: 'all' | 'in-person' | 'virtual'
@@ -64,7 +124,7 @@ export default function EventsDiscoverPage() {
   const [searchParams] = useSearchParams()
   const pastView = searchParams.get('view') === 'past'
 
-  const { isAuthenticated, isFallback } = useAuth()
+  const { isAuthenticated } = useAuth()
   const homeDemoFallbackEnv = import.meta.env.VITE_HOME_DEMO_FALLBACK === 'true'
   const useDemoFallback = homeDemoFallbackEnv && !isAuthenticated
 
@@ -98,9 +158,7 @@ export default function EventsDiscoverPage() {
 
   const apiEvents = useApiEvents(apiListFilters)
   const apiBackedEvents = !useDemoFallback && apiEvents.status === 'ready'
-  const showApiAgenda = apiBackedEvents && isAuthenticated && !isFallback
-  const organizingEvents = useApiEvents({ hostId: 'me', enabled: showApiAgenda })
-  const myRsvps = useApiMyRsvps(showApiAgenda)
+  const agenda = useEventsAgendaSidebar({ enabled: apiBackedEvents })
 
   const eventSource = useMemo(() => {
     if (useDemoFallback) return mockEvents
@@ -261,89 +319,47 @@ export default function EventsDiscoverPage() {
     clearFilters,
   }
 
-  type AgendaRow = {
-    eventId: string
-    title: string
-    startsAt: string
-    status: string
-    organizing: boolean
-  }
-
-  const upcomingAgenda = useMemo(() => {
-    const now = Date.now()
-    const byId = new Map<string, AgendaRow>()
-    for (const r of myRsvps.items) {
-      byId.set(r.eventId, {
-        eventId: r.eventId,
-        title: r.title,
-        startsAt: r.startsAt,
-        status: r.status,
-        organizing: false,
-      })
-    }
-    if (organizingEvents.status === 'ready') {
-      for (const ev of organizingEvents.items) {
-        const id = String(ev.id)
-        const startsAt = ev.startsAt ?? ''
-        const existing = byId.get(id)
-        if (existing) byId.set(id, { ...existing, organizing: true })
-        else {
-          byId.set(id, {
-            eventId: id,
-            title: ev.title,
-            startsAt,
-            status: 'organizing',
-            organizing: true,
-          })
-        }
-      }
-    }
-    return [...byId.values()]
-      .filter((row) => {
-        const t = new Date(row.startsAt).getTime()
-        return !Number.isNaN(t) && t >= now
-      })
-      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
-  }, [myRsvps.items, organizingEvents.items, organizingEvents.status])
-
-  const pastRsvpCount = useMemo(() => {
-    const now = Date.now()
-    return myRsvps.items.filter((r) => {
-      const t = new Date(r.startsAt).getTime()
-      return !Number.isNaN(t) && t < now
-    }).length
-  }, [myRsvps.items])
-
-  const agendaLoading =
-    showApiAgenda &&
-    (myRsvps.status === 'loading' || (showApiAgenda && organizingEvents.status === 'loading'))
-  const agendaError = myRsvps.status === 'error' || organizingEvents.status === 'error'
-
   const pageTitle = pastView ? 'Past Public Events' : 'Events'
   const pageSubtitle =
     pastView ?
       'Browse events that have already happened.'
-    : 'Find classes, munches, conventions, and community gatherings.'
+    : 'Find munches, classes, conventions, and play parties. Compare by date, location, format, and category before you RSVP.'
+
+  const resultSummary =
+    apiEvents.status === 'ready' && filteredEvents.length > 0 ?
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {buildEventsResultSummary({
+          count: filteredEvents.length,
+          pastView,
+          scopeTab,
+          searchQuery,
+          appliedFilterCount,
+          sortMode,
+          viewMode,
+          onClearFilters: clearFilters,
+        })}
+        <EventsPagination variant="compact" page={page} totalPages={totalPages} onPageChange={setPage} className="shrink-0" />
+      </div>
+    : null
 
   return (
     <DirectoryTemplate
       title={pageTitle}
       description={pageSubtitle}
       className="py-4 sm:py-6"
+      header={
+        <PageHeader
+          title={pageTitle}
+          description={pageSubtitle}
+          sticky={false}
+          className="mb-4 lg:mb-6"
+        />
+      }
       desktopSidebar={
         <EventsDiscoverLeftRail
           filterState={filterState}
           categoryCounts={categoryCounts}
-          agendaLoading={agendaLoading}
-          agendaError={agendaError}
-          onAgendaRetry={() => {
-            myRsvps.reload()
-            organizingEvents.reload()
-          }}
-          upcomingAgenda={upcomingAgenda}
-          pastRsvpCount={pastRsvpCount}
-          showAgenda={isAuthenticated && !isFallback && !useDemoFallback}
-          showMockAgenda={useDemoFallback}
+          {...agenda}
         />
       }
       desktopAside={<EventsRightRail allEvents={eventSource} suggested={filteredEvents} />}
@@ -410,7 +426,7 @@ export default function EventsDiscoverPage() {
           </div>
         </div>
       }
-      resultSummary={null}
+      resultSummary={resultSummary}
     >
       <EventsCategoryChips
         selectedCategories={selectedCategories}
@@ -473,40 +489,8 @@ export default function EventsDiscoverPage() {
         </div>
       }
 
-      {filteredEvents.length > 0 && totalPages > 1 ?
-        <nav className="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
-          <button
-            type="button"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="min-h-11 rounded-lg border border-dc-border px-3 text-sm disabled:opacity-40"
-          >
-            Previous
-          </button>
-          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => setPage(n)}
-              className={`min-h-11 min-w-11 rounded-lg border text-sm ${
-                page === n ?
-                  'border-dc-accent bg-dc-accent-muted text-dc-accent'
-                : 'border-dc-border text-dc-text-muted hover:text-dc-text'
-              }`}
-            >
-              {n}
-            </button>
-          ))}
-          {totalPages > 7 ? <span className="px-1 text-dc-muted">…</span> : null}
-          <button
-            type="button"
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="min-h-11 rounded-lg border border-dc-border px-3 text-sm disabled:opacity-40"
-          >
-            Next
-          </button>
-        </nav>
+      {filteredEvents.length > 0 ?
+        <EventsPagination variant="full" page={page} totalPages={totalPages} onPageChange={setPage} className="mt-8" />
       : null}
 
       <FilterSheet

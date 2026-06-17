@@ -10,6 +10,8 @@
     "db:seed-moderation-ts-fixtures": "npm run db:seed-moderation-ts-fixtures -w @c2k/api",
     "db:migrate-prod": "node scripts/migrate-prod.mjs",
     "db:seed:reference": "npm run db:seed:reference -w @c2k/api",
+    "db:seed:alpha:ecke": "npm run db:seed:alpha:ecke -w @c2k/api",
+    "db:clear:alpha:ecke": "npm run db:clear:alpha:ecke -w @c2k/api",
     "dev": "concurrently -n web,api -c blue,magenta \"npm run dev -w web\" \"npm run dev -w @c2k/api\"",
     "dev:web": "npm run dev -w web",
     "dev:api": "npm run dev -w @c2k/api",

@@ -1,3 +1,4 @@
+import { formatPlaceDisplayName, formatPlaceLocationLabel } from '@c2k/shared'
 import { asc, eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
@@ -65,7 +66,12 @@ export async function registerLocationRoutes(app: FastifyInstance) {
       .from(schema.places)
       .where(eq(schema.places.stateId, parsed.data.state_id))
       .orderBy(asc(schema.places.name))
-    return reply.send({ places: rows })
+    return reply.send({
+      places: rows.map((row) => ({
+        ...row,
+        name: formatPlaceDisplayName(row.name),
+      })),
+    })
   })
 
   app.get('/api/locations/by-zip', async (req, reply) => {

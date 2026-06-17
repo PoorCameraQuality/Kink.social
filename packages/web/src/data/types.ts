@@ -128,6 +128,7 @@ export type MockEvent = {
   featured?: boolean
   featuredUntil?: string | null
   isFeatured?: boolean
+  alphaLabel?: import('@c2k/shared').AlphaContentLabel
 }
 
 export type MockVendor = {
@@ -230,6 +231,8 @@ export type MockGroupMember = {
   username: string
   role: GroupRole
   joinedAt: string
+  /** Staff-only: member chose hidden list visibility. */
+  memberListHidden?: boolean
 }
 
 export type MockGroupChannel = {

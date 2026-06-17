@@ -9,15 +9,12 @@ import {
   deriveStudioNextSteps,
   deriveStudioStrengthScore,
 } from '@/lib/profile-studio/completion'
-import { derivePersonalityParagraph } from '@/lib/profile-story/derive'
 import ProfileAboutCard from './ProfileAboutCard'
 import ProfileLookingForCard from './ProfileLookingForCard'
-import ProfilePersonalityCard from './ProfilePersonalityCard'
 import ProfileStudioStrengthCard from '../studio/ProfileStudioStrengthCard'
 import ProfileCommunitySnapshotCard from './ProfileCommunitySnapshotCard'
 import ProfileOrganizationsCard from './ProfileOrganizationsCard'
 import ProfileUpcomingEventsCard from './ProfileUpcomingEventsCard'
-import ProfileFeedbackCard from './ProfileFeedbackCard'
 
 export type ProfileStorySidebarProps = {
   displayName: string
@@ -42,7 +39,7 @@ export type ProfileStorySidebarProps = {
   canOfferReference?: boolean
 }
 
-/** Condensed story cards for desktop left rail. */
+/** Desktop left rail — identity + activity summary; people/references live in Community tab. */
 export default function ProfileStorySidebar(props: ProfileStorySidebarProps) {
   const [linksCount, setLinksCount] = useState(props.linksCount ?? 0)
 
@@ -71,12 +68,6 @@ export default function ProfileStorySidebar(props: ProfileStorySidebarProps) {
   }, [props.linksCount, props.viewerIsOwner])
 
   const interests = props.kinks.map((k) => k.displayName)
-  const personality = derivePersonalityParagraph({
-    bio: props.bio,
-    lifestyleActivity: props.lifestyleActivity,
-    kinks: props.kinks,
-    presenterHeadline: props.ecosystem?.presenter?.headline,
-  })
 
   const completionInput = useMemo(
     () =>
@@ -119,23 +110,21 @@ export default function ProfileStorySidebar(props: ProfileStorySidebarProps) {
 
   return (
     <div className="space-y-4">
-      {props.viewerIsOwner || props.lookingFor.length > 0 ?
-        <ProfileLookingForCard lookingFor={props.lookingFor} viewerIsOwner={props.viewerIsOwner} />
-      : null}
       <ProfileAboutCard
         displayName={props.displayName}
         bio={props.bio}
         interests={interests}
         viewerIsOwner={props.viewerIsOwner}
       />
+      {props.viewerIsOwner || props.lookingFor.length > 0 ?
+        <ProfileLookingForCard lookingFor={props.lookingFor} viewerIsOwner={props.viewerIsOwner} />
+      : null}
       <ProfileCommunitySnapshotCard
         ecosystem={props.ecosystem}
         memberSince={props.memberSince}
         roles={props.roles}
         lifestyleActivity={props.lifestyleActivity}
-        referencesCount={props.referencesCount}
         eventsAttended={props.eventsAttended}
-        educationContributions={props.educationContributions}
       />
       {props.viewerIsOwner ?
         <ProfileStudioStrengthCard
@@ -151,14 +140,6 @@ export default function ProfileStorySidebar(props: ProfileStorySidebarProps) {
         viewerIsOwner={props.viewerIsOwner}
       />
       <ProfileOrganizationsCard ecosystem={props.ecosystem} username={props.username} />
-      <ProfileFeedbackCard
-        displayName={props.displayName}
-        referencesCount={props.referencesCount}
-        viewerIsOwner={props.viewerIsOwner}
-        onAddReference={props.onAddReference}
-        canOfferReference={props.canOfferReference}
-      />
-      <ProfilePersonalityCard paragraph={personality} displayName={props.displayName} />
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import TagLink from '@/components/TagLink'
 import CommunityHubShell from '@/components/ui/CommunityHubShell'
 import CopyLinkOverflowMenu from '@/components/ui/CopyLinkOverflowMenu'
+import { mediaDisplayUrl } from '@/lib/media-display-url'
 
 function groupInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -82,14 +83,16 @@ export default function GroupCommunityShell({
 }: GroupCommunityShellProps) {
   const roleLabel = viewerRole ? viewerRole.replace(/_/g, ' ') : null
   const modLine = viewerRole ? moderatorCapabilityLine(viewerRole) : null
+  const coverDisplay = mediaDisplayUrl(coverImageUrl)
+  const logoDisplay = mediaDisplayUrl(logoUrl)
 
   const header = (
     <div className="dc-card-polish c2k-community-hero mb-6 overflow-hidden rounded-2xl border border-dc-border shadow-[var(--dc-shadow-soft)]">
       <div className="relative w-full overflow-hidden bg-gradient-to-br from-dc-accent/15 via-violet-950/35 to-dc-surface-muted c2k-community-hero-cover">
         <div className="relative mx-auto aspect-[3/1] w-full min-h-[5rem] max-h-28 sm:aspect-[21/9] sm:min-h-[6.5rem] sm:max-h-36 md:max-h-44 lg:max-h-52">
-          {coverImageUrl ?
+          {coverDisplay ?
             <img
-              src={coverImageUrl}
+              src={coverDisplay}
               alt=""
               className="absolute inset-0 h-full w-full object-cover object-center"
             />
@@ -106,10 +109,10 @@ export default function GroupCommunityShell({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4 min-w-0">
             <div
               className="-mt-10 sm:-mt-12 shrink-0 h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border-4 border-dc-border bg-dc-elevated-solid overflow-hidden shadow-[var(--dc-shadow-soft)] flex items-center justify-center"
-              aria-hidden={logoUrl ? undefined : true}
+              aria-hidden={logoDisplay ? undefined : true}
             >
-              {logoUrl ?
-                <img src={logoUrl} alt="" className="h-full w-full object-cover" />
+              {logoDisplay ?
+                <img src={logoDisplay} alt="" className="h-full w-full object-cover" />
               : <span className="text-xl sm:text-2xl font-bold text-dc-text-muted">{groupInitials(name)}</span>
               }
             </div>

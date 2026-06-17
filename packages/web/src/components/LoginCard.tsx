@@ -32,29 +32,33 @@ function LandingCheckbox({
     landing ?
       'border-[var(--pub-border)] bg-white/[0.04]'
     : 'border-dc-border bg-dc-surface-muted'
+  const checkedClass =
+    landing ?
+      'border-[var(--pub-gold-bright)] bg-[var(--pub-gold-bright)] text-[#0a0908]'
+    : 'border-dc-accent bg-dc-accent text-white'
   return (
-    <label className="flex min-h-touch cursor-pointer items-start gap-3 py-1">
-      <span className="relative mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center">
+    <label className="flex cursor-pointer items-start gap-2.5 py-0.5">
+      <span className="relative mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center">
         <input
           type="checkbox"
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          className="absolute inset-0 z-10 h-11 w-11 cursor-pointer opacity-0"
+          className="absolute inset-0 z-10 h-9 w-9 cursor-pointer opacity-0 focus:outline-none"
         />
         <span
           aria-hidden
           className={`pointer-events-none flex h-5 w-5 items-center justify-center rounded border ${boxClass} ${
-            checked ? 'border-dc-accent bg-dc-accent text-dc-accent-foreground' : ''
+            checked ? checkedClass : ''
           }`}
         >
           {checked ?
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
             </svg>
           : null}
         </span>
       </span>
-      <span className="pt-2">{children}</span>
+      <span className="pt-0.5 leading-snug">{children}</span>
     </label>
   )
 }
@@ -288,8 +292,8 @@ export default function LoginCard({
           </h2>
           <p className="mt-1 text-sm text-[var(--pub-text-muted)]">
             {activeTab === 'signup' ?
-              'Create your account in seconds.'
-            : 'Log in to pick up where you left off.'}
+              'Free to join. 18+ only.'
+            : 'Use your username or email.'}
           </p>
         </div>
       : <>
@@ -434,8 +438,8 @@ export default function LoginCard({
               <div
                 className={
                   landing ?
-                    'space-y-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-[var(--pub-text-muted)]'
-                  : 'space-y-3 rounded-xl border border-dc-border bg-dc-surface-muted/60 px-4 py-3 text-sm text-dc-text-muted'
+                    'space-y-1 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs leading-snug text-[var(--pub-text-muted)]'
+                  : 'space-y-1 rounded-xl border border-dc-border bg-dc-surface-muted/60 px-3 py-2 text-xs leading-snug text-dc-text-muted'
                 }
               >
                 <LandingCheckbox checked={signupAgeAffirmed} onChange={setSignupAgeAffirmed} landing={landing}>
@@ -444,23 +448,23 @@ export default function LoginCard({
                 <LandingCheckbox checked={signupTermsAccepted} onChange={setSignupTermsAccepted} landing={landing}>
                   <span>
                     I agree to the{' '}
-                    <Link to="/terms" className={landing ? 'inline-flex min-h-touch items-center text-[var(--pub-gold-bright)] hover:underline' : 'inline-flex min-h-touch items-center text-dc-accent hover:underline'}>
+                    <Link to="/terms" className={landing ? 'text-[var(--pub-gold-bright)] hover:underline' : 'text-dc-accent hover:underline'}>
                       Terms
                     </Link>
                     ,{' '}
-                    <Link to="/privacy" className={landing ? 'inline-flex min-h-touch items-center text-[var(--pub-gold-bright)] hover:underline' : 'inline-flex min-h-touch items-center text-dc-accent hover:underline'}>
+                    <Link to="/privacy" className={landing ? 'text-[var(--pub-gold-bright)] hover:underline' : 'text-dc-accent hover:underline'}>
                       Privacy Policy
                     </Link>
                     ,{' '}
-                    <Link to="/guidelines" className={landing ? 'inline-flex min-h-touch items-center text-[var(--pub-gold-bright)] hover:underline' : 'inline-flex min-h-touch items-center text-dc-accent hover:underline'}>
+                    <Link to="/guidelines" className={landing ? 'text-[var(--pub-gold-bright)] hover:underline' : 'text-dc-accent hover:underline'}>
                       Community Guidelines
                     </Link>
-                    . And{' '}
-                    <Link to="/adult-content-consent" className={landing ? 'inline-flex min-h-touch items-center text-[var(--pub-gold-bright)] hover:underline' : 'inline-flex min-h-touch items-center text-dc-accent hover:underline'}>
-                      Adult Content/Consent
-                    </Link>{' '}
-                    for this adult-oriented platform.{' '}
-                    <Link to="/policies" className={landing ? 'inline-flex min-h-touch items-center text-[var(--pub-gold-bright)] hover:underline' : 'inline-flex min-h-touch items-center text-dc-accent hover:underline'}>
+                    , and{' '}
+                    <Link to="/adult-content-consent" className={landing ? 'text-[var(--pub-gold-bright)] hover:underline' : 'text-dc-accent hover:underline'}>
+                      Adult Content policy
+                    </Link>
+                    .{' '}
+                    <Link to="/policies" className={landing ? 'text-[var(--pub-gold-bright)] hover:underline' : 'text-dc-accent hover:underline'}>
                       View all policies
                     </Link>
                     .

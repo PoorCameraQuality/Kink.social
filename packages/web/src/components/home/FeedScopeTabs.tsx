@@ -1,24 +1,29 @@
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { EXPLORE_DASHBOARD_PATH } from '@/lib/app-routes'
 
 const SCOPES = [
   { id: 'foryou', label: 'For you', href: '/home?mode=discover&tab=Local' },
   { id: 'following', label: 'Following', href: '/home?mode=following' },
   { id: 'nearby', label: 'Nearby', href: '/people' },
   { id: 'organizers', label: 'Organizers', href: '/events' },
-  { id: 'trending', label: 'Trending', href: '/home?mode=discover&tab=Trending' },
+  { id: 'trending', label: 'Trending', href: EXPLORE_DASHBOARD_PATH },
 ] as const
 
 type Props = {
   showHeading?: boolean
+  /** When true, hidden at lg+ so HomeFeedScopeNav is the sole desktop scope control. */
+  hideOnDesktop?: boolean
 }
 
-export default function FeedScopeTabs({ showHeading = false }: Props) {
+export default function FeedScopeTabs({ showHeading = false, hideOnDesktop = false }: Props) {
   const [searchParams] = useSearchParams()
+  const { pathname } = useLocation()
   const mode = searchParams.get('mode') ?? 'discover'
   const tab = searchParams.get('tab') ?? 'Local'
 
   const activeId =
-    mode === 'following' ? 'following'
+    pathname === EXPLORE_DASHBOARD_PATH ? 'trending'
+    : mode === 'following' ? 'following'
     : tab === 'Trending' ? 'trending'
     : tab === 'People' ? 'nearby' // legacy tab param; redirects to /people
     : tab === 'Events' ? 'organizers'
@@ -26,7 +31,7 @@ export default function FeedScopeTabs({ showHeading = false }: Props) {
     : 'foryou'
 
   return (
-    <div className={showHeading ? 'mb-4' : 'mb-2'}>
+    <div className={`${showHeading ? 'mb-4' : 'mb-2'}${hideOnDesktop ? ' lg:hidden' : ''}`}>
       {showHeading ?
         <div className="mb-2 flex min-h-11 items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-dc-text">Community activity</h2>

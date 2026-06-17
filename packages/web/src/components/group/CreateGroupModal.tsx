@@ -1,4 +1,4 @@
-import { useId, useState, useCallback } from 'react'
+import { useId, useState, useCallback, useEffect, useMemo } from 'react'
 import type { GroupRule } from '@c2k/shared'
 import {
   GROUP_CATEGORY_DESCRIPTIONS,
@@ -15,6 +15,7 @@ import {
 } from '@/components/create-flow/CreateFlowWizardUi'
 import TextInput from '@/components/ui/TextInput'
 import { TAG_SEEDS } from '@/data/mock-data'
+import { uploadGroupBrandingAsset } from '@/lib/group-branding-upload'
 
 export type CreateGroupModalProps = {
   onClose: () => void
@@ -42,6 +43,7 @@ export default function CreateGroupModal({ onClose, onCreated }: CreateGroupModa
   const categoryId = useId()
   const tagsId = useId()
   const visibilityId = useId()
+  const bannerInputId = useId()
   const [step, setStep] = useState(1)
   const [name, setName] = useState('')
   const [category, setCategory] = useState<string>(GROUP_CATEGORY_VALUES[0])
@@ -49,8 +51,25 @@ export default function CreateGroupModal({ onClose, onCreated }: CreateGroupModa
   const [visibility, setVisibility] = useState<'public' | 'private' | 'invite-only'>('public')
   const [rules, setRules] = useState<GroupRule[]>([])
   const [showRules, setShowRules] = useState(false)
+  const [bannerFile, setBannerFile] = useState<File | null>(null)
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!bannerFile) {
+      setBannerPreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(bannerFile)
+    setBannerPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [bannerFile])
+
+  const bannerLabel = useMemo(() => {
+    if (!bannerFile) return 'None'
+    return bannerFile.name
+  }, [bannerFile])
 
   const stepDescription =
     step === 1 ?
@@ -128,6 +147,19 @@ export default function CreateGroupModal({ onClose, onCreated }: CreateGroupModa
       if (!j.group?.id) {
         setError('Group was created but no id was returned.')
         return
+      }
+      if (bannerFile) {
+        try {
+          await uploadGroupBrandingAsset(j.group.id, 'banner', bannerFile)
+        } catch (uploadErr) {
+          setError(
+            uploadErr instanceof Error ?
+              `Group created, but banner upload failed: ${uploadErr.message}`
+            : 'Group created, but banner upload failed.',
+          )
+          onCreated(j.group)
+          return
+        }
       }
       onCreated(j.group)
     } catch {
@@ -235,6 +267,50 @@ export default function CreateGroupModal({ onClose, onCreated }: CreateGroupModa
                 </div>
               </SectionCard>
 
+              <SectionCard title="Banner image" badge="Optional">
+                <p className="text-xs text-dc-muted">
+                  Wide header on your group page (3:1 or 16:9). You can change this later in organizer settings.
+                </p>
+                {bannerPreviewUrl ?
+                  <div className="mt-3 overflow-hidden rounded-xl border border-dc-border">
+                    <img src={bannerPreviewUrl} alt="" className="aspect-[3/1] w-full object-cover" />
+                  </div>
+                : (
+                  <div className="mt-3 flex aspect-[3/1] w-full items-center justify-center rounded-xl border-2 border-dashed border-dc-border bg-dc-surface-muted text-xs text-dc-muted">
+                    No banner yet
+                  </div>
+                )}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <input
+                    id={bannerInputId}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="sr-only"
+                    disabled={submitting}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null
+                      e.target.value = ''
+                      setBannerFile(file)
+                    }}
+                  />
+                  <label
+                    htmlFor={bannerInputId}
+                    className="inline-flex min-h-touch cursor-pointer items-center rounded-lg bg-dc-accent px-3 py-1.5 text-xs font-medium text-dc-text hover:bg-dc-accent-hover"
+                  >
+                    {bannerFile ? 'Replace banner' : 'Upload banner'}
+                  </label>
+                  {bannerFile ?
+                    <button
+                      type="button"
+                      className="min-h-touch rounded-lg border border-dc-border px-3 py-1.5 text-xs text-dc-text-muted hover:text-dc-text"
+                      onClick={() => setBannerFile(null)}
+                    >
+                      Remove
+                    </button>
+                  : null}
+                </div>
+              </SectionCard>
+
               <SectionCard title="Privacy" badge="Required">
                 <div>
                   <label htmlFor={visibilityId} className="mb-1.5 block text-sm font-medium text-dc-text-muted">
@@ -320,6 +396,7 @@ export default function CreateGroupModal({ onClose, onCreated }: CreateGroupModa
               <PreviewRow label="Name" value={name.trim() || '-'} missing={!name.trim()} />
               <PreviewRow label="Purpose" value={category || '-'} />
               <PreviewRow label="Visibility" value={VISIBILITY_LABELS[visibility]} />
+              <PreviewRow label="Banner" value={bannerLabel} />
               {tagsInput.trim() ?
                 <PreviewRow label="Tags" value={tagsInput.trim()} />
               : null}

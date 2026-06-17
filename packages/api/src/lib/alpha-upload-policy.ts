@@ -2,6 +2,8 @@ import type { FastifyReply } from 'fastify'
 
 export type AlphaUploadCategory =
   | 'profile_photo'
+  | 'profile_media'
+  | 'feed_video'
   | 'org_banner'
   | 'org_logo'
   | 'org_share'
@@ -23,6 +25,8 @@ export type AlphaUploadCategory =
 
 const CATEGORY_ENV: Record<AlphaUploadCategory, string> = {
   profile_photo: 'C2K_ALPHA_DISABLE_PROFILE_PHOTO_UPLOADS',
+  profile_media: 'C2K_ALPHA_DISABLE_PROFILE_PHOTO_UPLOADS',
+  feed_video: 'C2K_ALPHA_DISABLE_FEED_IMAGE_UPLOADS',
   org_banner: 'C2K_ALPHA_DISABLE_ORG_BANNER_UPLOADS',
   org_logo: 'C2K_ALPHA_DISABLE_ORG_BANNER_UPLOADS',
   org_share: 'C2K_ALPHA_DISABLE_ORG_BANNER_UPLOADS',

@@ -1,7 +1,9 @@
-import { useEffect, useId, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useEffect, useId, useMemo, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import EducationLeftRail from '@/components/education/EducationLeftRail'
 import MediaChannelCard from '@/components/media/MediaChannelCard'
 import MediaEmptyPanel from '@/components/media/MediaEmptyPanel'
+import MediaFilterLeftRail from '@/components/media/MediaFilterLeftRail'
 import MediaRightRail from '@/components/media/MediaRightRail'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
 import TabButton from '@/components/ui/TabButton'
@@ -9,8 +11,10 @@ import { FeedCardSkeleton } from '@/components/ui/skeleton'
 import DirectoryTemplate from '@/components/templates/DirectoryTemplate'
 import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
+import { useApiEducationArticles } from '@/hooks/useApiEducationArticles'
 import { useApiMyMediaShows } from '@/hooks/useApiMyMediaShows'
 import { useApiMediaShows, type MediaFormat } from '@/hooks/useApiMediaShows'
+import { educationTopicFiltersFromArticles } from '@/lib/education-discover-data'
 import { cn } from '@/lib/cn'
 import { MEDIA_FORMAT_TABS, MEDIA_TOPIC_META, MEDIA_TOPIC_TAGS, type MediaTopicTag } from '@/lib/media-page-utils'
 import { shellOuterClass } from '@/lib/shell-contract'
@@ -22,6 +26,7 @@ function parseFormatParam(raw: string | null): MediaFormat | '' {
 
 export default function MediaPage() {
   const searchId = useId()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { isAuthenticated, isFallback, viewerUsername } = useAuth()
   const showApi = isAuthenticated && !isFallback
@@ -30,6 +35,12 @@ export default function MediaPage() {
   const [tag, setTag] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [tagDrawerOpen, setTagDrawerOpen] = useState(false)
+
+  const hubArticlesApi = useApiEducationArticles({ limit: 48, enabled: true })
+  const topicFilters = useMemo(() => {
+    if (hubArticlesApi.status !== 'ready' || hubArticlesApi.items.length === 0) return []
+    return educationTopicFiltersFromArticles(hubArticlesApi.items)
+  }, [hubArticlesApi.status, hubArticlesApi.items])
 
   useEffect(() => {
     setFormat(parseFormatParam(searchParams.get('format')))
@@ -62,6 +73,24 @@ export default function MediaPage() {
   }
 
   const submitHref = isAuthenticated ? '/media/submit' : buildLoginHref('/media/submit')
+
+  const leftRail = (
+    <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+      <EducationLeftRail
+        embedded
+        selectedCategory={null}
+        onCategoryChange={() => {}}
+        onBrowseTopics={() => navigate('/education?view=articles')}
+        topicFilters={topicFilters}
+      />
+      <MediaFilterLeftRail
+        format={format}
+        tag={tag}
+        onFormatChange={setFormatFilter}
+        onTagChange={setTag}
+      />
+    </div>
+  )
 
   const rightRail = (
     <MediaRightRail
@@ -163,7 +192,7 @@ export default function MediaPage() {
             </div>
 
             <nav
-              className="-mx-1 mt-4 flex items-center gap-2 overflow-x-auto px-1 pb-1 c2k-no-scrollbar"
+              className="-mx-1 mt-4 flex items-center gap-2 overflow-x-auto px-1 pb-1 c2k-no-scrollbar lg:hidden"
               aria-label="Media format"
             >
               {MEDIA_FORMAT_TABS.map((tab) => (
@@ -184,8 +213,6 @@ export default function MediaPage() {
               </button>
             </nav>
 
-            <div className="mt-4 hidden lg:block">{tagChips}</div>
-
             {tagDrawerOpen ?
               <div className="mt-2 rounded-2xl border border-dc-border bg-dc-elevated-solid p-3 lg:hidden">{tagChips}</div>
             : null}
@@ -203,6 +230,7 @@ export default function MediaPage() {
             : null}
           </>
         }
+        desktopSidebar={leftRail}
         desktopAside={rightRail}
       >
         {error ?

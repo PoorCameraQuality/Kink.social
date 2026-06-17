@@ -1,3 +1,4 @@
+import { formatPlaceDisplayName } from '@c2k/shared'
 import { eq } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 
@@ -14,7 +15,7 @@ type OpenMeteoResponse = {
 }
 
 function geocodeSearchName(placeName: string): string {
-  return placeName.replace(/\s+(city|town|village|CDP|borough|municipality)$/i, '').trim()
+  return formatPlaceDisplayName(placeName)
 }
 
 function normalizeAdminName(name: string): string {

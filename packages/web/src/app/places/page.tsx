@@ -23,7 +23,7 @@ export default function PlacesPage() {
     <div className={cn(shellOuterClass, 'c2k-mobile-scroll-pad')}>
       <DirectoryTemplate
         title="Places"
-        description="Community-submitted venues and resources. Dungeons, clubs, kink-friendly hotels, and web resources."
+        description="Kinky Map — community venues and resources. Dungeons with a managed organization link to their org hub for events and forums; other pins are discovery-only until onboarded."
         className="py-6 sm:py-8"
         toolbar={
           <div className="space-y-4">

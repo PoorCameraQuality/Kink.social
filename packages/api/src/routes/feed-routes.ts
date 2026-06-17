@@ -7,6 +7,7 @@ import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { db, schema } from '../db/index.js'
 import { emitActivity } from '../lib/feed-activities.js'
 import { getFollowingFeed, getFollowingFeedCounts } from '../lib/feed-following.js'
+import { getHomeFeed } from '../lib/feed-home.js'
 import { enrichPostsWithLikeMeta, setPostReaction, clearPostReaction } from '../lib/post-like-meta.js'
 import {
   createFeedPostComment,
@@ -28,6 +29,7 @@ import {
   replyIfViewerUserNotFound,
   ViewerUserNotFoundError,
 } from '../lib/user-settings-row.js'
+import { withAlphaLabel, withAlphaLabels } from '../lib/alpha-seed-labels.js'
 
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
@@ -61,10 +63,30 @@ function requireUser(req: FastifyRequest, reply: FastifyReply): { userId: string
   return { userId: v.payload.sub }
 }
 
-const attachmentSchema = z.object({
-  type: z.enum(['image', 'audio']),
-  url: z.string().url(),
-})
+const attachmentSchema = z.union([
+  z.object({ type: z.literal('image'), url: z.string().url() }),
+  z.object({ type: z.literal('audio'), url: z.string().url() }),
+  z.object({
+    type: z.literal('video'),
+    url: z.string(),
+    posterUrl: z.string().nullable().optional(),
+    durationSeconds: z.number().int().nullable().optional(),
+  }),
+  z.object({
+    type: z.literal('media'),
+    mediaKind: z.enum(['image', 'video', 'audio']),
+    mediaItemId: z.string().uuid(),
+    mediaAssetId: z.string().uuid(),
+    previewUrl: z.string().nullable().optional(),
+    blurredPreviewUrl: z.string().nullable().optional(),
+    width: z.number().int().nullable().optional(),
+    height: z.number().int().nullable().optional(),
+    durationSeconds: z.number().int().nullable().optional(),
+    isBlurredByDefault: z.boolean().optional(),
+    contentRating: z.string().nullable().optional(),
+    visibility: z.string().optional(),
+  }),
+])
 
 const mentionSchema = z.object({
   type: z.string(),
@@ -82,14 +104,19 @@ const createPostBody = z.object({
   mentions: z.array(mentionSchema).max(50).optional(),
 })
 
-function normalizeAttachmentsForBody(attachments: Array<{ type: 'image' | 'audio'; url: string }> | undefined, bodyFormat: 'text' | 'html') {
+function normalizeAttachmentsForBody(
+  attachments: Array<z.infer<typeof attachmentSchema>> | undefined,
+  bodyFormat: 'text' | 'html',
+) {
   if (!attachments?.length) return []
   const seen = new Set<string>()
-  const out: Array<{ type: 'image' | 'audio'; url: string }> = []
+  const out: Array<z.infer<typeof attachmentSchema>> = []
   for (const a of attachments) {
-    // HTML posts render inline images from body content; avoid duplicate image blocks from attachments.
     if (bodyFormat === 'html' && a.type === 'image') continue
-    const key = `${a.type}:${a.url}`
+    const key =
+      a.type === 'media'
+        ? `media:${a.mediaItemId}`
+        : `${a.type}:${'url' in a ? a.url : ''}`
     if (seen.has(key)) continue
     seen.add(key)
     out.push(a)
@@ -269,7 +296,8 @@ export async function registerFeedRoutes(app: FastifyInstance) {
       .slice(0, limit)
     const withQuotes = await attachQuotedPosts(shaped)
     const withLikes = await attachLikeMetaToPosts(viewerId, withQuotes)
-    return reply.send({ items: withLikes })
+    const items = await withAlphaLabels('feed_post', withLikes)
+    return reply.send({ items })
     } catch (e) {
       if (isMissingDbRelationError(e)) {
         replySchemaDrift(reply)
@@ -309,7 +337,8 @@ export async function registerFeedRoutes(app: FastifyInstance) {
       .limit(limit)
     const shaped = rows.map(shapePostRow)
     const withLikes = await attachLikeMetaToPosts(user.userId, shaped)
-    return reply.send({ items: withLikes })
+    const items = await withAlphaLabels('feed_post', withLikes)
+    return reply.send({ items })
   })
 
   app.get('/api/v1/feed/posts/:postId', async (req, reply) => {
@@ -340,7 +369,8 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     const [withQuote] = await attachQuotedPosts([shaped])
     const viewerId = getViewerUserId(resolveViewerFromRequest(req).payload)
     const [withLikes] = await attachLikeMetaToPosts(viewerId, [withQuote])
-    return reply.send({ post: withLikes })
+    const post = withLikes ? await withAlphaLabel('feed_post', withLikes) : withLikes
+    return reply.send({ post })
   })
 
   app.post('/api/v1/feed/posts', { ...rateLimitRoute('feedPosts') }, async (req, reply) => {
@@ -387,6 +417,35 @@ export async function registerFeedRoutes(app: FastifyInstance) {
         avatarUrl: author.avatarUrl,
       }),
     })
+  })
+
+  app.get('/api/v1/feed/home', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const q = req.query as { limit?: string; cursor?: string; filter?: string }
+    const limit = Math.min(50, Math.max(1, parseInt(String(q.limit ?? '20'), 10) || 20))
+    const filter = q.filter?.trim() || 'all'
+    try {
+      const result = await getHomeFeed({
+        viewerId: user.userId,
+        limit,
+        cursor: q.cursor,
+        filter,
+      })
+      return reply.send({
+        cards: result.cards,
+        nextCursor: result.nextCursor,
+        connectionCount: result.connectionCount,
+      })
+    } catch (e) {
+      if (replyIfViewerUserNotFound(e, reply)) return
+      if (isMissingDbRelationError(e)) {
+        replySchemaDrift(reply)
+        return
+      }
+      throw e
+    }
   })
 
   app.get('/api/v1/feed/following', async (req, reply) => {

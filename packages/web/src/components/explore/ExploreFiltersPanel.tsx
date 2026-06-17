@@ -41,8 +41,13 @@ function CheckboxField({
   )
 }
 
-function SectionHeading({ children }: { children: ReactNode }) {
-  return <h3 className="text-xs font-semibold uppercase tracking-wide text-dc-muted">{children}</h3>
+function SectionHeading({ children, helper }: { children: ReactNode; helper?: string }) {
+  return (
+    <div className="space-y-1">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-dc-muted">{children}</h3>
+      {helper ? <p className="text-xs leading-relaxed text-dc-text-muted">{helper}</p> : null}
+    </div>
+  )
 }
 
 export default function ExploreFiltersPanel({
@@ -74,7 +79,7 @@ export default function ExploreFiltersPanel({
   return (
     <div className="space-y-6">
       <section className="space-y-3">
-        <SectionHeading>Content type</SectionHeading>
+        <SectionHeading helper="Limit results to specific kinds of community content.">Content type</SectionHeading>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {EXPLORE_CONTENT_TYPES.map((type) => (
             <CheckboxField
@@ -89,7 +94,7 @@ export default function ExploreFiltersPanel({
       </section>
 
       <section className="space-y-3">
-        <SectionHeading>Location</SectionHeading>
+        <SectionHeading helper="Near me uses your saved location; city narrows further.">Location</SectionHeading>
         <div className="space-y-2">
           <CheckboxField
             id={`${idPrefix}-near`}
@@ -118,7 +123,7 @@ export default function ExploreFiltersPanel({
       </section>
 
       <section className="space-y-3">
-        <SectionHeading>Date</SectionHeading>
+        <SectionHeading helper="Useful for events and time-bound gatherings.">Date</SectionHeading>
         <div className="flex flex-wrap gap-2">
           {(
             [
@@ -134,11 +139,7 @@ export default function ExploreFiltersPanel({
                 type="button"
                 aria-pressed={active}
                 onClick={() => setDate(active ? null : opt.value)}
-                className={`min-h-10 rounded-full border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent ${
-                  active ?
-                    'border-dc-accent bg-dc-accent text-dc-accent-foreground'
-                  : 'border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:text-dc-text'
-                }`}
+                className={`xpl-chip xpl-chip--topic ${active ? 'xpl-chip--active xpl-chip--accent-fill' : ''}`}
               >
                 {opt.label}
               </button>
@@ -147,8 +148,10 @@ export default function ExploreFiltersPanel({
         </div>
       </section>
 
-      <section className="space-y-3">
-        <SectionHeading>Trust and safety</SectionHeading>
+      <section className="space-y-3 rounded-xl border border-dc-border/60 bg-dc-elevated-solid/30 p-3">
+        <SectionHeading helper="Discovery comfort controls — only show what matches your boundaries.">
+          Trust and safety
+        </SectionHeading>
         <div className="space-y-2">
           <CheckboxField
             id={`${idPrefix}-verified`}
@@ -172,7 +175,7 @@ export default function ExploreFiltersPanel({
       </section>
 
       <section className="space-y-3">
-        <SectionHeading>Topic tags</SectionHeading>
+        <SectionHeading helper="Same topics as the chip row on the hub page.">Topic tags</SectionHeading>
         <div className="flex flex-wrap gap-2">
           {EXPLORE_TOPIC_CHIPS.map((topic) => {
             const active = draft.topics.some((t) => t.toLowerCase() === topic.toLowerCase())
@@ -188,11 +191,7 @@ export default function ExploreFiltersPanel({
                   else topics.push(topic)
                   onChange({ ...draft, topics })
                 }}
-                className={`min-h-10 rounded-full border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent ${
-                  active ?
-                    'border-dc-accent bg-dc-accent text-dc-accent-foreground'
-                  : 'border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:text-dc-text'
-                }`}
+                className={`xpl-chip xpl-chip--topic ${active ? 'xpl-chip--active xpl-chip--accent-fill' : ''}`}
               >
                 {topic}
               </button>
@@ -202,7 +201,7 @@ export default function ExploreFiltersPanel({
       </section>
 
       <section className="space-y-3">
-        <SectionHeading>Vendors</SectionHeading>
+        <SectionHeading helper="Marketplace filters for vendor listings.">Vendors</SectionHeading>
         <div className="space-y-2">
           <CheckboxField
             id={`${idPrefix}-ships`}

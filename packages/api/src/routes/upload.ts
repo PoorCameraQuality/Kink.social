@@ -10,6 +10,7 @@ import { rateLimitRoute } from '../lib/rate-limit-config.js'
 import {
   MediaUploadValidationError,
   processIncomingImageUpload,
+  processIncomingVideoUpload,
 } from '../lib/media-pipeline.js'
 
 function useDatabase(): boolean {
@@ -17,7 +18,7 @@ function useDatabase(): boolean {
 }
 
 export async function registerUploadRoutes(app: FastifyInstance) {
-  await app.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } })
+  await app.register(multipart, { limits: { fileSize: 100 * 1024 * 1024 } })
 
   app.post('/api/upload', { ...rateLimitRoute('upload') }, async (req, reply) => {
     if (!useDatabase()) {
@@ -60,12 +61,23 @@ export async function registerUploadRoutes(app: FastifyInstance) {
     }
 
     try {
-      const processed = await processIncomingImageUpload({
-        userId: viewer.payload.sub,
-        buffer,
-        filename,
-        declaredMime,
-      })
+      const isVideo =
+        (declaredMime ?? '').startsWith('video/') ||
+        purpose === 'feed_video' ||
+        /\.(mp4|webm)$/i.test(filename)
+      const processed = isVideo
+        ? await processIncomingVideoUpload({
+            userId: viewer.payload.sub,
+            buffer,
+            filename,
+            declaredMime,
+          })
+        : await processIncomingImageUpload({
+            userId: viewer.payload.sub,
+            buffer,
+            filename,
+            declaredMime,
+          })
 
       return reply.send({
         key: processed.quarantineKey,

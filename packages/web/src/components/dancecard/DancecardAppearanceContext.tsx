@@ -47,7 +47,7 @@ export function useDancecardAppearance(): DancecardAppearanceContextValue {
       preset,
       presets: DANCECARD_APPEARANCE_PRESETS,
       setAppearanceId: () => {},
-      appearanceStyle: appearanceVarsToStyle(preset.vars),
+      appearanceStyle: appearanceVarsToStyle(preset.vars, preset.mode),
       isDark: preset.mode === 'dark',
       appearanceReady: false,
     }
@@ -60,7 +60,7 @@ type ProviderProps = {
   className?: string
   chromeClassName?: string
   wrapChrome?: boolean
-  /** When localStorage has no saved theme, use this preset (organizer embed defaults to coastal-slate). */
+  /** When localStorage has no saved theme, use this preset (defaults to midnight-velvet sitewide). */
   defaultAppearanceId?: DancecardAppearanceId
   /** Subset for theme pickers (member site uses three comfort themes). */
   presets?: readonly DancecardAppearancePreset[]
@@ -91,7 +91,7 @@ export function DancecardAppearanceProvider({
   }, [])
 
   const preset = useMemo(() => getAppearancePreset(appearanceId), [appearanceId])
-  const appearanceStyle = useMemo(() => appearanceVarsToStyle(preset.vars), [preset])
+  const appearanceStyle = useMemo(() => appearanceVarsToStyle(preset.vars, preset.mode), [preset])
 
   useEffect(() => {
     if (!hydrated) return
@@ -129,7 +129,7 @@ export function DancecardAppearanceProvider({
     suppressHydrationWarning: true as const,
   }
 
-  const showSiteAtmosphere = wrapChrome && preset.mode === 'dark'
+  const showSiteAtmosphere = wrapChrome
 
   return (
     <DancecardAppearanceContext.Provider value={value}>
@@ -138,9 +138,9 @@ export function DancecardAppearanceProvider({
           {showSiteAtmosphere ?
             <>
               <div className="site-atmosphere__layer site-atmosphere__base" aria-hidden />
-              <div className="site-atmosphere__orb site-atmosphere__orb--gold" aria-hidden />
-              <div className="site-atmosphere__orb site-atmosphere__orb--violet" aria-hidden />
-              <div className="site-atmosphere__orb site-atmosphere__orb--teal" aria-hidden />
+              <div className="site-atmosphere__orb site-atmosphere__orb--primary" aria-hidden />
+              <div className="site-atmosphere__orb site-atmosphere__orb--secondary" aria-hidden />
+              <div className="site-atmosphere__orb site-atmosphere__orb--tertiary" aria-hidden />
               <div className="site-atmosphere__layer site-atmosphere__noise" aria-hidden />
             </>
           : null}

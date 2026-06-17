@@ -28,7 +28,7 @@ import {
   rejectProfileGalleryMediaAsset,
 } from '../lib/profile-photo-policy.js'
 import { mediaContentProxyPath } from '../lib/media-pipeline.js'
-import { publicUrlForKey } from '../lib/s3-upload.js'
+import { isBrowserReachablePublicUrl, publicUrlForKey } from '../lib/s3-upload.js'
 
 import type { MediaAsset } from '../db/schema.js'
 
@@ -72,6 +72,30 @@ export type ProfilePhotoDto = {
 
 
 
+function profilePhotoServingUrl(mediaAssetId: string, media: MediaAsset | null | undefined): string {
+  if (media?.publicStorageKey) {
+    const publicUrl = publicUrlForKey(media.publicStorageKey, media.storageBucket ?? undefined)
+    if (publicUrl && isBrowserReachablePublicUrl(publicUrl)) return publicUrl
+  }
+  const legacy = media?.storageKey?.trim()
+  if (legacy?.startsWith('http') && isBrowserReachablePublicUrl(legacy)) return legacy
+  return mediaContentProxyPath(mediaAssetId)
+}
+
+function resolveProfilePhotoUrl(
+  r: typeof schema.profilePhotos.$inferSelect,
+  media?: MediaAsset | null,
+): string {
+  const mediaId = r.mediaAssetId ?? media?.id ?? null
+  if (mediaId) {
+    return profilePhotoServingUrl(mediaId, media ?? null)
+  }
+  const stored = r.url?.trim() ?? ''
+  if (!stored) return ''
+  if (stored.startsWith('/') || isBrowserReachablePublicUrl(stored)) return stored
+  return ''
+}
+
 function mapPhotoRow(
 
   r: typeof schema.profilePhotos.$inferSelect,
@@ -86,7 +110,7 @@ function mapPhotoRow(
 
     id: r.id,
 
-    url: r.url,
+    url: resolveProfilePhotoUrl(r, media),
 
     caption: r.caption,
 
@@ -180,16 +204,6 @@ async function resolveOwnProfile(userId: string) {
 
   return ensureProfileForUserId(userId)
 
-}
-
-
-
-function profilePhotoServingUrl(mediaAssetId: string, media: MediaAsset | null | undefined): string {
-  if (media?.publicStorageKey) {
-    const publicUrl = publicUrlForKey(media.publicStorageKey, media.storageBucket ?? undefined)
-    if (publicUrl) return publicUrl
-  }
-  return mediaContentProxyPath(mediaAssetId)
 }
 
 

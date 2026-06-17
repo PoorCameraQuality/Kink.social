@@ -44,8 +44,9 @@ export async function registerNotificationPreferencesRoutes(app: FastifyInstance
     return reply.send({
       orgDigestEmailWeekly: row?.orgDigestEmailWeekly ?? true,
       pinnedDigestEmailWeekly: row?.pinnedDigestEmailWeekly ?? true,
-      pushHubAnnouncements: row?.pushHubAnnouncements ?? true,
-      pushHubChat: row?.pushHubChat ?? true,
+      pushEnabled: row?.pushEnabled ?? false,
+      pushHubAnnouncements: row?.pushHubAnnouncements ?? false,
+      pushHubChat: row?.pushHubChat ?? false,
     })
   })
 
@@ -57,6 +58,7 @@ export async function registerNotificationPreferencesRoutes(app: FastifyInstance
       .object({
         orgDigestEmailWeekly: z.boolean().optional(),
         pinnedDigestEmailWeekly: z.boolean().optional(),
+        pushEnabled: z.boolean().optional(),
         pushHubAnnouncements: z.boolean().optional(),
         pushHubChat: z.boolean().optional(),
       })
@@ -66,6 +68,7 @@ export async function registerNotificationPreferencesRoutes(app: FastifyInstance
     if (
       parsed.data.orgDigestEmailWeekly === undefined &&
       parsed.data.pinnedDigestEmailWeekly === undefined &&
+      parsed.data.pushEnabled === undefined &&
       parsed.data.pushHubAnnouncements === undefined &&
       parsed.data.pushHubChat === undefined
     ) {
@@ -84,9 +87,10 @@ export async function registerNotificationPreferencesRoutes(app: FastifyInstance
           parsed.data.orgDigestEmailWeekly ?? existing?.orgDigestEmailWeekly ?? true,
         pinnedDigestEmailWeekly:
           parsed.data.pinnedDigestEmailWeekly ?? existing?.pinnedDigestEmailWeekly ?? true,
+        pushEnabled: parsed.data.pushEnabled ?? existing?.pushEnabled ?? false,
         pushHubAnnouncements:
-          parsed.data.pushHubAnnouncements ?? existing?.pushHubAnnouncements ?? true,
-        pushHubChat: parsed.data.pushHubChat ?? existing?.pushHubChat ?? true,
+          parsed.data.pushHubAnnouncements ?? existing?.pushHubAnnouncements ?? false,
+        pushHubChat: parsed.data.pushHubChat ?? existing?.pushHubChat ?? false,
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
@@ -98,21 +102,26 @@ export async function registerNotificationPreferencesRoutes(app: FastifyInstance
           ...(parsed.data.pinnedDigestEmailWeekly !== undefined ?
             { pinnedDigestEmailWeekly: parsed.data.pinnedDigestEmailWeekly }
           : {}),
+          ...(parsed.data.pushEnabled !== undefined ? { pushEnabled: parsed.data.pushEnabled } : {}),
           ...(parsed.data.pushHubAnnouncements !== undefined ?
             { pushHubAnnouncements: parsed.data.pushHubAnnouncements }
           : {}),
-          ...(parsed.data.pushHubChat !== undefined ?
-            { pushHubChat: parsed.data.pushHubChat }
-          : {}),
+          ...(parsed.data.pushHubChat !== undefined ? { pushHubChat: parsed.data.pushHubChat } : {}),
           updatedAt: new Date(),
         },
       })
       .returning()
+
+    if (parsed.data.pushEnabled === false) {
+      await db.delete(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.userId, actor.userId))
+    }
+
     return reply.send({
       orgDigestEmailWeekly: row?.orgDigestEmailWeekly ?? true,
       pinnedDigestEmailWeekly: row?.pinnedDigestEmailWeekly ?? true,
-      pushHubAnnouncements: row?.pushHubAnnouncements ?? true,
-      pushHubChat: row?.pushHubChat ?? true,
+      pushEnabled: row?.pushEnabled ?? false,
+      pushHubAnnouncements: row?.pushHubAnnouncements ?? false,
+      pushHubChat: row?.pushHubChat ?? false,
     })
   })
 }

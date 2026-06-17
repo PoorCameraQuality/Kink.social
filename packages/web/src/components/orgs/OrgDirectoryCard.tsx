@@ -34,6 +34,8 @@ function regionDisplay(region: string | null): string | null {
 type Props = {
   org: OrgDirectoryModel
   canManage: boolean
+  /** Tighter layout for Explore hub tiles. */
+  compact?: boolean
 }
 
 function StatItem({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
@@ -47,7 +49,7 @@ function StatItem({ icon, children }: { icon: React.ReactNode; children: React.R
   )
 }
 
-export default function OrgDirectoryCard({ org, canManage }: Props) {
+export default function OrgDirectoryCard({ org, canManage, compact = false }: Props) {
   const publicHref = `/orgs/${encodeURIComponent(org.slug)}`
   const consoleHref = `/organizer/orgs/${encodeURIComponent(org.slug)}`
   const preview = bioPreview(org)
@@ -60,11 +62,13 @@ export default function OrgDirectoryCard({ org, canManage }: Props) {
     'inline-flex min-h-9 flex-1 items-center justify-center rounded-lg bg-dc-accent px-2.5 text-xs font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover'
 
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)] transition-colors hover:border-dc-accent-border/40">
+    <article
+      className={`flex flex-col rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)] transition-colors hover:border-dc-accent-border/40 ${compact ? 'p-3' : 'p-4'}`}
+    >
       <div className="flex gap-3">
         {org.logoUrl ?
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/95 p-1 ring-1 ring-dc-border/60">
-            <img src={org.logoUrl} alt="" className="h-full w-full object-contain" loading="lazy" decoding="async" />
+          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-dc-border/60">
+            <img src={org.logoUrl} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
           </div>
         : <div
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-dc-accent-muted text-xs font-bold text-dc-accent"
@@ -107,10 +111,13 @@ export default function OrgDirectoryCard({ org, canManage }: Props) {
       : null}
 
       {preview ?
-        <p className="mt-2 text-xs leading-relaxed text-dc-text-muted line-clamp-3">{preview}</p>
+        <p className={`mt-2 leading-relaxed text-dc-text-muted ${compact ? 'text-xs line-clamp-2' : 'text-xs line-clamp-3'}`}>
+          {preview}
+        </p>
       : null}
 
-      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1">
+      {!compact ?
+        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1">
         <StatItem
           icon={
             <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
@@ -152,10 +159,11 @@ export default function OrgDirectoryCard({ org, canManage }: Props) {
           </StatItem>
         : null}
       </div>
+      : null}
 
       {org.badges.length > 0 ?
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {org.badges.map((badge) => (
+        <div className={`flex flex-wrap gap-1.5 ${compact ? 'mt-2' : 'mt-2.5'}`}>
+          {(compact ? org.badges.slice(0, 2) : org.badges).map((badge) => (
             <span
               key={badge.id}
               className={`inline-flex rounded-md border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${BADGE_CLASS[badge.tone] ?? BADGE_CLASS.muted}`}
@@ -166,7 +174,7 @@ export default function OrgDirectoryCard({ org, canManage }: Props) {
         </div>
       : null}
 
-      <div className="mt-auto flex gap-2 pt-4">
+      <div className={`flex gap-2 ${compact ? 'mt-3 flex-col sm:flex-row' : 'mt-auto pt-4'}`}>
         {canManage ?
           <>
             <Link to={consoleHref} className={solidBtn}>

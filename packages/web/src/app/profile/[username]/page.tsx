@@ -18,6 +18,7 @@ import { ADULT_CONTENT_PREFERENCES, formatPronounDisplay, normalizeProfilePhotoD
 import { shouldBlurMediaForViewer } from '@/lib/media-visibility'
 import ProfileExtendedSection from '@/components/profile/ProfileExtendedSection'
 import ProfileWritingTab from '@/components/profile/tabs/ProfileWritingTab'
+import ProfileCommunityTab from '@/components/profile/tabs/ProfileCommunityTab'
 import ProfileReviewsTab from '@/components/profile/tabs/ProfileReviewsTab'
 import ProfileIsoTab from '@/components/profile/tabs/ProfileIsoTab'
 import ProfileConnectionsTab from '@/components/profile/tabs/ProfileConnectionsTab'
@@ -38,6 +39,7 @@ import { PROFILE_MEDIA_GALLERY_ID, scrollToProfileMediaGallery } from '@/lib/pro
 import {
   DEFAULT_PUBLIC_PROFILE_TAB,
   getVisiblePublicProfileTabs,
+  type CommunitySection,
   type PublicProfileTab,
   type PublicProfileTabCounts,
 } from '@/lib/public-profile-tabs'
@@ -133,15 +135,22 @@ export default function ProfileUsernamePage() {
   const [publicRelationships, setPublicRelationships] = useState<PublicRelationshipItem[]>([])
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const [activeTab, setActiveTabState] = usePublicProfileTabFromUrl()
+  const [activeTab, setActiveTabState, communitySection] = usePublicProfileTabFromUrl()
   const [journalArticles, setJournalArticles] = useState<ApiEducationArticle[]>([])
   const [journalLoading, setJournalLoading] = useState(false)
   const selectTab = useCallback(
-    (tab: PublicProfileTab) => {
+    (tab: PublicProfileTab, section?: CommunitySection) => {
       setActiveTabState(tab)
-      navigate(`${pathname}?tab=${encodeURIComponent(tab)}`)
+      const params = new URLSearchParams()
+      params.set('tab', tab)
+      if (tab === 'Community' && section) params.set('section', section)
+      navigate(`${pathname}?${params.toString()}`)
     },
     [pathname, navigate, setActiveTabState],
+  )
+  const selectCommunitySection = useCallback(
+    (section: CommunitySection) => selectTab('Community', section),
+    [selectTab],
   )
   const openPhotoGallery = useCallback(() => {
     selectTab('Media')
@@ -376,6 +385,12 @@ export default function ProfileUsernamePage() {
   }, [loadPublicProfile])
 
   useEffect(() => {
+    const onPrivacySaved = () => void loadPublicProfile()
+    window.addEventListener('c2k:profile-privacy-saved', onPrivacySaved)
+    return () => window.removeEventListener('c2k:profile-privacy-saved', onPrivacySaved)
+  }, [loadPublicProfile])
+
+  useEffect(() => {
     if (!username) return
     let cancelled = false
     void (async () => {
@@ -588,8 +603,25 @@ export default function ProfileUsernamePage() {
   const profileTabCounts = useMemo((): PublicProfileTabCounts | undefined => {
     const count = connectionsSummary?.totalCount
     if (count == null) return undefined
-    return { Connections: count }
+    return { Community: count }
   }, [connectionsSummary?.totalCount])
+
+  const communityVisibleSections = useMemo((): CommunitySection[] => {
+    if (viewerIsSelf) return ['relationships', 'connections', 'feedback']
+    const sections: CommunitySection[] = []
+    if (publicRelationships.length > 0) sections.push('relationships')
+    if (connectionsSummary?.listVisible && (connectionsSummary?.totalCount ?? 0) > 0) {
+      sections.push('connections')
+    }
+    if (displayReferences.length > 0) sections.push('feedback')
+    return sections
+  }, [
+    viewerIsSelf,
+    publicRelationships.length,
+    connectionsSummary?.listVisible,
+    connectionsSummary?.totalCount,
+    displayReferences.length,
+  ])
 
   const visibleTabs = useMemo(
     () => getVisiblePublicProfileTabs(tabVisibility),
@@ -664,7 +696,7 @@ export default function ProfileUsernamePage() {
       alerts={
         viewerIsSelf ?
           <p
-            className="mb-6 rounded-2xl bg-dc-accent/[0.06] px-4 py-3.5 text-sm leading-relaxed text-dc-text-muted ring-1 ring-inset ring-dc-accent/15 lg:col-span-full"
+            className="mb-6 rounded-2xl bg-dc-accent/[0.06] px-4 py-3.5 text-sm leading-relaxed text-dc-text-muted ring-1 ring-inset ring-dc-accent/15"
             role="status"
           >
             You are viewing your <strong className="text-dc-text">public profile</strong>. What others see on Kink Social.
@@ -703,7 +735,7 @@ export default function ProfileUsernamePage() {
             pronounTags: publicProfile?.profile?.pronounTags ?? undefined,
             relationshipsCount: viewerIsSelf ? publicRelationships.length : undefined,
             canOfferReference: !viewerIsSelf && isAuthenticated && !viewerHasPendingOrAccepted,
-            onAddReference: () => selectTab('Reviews'),
+            onAddReference: () => selectTab('Community', 'feedback'),
             heroActions: profileHeroActions,
           }).cover}
         />
@@ -738,7 +770,7 @@ export default function ProfileUsernamePage() {
           pronounTags={publicProfile?.profile?.pronounTags ?? undefined}
           relationshipsCount={viewerIsSelf ? publicRelationships.length : undefined}
           canOfferReference={!viewerIsSelf && isAuthenticated && !viewerHasPendingOrAccepted}
-          onAddReference={() => selectTab('Reviews')}
+          onAddReference={() => selectTab('Community', 'feedback')}
           heroActions={profileHeroActions}
         />
       }
@@ -764,7 +796,7 @@ export default function ProfileUsernamePage() {
             pronounTags: publicProfile?.profile?.pronounTags ?? undefined,
             relationshipsCount: viewerIsSelf ? publicRelationships.length : undefined,
             canOfferReference: !viewerIsSelf && isAuthenticated && !viewerHasPendingOrAccepted,
-            onAddReference: () => selectTab('Reviews'),
+            onAddReference: () => selectTab('Community', 'feedback'),
             heroActions: profileHeroActions,
           }).sidebar}
         />
@@ -778,23 +810,52 @@ export default function ProfileUsernamePage() {
           onSelect={selectTab}
           tabCounts={profileTabCounts}
         >
-            {activeTab === 'Relationships' && (
-              <ProfileRelationshipsList relationships={publicRelationships} title="Relationships & D/s" />
-            )}
-
-            {activeTab === 'Connections' && (
-              <ProfileConnectionsTab
-                username={username}
-                listVisible={viewerIsSelf || (connectionsSummary?.listVisible ?? false)}
-                totalCount={connectionsSummary?.totalCount ?? 0}
-                mutualCount={connectionsSummary?.mutualCount ?? null}
-                viewerIsOwner={viewerIsSelf}
+            {activeTab === 'Community' && (
+              <ProfileCommunityTab
+                activeSection={communitySection}
+                onSectionChange={selectCommunitySection}
+                visibleSections={communityVisibleSections}
+                relationships={
+                  <ProfileRelationshipsList relationships={publicRelationships} title="Relationships & D/s" />
+                }
+                connections={
+                  <ProfileConnectionsTab
+                    username={username}
+                    listVisible={viewerIsSelf || (connectionsSummary?.listVisible ?? false)}
+                    totalCount={connectionsSummary?.totalCount ?? 0}
+                    mutualCount={connectionsSummary?.mutualCount ?? null}
+                    viewerIsOwner={viewerIsSelf}
+                  />
+                }
+                feedback={
+                  <ProfileReviewsTab
+                    viewerIsOwner={viewerIsSelf}
+                    username={username}
+                    viewerUsername={viewerUsername}
+                    isAuthenticated={isAuthenticated}
+                    references={displayReferences}
+                    incoming={incoming}
+                    loading={refLoading}
+                    viewerHasPendingOrAccepted={viewerHasPendingOrAccepted}
+                    refCategory={refCategory}
+                    refNote={refNote}
+                    refNoteId={refNoteId}
+                    onRefCategoryChange={setRefCategory}
+                    onRefNoteChange={setRefNote}
+                    onOfferReference={() => void offerReference()}
+                    onRespondIncoming={(id, action) => void respondIncoming(id, action)}
+                  />
+                }
               />
             )}
 
             {activeTab === 'Media' && (
               <ProfileMediaTabPanel
                 id={PROFILE_MEDIA_GALLERY_ID}
+                username={username}
+                apiBacked={apiBackedPublicProfile}
+                viewerIsOwner={viewerIsSelf}
+                mediaViewer={mediaViewer}
                 writing={
                   <ProfileWritingTab
                     viewerIsOwner={viewerIsSelf}
@@ -805,7 +866,7 @@ export default function ProfileUsernamePage() {
                     formatTeachingDate={formatTeachingCreditDate}
                   />
                 }
-                photos={
+                profilePhotosSlot={
                   viewerIsSelf && isAuthenticated && !isFallback ?
                     <ProfilePhotoManager apiBacked embedded onPhotosChanged={() => void loadPublicProfile()} />
                   : displayPhotos.length === 0 ?
@@ -834,26 +895,6 @@ export default function ProfileUsernamePage() {
                       }
                     />
                 }
-              />
-            )}
-
-            {activeTab === 'Reviews' && (
-              <ProfileReviewsTab
-                viewerIsOwner={viewerIsSelf}
-                username={username}
-                viewerUsername={viewerUsername}
-                isAuthenticated={isAuthenticated}
-                references={displayReferences}
-                incoming={incoming}
-                loading={refLoading}
-                viewerHasPendingOrAccepted={viewerHasPendingOrAccepted}
-                refCategory={refCategory}
-                refNote={refNote}
-                refNoteId={refNoteId}
-                onRefCategoryChange={setRefCategory}
-                onRefNoteChange={setRefNote}
-                onOfferReference={() => void offerReference()}
-                onRespondIncoming={(id, action) => void respondIncoming(id, action)}
               />
             )}
 

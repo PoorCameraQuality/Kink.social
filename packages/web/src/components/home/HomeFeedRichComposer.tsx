@@ -27,14 +27,19 @@ import PostComposerModeBar from '@/components/home/PostComposerModeBar'
 import FeedComposerQuickActions from '@/components/home/FeedComposerQuickActions'
 
 import Button from '@/components/ui/Button'
-
 import Card from '@/components/ui/Card'
+import { cardSurfaceFeedActivityClass } from '@/lib/card-surface'
 
 import StatusBanner from '@/components/ui/StatusBanner'
 
 
 import type { FeedAttachment, FeedMention } from '@/lib/feed-types'
 import { uploadMediaFile } from '@/lib/upload-media'
+
+function feedAttachmentKey(a: FeedAttachment): string {
+  if (a.type === 'media') return `${a.type}:${a.mediaItemId}`
+  return `${a.type}:${a.url}`
+}
 
 
 
@@ -91,6 +96,7 @@ export default function HomeFeedRichComposer({
 }: Props) {
 
   const [focused, setFocused] = useState(false)
+  const [hasDraft, setHasDraft] = useState(false)
   const [postError, setPostError] = useState<string | null>(null)
 
   const [posting, setPosting] = useState(false)
@@ -262,6 +268,12 @@ export default function HomeFeedRichComposer({
     ],
 
     content: '',
+
+    onUpdate: ({ editor: ed }) => {
+      const text = ed.getText().trim()
+      const hasImg = ed.getHTML().includes('<img')
+      setHasDraft(Boolean(text || hasImg))
+    },
 
     editorProps: {
 
@@ -440,7 +452,7 @@ export default function HomeFeedRichComposer({
 
     for (const a of extraAttachments) {
 
-      const key = `${a.type}:${a.url}`
+      const key = feedAttachmentKey(a)
 
       if (seen.has(key)) continue
 
@@ -491,6 +503,7 @@ export default function HomeFeedRichComposer({
       editor.commands.clearContent()
 
       setExtraAttachments([])
+      setHasDraft(false)
 
       onPosted()
 
@@ -526,7 +539,7 @@ export default function HomeFeedRichComposer({
 
       {!showQuickActions ? <PostComposerModeBar /> : null}
 
-      <Card padding="none" className="overflow-hidden border-dc-border bg-[var(--dc-input)]">
+      <Card padding="none" className={`overflow-hidden ring-1 ring-dc-border/40 ${cardSurfaceFeedActivityClass}`}>
 
         <EditorContent editor={editor} />
 
@@ -551,7 +564,7 @@ export default function HomeFeedRichComposer({
 
             <li
 
-              key={`${a.type}-${a.url}-${i}`}
+              key={`${feedAttachmentKey(a)}-${i}`}
 
               className="inline-flex items-center gap-1 rounded-md border border-dc-border bg-dc-elevated-muted px-2 py-1"
 
@@ -589,7 +602,7 @@ export default function HomeFeedRichComposer({
 
       <div className="flex flex-wrap items-center justify-between gap-2">
 
-        {shellMode && !focused ?
+        {shellMode && !focused && !hasDraft ?
           null
         : shellMode === 'mobile' ?
           null
@@ -715,8 +728,15 @@ export default function HomeFeedRichComposer({
 
         </div>}
 
-        {(!shellMode || shellMode === 'mobile' || focused) && (
-          <Button type="button" variant="primary" disabled={posting} onClick={() => void submit()} className="ml-auto shrink-0">
+        {(!shellMode || shellMode === 'mobile' || focused || hasDraft) && (
+          <Button
+            type="button"
+            variant="primary"
+            disabled={posting}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => void submit()}
+            className="ml-auto shrink-0"
+          >
 
             {posting ? 'Posting…' : 'Post'}
 

@@ -69,6 +69,7 @@ export default function EducationDiscoverCenter({
 }: Props) {
   const articlesOnly = variant === 'articles-only'
   const showMockOverview = !apiBacked && !articlesOnly
+  const showLearningPaths = learningPaths.length > 0 && (apiBacked || showMockOverview)
   const sortedCatalogue = useMemo(() => {
     return [...catalogueArticles].sort((a, b) => {
       const ta = a.publishedAt ? new Date(a.publishedAt).getTime() : 0
@@ -89,24 +90,35 @@ export default function EducationDiscoverCenter({
                 Learning paths, featured educators, and video strips below use preview content. Article catalogue is live when
                 signed in.
               </p>
-              <EducationLearningPaths paths={learningPaths} />
+              {showLearningPaths ?
+                <EducationLearningPaths paths={learningPaths} />
+              : null}
               <EducationFeaturedEducators educators={educators} />
             </>
-          : null}
+          : <>
+              {showLearningPaths ?
+                <EducationLearningPaths paths={learningPaths} />
+              : null}
+              {educators.length > 0 ?
+                <EducationFeaturedEducators educators={educators} />
+              : null}
+            </>}
 
           <EducationDiscoverSection title="Trending Articles" viewAllHref="/education?view=articles">
-            <div className="c2k-snap-carousel">
-              <div className="c2k-snap-carousel__track">
-                {trending.map((article) => (
-                  <EducationArticleStripCard key={article.slug} article={article} />
-                ))}
+            {trending.length > 0 ?
+              <div className="c2k-snap-carousel">
+                <div className="c2k-snap-carousel__track">
+                  {trending.map((article) => (
+                    <EducationArticleStripCard key={article.slug} article={article} />
+                  ))}
+                </div>
+                <div className="c2k-snap-carousel__fade" aria-hidden />
               </div>
-              <div className="c2k-snap-carousel__fade" aria-hidden />
-            </div>
+            : <p className="text-sm text-dc-text-muted">No articles match this filter yet.</p>}
           </EducationDiscoverSection>
 
           {videos.length > 0 ?
-            <EducationDiscoverSection title="Popular Videos" viewAllHref="/media?format=video">
+            <EducationDiscoverSection title="Popular Videos" viewAllHref="/education?view=videos">
               <div className="c2k-snap-carousel">
                 <div className="c2k-snap-carousel__track">
                   {videos.map((video) => (
@@ -217,7 +229,13 @@ export default function EducationDiscoverCenter({
             role="status"
           >
             <p className="text-lg font-semibold text-dc-text">No articles found</p>
-            <p className="mt-2 text-sm text-dc-text-muted">Try another category or search with different keywords.</p>
+            <p className="mt-2 text-sm text-dc-text-muted">
+              {hasActiveFilters ?
+                'Try another category or search with different keywords.'
+              : catalogueError ?
+                'The article catalogue could not be loaded.'
+              : 'Nothing is listed on the education hub yet. Published articles with “List in education hub” appear here.'}
+            </p>
             {hasActiveFilters ?
               <button
                 type="button"

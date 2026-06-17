@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
       setMessage(
         typeof data.message === 'string'
           ? data.message
-          : 'If an account matches that information, you will receive password reset instructions shortly.',
+          : 'If an account matches that information, you will receive password recovery instructions shortly.',
       )
     } catch {
       setError('Network error. Try again.')
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
     <main className="mx-auto max-w-md px-4 py-16">
       <h1 className="text-2xl font-semibold text-dc-text">Reset password</h1>
       <p className="mt-2 text-sm text-dc-text-muted">
-        Enter your email or username. We will send reset instructions if an account exists.
+        Enter your email or username. We will send recovery instructions if an account exists.
       </p>
       <form className="mt-6 space-y-4" onSubmit={onSubmit} noValidate>
         <div>

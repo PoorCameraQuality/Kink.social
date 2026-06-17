@@ -1,8 +1,7 @@
-import type { FeedReactionId } from '@c2k/shared'
+import type { FeedReactionId, AlphaContentLabel, FeedAttachment } from '@c2k/shared'
 import type { FeedReactionCounts } from '@/hooks/useFeedPostReactions'
 
-export type FeedAttachment = { type: 'image' | 'audio'; url: string }
-
+export type { FeedAttachment }
 export type FeedMention = { type: string; id?: string; slug?: string; label: string }
 
 export type ConnectionLikerPreview = { username: string; avatarUrl?: string | null }
@@ -31,6 +30,7 @@ export type HomeFeedPost = {
   connectionLikerPreview?: ConnectionLikerPreview[]
   comments: number
   source: 'api' | 'mock'
+  alphaLabel?: AlphaContentLabel
 }
 
 export type FollowingFeedActor = {
@@ -49,6 +49,21 @@ export type ApiFollowingFeedItem = {
   actor: FollowingFeedActor
   object?: Record<string, unknown>
   post?: Record<string, unknown>
+}
+
+export type ApiFeedHomeCard = {
+  id: string
+  cardType: 'post' | 'activity'
+  layout: 'full' | 'compact'
+  cursor: string
+  createdAt: string
+  deepLink: string
+  actor: FollowingFeedActor
+  verb?: string
+  post?: Record<string, unknown>
+  object?: Record<string, unknown>
+  reasonText?: string | null
+  alphaLabel?: AlphaContentLabel | null
 }
 
 export type FollowingFeedItem =

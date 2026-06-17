@@ -1,15 +1,19 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
-import { APP_NAME } from '@c2k/shared'
 import bcrypt from 'bcryptjs'
 import { and, eq, gt, isNull } from 'drizzle-orm'
 import type { FastifyRequest } from 'fastify'
 import { db, schema } from '../db/index.js'
 import { clientIpLabel } from './client-ip.js'
+import {
+  mailProductName,
+  passwordChangedEmailSubject,
+  passwordResetEmailSubject,
+} from './mail-branding.js'
 import { sendEmail } from './mailer.js'
 import { findUserByEmailLookup, getEmailFromUserRow } from './user-email.js'
 
 export const PASSWORD_RESET_GENERIC_MESSAGE =
-  'If an account matches that information, you will receive password reset instructions shortly.'
+  'If an account matches that information, you will receive password recovery instructions shortly.'
 
 const TOKEN_TTL_MS = Number(process.env.C2K_PASSWORD_RESET_TTL_MS ?? 45 * 60 * 1000)
 
@@ -32,32 +36,35 @@ export function buildPasswordResetLink(rawToken: string): string {
 
 export function buildPasswordResetEmail(rawToken: string): { subject: string; text: string; html: string } {
   const link = buildPasswordResetLink(rawToken)
-  const subject = `${APP_NAME} password reset`
+  const product = mailProductName()
+  const subject = passwordResetEmailSubject()
+  const ttlMinutes = Math.round(TOKEN_TTL_MS / 60_000)
   const text = [
-    `We received a request to reset your ${APP_NAME} password.`,
+    `We received a request to recover your ${product} password.`,
     '',
-    `Reset your password (link expires in about ${Math.round(TOKEN_TTL_MS / 60_000)} minutes):`,
+    `Recover your password (link expires in about ${ttlMinutes} minutes):`,
     link,
     '',
     'If you did not request this, you can ignore this email.',
   ].join('\n')
   const html = [
-    `<p>We received a request to reset your ${APP_NAME} password.</p>`,
-    `<p><a href="${link}">Reset your password</a> (link expires in about ${Math.round(TOKEN_TTL_MS / 60_000)} minutes).</p>`,
+    `<p>We received a request to recover your ${product} password.</p>`,
+    `<p><a href="${link}">Recover your password</a> (link expires in about ${ttlMinutes} minutes).</p>`,
     '<p>If you did not request this, you can ignore this email.</p>',
   ].join('')
   return { subject, text, html }
 }
 
 export function buildPasswordChangedEmail(): { subject: string; text: string; html: string } {
-  const subject = `${APP_NAME} password changed`
+  const product = mailProductName()
+  const subject = passwordChangedEmailSubject()
   const text = [
-    `Your ${APP_NAME} password was changed.`,
+    `Your ${product} password was changed.`,
     '',
     'If you did not make this change, contact support immediately.',
   ].join('\n')
   const html = [
-    `<p>Your ${APP_NAME} password was changed.</p>`,
+    `<p>Your ${product} password was changed.</p>`,
     '<p>If you did not make this change, contact support immediately.</p>',
   ].join('')
   return { subject, text, html }
@@ -116,6 +123,8 @@ export async function requestPasswordReset(input: {
       subject: emailContent.subject,
       text: emailContent.text,
       html: emailContent.html,
+      sensitive: true,
+      category: 'password_reset',
     })
     if (!sent.ok) {
       input.log.warn({ err: sent.error, userId: user.id }, 'password reset email failed')
@@ -183,6 +192,8 @@ export async function confirmPasswordReset(input: {
       subject: changed.subject,
       text: changed.text,
       html: changed.html,
+      sensitive: true,
+      category: 'password_changed',
     })
     if (!sent.ok) {
       input.log.warn({ err: sent.error, userId: row.userId }, 'password changed email failed')

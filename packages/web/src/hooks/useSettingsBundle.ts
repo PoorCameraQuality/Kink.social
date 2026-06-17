@@ -101,7 +101,7 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
     setProfSectionLoading(true)
     void (async () => {
       try {
-        const r = await fetch(`/api/profile/${encodeURIComponent(viewerUsername)}`, { credentials: 'include' })
+        const r = await fetch('/api/profile/me', { credentials: 'include' })
         if (cancelled) return
         if (!r.ok) {
           setProfSectionLoading(false)
@@ -116,12 +116,15 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
             customLocation?: string | null
             displayName?: string | null
           } | null
+          customLocation?: string | null
+          location?: string | null
+          displayName?: string | null
         }
-        if (data.profile) {
-          const p = data.profile
+        const p = data.profile
+        if (p) {
           setProfGender(p.gender ?? '')
-          setProfLocationLabel(p.customLocation ?? p.location ?? null)
-          setProfDisplayName(p.displayName ?? null)
+          setProfLocationLabel(p.customLocation ?? data.customLocation ?? p.location ?? data.location ?? null)
+          setProfDisplayName(p.displayName ?? data.displayName ?? null)
           setProfDiscoverable(p.discoverableInPeopleSearch !== false)
           const m = parseProfileFieldVisibility(p.fieldVisibility)
           setFvGender(m.gender ?? 'public')
@@ -140,6 +143,30 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
       cancelled = true
     }
   }, [loadState, enabled, viewerUsername])
+
+  const patchProfilePrivacy = useCallback(async (): Promise<string | null> => {
+    const r = await fetch('/api/profile/me', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        discoverableInPeopleSearch: profDiscoverable,
+        fieldVisibility: {
+          gender: fvGender,
+          age: fvAge,
+          sexuality: fvSexuality,
+          pronouns: fvPronouns,
+          location: fvLocation,
+        },
+      }),
+    })
+    const data = (await r.json()) as { error?: string }
+    if (!r.ok) {
+      return typeof data.error === 'string' ? data.error : 'Profile privacy save failed'
+    }
+    window.dispatchEvent(new Event('c2k:profile-privacy-saved'))
+    return null
+  }, [profDiscoverable, fvGender, fvAge, fvSexuality, fvPronouns, fvLocation])
 
   useEffect(() => {
     if (loadState !== 'ready' || !enabled) {
@@ -200,6 +227,11 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
       } catch {
         /* digest/push columns also stored on preferences row */
       }
+      const profilePrivacyError = await patchProfilePrivacy()
+      if (profilePrivacyError) {
+        setSaveError(profilePrivacyError)
+        return
+      }
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
@@ -207,42 +239,26 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
     } finally {
       setSaving(false)
     }
-  }, [privacy, notifications, feed])
+  }, [privacy, notifications, feed, patchProfilePrivacy])
 
   const saveProfilePrivacy = useCallback(async () => {
     setProfPrivacyError(null)
     setProfPrivacySaving(true)
     setProfPrivacySaved(false)
     try {
-      const r = await fetch('/api/profile/me', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          discoverableInPeopleSearch: profDiscoverable,
-          fieldVisibility: {
-            gender: fvGender,
-            age: fvAge,
-            sexuality: fvSexuality,
-            pronouns: fvPronouns,
-            location: fvLocation,
-          },
-        }),
-      })
-      const data = (await r.json()) as { error?: string }
-      if (!r.ok) {
-        setProfPrivacyError(typeof data.error === 'string' ? data.error : 'Save failed')
+      const error = await patchProfilePrivacy()
+      if (error) {
+        setProfPrivacyError(error)
         return
       }
       setProfPrivacySaved(true)
-      window.dispatchEvent(new Event('c2k:profile-privacy-saved'))
       setTimeout(() => setProfPrivacySaved(false), 2000)
     } catch {
       setProfPrivacyError('Network error')
     } finally {
       setProfPrivacySaving(false)
     }
-  }, [profGender, profDiscoverable, fvGender, fvAge, fvSexuality, fvPronouns, fvLocation])
+  }, [patchProfilePrivacy])
 
   const bundleReady = privacy !== null && notifications !== null && feed !== null
 

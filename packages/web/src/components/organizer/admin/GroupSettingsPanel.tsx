@@ -24,10 +24,12 @@ type GroupRecord = {
 type Props = {
   groupId: string
   onGroupUpdated?: (group: GroupRecord) => void
+  /** Render inside organizer settings shell (no duplicate page chrome). */
+  embedded?: boolean
 }
 
 const inputClass =
-  'w-full min-h-10 rounded-xl border border-dc-border bg-dc-surface-muted px-3 py-2 text-sm text-dc-text placeholder:text-dc-muted'
+  'w-full min-h-10 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 py-2 text-sm text-dc-text placeholder:text-dc-muted focus:border-dc-accent focus:outline-none focus:ring-2 focus:ring-dc-accent/30'
 
 const VISIBILITY_OPTIONS = [
   { value: 'public', label: 'Public' },
@@ -36,7 +38,7 @@ const VISIBILITY_OPTIONS = [
   { value: 'owner_absent', label: 'Owner absent (restricted)' },
 ] as const
 
-export default function GroupSettingsPanel({ groupId, onGroupUpdated }: Props) {
+export default function GroupSettingsPanel({ groupId, onGroupUpdated, embedded = false }: Props) {
   const [name, setName] = useState('')
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
@@ -143,49 +145,45 @@ export default function GroupSettingsPanel({ groupId, onGroupUpdated }: Props) {
 
   const msgIsError = Boolean(msg && /fail|error|could not|network|not available|required/i.test(msg))
 
-  return (
-    <div className="space-y-4 max-w-3xl">
-      <OrganizerPanel
-        title="Group metadata"
-        description="Name, category, description, and visibility shown on discovery and the public group page."
-      >
-        {loadError ?
-          <div
-            className="rounded-xl border border-red-500/30 bg-red-950/25 px-3 py-2 text-sm text-red-200"
-            role="alert"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <p className="flex-1">{loadError}</p>
-              <button
-                type="button"
-                onClick={() => void loadGroup()}
-                className="min-h-10 shrink-0 rounded-xl border border-dc-border px-3 text-sm text-dc-text hover:bg-dc-elevated-muted"
-              >
-                Retry
-              </button>
-            </div>
+  const formBody = (
+    <>
+      {loadError ?
+        <div
+          className="rounded-xl border border-red-500/30 bg-red-950/25 px-3 py-2 text-sm text-red-200"
+          role="alert"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <p className="flex-1">{loadError}</p>
+            <button
+              type="button"
+              onClick={() => void loadGroup()}
+              className="min-h-10 shrink-0 rounded-xl border border-dc-border px-3 text-sm text-dc-text hover:bg-dc-elevated-muted"
+            >
+              Retry
+            </button>
           </div>
-        : null}
+        </div>
+      : null}
 
-        {msg ?
-          <div
-            className={`text-sm rounded-xl border px-3 py-2 ${
-              msgIsError ?
-                'border-amber-500/30 bg-amber-950/25 text-amber-100'
-              : 'border-emerald-500/30 bg-emerald-950/30 text-emerald-100'
-            }`}
-            role={msgIsError ? 'alert' : 'status'}
-          >
-            {msg}
-          </div>
-        : null}
+      {msg ?
+        <div
+          className={`text-sm rounded-xl border px-3 py-2 ${
+            msgIsError ?
+              'border-amber-500/30 bg-amber-950/25 text-amber-100'
+            : 'border-emerald-500/30 bg-emerald-950/30 text-emerald-100'
+          }`}
+          role={msgIsError ? 'alert' : 'status'}
+        >
+          {msg}
+        </div>
+      : null}
 
-        {!loadAttempted ?
-          <div className="h-32 animate-pulse rounded-xl bg-dc-elevated-muted" aria-busy="true" />
-        : null}
+      {!loadAttempted ?
+        <div className="h-32 animate-pulse rounded-xl bg-dc-elevated-muted" aria-busy="true" />
+      : null}
 
-        {loadAttempted && !loadError ?
-          <form onSubmit={saveSettings} className="space-y-0">
+      {loadAttempted && !loadError ?
+        <form onSubmit={saveSettings} className="space-y-0">
             <OrganizerFormSection title="Basics">
               <label className="block space-y-1">
                 <span className="text-xs text-dc-muted">Group name</span>
@@ -335,17 +333,41 @@ export default function GroupSettingsPanel({ groupId, onGroupUpdated }: Props) {
               </div>
             </OrganizerFormSection>
 
-            <div className="pt-2">
+            <div className="sticky bottom-0 z-10 -mx-1 mt-6 border-t border-dc-border bg-[var(--organizer-panel-bg)]/95 px-1 py-4 backdrop-blur-sm sm:-mx-2">
               <button
                 type="submit"
                 disabled={saving || !name.trim()}
-                className="min-h-10 rounded-xl bg-dc-accent px-4 text-sm font-medium text-dc-text disabled:opacity-50"
+                className="min-h-11 rounded-xl bg-dc-accent px-5 text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover disabled:opacity-50"
               >
-                {saving ? 'Saving…' : 'Save settings'}
+                {saving ? 'Saving…' : 'Save metadata'}
               </button>
             </div>
           </form>
         : null}
+    </>
+  )
+
+  if (embedded) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold text-dc-text">Metadata &amp; discovery</h3>
+          <p className="mt-1 text-sm text-dc-text-muted">
+            Name, category, description, visibility, region, and tags shown on discovery and the public group page.
+          </p>
+        </div>
+        {formBody}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4 max-w-3xl">
+      <OrganizerPanel
+        title="Group metadata"
+        description="Name, category, description, and visibility shown on discovery and the public group page."
+      >
+        {formBody}
       </OrganizerPanel>
     </div>
   )

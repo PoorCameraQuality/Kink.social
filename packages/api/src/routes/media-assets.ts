@@ -72,9 +72,10 @@ export async function registerMediaAssetRoutes(app: FastifyInstance) {
     if (parsed.data.ownerType !== 'profile') {
       return reply.status(400).send({ error: 'Unsupported owner or surface for this endpoint' })
     }
+    const allowedSurfaces = new Set(['profile_gallery', 'profile_photo', 'profile_media', 'feed_upload'])
     const sourceSurface =
       parsed.data.sourceSurface === 'profile_photo' ? 'profile_gallery' : parsed.data.sourceSurface
-    if (sourceSurface !== 'profile_gallery') {
+    if (!allowedSurfaces.has(sourceSurface)) {
       return reply.status(400).send({ error: 'Unsupported owner or surface for this endpoint' })
     }
     const quarantineKey = parsed.data.storageKey ?? parsed.data.url

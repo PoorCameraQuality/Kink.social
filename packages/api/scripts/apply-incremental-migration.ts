@@ -1353,6 +1353,249 @@ CREATE TABLE IF NOT EXISTS presenter_profile_focuses (
 CREATE INDEX IF NOT EXISTS presenter_profile_focuses_user_idx ON presenter_profile_focuses (user_id);
 
 ALTER TABLE profile_photos ADD COLUMN IF NOT EXISTS display_settings jsonb;
+
+CREATE TABLE IF NOT EXISTS alpha_seed_batches (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_key varchar(128) NOT NULL UNIQUE,
+  source_name varchar(255) NOT NULL,
+  source_url text,
+  source_repo text,
+  notes text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS alpha_seed_batches_created_idx ON alpha_seed_batches (created_at);
+
+CREATE TABLE IF NOT EXISTS alpha_seed_items (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_id uuid NOT NULL REFERENCES alpha_seed_batches(id) ON DELETE CASCADE,
+  target_type varchar(64) NOT NULL,
+  target_id text NOT NULL,
+  source_type varchar(64),
+  source_slug varchar(255),
+  label_text varchar(64) NOT NULL DEFAULT 'ALPHA TEST',
+  is_synthetic boolean NOT NULL DEFAULT false,
+  is_public_source boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT alpha_seed_items_batch_target_uq UNIQUE (batch_id, target_type, target_id)
+);
+CREATE INDEX IF NOT EXISTS alpha_seed_items_target_idx ON alpha_seed_items (target_type, target_id);
+CREATE INDEX IF NOT EXISTS alpha_seed_items_batch_idx ON alpha_seed_items (batch_id);
+
+ALTER TABLE community_places
+  ADD COLUMN IF NOT EXISTS logo_url text;
+ALTER TABLE community_places
+  ADD COLUMN IF NOT EXISTS linked_organization_id uuid REFERENCES organizations(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS community_places_linked_org_idx ON community_places (linked_organization_id);
+
+ALTER TABLE group_members ADD COLUMN IF NOT EXISTS member_list_visibility varchar(16) NOT NULL DEFAULT 'visible';
+ALTER TABLE group_members ADD COLUMN IF NOT EXISTS show_group_on_profile boolean NOT NULL DEFAULT true;
+ALTER TABLE group_members ADD COLUMN IF NOT EXISTS announce_group_join_in_feed boolean NOT NULL DEFAULT true;
+ALTER TABLE group_members ADD COLUMN IF NOT EXISTS visibility_updated_at timestamptz;
+ALTER TABLE group_members ADD COLUMN IF NOT EXISTS visibility_updated_by_user_id uuid REFERENCES users(id) ON DELETE SET NULL;
+
+-- Media social layer (photos/videos as first-class objects)
+DO $$ BEGIN
+  CREATE TYPE media_kind AS ENUM ('image', 'video', 'audio');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE media_comment_policy AS ENUM ('everyone_allowed_by_visibility', 'connections', 'no_one');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE media_people_tag_status AS ENUM ('pending', 'approved', 'declined', 'removed');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE media_album_kind AS ENUM ('default_all', 'profile_pictures', 'uploaded_pictures', 'tagged_pictures', 'custom');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+ALTER TABLE media_assets ADD COLUMN IF NOT EXISTS video_width integer;
+ALTER TABLE media_assets ADD COLUMN IF NOT EXISTS video_height integer;
+ALTER TABLE media_assets ADD COLUMN IF NOT EXISTS duration_seconds integer;
+ALTER TABLE media_assets ADD COLUMN IF NOT EXISTS poster_storage_key text;
+ALTER TABLE media_assets ADD COLUMN IF NOT EXISTS transcoding_status varchar(32);
+
+CREATE TABLE IF NOT EXISTS media_items (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  media_asset_id uuid NOT NULL REFERENCES media_assets(id) ON DELETE CASCADE,
+  media_kind media_kind NOT NULL,
+  caption text,
+  visibility media_visibility NOT NULL,
+  comment_policy media_comment_policy NOT NULL DEFAULT 'connections',
+  show_in_feed boolean NOT NULL DEFAULT true,
+  pinned_to_profile boolean NOT NULL DEFAULT false,
+  use_as_avatar boolean NOT NULL DEFAULT false,
+  content_rating media_content_rating,
+  is_blurred_by_default boolean NOT NULL DEFAULT false,
+  source_surface varchar(64) NOT NULL,
+  source_group_id uuid REFERENCES groups(id) ON DELETE SET NULL,
+  source_event_id uuid REFERENCES events(id) ON DELETE SET NULL,
+  source_convention_id uuid REFERENCES conventions(id) ON DELETE SET NULL,
+  original_feed_post_id uuid REFERENCES feed_posts(id) ON DELETE SET NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  deleted_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS media_items_owner_created_idx ON media_items (owner_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS media_items_asset_idx ON media_items (media_asset_id);
+CREATE INDEX IF NOT EXISTS media_items_source_group_idx ON media_items (source_group_id);
+CREATE INDEX IF NOT EXISTS media_items_source_event_idx ON media_items (source_event_id);
+CREATE INDEX IF NOT EXISTS media_items_source_convention_idx ON media_items (source_convention_id);
+CREATE INDEX IF NOT EXISTS media_items_visibility_idx ON media_items (visibility);
+CREATE INDEX IF NOT EXISTS media_items_deleted_at_idx ON media_items (deleted_at);
+
+CREATE TABLE IF NOT EXISTS media_posts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  caption text,
+  visibility media_visibility NOT NULL,
+  comment_policy media_comment_policy NOT NULL DEFAULT 'connections',
+  show_in_feed boolean NOT NULL DEFAULT true,
+  feed_post_id uuid REFERENCES feed_posts(id) ON DELETE SET NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  deleted_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS media_posts_owner_created_idx ON media_posts (owner_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS media_posts_feed_post_idx ON media_posts (feed_post_id);
+CREATE INDEX IF NOT EXISTS media_posts_deleted_at_idx ON media_posts (deleted_at);
+
+CREATE TABLE IF NOT EXISTS media_post_items (
+  media_post_id uuid NOT NULL REFERENCES media_posts(id) ON DELETE CASCADE,
+  media_item_id uuid NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  sort_order integer NOT NULL DEFAULT 0,
+  PRIMARY KEY (media_post_id, media_item_id)
+);
+
+CREATE TABLE IF NOT EXISTS media_albums (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title varchar(255) NOT NULL,
+  slug varchar(128) NOT NULL,
+  description text,
+  visibility media_visibility NOT NULL DEFAULT 'LOGGED_IN',
+  cover_media_item_id uuid REFERENCES media_items(id) ON DELETE SET NULL,
+  album_kind media_album_kind NOT NULL DEFAULT 'custom',
+  sort_order integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  deleted_at timestamptz
+);
+CREATE UNIQUE INDEX IF NOT EXISTS media_albums_owner_slug_uq ON media_albums (owner_user_id, slug) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS media_albums_owner_sort_idx ON media_albums (owner_user_id, sort_order);
+CREATE INDEX IF NOT EXISTS media_albums_visibility_idx ON media_albums (visibility);
+CREATE INDEX IF NOT EXISTS media_albums_deleted_at_idx ON media_albums (deleted_at);
+
+CREATE TABLE IF NOT EXISTS media_album_items (
+  album_id uuid NOT NULL REFERENCES media_albums(id) ON DELETE CASCADE,
+  media_item_id uuid NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  sort_order integer NOT NULL DEFAULT 0,
+  added_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (album_id, media_item_id)
+);
+
+CREATE TABLE IF NOT EXISTS media_item_tags (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  media_item_id uuid NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  tag varchar(64) NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS media_item_tags_item_tag_uq ON media_item_tags (media_item_id, lower(tag));
+CREATE INDEX IF NOT EXISTS media_item_tags_item_idx ON media_item_tags (media_item_id);
+
+CREATE TABLE IF NOT EXISTS media_people_tags (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  media_item_id uuid NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  tagged_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  tagged_by_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status media_people_tag_status NOT NULL DEFAULT 'pending',
+  x double precision,
+  y double precision,
+  label varchar(128),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS media_people_tags_item_idx ON media_people_tags (media_item_id);
+CREATE INDEX IF NOT EXISTS media_people_tags_tagged_user_idx ON media_people_tags (tagged_user_id);
+CREATE INDEX IF NOT EXISTS media_people_tags_status_idx ON media_people_tags (status);
+
+CREATE TABLE IF NOT EXISTS media_reactions (
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  media_item_id uuid NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  kind varchar(16) NOT NULL DEFAULT 'love',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, media_item_id)
+);
+CREATE INDEX IF NOT EXISTS media_reactions_item_idx ON media_reactions (media_item_id);
+
+CREATE TABLE IF NOT EXISTS media_comments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  media_item_id uuid NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  author_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  deleted_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS media_comments_item_created_idx ON media_comments (media_item_id, created_at);
+CREATE INDEX IF NOT EXISTS media_comments_author_idx ON media_comments (author_id);
+
+DO $$ BEGIN
+  CREATE TYPE mail_intake_status AS ENUM ('new', 'triaged', 'assigned', 'waiting', 'closed');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE mail_intake_priority AS ENUM ('normal', 'high', 'urgent');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE mail_intake_visibility AS ENUM ('owner_only', 'admin_only', 'trust_safety', 'support', 'business');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS mail_intake_items (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  mailbox varchar(320) NOT NULL,
+  message_id varchar(512) NOT NULL,
+  thread_key varchar(512),
+  from_name varchar(255),
+  from_email varchar(320) NOT NULL,
+  to_email varchar(320) NOT NULL,
+  subject varchar(512) NOT NULL,
+  received_at timestamptz NOT NULL,
+  plain_text_body text,
+  sanitized_html_body text,
+  attachment_metadata jsonb NOT NULL DEFAULT '[]'::jsonb,
+  status mail_intake_status NOT NULL DEFAULT 'new',
+  priority mail_intake_priority NOT NULL DEFAULT 'normal',
+  visibility mail_intake_visibility NOT NULL DEFAULT 'support',
+  assigned_to_user_id uuid REFERENCES users(id) ON DELETE SET NULL,
+  linked_user_id uuid REFERENCES users(id) ON DELETE SET NULL,
+  linked_moderation_case_id uuid REFERENCES moderation_cases(id) ON DELETE SET NULL,
+  imported_at timestamptz NOT NULL DEFAULT now(),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS mail_intake_items_mailbox_message_uq ON mail_intake_items (mailbox, message_id);
+CREATE INDEX IF NOT EXISTS mail_intake_items_mailbox_status_idx ON mail_intake_items (mailbox, status, received_at);
+CREATE INDEX IF NOT EXISTS mail_intake_items_visibility_idx ON mail_intake_items (visibility, status, received_at);
+
+ALTER TABLE user_notification_preferences
+  ADD COLUMN IF NOT EXISTS push_enabled boolean NOT NULL DEFAULT false;
+
+ALTER TABLE user_notification_preferences
+  ALTER COLUMN push_hub_announcements SET DEFAULT false;
+
+ALTER TABLE user_notification_preferences
+  ALTER COLUMN push_hub_chat SET DEFAULT false;
 `
 
 async function main() {

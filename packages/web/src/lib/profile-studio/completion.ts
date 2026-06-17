@@ -71,7 +71,7 @@ export function deriveStudioEssentials(input: StudioCompletionInput): StudioChec
   return [
     { key: 'name', label: 'Display name', complete: input.displayName.trim().length > 0 },
     { key: 'location', label: 'Location', complete: input.locationLabel.trim().length > 0 },
-    { key: 'bio', label: 'Short bio', complete: input.bio.trim().length > 0 },
+    { key: 'bio', label: 'About', complete: input.bio.trim().length > 0 },
     { key: 'photo', label: 'Profile photo', complete: input.hasPhoto },
   ]
 }
@@ -85,7 +85,7 @@ export function deriveStudioBoosters(input: StudioCompletionInput): StudioCheckI
     },
     { key: 'goals', label: 'Looking for', complete: input.lookingFor.length > 0 },
     { key: 'interests', label: '3+ interests', complete: input.kinksCount >= 3 },
-    { key: 'depth', label: 'Extended story', complete: input.bio.trim().length >= 120 },
+    { key: 'depth', label: 'About (120+ chars)', complete: input.bio.trim().length >= 120 },
     { key: 'roles', label: 'Community roles', complete: input.roles.length > 0 },
     { key: 'links', label: 'Links', complete: input.linksCount > 0 },
   ]
@@ -112,7 +112,7 @@ export function deriveVisitorReadout(input: StudioCompletionInput): string {
   if (parts.length === 1) {
     return `Visitors can see ${parts[0]}. Add connection goals and a fuller bio so people know why to reach out.`
   }
-  return 'Add a short bio, roles, and what you are looking for so visitors understand who you are and why to connect.'
+  return 'Add an About section, roles, and what you are looking for so visitors understand who you are and why to connect.'
 }
 
 export function deriveStudioNextSteps(boosters: StudioCheckItem[]): string[] {
@@ -120,7 +120,7 @@ export function deriveStudioNextSteps(boosters: StudioCheckItem[]): string[] {
     headline: 'Add roles and experience level for your profile headline',
     goals: 'Add what you are looking for',
     interests: 'Add at least three interests',
-    depth: 'Expand your story in Personality Prompts',
+    depth: 'Expand your About section',
     roles: 'Add community roles',
     links: 'Add a website or social link',
   }

@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { OrgFlags } from '@/components/org/OrgAdminDashboard'
+import type { BrandingAssetKind } from '@/components/organizer/ScopeBrandingPanel'
+import { uploadOrgBrandingAsset } from '@/lib/org-branding-upload'
 
 export type OrgAdminSettingsOrg = {
   displayName: string
@@ -93,45 +95,51 @@ export function useOrgAdminSettings(orgKey: string, reloadOrg: () => Promise<voi
     [orgKey, reloadOrg],
   )
 
-  const uploadOrgBanner = useCallback(
-    async (isAdmin: boolean) => {
+  const pickAndUploadBranding = useCallback(
+    (
+      isAdmin: boolean,
+      kind: BrandingAssetKind,
+      setUploading: (value: boolean) => void,
+      successMessage: string,
+      failureMessage: string,
+      accept: string,
+    ) => {
       if (!isAdmin) return
       const input = document.createElement('input')
       input.type = 'file'
-      input.accept = 'image/*'
+      input.accept = accept
       input.onchange = async () => {
         const file = input.files?.[0]
         if (!file) return
-        setBannerUploading(true)
+        setUploading(true)
         setAdminMsg(null)
         try {
-          const fd = new FormData()
-          fd.append('file', file)
-          const up = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
-          const data = (await up.json().catch(() => ({}))) as { url?: string; error?: string }
-          if (!up.ok || !data.url) {
-            setAdminMsg(data.error ?? 'Banner upload failed')
-            return
-          }
-          const r = await fetch(`/api/v1/organizations/${orgKey}`, {
-            method: 'PATCH',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bannerUrl: data.url }),
-          })
-          if (!r.ok) {
-            setAdminMsg('Could not save banner')
-            return
-          }
+          await uploadOrgBrandingAsset(orgKey, kind, file)
           await reloadOrg()
-          setAdminMsg('Banner updated.')
+          setAdminMsg(successMessage)
+        } catch (err) {
+          setAdminMsg(err instanceof Error ? err.message : failureMessage)
         } finally {
-          setBannerUploading(false)
+          setUploading(false)
         }
       }
       input.click()
     },
     [orgKey, reloadOrg],
+  )
+
+  const uploadOrgBanner = useCallback(
+    (isAdmin: boolean) => {
+      pickAndUploadBranding(
+        isAdmin,
+        'banner',
+        setBannerUploading,
+        'Banner updated.',
+        'Banner upload failed',
+        'image/*',
+      )
+    },
+    [pickAndUploadBranding],
   )
 
   const clearOrgBanner = useCallback(
@@ -159,44 +167,17 @@ export function useOrgAdminSettings(orgKey: string, reloadOrg: () => Promise<voi
   )
 
   const uploadOrgLogo = useCallback(
-    async (isAdmin: boolean) => {
-      if (!isAdmin) return
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = 'image/*'
-      input.onchange = async () => {
-        const file = input.files?.[0]
-        if (!file) return
-        setLogoUploading(true)
-        setAdminMsg(null)
-        try {
-          const fd = new FormData()
-          fd.append('file', file)
-          const up = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
-          const data = (await up.json().catch(() => ({}))) as { url?: string; error?: string }
-          if (!up.ok || !data.url) {
-            setAdminMsg(data.error ?? 'Logo upload failed')
-            return
-          }
-          const r = await fetch(`/api/v1/organizations/${orgKey}`, {
-            method: 'PATCH',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ logoUrl: data.url }),
-          })
-          if (!r.ok) {
-            setAdminMsg('Could not save logo')
-            return
-          }
-          await reloadOrg()
-          setAdminMsg('Logo updated.')
-        } finally {
-          setLogoUploading(false)
-        }
-      }
-      input.click()
+    (isAdmin: boolean) => {
+      pickAndUploadBranding(
+        isAdmin,
+        'logo',
+        setLogoUploading,
+        'Logo updated.',
+        'Logo upload failed',
+        'image/*',
+      )
     },
-    [orgKey, reloadOrg],
+    [pickAndUploadBranding],
   )
 
   const clearOrgLogo = useCallback(
@@ -224,34 +205,17 @@ export function useOrgAdminSettings(orgKey: string, reloadOrg: () => Promise<voi
   )
 
   const uploadOrgShareImage = useCallback(
-    async (isAdmin: boolean) => {
-      if (!isAdmin) return
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = 'image/png,image/jpeg,image/webp'
-      input.onchange = async () => {
-        const file = input.files?.[0]
-        if (!file) return
-        setShareUploading(true)
-        setAdminMsg(null)
-        try {
-          const fd = new FormData()
-          fd.append('file', file)
-          const up = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
-          const data = (await up.json().catch(() => ({}))) as { url?: string; error?: string }
-          if (!up.ok || !data.url) {
-            setAdminMsg(data.error ?? 'Share image upload failed')
-            return
-          }
-          const ok = await patchOrganization({ shareImageUrl: data.url }, 'Link preview image updated.')
-          if (!ok) setAdminMsg('Could not save share image')
-        } finally {
-          setShareUploading(false)
-        }
-      }
-      input.click()
+    (isAdmin: boolean) => {
+      pickAndUploadBranding(
+        isAdmin,
+        'share',
+        setShareUploading,
+        'Link preview image updated.',
+        'Share image upload failed',
+        'image/png,image/jpeg,image/webp',
+      )
     },
-    [patchOrganization],
+    [pickAndUploadBranding],
   )
 
   const clearOrgShareImage = useCallback(

@@ -140,9 +140,11 @@ export const userNotificationPreferences = pgTable('user_notification_preference
   orgDigestEmailWeekly: boolean('org_digest_email_weekly').notNull().default(true),
   pinnedDigestEmailWeekly: boolean('pinned_digest_email_weekly').notNull().default(true),
   /** Web push when a pinned convention posts to hub ANNOUNCEMENTS. */
-  pushHubAnnouncements: boolean('push_hub_announcements').notNull().default(true),
+  pushHubAnnouncements: boolean('push_hub_announcements').notNull().default(false),
   /** Web push when a pinned convention posts to hub CHAT channels. */
-  pushHubChat: boolean('push_hub_chat').notNull().default(true),
+  pushHubChat: boolean('push_hub_chat').notNull().default(false),
+  /** Master opt-in for browser push on this account (off by default). */
+  pushEnabled: boolean('push_enabled').notNull().default(false),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
@@ -168,7 +170,7 @@ export const profiles = pgTable('profiles', {
   age: integer('age'),
   /** When false, profile is omitted from /api/v1/profiles people discovery for everyone except self. */
   discoverableInPeopleSearch: boolean('discoverable_in_people_search').notNull().default(true),
-  /** Per-field visibility: public | friends | hidden for gender, age, sexuality, pronouns (see @c2k/shared). */
+  /** Per-field visibility: public | friends | hidden for gender, age, orientation (`sexuality` key), pronouns, location (see @c2k/shared). */
   fieldVisibility: jsonb('field_visibility').$type<Record<string, string>>(),
   avatarUrl: text('avatar_url'),
   verified: boolean('verified').notNull().default(false),
@@ -923,6 +925,11 @@ export const mediaAssets = pgTable(
     sizeBytes: integer('size_bytes').notNull(),
     imageWidth: integer('image_width'),
     imageHeight: integer('image_height'),
+    videoWidth: integer('video_width'),
+    videoHeight: integer('video_height'),
+    durationSeconds: integer('duration_seconds'),
+    posterStorageKey: text('poster_storage_key'),
+    transcodingStatus: varchar('transcoding_status', { length: 32 }),
     sha256Hash: varchar('sha256_hash', { length: 64 }),
     perceptualHash: varchar('perceptual_hash', { length: 128 }),
     perceptualHashAlgorithm: varchar('perceptual_hash_algorithm', { length: 64 }),
@@ -975,6 +982,252 @@ export const mediaAssets = pgTable(
 
 export type MediaAsset = typeof mediaAssets.$inferSelect
 export type MediaAssetInsert = typeof mediaAssets.$inferInsert
+
+/** User-facing media kind (image, video, audio). */
+export const mediaKindEnum = pgEnum('media_kind', ['image', 'video', 'audio'])
+
+export const mediaCommentPolicyEnum = pgEnum('media_comment_policy', [
+  'everyone_allowed_by_visibility',
+  'connections',
+  'no_one',
+])
+
+export const mediaPeopleTagStatusEnum = pgEnum('media_people_tag_status', [
+  'pending',
+  'approved',
+  'declined',
+  'removed',
+])
+
+export const mediaAlbumKindEnum = pgEnum('media_album_kind', [
+  'default_all',
+  'profile_pictures',
+  'uploaded_pictures',
+  'tagged_pictures',
+  'custom',
+])
+
+/** Canonical user-facing media object layered on media_assets. */
+export const mediaItems = pgTable(
+  'media_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerUserId: uuid('owner_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    mediaAssetId: uuid('media_asset_id')
+      .notNull()
+      .references(() => mediaAssets.id, { onDelete: 'cascade' }),
+    mediaKind: mediaKindEnum('media_kind').notNull(),
+    caption: text('caption'),
+    visibility: mediaVisibilityEnum('visibility').notNull(),
+    commentPolicy: mediaCommentPolicyEnum('comment_policy')
+      .notNull()
+      .default('connections'),
+    showInFeed: boolean('show_in_feed').notNull().default(true),
+    pinnedToProfile: boolean('pinned_to_profile').notNull().default(false),
+    useAsAvatar: boolean('use_as_avatar').notNull().default(false),
+    contentRating: mediaContentRatingEnum('content_rating'),
+    isBlurredByDefault: boolean('is_blurred_by_default').notNull().default(false),
+    sourceSurface: varchar('source_surface', { length: 64 }).notNull(),
+    sourceGroupId: uuid('source_group_id').references(() => groups.id, { onDelete: 'set null' }),
+    sourceEventId: uuid('source_event_id').references(() => events.id, { onDelete: 'set null' }),
+    sourceConventionId: uuid('source_convention_id').references(() => conventions.id, {
+      onDelete: 'set null',
+    }),
+    originalFeedPostId: uuid('original_feed_post_id').references(() => feedPosts.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  },
+  (t) => [
+    index('media_items_owner_created_idx').on(t.ownerUserId, t.createdAt),
+    index('media_items_asset_idx').on(t.mediaAssetId),
+    index('media_items_source_group_idx').on(t.sourceGroupId),
+    index('media_items_source_event_idx').on(t.sourceEventId),
+    index('media_items_source_convention_idx').on(t.sourceConventionId),
+    index('media_items_visibility_idx').on(t.visibility),
+    index('media_items_deleted_at_idx').on(t.deletedAt),
+  ],
+)
+
+export type MediaItem = typeof mediaItems.$inferSelect
+export type MediaItemInsert = typeof mediaItems.$inferInsert
+
+/** One upload action grouping multiple media items for feed cards. */
+export const mediaPosts = pgTable(
+  'media_posts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerUserId: uuid('owner_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    caption: text('caption'),
+    visibility: mediaVisibilityEnum('visibility').notNull(),
+    commentPolicy: mediaCommentPolicyEnum('comment_policy')
+      .notNull()
+      .default('connections'),
+    showInFeed: boolean('show_in_feed').notNull().default(true),
+    feedPostId: uuid('feed_post_id').references(() => feedPosts.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  },
+  (t) => [
+    index('media_posts_owner_created_idx').on(t.ownerUserId, t.createdAt),
+    index('media_posts_feed_post_idx').on(t.feedPostId),
+    index('media_posts_deleted_at_idx').on(t.deletedAt),
+  ],
+)
+
+export type MediaPost = typeof mediaPosts.$inferSelect
+
+export const mediaPostItems = pgTable(
+  'media_post_items',
+  {
+    mediaPostId: uuid('media_post_id')
+      .notNull()
+      .references(() => mediaPosts.id, { onDelete: 'cascade' }),
+    mediaItemId: uuid('media_item_id')
+      .notNull()
+      .references(() => mediaItems.id, { onDelete: 'cascade' }),
+    sortOrder: integer('sort_order').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.mediaPostId, t.mediaItemId] })],
+)
+
+export const mediaAlbums = pgTable(
+  'media_albums',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerUserId: uuid('owner_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: varchar('title', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 128 }).notNull(),
+    description: text('description'),
+    visibility: mediaVisibilityEnum('visibility').notNull().default('LOGGED_IN'),
+    coverMediaItemId: uuid('cover_media_item_id').references(() => mediaItems.id, {
+      onDelete: 'set null',
+    }),
+    albumKind: mediaAlbumKindEnum('album_kind').notNull().default('custom'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex('media_albums_owner_slug_uq')
+      .on(t.ownerUserId, t.slug)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index('media_albums_owner_sort_idx').on(t.ownerUserId, t.sortOrder),
+    index('media_albums_visibility_idx').on(t.visibility),
+    index('media_albums_deleted_at_idx').on(t.deletedAt),
+  ],
+)
+
+export type MediaAlbum = typeof mediaAlbums.$inferSelect
+
+export const mediaAlbumItems = pgTable(
+  'media_album_items',
+  {
+    albumId: uuid('album_id')
+      .notNull()
+      .references(() => mediaAlbums.id, { onDelete: 'cascade' }),
+    mediaItemId: uuid('media_item_id')
+      .notNull()
+      .references(() => mediaItems.id, { onDelete: 'cascade' }),
+    sortOrder: integer('sort_order').notNull().default(0),
+    addedAt: timestamp('added_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.albumId, t.mediaItemId] })],
+)
+
+export const mediaItemTags = pgTable(
+  'media_item_tags',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    mediaItemId: uuid('media_item_id')
+      .notNull()
+      .references(() => mediaItems.id, { onDelete: 'cascade' }),
+    tag: varchar('tag', { length: 64 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('media_item_tags_item_tag_uq').on(t.mediaItemId, sql`lower(${t.tag})`),
+    index('media_item_tags_item_idx').on(t.mediaItemId),
+  ],
+)
+
+export const mediaPeopleTags = pgTable(
+  'media_people_tags',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    mediaItemId: uuid('media_item_id')
+      .notNull()
+      .references(() => mediaItems.id, { onDelete: 'cascade' }),
+    taggedUserId: uuid('tagged_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    taggedByUserId: uuid('tagged_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: mediaPeopleTagStatusEnum('status').notNull().default('pending'),
+    x: doublePrecision('x'),
+    y: doublePrecision('y'),
+    label: varchar('label', { length: 128 }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('media_people_tags_item_idx').on(t.mediaItemId),
+    index('media_people_tags_tagged_user_idx').on(t.taggedUserId),
+    index('media_people_tags_status_idx').on(t.status),
+  ],
+)
+
+export const mediaReactions = pgTable(
+  'media_reactions',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    mediaItemId: uuid('media_item_id')
+      .notNull()
+      .references(() => mediaItems.id, { onDelete: 'cascade' }),
+    kind: varchar('kind', { length: 16 }).notNull().default('love'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.mediaItemId] }),
+    index('media_reactions_item_idx').on(t.mediaItemId),
+  ],
+)
+
+export const mediaComments = pgTable(
+  'media_comments',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    mediaItemId: uuid('media_item_id')
+      .notNull()
+      .references(() => mediaItems.id, { onDelete: 'cascade' }),
+    authorId: uuid('author_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  },
+  (t) => [
+    index('media_comments_item_created_idx').on(t.mediaItemId, t.createdAt),
+    index('media_comments_author_idx').on(t.authorId),
+  ],
+)
+
+export type MediaComment = typeof mediaComments.$inferSelect
 
 export const mediaHashKindEnum = pgEnum('media_hash_kind', ['SHA256', 'PERCEPTUAL'])
 
@@ -1134,6 +1387,62 @@ export const contactInquiries = pgTable(
 
 export type ContactInquiry = typeof contactInquiries.$inferSelect
 export type ContactInquiryInsert = typeof contactInquiries.$inferInsert
+
+export const mailIntakeStatusEnum = pgEnum('mail_intake_status', [
+  'new',
+  'triaged',
+  'assigned',
+  'waiting',
+  'closed',
+])
+
+export const mailIntakePriorityEnum = pgEnum('mail_intake_priority', ['normal', 'high', 'urgent'])
+
+export const mailIntakeVisibilityEnum = pgEnum('mail_intake_visibility', [
+  'owner_only',
+  'admin_only',
+  'trust_safety',
+  'support',
+  'business',
+])
+
+/** Inbound mailbox messages imported via IMAP for admin dashboard intake. */
+export const mailIntakeItems = pgTable(
+  'mail_intake_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    mailbox: varchar('mailbox', { length: 320 }).notNull(),
+    messageId: varchar('message_id', { length: 512 }).notNull(),
+    threadKey: varchar('thread_key', { length: 512 }),
+    fromName: varchar('from_name', { length: 255 }),
+    fromEmail: varchar('from_email', { length: 320 }).notNull(),
+    toEmail: varchar('to_email', { length: 320 }).notNull(),
+    subject: varchar('subject', { length: 512 }).notNull(),
+    receivedAt: timestamp('received_at', { withTimezone: true }).notNull(),
+    plainTextBody: text('plain_text_body'),
+    sanitizedHtmlBody: text('sanitized_html_body'),
+    attachmentMetadata: jsonb('attachment_metadata').notNull().default([]),
+    status: mailIntakeStatusEnum('status').notNull().default('new'),
+    priority: mailIntakePriorityEnum('priority').notNull().default('normal'),
+    visibility: mailIntakeVisibilityEnum('visibility').notNull().default('support'),
+    assignedToUserId: uuid('assigned_to_user_id').references(() => users.id, { onDelete: 'set null' }),
+    linkedUserId: uuid('linked_user_id').references(() => users.id, { onDelete: 'set null' }),
+    linkedModerationCaseId: uuid('linked_moderation_case_id').references(() => moderationCases.id, {
+      onDelete: 'set null',
+    }),
+    importedAt: timestamp('imported_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('mail_intake_items_mailbox_message_uq').on(t.mailbox, t.messageId),
+    index('mail_intake_items_mailbox_status_idx').on(t.mailbox, t.status, t.receivedAt),
+    index('mail_intake_items_visibility_idx').on(t.visibility, t.status, t.receivedAt),
+  ]
+)
+
+export type MailIntakeItem = typeof mailIntakeItems.$inferSelect
+export type MailIntakeItemInsert = typeof mailIntakeItems.$inferInsert
 
 /** Inbound legal/process requests (DMCA, subpoena, etc.) - Epic 4 stub. */
 export const legalRequests = pgTable(
@@ -1463,6 +1772,13 @@ export const groupMembers = pgTable('group_members', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   role: varchar('role', { length: 32 }).notNull().default('member'),
+  memberListVisibility: varchar('member_list_visibility', { length: 16 }).notNull().default('visible'),
+  showGroupOnProfile: boolean('show_group_on_profile').notNull().default(true),
+  announceGroupJoinInFeed: boolean('announce_group_join_in_feed').notNull().default(true),
+  visibilityUpdatedAt: timestamp('visibility_updated_at', { withTimezone: true }),
+  visibilityUpdatedByUserId: uuid('visibility_updated_by_user_id').references(() => users.id, {
+    onDelete: 'set null',
+  }),
 })
 
 export const groupReviewSentimentEnum = pgEnum('group_review_sentiment', ['POSITIVE', 'NEGATIVE'])
@@ -2149,6 +2465,11 @@ export const communityPlaces = pgTable(
     slug: varchar('slug', { length: 128 }).notNull(),
     category: communityPlaceCategoryEnum('category').notNull().default('other'),
     description: text('description'),
+    logoUrl: text('logo_url'),
+    /** When set, this map pin corresponds to a managed organization hub. */
+    linkedOrganizationId: uuid('linked_organization_id').references(() => organizations.id, {
+      onDelete: 'set null',
+    }),
     lat: doublePrecision('lat'),
     lng: doublePrecision('lng'),
     city: varchar('city', { length: 128 }),
@@ -3856,5 +4177,47 @@ export type MessagingHealthRollup = typeof messagingHealthRollups.$inferSelect
 export type MessagingRestriction = typeof messagingRestrictions.$inferSelect
 export type ScopedStandingEvent = typeof scopedStandingEvents.$inferSelect
 export type ScopedModerationAppeal = typeof scopedModerationAppeals.$inferSelect
+
+/* --- Alpha demo seed tracking --- */
+
+export const alphaSeedBatches = pgTable(
+  'alpha_seed_batches',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    batchKey: varchar('batch_key', { length: 128 }).notNull().unique(),
+    sourceName: varchar('source_name', { length: 255 }).notNull(),
+    sourceUrl: text('source_url'),
+    sourceRepo: text('source_repo'),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('alpha_seed_batches_created_idx').on(t.createdAt)],
+)
+
+export const alphaSeedItems = pgTable(
+  'alpha_seed_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    batchId: uuid('batch_id')
+      .notNull()
+      .references(() => alphaSeedBatches.id, { onDelete: 'cascade' }),
+    targetType: varchar('target_type', { length: 64 }).notNull(),
+    targetId: text('target_id').notNull(),
+    sourceType: varchar('source_type', { length: 64 }),
+    sourceSlug: varchar('source_slug', { length: 255 }),
+    labelText: varchar('label_text', { length: 64 }).notNull().default('ALPHA TEST'),
+    isSynthetic: boolean('is_synthetic').notNull().default(false),
+    isPublicSource: boolean('is_public_source').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('alpha_seed_items_target_idx').on(t.targetType, t.targetId),
+    index('alpha_seed_items_batch_idx').on(t.batchId),
+    uniqueIndex('alpha_seed_items_batch_target_uq').on(t.batchId, t.targetType, t.targetId),
+  ],
+)
+
+export type AlphaSeedBatch = typeof alphaSeedBatches.$inferSelect
+export type AlphaSeedItem = typeof alphaSeedItems.$inferSelect
 
 export * from './convention-organizer-schema.js'

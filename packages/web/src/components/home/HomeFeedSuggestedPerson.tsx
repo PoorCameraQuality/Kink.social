@@ -32,7 +32,7 @@ export default function HomeFeedSuggestedPerson({
         <Link to={`/profile/${encodeURIComponent(username)}`} className="block truncate text-sm font-medium text-dc-text hover:text-dc-accent">
           {name}
         </Link>
-        {subtitle ? <p className="truncate text-xs text-dc-muted">{subtitle}</p> : null}
+        {subtitle ? <p className="truncate text-xs text-dc-text-muted">{subtitle}</p> : null}
       </div>
       <Link
         to={`/profile/${encodeURIComponent(username)}`}

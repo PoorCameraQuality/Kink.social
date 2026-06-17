@@ -4,6 +4,14 @@ import { requestFeedActivityEmit } from './feed-activities-queue.js'
 
 export type FeedActivityVerb =
   | 'post'
+  | 'uploaded_media'
+  | 'uploaded_picture'
+  | 'uploaded_video'
+  | 'media_reacted'
+  | 'media_commented'
+  | 'media_tagged_user'
+  | 'media_added_to_album'
+  | 'avatar_updated'
   | 'connection_accepted'
   | 'event_created'
   | 'event_rsvp'
@@ -13,9 +21,14 @@ export type FeedActivityVerb =
   | 'org_join'
   | 'group_join'
   | 'vendor_shop_live'
+  | 'loved'
+  | 'reacted'
+  | 'followed'
 
 export type FeedActivityObjectType =
   | 'feed_post'
+  | 'media_post'
+  | 'media_item'
   | 'connection'
   | 'event'
   | 'schedule_slot'
@@ -23,6 +36,8 @@ export type FeedActivityObjectType =
   | 'organization'
   | 'group'
   | 'vendor'
+  | 'profile'
+  | 'user'
 
 export type EmitActivityParams = {
   actorId: string

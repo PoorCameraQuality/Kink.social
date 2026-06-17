@@ -1,6 +1,6 @@
 import type { FeedSettings } from './user-settings.js'
 
-export const ONBOARDING_STEP_COUNT = 6 as const
+export const ONBOARDING_STEP_COUNT = 7 as const
 
 export const ONBOARDING_INTENT_OPTIONS = [
   { id: 'friends', label: 'Make friends' },

@@ -48,32 +48,43 @@ type Props = {
   variant?: 'full' | 'home-desktop' | 'home-mobile'
 }
 
-export default function FeedComposerQuickActions({ onPhoto, onVideo, variant = 'full' }: Props) {
+function withComposerCallbacks(actions: Action[], onPhoto?: () => void, onVideo?: () => void): Action[] {
+  return actions.map((action) => {
+    if (action.id === 'photo' && onPhoto) return { ...action, href: undefined, onClick: onPhoto }
+    if (action.id === 'video' && onVideo) return { ...action, href: undefined, onClick: onVideo }
+    return action
+  })
+}
+
+export default function FeedComposerQuickActions({ variant = 'full', onPhoto, onVideo }: Props) {
   const [moreOpen, setMoreOpen] = useState(false)
 
   const fullActions: Action[] = [
-    { id: 'photo', label: 'Photo', onClick: onPhoto, disabled: !onPhoto, title: onPhoto ? undefined : 'Open composer to add a photo' },
-    { id: 'video', label: 'Video', onClick: onVideo, disabled: !onVideo, title: 'Video coming soon' },
+    { id: 'photo', label: 'Photo', href: '/create?tab=picture' },
+    { id: 'video', label: 'Video', href: '/create?tab=video' },
     { id: 'article', label: 'Article', href: '/education/write' },
     { id: 'event', label: 'Event', href: '/events?create=event' },
   ]
 
   const homeDesktopActions: Action[] = [
-    { id: 'photo', label: 'Photo', onClick: onPhoto, disabled: !onPhoto, title: onPhoto ? undefined : 'Open composer to add a photo' },
+    { id: 'photo', label: 'Photo', href: '/create?tab=picture' },
     { id: 'article', label: 'Article', href: '/education/write' },
     { id: 'event', label: 'Event', href: '/events?create=event' },
   ]
 
   const homeMobileActions: Action[] = [
-    { id: 'photo', label: 'Photo', onClick: onPhoto, disabled: !onPhoto, title: onPhoto ? undefined : 'Open composer to add a photo' },
+    { id: 'photo', label: 'Photo', href: '/create?tab=picture' },
     { id: 'article', label: 'Article', href: '/education/write' },
     { id: 'event', label: 'Event', href: '/events?create=event' },
   ]
 
-  const actions =
+  const actions = withComposerCallbacks(
     variant === 'home-mobile' ? homeMobileActions
     : variant === 'home-desktop' ? homeDesktopActions
-    : fullActions
+    : fullActions,
+    onPhoto,
+    onVideo,
+  )
 
   const chipClass =
     'inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-dc-text-muted transition-colors hover:bg-dc-elevated-hover hover:text-dc-text disabled:cursor-not-allowed disabled:opacity-50'
@@ -123,15 +134,14 @@ export default function FeedComposerQuickActions({ onPhoto, onVideo, variant = '
           </button>
           {moreOpen ?
             <div className="absolute left-0 top-full z-10 mt-1 min-w-[8rem] rounded-lg border border-dc-border bg-dc-elevated-solid py-1 shadow-[var(--dc-shadow-panel)]">
-              <button
-                type="button"
-                disabled={!onVideo}
-                title="Video coming soon"
-                className="block w-full px-3 py-2 text-left text-xs text-dc-muted"
-                onClick={onVideo}
+              <Link
+                role="menuitem"
+                to="/create?tab=video"
+                onClick={() => setMoreOpen(false)}
+                className="block w-full px-3 py-2 text-left text-xs text-dc-text hover:bg-dc-elevated-muted"
               >
                 Video
-              </button>
+              </Link>
             </div>
           : null}
         </div>

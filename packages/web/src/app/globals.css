@@ -4,6 +4,10 @@
 @import '../styles/shared-surfaces.css';
 @import '../styles/mobile-polish.css';
 @import '../styles/desktop-surfaces.css';
+@import '../styles/education-hub.css';
+@import '../styles/explore-hub.css';
+@import '../styles/feed-activity.css';
+@import '../styles/create-flow.css';
 
 @tailwind base;
 @tailwind components;
@@ -201,6 +205,56 @@
   }
 }
 
+@keyframes feed-tap-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.14);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes feed-reaction-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--dc-accent) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .feed-tap-pop {
+    animation: feed-tap-pop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .feed-reaction-ring {
+    animation: feed-reaction-ring 0.45s ease-out;
+  }
+
+  .feed-tap-control {
+    transition:
+      transform 0.15s ease,
+      background-color 0.15s ease,
+      color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .feed-tap-control:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-tap-pop,
+  .feed-reaction-ring {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root),
   ::view-transition-new(root) {
@@ -313,6 +367,12 @@
 
   .organizer-shell {
     @apply min-h-[calc(100vh-4rem)] text-[13px] leading-snug;
+  }
+  .organizer-shell .organizer-panel {
+    display: block;
+    grid-template-columns: unset;
+    align-items: stretch;
+    gap: unset;
   }
   .organizer-panel {
     background: var(--organizer-panel-bg);

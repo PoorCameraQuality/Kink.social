@@ -43,13 +43,15 @@ test.describe('smoke', () => {
     expect(body.viewer?.sub).toBeTruthy()
   })
 
-  test('landing shows hero heading', async ({ page }) => {
+  test('landing shows auth screen', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/Find events.*Learn safely/i)
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/connected to the community/i)
+    await expect(page.getByRole('link', { name: 'Kink Social home' })).toBeVisible()
+    await expect(page.getByRole('tab', { name: 'Join free' })).toBeVisible()
+    await expect(page.getByRole('tab', { name: 'Log in' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 2, name: 'Join free' })).toBeVisible()
   })
 
-  test('home feed shows community activity scope tabs', async ({ page }) => {
+  test('home feed shows Home feed scope tabs', async ({ page }) => {
     const login = await page.request.post('/api/auth/session', {
       headers: { 'Content-Type': 'application/json' },
       data: JSON.stringify({ username: 'RopeDreamer', password: demoPassword }),
@@ -59,7 +61,10 @@ test.describe('smoke', () => {
       'Skipping: POST /api/auth/session failed (seed DB + RopeDreamer, or set E2E_DEMO_PASSWORD)',
     )
     await page.goto('/home?mode=discover&tab=Local')
-    await expect(page.getByRole('tablist', { name: 'Community activity scope' })).toBeVisible()
+    const homeScope = page.getByRole('tablist', { name: 'Home feed scope' })
+    await expect(homeScope).toBeVisible()
+    await expect(homeScope.getByRole('tab', { name: 'Near you' })).toBeVisible()
+    await expect(page.getByRole('tablist', { name: 'Community activity scope' })).toHaveCount(0)
   })
 
   test('home shows following and near you when signed in', async ({ page }) => {
@@ -72,9 +77,10 @@ test.describe('smoke', () => {
       'Skipping: POST /api/auth/session failed (seed DB + RopeDreamer, or set E2E_DEMO_PASSWORD)',
     )
     await page.goto('/home')
-    await expect(page.getByRole('tablist', { name: 'Community activity scope' })).toBeVisible()
-    await expect(page.getByRole('tab', { name: 'Following' })).toBeVisible()
-    await expect(page.getByRole('tab', { name: 'Nearby' })).toBeVisible()
+    const homeScope = page.getByRole('tablist', { name: 'Home feed scope' })
+    await expect(homeScope).toBeVisible()
+    await expect(homeScope.getByRole('tab', { name: 'Following' })).toBeVisible()
+    await expect(homeScope.getByRole('tab', { name: 'Near you' })).toBeVisible()
   })
 
   test('following feed lists new post after create when API DB is seeded', async ({ page }) => {
@@ -106,7 +112,8 @@ test.describe('smoke', () => {
     expect(found).toBe(true)
 
     await page.goto('/home?mode=following')
-    await expect(page.getByRole('tab', { name: 'Following' })).toBeVisible()
+    const homeScope = page.getByRole('tablist', { name: 'Home feed scope' })
+    await expect(homeScope.getByRole('tab', { name: 'Following', selected: true })).toBeVisible()
     await expect(page.getByRole('tablist', { name: 'Following feed filters' })).toBeVisible({ timeout: 15_000 })
   })
 
@@ -373,11 +380,11 @@ test.describe('smoke', () => {
     await expect(page.getByRole('heading', { name: 'Events on your profile', level: 2 })).toBeVisible()
   })
 
-  test('member chrome defaults to midnight-brass appearance', async ({ page }) => {
+  test('member chrome defaults to midnight-velvet appearance', async ({ page }) => {
     await page.goto('/')
     const chrome = page.locator('.dc-gold-chrome').first()
     await expect(chrome).toBeVisible({ timeout: 15_000 })
-    await expect(chrome).toHaveAttribute('data-dc-appearance', 'midnight-brass')
+    await expect(chrome).toHaveAttribute('data-dc-appearance', 'midnight-velvet')
   })
 
   test('settings appearance theme persists in localStorage', async ({ page }) => {

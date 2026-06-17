@@ -32,6 +32,7 @@ import {
   deleteMockLocalPost,
   mockRichLocalFeedPosts,
 } from '@/data/mock-data'
+import { presentHomeFeedPosts } from '@/lib/following-feed-demo'
 import { useAuth, useViewerUsername } from '@/contexts/AuthContext'
 import { useHomeSurface } from '@/hooks/useHomeSurface'
 import { useApiEducationArticles } from '@/hooks/useApiEducationArticles'
@@ -61,6 +62,16 @@ function groupIdForChannel(channelId: string): string {
 function formatEducationReadMinutes(readingMinutes: number | null | undefined): string {
   if (readingMinutes == null || readingMinutes < 1) return ''
   return `${readingMinutes} min read`
+}
+
+const HOME_DISCOVER_TAB_BLURB: Partial<Record<HomeTab, string>> = {
+  Events: 'Find munches, classes, conventions, and play parties worth your time.',
+  Conventions: 'Multi-day gatherings and conference-style events in the community.',
+  Groups: 'Communities to join, lurk in, or stay involved with over time.',
+  Vendors: 'Makers, shops, and creators serving the kink community.',
+  Education: 'Guides and perspectives from community educators and writers.',
+  Media: 'Podcasts, shows, and channels from community creators.',
+  Trending: 'Active conversations and community signals across the network.',
 }
 
 export default function HomePageClient() {
@@ -107,6 +118,7 @@ export default function HomePageClient() {
     apiVendors,
     apiGroups,
     displayCoSuggestions,
+    myGroups,
     displayConventions,
     multiDayConventions,
     displayVendorSpotlight,
@@ -149,7 +161,14 @@ export default function HomePageClient() {
       return
     }
     if (n) setActiveTab(n)
-  }, [tabParam, navigate])
+    if (n === 'Local' && normalizeHomeMode(modeParam) !== 'Discover') {
+      setHomeMode('Discover')
+      const p = new URLSearchParams(searchParams)
+      p.set('mode', 'discover')
+      p.set('tab', 'Local')
+      setSearchParams(p, { replace: true })
+    }
+  }, [tabParam, modeParam, navigate, searchParams, setSearchParams])
 
   useEffect(() => {
     const m = normalizeHomeMode(modeParam)
@@ -165,7 +184,7 @@ export default function HomePageClient() {
     void (async () => {
       try {
         const [feedRes, settingsRes] = await Promise.all([
-          fetch('/api/v1/feed/following?limit=1', { credentials: 'include' }),
+          fetch('/api/v1/feed/home?limit=1', { credentials: 'include' }),
           fetch('/api/settings/me', { credentials: 'include' }),
         ])
         if (cancelled) return
@@ -292,7 +311,7 @@ export default function HomePageClient() {
       return []
     }
     if (!apiFeedSettled) return []
-    if (apiFeedOk) return apiFeedPosts ?? []
+    if (apiFeedOk) return presentHomeFeedPosts(apiFeedPosts ?? [])
     return []
   }, [apiFeedOk, apiFeedPosts, apiFeedSettled, useDemoFallback, isAuthenticated, isFallback, localPostsMock])
 
@@ -348,7 +367,7 @@ export default function HomePageClient() {
     : 'text-dc-muted'
 
   const sidebarReputationTips = (
-    <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+    <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
       <h3 className="text-sm font-semibold text-dc-text mb-2">Reputation tips</h3>
       <p className="text-xs text-dc-muted">
         Attend events and get checked in to build your Event Reliability score. Endorsements from trusted members boost your visibility.
@@ -357,7 +376,7 @@ export default function HomePageClient() {
   )
 
   const sidebarSuggestedCo = (
-    <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+    <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
       <h3 className="text-sm font-semibold text-dc-text mb-3">People you may meet soon</h3>
       <div className="space-y-2 max-h-80 overflow-y-auto">
         {displayCoSuggestions.map((p) => (
@@ -381,7 +400,7 @@ export default function HomePageClient() {
   )
 
   const sidebarEventsConventions = displayConventions.length > 0 && (
-    <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+    <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
       <h3 className="text-sm font-semibold text-dc-text mb-1">Conventions in your region</h3>
       <Link to="/events" className="text-xs text-dc-accent hover:underline mb-3 inline-block">
         See all nationwide →
@@ -399,7 +418,7 @@ export default function HomePageClient() {
   )
 
   const sidebarEventsEducation = (
-    <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+    <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
       <h3 className="text-sm font-semibold text-dc-text mb-3">Educational opportunities</h3>
       <ul className="space-y-2">
         {rankedArticles.slice(0, 4).map((a) => (
@@ -417,7 +436,7 @@ export default function HomePageClient() {
   )
 
   const sidebarGroups = (
-    <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)] space-y-6">
+    <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)] space-y-6">
       {groupDiscussionPeek.length > 0 ?
         <div>
           <h3 className="text-sm font-semibold text-dc-text mb-3">Recent group discussions</h3>
@@ -457,7 +476,7 @@ export default function HomePageClient() {
 
   const sidebarVendors = (
     <>
-      <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+      <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
         <h3 className="text-sm font-semibold text-dc-text mb-3">Visit in person</h3>
         <ul className="space-y-2 text-sm">
           {displayVendorInPerson.slice(0, 6).map((row) => (
@@ -474,7 +493,7 @@ export default function HomePageClient() {
         </ul>
       </div>
       {vendorCarouselItems.length > 0 ?
-        <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+        <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
           <h3 className="text-sm font-semibold text-dc-text mb-3">Suggested picks</h3>
           <p className="text-xs text-dc-muted mb-2">One listing per shop. Refreshes as you interact with the feed.</p>
           <AutoScrollRow aria-label="Suggested vendor picks">
@@ -492,7 +511,7 @@ export default function HomePageClient() {
           </AutoScrollRow>
         </div>
       : null}
-      <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+      <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
         <h3 className="text-sm font-semibold text-dc-text mb-3">Spotlight listings</h3>
         <AutoScrollRow aria-label="Spotlight vendor listings">
           {displayVendorSpotlight.map((v) => (
@@ -513,7 +532,7 @@ export default function HomePageClient() {
 
   const sidebarEducation = (
     <>
-      <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+      <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
         <h3 className="text-sm font-semibold text-dc-text mb-3">Recent articles</h3>
         <ul className="space-y-2">
           {rankedArticles.slice(0, 5).map((a) => (
@@ -527,7 +546,7 @@ export default function HomePageClient() {
         </ul>
       </div>
       {presenterRail.length > 0 || !apiBackedHome ?
-        <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+        <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
           <h3 className="text-sm font-semibold text-dc-text mb-3">Educators & presenters</h3>
           {presenterRail.length > 0 ?
             <div className="space-y-2">
@@ -542,7 +561,7 @@ export default function HomePageClient() {
         </div>
       : null}
       {upcomingClassesRail.length > 0 ?
-        <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+        <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
           <h3 className="text-sm font-semibold text-dc-text mb-3">Upcoming classes</h3>
           <ul className="space-y-2">
             {upcomingClassesRail.map((row) => (
@@ -562,7 +581,7 @@ export default function HomePageClient() {
 
   const sidebarTrending = (
     <>
-      <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+      <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
         <h3 className="text-sm font-semibold text-dc-text mb-2">How Trending works</h3>
         <p className="text-xs text-dc-muted">
           Ranked by recent activity and engagement. Collars, boosts, RSVPs, and freshness with 48-hour decay. Feed posts,
@@ -576,7 +595,7 @@ export default function HomePageClient() {
 
   const sidebarConventionsTab = (
     <>
-      <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+      <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
         <h3 className="text-sm font-semibold text-dc-text mb-2">Multi-day gatherings</h3>
         <p className="text-xs text-dc-muted">
           Conventions and hotel takeovers use the same calendar model as other events: one anchor event, optional full program on the convention page.
@@ -606,7 +625,7 @@ export default function HomePageClient() {
     if (activeTab === 'Education') return <>{sidebarEducation}</>
     if (activeTab === 'Media') {
       return (
-        <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
+        <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
           <h3 className="text-sm font-semibold text-dc-text mb-2">Media directory</h3>
           <p className="text-xs text-dc-muted mb-3">Podcasts and video channels. Link-out only.</p>
           <Link to="/media" className="text-sm text-dc-accent hover:underline">
@@ -636,6 +655,41 @@ export default function HomePageClient() {
 
   const showDevHeadline =
     import.meta.env.DEV && import.meta.env.VITE_SHOW_HOME_DEBUG === 'true' && surfaceHeadline.visible
+
+  const discoverTabBlurb = HOME_DISCOVER_TAB_BLURB[activeTab] ?? null
+
+  const discoverRailProps = useMemo(
+    () => ({
+      suggestions: displayCoSuggestions.map((p) => ({
+        userId: p.userId,
+        username: p.username,
+        displayName: p.displayName,
+        subtitle:
+          p.sharedCount && p.sharedCount > 0 ?
+            `${p.sharedCount} mutual event${p.sharedCount === 1 ? '' : 's'}`
+          : (p.location ?? undefined),
+        avatarUrl: p.avatarUrl ?? undefined,
+      })),
+      upcomingNearYou: rankedEvents.slice(0, 4).map((e) => ({
+        id: String(e.id),
+        title: e.title,
+        href: `/events/${e.id}`,
+        meta: [e.date, e.location].filter(Boolean).join(' · ') || undefined,
+      })),
+      trendingEvents: displayTrendingItems.slice(0, 3).map((item) => ({
+        id: `${item.kind}-${item.id}`,
+        title: item.title,
+        href: item.href,
+        mentions: item.subtitle,
+      })),
+      myGroups: (myGroups ?? []).slice(0, 6).map((g) => ({
+        id: g.id,
+        name: g.name,
+        href: g.slug ? `/groups/${encodeURIComponent(g.slug)}` : `/groups/${encodeURIComponent(g.id)}`,
+      })),
+    }),
+    [displayCoSuggestions, rankedEvents, displayTrendingItems, myGroups],
+  )
 
   return (
     <div
@@ -692,7 +746,7 @@ export default function HomePageClient() {
       <div
         className={
           showFeedThreeColumn ?
-            'mt-2 grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(680px,760px)_300px]'
+            'mt-2 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(220px,240px)_minmax(0,1fr)_minmax(260px,300px)] lg:items-start lg:gap-x-6 lg:gap-y-5'
           : 'mt-4 flex flex-col gap-8 lg:flex-row'
         }
       >
@@ -702,22 +756,27 @@ export default function HomePageClient() {
           </div>
         : null}
 
+        <div
+          className={
+            showFeedThreeColumn ?
+              'flex min-w-0 flex-col gap-4 lg:gap-5'
+            : 'min-w-0 w-full flex-1 mx-auto'
+          }
+        >
         <main
-          className={`min-w-0 w-full ${
-            showFeedThreeColumn ? ''
-            : `flex-1 mx-auto ${
+          className={
+            showFeedThreeColumn ?
+              'mx-auto w-full max-w-[760px]'
+            : `min-w-0 w-full ${
                 homeMode === 'Following' || activeTab === 'Local' ? 'max-w-2xl lg:max-w-3xl'
                 : 'max-w-6xl'
               }`
-          }`}
+          }
         >
           {showFeedThreeColumn ?
             <div className="mb-4 hidden lg:block">
               <HomeFeedScopeNav />
             </div>
-          : null}
-          {showFeedThreeColumn && !returningMember ?
-            <HomeWelcomePanel className="mb-4" dashboard />
           : null}
           {apiBackedHome && homeMode === 'Following' ?
             <>
@@ -729,14 +788,16 @@ export default function HomePageClient() {
                   void refreshApiFeed()
                 }}
               />
-              {returningMember ?
-                <HomeWelcomePanel className="mt-4" dashboard preferCompact />
-              : null}
             </>
           : null}
           <TabContentTransition tabKey={`${homeMode}-${activeTab}`}>
           {showDiscoverContent && activeTab !== 'Local' ?
-            <h2 className="mb-4 text-lg font-semibold text-dc-text">{HOME_TAB_LABELS[activeTab]}</h2>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-dc-text">{HOME_TAB_LABELS[activeTab]}</h2>
+              {discoverTabBlurb ?
+                <p className="mt-1 hidden text-sm text-dc-text-muted lg:block">{discoverTabBlurb}</p>
+              : null}
+            </div>
           : null}
           {showDiscoverContent && activeTab === 'Local' && (
             <>
@@ -771,9 +832,6 @@ export default function HomePageClient() {
                 feedShell={showFeedThreeColumn}
                 compactComposer={returningMember}
               />
-              {returningMember ?
-                <HomeWelcomePanel className="mt-3" dashboard preferCompact />
-              : null}
             </>
           )}
 
@@ -783,7 +841,7 @@ export default function HomePageClient() {
             : homeEventsApiError ?
               <EmptyState
                 inline
-                className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+                className="rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
                 title="Could not load events"
                 message="The events feed did not load. Check your connection and try again."
                 actionLabel="Retry"
@@ -816,7 +874,7 @@ export default function HomePageClient() {
               : homeConventionsApiError ?
                 <EmptyState
                   inline
-                  className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+                  className="rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
                   title="Could not load conventions"
                   message="The conventions feed did not load. Check your connection and try again."
                   actionLabel="Retry"
@@ -827,7 +885,7 @@ export default function HomePageClient() {
               : multiDayConventions.length === 0 ?
                 <EmptyState
                   inline
-                  className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+                  className="rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
                   title="No conventions yet"
                   message="Multi-day conventions and hotel takeovers will appear here when published. Browse events or Discovery in the meantime."
                   ctaLabel="Browse events"
@@ -856,7 +914,7 @@ export default function HomePageClient() {
             : homeGroupsApiError ?
               <EmptyState
                 inline
-                className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+                className="rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
                 title="Could not load groups"
                 message="The groups feed did not load. Check your connection and try again."
                 actionLabel="Retry"
@@ -883,7 +941,7 @@ export default function HomePageClient() {
             : homeVendorsApiError ?
               <EmptyState
                 inline
-                className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+                className="rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
                 title="Could not load vendors"
                 message="The vendor feed did not load. Check your connection and try again."
                 actionLabel="Retry"
@@ -911,7 +969,7 @@ export default function HomePageClient() {
               {eduArticlesApi.error ?
                 <EmptyState
                   inline
-                  className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+                  className="rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
                   title="Could not load education"
                   message={eduArticlesApi.error}
                   actionLabel="Retry"
@@ -981,7 +1039,7 @@ export default function HomePageClient() {
                   {educationArticlesFiltered.length === 0 ?
                     <EmptyState
                       inline
-                      className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+                      className="rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
                       title="Nothing here yet"
                       message="No education articles matched these filters yet. Try resetting filters or open the hub for the full catalogue."
                       ctaLabel="Open Education hub"
@@ -1052,7 +1110,7 @@ export default function HomePageClient() {
             : homeTrendingApiError ?
               <EmptyState
                 inline
-                className="rounded-2xl border border-dc-border bg-dc-elevated/80 shadow-[var(--dc-shadow-soft)]"
+                className="rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
                 title="Trending unavailable"
                 message="We could not load trending right now. Try again in a moment or browse Discovery."
                 ctaLabel="Browse Discovery"
@@ -1075,31 +1133,17 @@ export default function HomePageClient() {
         </main>
 
         {showFeedThreeColumn ?
+          <HomeFeedDiscoverRail
+            {...discoverRailProps}
+            variant="mobile-supplement"
+            className="mx-auto w-full max-w-[760px] lg:hidden"
+          />
+        : null}
+        </div>
+
+        {showFeedThreeColumn ?
           <div className="hidden lg:block">
-            <HomeFeedDiscoverRail
-              suggestions={displayCoSuggestions.map((p) => ({
-                userId: p.userId,
-                username: p.username,
-                displayName: p.displayName,
-                subtitle:
-                  p.sharedCount && p.sharedCount > 0 ?
-                    `${p.sharedCount} mutual event${p.sharedCount === 1 ? '' : 's'}`
-                  : (p.location ?? undefined),
-                avatarUrl: p.avatarUrl ?? undefined,
-              }))}
-              upcomingNearYou={rankedEvents.slice(0, 4).map((e) => ({
-                id: String(e.id),
-                title: e.title,
-                href: `/events/${e.id}`,
-                meta: [e.date, e.location].filter(Boolean).join(' · ') || undefined,
-              }))}
-              trendingEvents={displayTrendingItems.slice(0, 3).map((item) => ({
-                id: `${item.kind}-${item.id}`,
-                title: item.title,
-                href: item.href,
-                mentions: item.subtitle,
-              }))}
-            />
+            <HomeFeedDiscoverRail {...discoverRailProps} variant="desktop" />
           </div>
         : <aside className="hidden w-72 flex-shrink-0 space-y-4 lg:block">{rightRail}</aside>}
       </div>

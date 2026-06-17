@@ -1,3 +1,4 @@
+import { formatPlaceLocationLabel } from '@c2k/shared'
 import { eq, inArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 
@@ -24,7 +25,7 @@ export async function loadPlaceLabels(placeIds: string[]): Promise<Map<string, P
   for (const r of rows) {
     out.set(r.placeId, {
       placeId: r.placeId,
-      label: `${r.placeName}, ${r.stateName}`,
+      label: formatPlaceLocationLabel(r.placeName, r.stateName),
       lat: r.lat,
       lng: r.lng,
     })

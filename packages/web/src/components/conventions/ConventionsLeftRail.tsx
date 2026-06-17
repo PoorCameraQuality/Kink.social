@@ -9,7 +9,7 @@ type Props = {
 
 const NAV = [
   { href: '/conventions', label: 'Browse Conventions', match: 'browse' },
-  { href: '/events?mine=registrations', label: 'My Registrations', match: 'tickets' },
+  { href: '/events?mine=registrations', label: 'My RSVPs & registrations', match: 'tickets' },
   { href: '/saved', label: 'Saved', match: 'saved' },
   { href: '/conventions?view=past', label: 'Past Conventions', match: 'past' },
 ] as const

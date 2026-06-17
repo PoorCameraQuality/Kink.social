@@ -14,16 +14,16 @@ export default function ExploreCompactTrendingRow({ item }: Props) {
     <li>
       <Link
         to={item.href}
-        className="flex gap-3 rounded-xl border border-transparent border-l-[3px] border-l-violet-500/60 p-2 transition-colors hover:border-dc-border hover:bg-dc-elevated-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
+        className="xpl-row-card xpl-row-card--subtle p-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
       >
         <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-dc-border bg-dc-elevated-solid">
           <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-dc-muted">{trendingKindLabel(item.kind)}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-dc-accent">{trendingKindLabel(item.kind)}</p>
           <p className="text-sm font-medium text-dc-text line-clamp-2">{item.title}</p>
           {item.subtitle ?
-            <p className="text-xs text-dc-muted line-clamp-1 mt-0.5">{item.subtitle}</p>
+            <p className="text-xs text-dc-text-muted line-clamp-1 mt-0.5">{item.subtitle}</p>
           : null}
         </div>
       </Link>

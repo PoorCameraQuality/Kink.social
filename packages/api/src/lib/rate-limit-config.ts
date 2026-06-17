@@ -17,6 +17,7 @@ export type RateLimitPreset =
   | 'register'
   | 'passwordResetRequest'
   | 'passwordResetConfirm'
+  | 'passwordChange'
   | 'pushSubscribe'
   | 'scopeEmailSubscribe'
   | 'reports'
@@ -48,6 +49,11 @@ function presetConfig(preset: RateLimitPreset): { max: number; timeWindow: numbe
       return {
         max: intEnv('C2K_RATE_LIMIT_PASSWORD_RESET_CONFIRM_MAX', 10),
         timeWindow: intEnv('C2K_RATE_LIMIT_PASSWORD_RESET_CONFIRM_WINDOW_MS', 3_600_000),
+      }
+    case 'passwordChange':
+      return {
+        max: intEnv('C2K_RATE_LIMIT_PASSWORD_CHANGE_MAX', 10),
+        timeWindow: intEnv('C2K_RATE_LIMIT_PASSWORD_CHANGE_WINDOW_MS', 3_600_000),
       }
     case 'pushSubscribe':
       return {

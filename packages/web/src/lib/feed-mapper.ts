@@ -1,8 +1,9 @@
-import type { FeedReactionId } from '@c2k/shared'
+import { feedAttachmentSchema } from '@c2k/shared'
+import type { FeedReactionId, AlphaContentLabel } from '@c2k/shared'
 import { emptyFeedReactionCounts } from '@c2k/shared'
 import type { MockLocalPost } from '@/data/types'
 import { getMockPersonByUsername } from '@/data/mock-seeds'
-import type { ApiFollowingFeedItem, FeedAttachment, FeedMention, FollowingFeedItem, HomeFeedPost } from './feed-types'
+import type { ApiFeedHomeCard, ApiFollowingFeedItem, FeedAttachment, FeedMention, FollowingFeedItem, HomeFeedPost } from './feed-types'
 import type { FeedReactionCounts } from '@/hooks/useFeedPostReactions'
 function timeAgoFromIso(iso: string): string {
   const d = new Date(iso)
@@ -36,19 +37,18 @@ export type ApiFeedPost = {
   viewerReaction?: FeedReactionId | null
   commentCount?: number
   connectionLikerPreview?: Array<{ username: string; avatarUrl?: string | null }>
+  alphaLabel?: AlphaContentLabel
 }
 
 function parseAttachments(raw: unknown): FeedAttachment[] {
   if (!Array.isArray(raw)) return []
-  return raw.filter(
-    (x): x is FeedAttachment =>
-      !!x &&
-      typeof x === 'object' &&
-      (x as FeedAttachment).type !== undefined &&
-      typeof (x as FeedAttachment).url === 'string'
-  )
+  const out: FeedAttachment[] = []
+  for (const entry of raw) {
+    const parsed = feedAttachmentSchema.safeParse(entry)
+    if (parsed.success) out.push(parsed.data)
+  }
+  return out
 }
-
 function parseMentions(raw: unknown): FeedMention[] {
   if (!Array.isArray(raw)) return []
   return raw.filter(
@@ -78,9 +78,43 @@ export function apiPostToHomeFeedPost(p: ApiFeedPost): HomeFeedPost {
     reactionCounts: p.reactionCounts ?? emptyFeedReactionCounts(),
     viewerReaction: p.viewerReaction ?? null,
     connectionLikerPreview: p.connectionLikerPreview ?? [],
+    alphaLabel: p.alphaLabel,
     comments: p.commentCount ?? 0,
     source: 'api',
   }
+}
+
+export function apiFeedHomeCardToFeedItem(card: ApiFeedHomeCard): FollowingFeedItem | null {
+  if (card.cardType === 'post' && card.post) {
+    const raw = card.post as ApiFeedPost
+    return {
+      kind: 'post',
+      cursor: card.cursor,
+      createdAt: card.createdAt,
+      deepLink: card.deepLink,
+      post: apiPostToHomeFeedPost({
+        ...raw,
+        createdAt: raw.createdAt ?? card.createdAt,
+        alphaLabel: card.alphaLabel ?? raw.alphaLabel,
+      }),
+    }
+  }
+  if (card.cardType === 'activity' && card.verb) {
+    return {
+      kind: 'activity',
+      verb: card.verb,
+      cursor: card.cursor,
+      createdAt: card.createdAt,
+      deepLink: card.deepLink,
+      actor: card.actor,
+      object: {
+        ...(card.object ?? {}),
+        ...(card.reasonText ? { feedStreamReason: card.reasonText } : {}),
+        ...(card.alphaLabel ? { alphaLabel: card.alphaLabel } : {}),
+      },
+    }
+  }
+  return null
 }
 
 export function apiFollowingItemToFeedItem(row: ApiFollowingFeedItem): FollowingFeedItem | null {

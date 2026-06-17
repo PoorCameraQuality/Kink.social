@@ -1,6 +1,8 @@
 import SettingsBundleSaveBar from '@/components/settings/SettingsBundleSaveBar'
 import SettingsPrivacyDataPanel from '@/components/settings/SettingsPrivacyDataPanel'
 import SettingsPrivacySidebar from '@/components/settings/SettingsPrivacySidebar'
+import SettingsFeedActivityPrivacyPanel from '@/components/settings/SettingsFeedActivityPrivacyPanel'
+import SettingsMediaPrivacyPanel from '@/components/settings/SettingsMediaPrivacyPanel'
 import {
   SettingsEventHistoryPanel,
   SettingsConnectionsListPanel,
@@ -45,6 +47,8 @@ export default function SettingsPrivacyPage() {
         />
         <SettingsEventHistoryPanel privacy={ctx.privacy} onPrivacyChange={onPrivacyChange} />
         <SettingsConnectionsListPanel privacy={ctx.privacy} onPrivacyChange={onPrivacyChange} />
+        <SettingsFeedActivityPrivacyPanel privacy={ctx.privacy} onPrivacyChange={onPrivacyChange} />
+        <SettingsMediaPrivacyPanel privacy={ctx.privacy} onPrivacyChange={onPrivacyChange} />
         <SettingsInboxPanel privacy={ctx.privacy} onPrivacyChange={onPrivacyChange} />
         <SettingsDataRetentionPanel privacy={ctx.privacy} onPrivacyChange={onPrivacyChange} />
         <SettingsProfileFieldsPanel
@@ -63,7 +67,7 @@ export default function SettingsPrivacyPage() {
           onSaveProfilePrivacy={() => void ctx.saveProfilePrivacy()}
         />
         <SettingsPrivacyDataPanel />
-        <SettingsBundleSaveBar />
+        <SettingsBundleSaveBar profilePrivacyNote />
       </div>
       <aside className="mt-8 lg:mt-0">
         <SettingsPrivacySidebar />

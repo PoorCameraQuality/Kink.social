@@ -8,7 +8,7 @@ type Props = {
 }
 
 export default function EducationVideoStripCard({ video }: Props) {
-  const href = `/education/${encodeURIComponent(video.slug)}`
+  const href = video.href ?? `/education/${encodeURIComponent(video.slug)}`
 
   return (
     <article className="relative w-[min(100%,280px)] shrink-0 overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]">

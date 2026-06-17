@@ -79,7 +79,79 @@ export function buildDarkCommunityVars(p: CommunityPalette): Record<string, stri
     '--dc-tab-active-shadow': '0 10px 28px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
     '--dc-chip-bg': 'var(--dc-elevated-muted)',
     '--dc-chip-hover-bg': 'var(--dc-accent-muted)',
+    ...buildAtmosphereVars({
+      mode: 'dark',
+      background: p.background,
+      card: p.card,
+      primary: p.primary,
+    }),
   }
+}
+
+/** Ambient page background tokens — paired with card `--dc-elevated-solid` for depth. */
+export function buildAtmosphereVars(input: {
+  mode: 'light' | 'dark'
+  background: string
+  card: string
+  primary: string
+}): Record<string, string> {
+  const { mode, background, card, primary } = input
+
+  if (mode === 'light') {
+    const wash = hexWithAlpha(primary, 0.07)
+    return {
+      '--dc-atmosphere-vignette': hexWithAlpha('#000000', 0.05),
+      '--dc-atmosphere-glow-a': hexWithAlpha(primary, 0.1),
+      '--dc-atmosphere-glow-b': hexWithAlpha(primary, 0.05),
+      '--dc-atmosphere-glow-c': hexWithAlpha(primary, 0.06),
+      '--dc-atmosphere-gradient-top': lightenHex(background, 0.015),
+      '--dc-atmosphere-gradient-mid': background,
+      '--dc-atmosphere-gradient-bottom': darkenHex(background, 0.02),
+      '--dc-atmosphere-orb-a': wash,
+      '--dc-atmosphere-orb-b': hexWithAlpha(primary, 0.05),
+      '--dc-atmosphere-orb-c': hexWithAlpha(primary, 0.04),
+      '--dc-atmosphere-orb-opacity': '0.45',
+    }
+  }
+
+  const top = darkenHex(background, 0.06)
+  const mid = lightenHex(card, 0.04)
+  return {
+    '--dc-atmosphere-vignette': 'rgba(0, 0, 0, 0.38)',
+    '--dc-atmosphere-glow-a': hexWithAlpha(primary, 0.18),
+    '--dc-atmosphere-glow-b': hexWithAlpha(primary, 0.08),
+    '--dc-atmosphere-glow-c': hexWithAlpha(primary, 0.06),
+    '--dc-atmosphere-gradient-top': top,
+    '--dc-atmosphere-gradient-mid': mid,
+    '--dc-atmosphere-gradient-bottom': background,
+    '--dc-atmosphere-orb-a': hexWithAlpha(primary, 0.18),
+    '--dc-atmosphere-orb-b': hexWithAlpha(primary, 0.1),
+    '--dc-atmosphere-orb-c': hexWithAlpha(primary, 0.07),
+    '--dc-atmosphere-orb-opacity': '0.72',
+  }
+}
+
+export function enrichAppearanceVars(
+  vars: Record<string, string>,
+  mode: 'light' | 'dark',
+): Record<string, string> {
+  const background = vars['--dc-surface'] ?? (mode === 'light' ? '#f4f0e8' : '#090a0f')
+  const card = vars['--dc-elevated-solid'] ?? vars['--dc-surface-muted'] ?? '#1e1e1e'
+  const primary = vars['--dc-accent'] ?? '#e6638e'
+  return {
+    ...vars,
+    ...buildAtmosphereVars({ mode, background, card, primary }),
+  }
+}
+
+function darkenHex(hex: string, amount: number): string {
+  const h = hex.replace('#', '')
+  if (h.length !== 6) return hex
+  const clamp = (n: number) => Math.min(255, Math.max(0, Math.round(n)))
+  const r = clamp(parseInt(h.slice(0, 2), 16) * (1 - amount))
+  const g = clamp(parseInt(h.slice(2, 4), 16) * (1 - amount))
+  const b = clamp(parseInt(h.slice(4, 6), 16) * (1 - amount))
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
 }
 
 function hexWithAlpha(hex: string, alpha: number): string {

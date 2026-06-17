@@ -95,6 +95,19 @@ describe('HTTP smoke (no database)', () => {
     await app.close()
   })
 
+  test('GET /api/v1/feed/home returns 401 without session', async () => {
+    process.env.USE_DATABASE = 'true'
+    const cookie = (await import('@fastify/cookie')).default
+    const app = Fastify()
+    await app.register(cookie)
+    const { registerFeedRoutes } = await import('./feed-routes.js')
+    await registerFeedRoutes(app)
+
+    const res = await app.inject({ method: 'GET', url: '/api/v1/feed/home' })
+    assert.equal(res.statusCode, 401)
+    await app.close()
+  })
+
   test('GET /api/v1/feed/following/counts returns 401 without session', async () => {
     process.env.USE_DATABASE = 'true'
     const cookie = (await import('@fastify/cookie')).default

@@ -1,14 +1,8 @@
-import LandingProductPreview from '@/components/landing/LandingProductPreview'
+import SiteWordmark from '@/components/brand/SiteWordmark'
 import '@/components/landing/public-auth.css'
-import LandingHeroBackdrop from '@/components/landing/LandingHeroBackdrop'
-import LandingPublicFooter from '@/components/landing/LandingPublicFooter'
 import LandingSignupBlock from '@/components/landing/LandingSignupBlock'
-import LandingTrustPillRow from '@/components/landing/LandingTrustPillRow'
-import MobilePublicNav from '@/components/landing/MobilePublicNav'
-import PublicNav from '@/components/landing/PublicNav'
-import { LANDING_SUPPORTING_COPY } from '@/components/landing/landing-content'
 import { useAuth } from '@/contexts/AuthContext'
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { safeInternalPath } from '@c2k/shared'
 
 export default function LandingPage() {
@@ -30,33 +24,19 @@ export default function LandingPage() {
   }
 
   return (
-    <div className={loginTab ? 'public-page public-page--login-focus' : 'public-page'}>
-      <PublicNav />
-      <MobilePublicNav />
+    <div className="public-page public-page--auth-only">
+      <main className="landing-auth-only">
+        <Link to="/" className="landing-auth-only__brand" aria-label="Kink Social home">
+          <SiteWordmark className="text-xl font-semibold tracking-tight text-[var(--pub-text)] sm:text-2xl" />
+          <span className="landing-auth-only__alpha-badge" aria-hidden="true">
+            Alpha Test
+          </span>
+        </Link>
 
-      <section className="hero-section">
-        <LandingHeroBackdrop />
-        <div className="public-container hero-grid">
-          <div className="hero-copy pub-animate">
-            <p className="hero-eyebrow">18+ • COMMUNITY • CONSENT-CENTERED • PRIVACY-FIRST</p>
-            <h1 className="hero-title">
-              Friends, Events,
-              <span>Conventions &amp; Education.</span>
-            </h1>
-            <p className="hero-tagline">Build community. Organize events. Make friends.</p>
-            <p className="hero-body">{LANDING_SUPPORTING_COPY}</p>
-            <LandingTrustPillRow />
-          </div>
-
-          <div id="auth" className="auth-column scroll-mt-24 pub-animate pub-animate-delay-1">
-            <LandingSignupBlock {...signupProps} />
-          </div>
+        <div id="auth" className="landing-auth-only__card scroll-mt-24">
+          <LandingSignupBlock {...signupProps} />
         </div>
-      </section>
-
-      <LandingProductPreview />
-
-      <LandingPublicFooter />
+      </main>
     </div>
   )
 }

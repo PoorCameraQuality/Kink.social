@@ -1,29 +1,38 @@
 import { useId, useMemo, useState } from 'react'
 import EventCard from '@/components/cards/EventCard'
+import EventsDiscoverLeftRail from '@/components/events/EventsDiscoverLeftRail'
 import EventsPersonalCompactFilters from '@/components/events/EventsPersonalCompactFilters'
-import EventsPersonalNav from '@/components/events/EventsPersonalNav'
 import EventsPersonalRightRail from '@/components/events/EventsPersonalRightRail'
 import PersonalRegistrationRow from '@/components/events/PersonalRegistrationRow'
+import PageHeader from '@/components/shell/PageHeader'
+import DirectoryTemplate from '@/components/templates/DirectoryTemplate'
 import EmptyState from '@/components/ui/EmptyState'
 import { useAuth } from '@/contexts/AuthContext'
 import { BOOKMARK_OBJECT_EVENT, useApiBookmarks } from '@/hooks/useApiBookmarks'
 import { useApiEvents } from '@/hooks/useApiEvents'
-import { useApiMyRsvps } from '@/hooks/useApiMyRsvps'
+import { useEventsAgendaSidebar } from '@/hooks/useEventsAgendaSidebar'
+import { useApiMyRsvps, type ApiMyRsvpItem } from '@/hooks/useApiMyRsvps'
 import { bookmarkEventToMockEvent } from '@/lib/bookmark-event-mapper'
 import { eventStartDate } from '@/lib/events-page-utils'
 import type { EventsSectionMode } from '@/lib/events-section-mode'
+import { RSVP_LABEL_INTERESTED } from '@c2k/shared'
 
 type RegistrationsTab = 'upcoming' | 'pending' | 'past'
 type HostedTab = 'upcoming' | 'drafts' | 'staffed' | 'past'
 
 const COMPACT_FILTER_THRESHOLD = 10
 
+function isPendingRegistration(r: ApiMyRsvpItem): boolean {
+  if (r.status === 'waitlist') return true
+  return r.status === 'going' && r.rsvpApprovalStatus === 'pending'
+}
+
 const PAGE_META: Record<
   Exclude<EventsSectionMode, 'discover' | 'past-public'>,
   { title: string; subtitle: string }
 > = {
   registrations: {
-    title: 'My Registrations',
+    title: 'My RSVPs & registrations',
     subtitle: 'Events and conventions you RSVP’d to, registered for, or have access to.',
   },
   hosted: {
@@ -43,7 +52,7 @@ const PAGE_META: Record<
 const REGISTRATION_STATUS_OPTIONS = [
   { value: 'all', label: 'All statuses' },
   { value: 'going', label: 'Going' },
-  { value: 'maybe', label: 'Maybe' },
+  { value: 'maybe', label: RSVP_LABEL_INTERESTED },
   { value: 'waitlist', label: 'Waitlist' },
 ] as const
 
@@ -107,6 +116,7 @@ export default function EventsPersonalLibraryPage({ mode }: Props) {
   const myRsvps = useApiMyRsvps(showApi && (mode === 'registrations' || mode === 'past-attended'))
   const hostedEvents = useApiEvents({ hostId: 'me', enabled: showApi && mode === 'hosted' })
   const bookmarks = useApiBookmarks(showApi && mode === 'saved')
+  const agenda = useEventsAgendaSidebar()
 
   const meta = PAGE_META[mode as keyof typeof PAGE_META]
   if (!meta) return null
@@ -144,8 +154,8 @@ export default function EventsPersonalLibraryPage({ mode }: Props) {
       const isPast = !Number.isNaN(t) && t < now
       if (mode === 'past-attended') return isPast
       if (regTab === 'past') return isPast
-      if (regTab === 'pending') return r.status === 'waitlist' && !isPast
-      return !isPast && r.status !== 'waitlist'
+      if (regTab === 'pending') return isPendingRegistration(r) && !isPast
+      return !isPast && !isPendingRegistration(r)
     })
   }, [myRsvps.items, searchQuery, regTab, mode, now, showCompactFilters, statusFilter, dateStart, dateEnd])
 
@@ -189,7 +199,8 @@ export default function EventsPersonalLibraryPage({ mode }: Props) {
     if (tab === 'pending') {
       return {
         title: 'No pending registrations',
-        message: 'Waitlist and approval requests will appear here when you have them.',
+        message:
+          'You land here when an event is full (waitlist) or the host must approve your Going RSVP. Interested RSVPs stay under Upcoming.',
         ctaLabel: 'Find events',
         ctaHref: '/events',
       }
@@ -405,19 +416,20 @@ export default function EventsPersonalLibraryPage({ mode }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(260px,300px)]">
-        <div className="hidden lg:block">
-          <EventsPersonalNav />
-        </div>
-
-        <main className="min-w-0">
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">{meta.title}</h1>
-              <p className="mt-1 text-sm text-dc-text-muted">{meta.subtitle}</p>
-            </div>
-            {mode === 'hosted' ?
+    <DirectoryTemplate
+      title={meta.title}
+      description={meta.subtitle}
+      className="py-4 sm:py-6"
+      desktopAsideFrom="lg"
+      header={
+        <PageHeader
+          eyebrow="My events"
+          title={meta.title}
+          description={meta.subtitle}
+          sticky={false}
+          className="mb-4 lg:mb-6"
+          actions={
+            mode === 'hosted' ?
               <button
                 type="button"
                 data-create-trigger
@@ -425,23 +437,30 @@ export default function EventsPersonalLibraryPage({ mode }: Props) {
               >
                 + Create event
               </button>
-            : null}
-          </div>
+            : undefined
+          }
+        />
+      }
+      desktopSidebar={
+        <EventsDiscoverLeftRail showDiscoverFilters={false} {...agenda} />
+      }
+      desktopAside={<EventsPersonalRightRail mode={mode} />}
+    >
+      <button
+        type="button"
+        onClick={() => setNavDrawerOpen(!navDrawerOpen)}
+        className="mb-4 inline-flex min-h-11 items-center rounded-xl border border-dc-border bg-dc-elevated-solid px-4 text-sm font-medium text-dc-accent lg:hidden"
+        aria-expanded={navDrawerOpen}
+      >
+        Event sections
+      </button>
+      {navDrawerOpen ?
+        <div className="mb-6 lg:hidden">
+          <EventsDiscoverLeftRail showDiscoverFilters={false} {...agenda} />
+        </div>
+      : null}
 
-          <button
-            type="button"
-            onClick={() => setNavDrawerOpen(!navDrawerOpen)}
-            className="mb-4 inline-flex min-h-11 items-center rounded-xl border border-dc-border bg-dc-elevated-solid px-4 text-sm font-medium text-dc-accent lg:hidden"
-          >
-            My event life
-          </button>
-          {navDrawerOpen ?
-            <div className="mb-6 lg:hidden">
-              <EventsPersonalNav />
-            </div>
-          : null}
-
-          {mode === 'registrations' ?
+      {mode === 'registrations' ?
             <div className="mb-4 flex gap-2 overflow-x-auto c2k-no-scrollbar" role="tablist" aria-label="Registration tabs">
               {(['upcoming', 'pending', 'past'] as const).map((tab) => (
                 <TabButton key={tab} active={regTab === tab} onClick={() => setRegTab(tab)}>
@@ -468,12 +487,6 @@ export default function EventsPersonalLibraryPage({ mode }: Props) {
           : mode === 'hosted' ?
             renderHostedBody()
           : renderRegistrationsBody()}
-        </main>
-
-        <div className="hidden lg:block">
-          <EventsPersonalRightRail mode={mode} />
-        </div>
-      </div>
-    </div>
+    </DirectoryTemplate>
   )
 }

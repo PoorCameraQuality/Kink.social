@@ -6,6 +6,7 @@ import { PROFILE_MEDIA_GALLERY_ID, scrollToProfileMediaGallery } from '@/lib/pro
 import ProfileExtendedSection from '@/components/profile/ProfileExtendedSection'
 import ProfileAttendedEventCard from '@/components/profile/ProfileAttendedEventCard'
 import ProfileWritingTab from '@/components/profile/tabs/ProfileWritingTab'
+import ProfileCommunityTab from '@/components/profile/tabs/ProfileCommunityTab'
 import ProfileReviewsTab from '@/components/profile/tabs/ProfileReviewsTab'
 import ProfileIsoTab from '@/components/profile/tabs/ProfileIsoTab'
 import ProfileConnectionsTab from '@/components/profile/tabs/ProfileConnectionsTab'
@@ -23,6 +24,7 @@ import ProfileMediaTabPanel from '@/components/profile/layout/ProfileMediaTabPan
 import {
   DEFAULT_PUBLIC_PROFILE_TAB,
   getVisiblePublicProfileTabs,
+  type CommunitySection,
   type PublicProfileTab,
   type PublicProfileTabCounts,
 } from '@/lib/public-profile-tabs'
@@ -38,7 +40,7 @@ import ProfileOwnerActions from '@/components/profile/ProfileOwnerActions'
 import { formatMyRsvpLabel, useApiMyRsvps } from '@/hooks/useApiMyRsvps'
 import { useApiProfileMe } from '@/hooks/useApiProfileMe'
 import { clearProfileEditLocalOverrides, PROFILE_EDIT_STORAGE_KEY } from '@/lib/profileEditLocalStorage'
-import { formatPronounDisplay, pickPrimaryProfilePhoto } from '@c2k/shared'
+import { formatPronounDisplay, pickPrimaryProfilePhoto, visibleProfileIdentityFields } from '@c2k/shared'
 
 function formatAttendedDate(iso: string): string {
   const d = new Date(iso)
@@ -127,14 +129,21 @@ export default function ProfilePageClient() {
   const { status: authStatus, isAuthenticated, isFallback } = useAuth()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const [activeTab, setActiveTabState] = usePublicProfileTabFromUrl()
+  const [activeTab, setActiveTabState, communitySection] = usePublicProfileTabFromUrl()
 
   const selectTab = useCallback(
-    (tab: PublicProfileTab) => {
+    (tab: PublicProfileTab, section?: CommunitySection) => {
       setActiveTabState(tab)
-      navigate(`${pathname}?tab=${encodeURIComponent(tab)}`)
+      const params = new URLSearchParams()
+      params.set('tab', tab)
+      if (tab === 'Community' && section) params.set('section', section)
+      navigate(`${pathname}?${params.toString()}`)
     },
     [pathname, navigate, setActiveTabState],
+  )
+  const selectCommunitySection = useCallback(
+    (section: CommunitySection) => selectTab('Community', section),
+    [selectTab],
   )
   const openPhotoGallery = useCallback(() => {
     selectTab('Media')
@@ -215,11 +224,14 @@ export default function ProfilePageClient() {
     const onVisible = () => {
       if (document.visibilityState === 'visible') refresh()
     }
+    const onPrivacySaved = () => refresh()
     window.addEventListener('focus', refresh)
     document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('c2k:profile-privacy-saved', onPrivacySaved)
     return () => {
       window.removeEventListener('focus', refresh)
       document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('c2k:profile-privacy-saved', onPrivacySaved)
     }
   }, [loadRemoteProfile, profileMe.reload])
 
@@ -275,8 +287,6 @@ export default function ProfilePageClient() {
     signedInLive ? (p?.bio ?? '') : (p?.bio ?? storedProfile?.bio ?? person?.bio ?? '')
   const displayRoles =
     signedInLive ? (p?.roles ?? []) : (p?.roles ?? storedProfile?.roles ?? person?.roles ?? ['Switch', 'Rigger', 'Educator'])
-  const displayLocation =
-    signedInLive ? (p?.location ?? '') : (p?.location ?? storedProfile?.location ?? person?.location ?? 'Shippensburg, Pennsylvania')
   const primaryPhoto =
     pickPrimaryProfilePhoto(profilePhotos) ??
     profilePhotos.find((ph) => !ph.pendingReview && ph.url) ??
@@ -289,17 +299,34 @@ export default function ProfilePageClient() {
       ? (profileMe.data?.user?.username ?? remote?.user?.username ?? viewerUsername ?? '')
       : (remote?.user?.username ?? person?.username ?? viewerUsername ?? MOCK_VIEWER_USERNAME)
   const displayLookingFor = signedInLive ? (profileMe.data?.profile?.lookingFor ?? []) : []
+  const visibleIdentity = useMemo(() => {
+    const prof = profileMe.data?.profile
+    if (!signedInLive || !prof) return null
+    return visibleProfileIdentityFields(
+      {
+        gender: prof.gender ?? null,
+        age: prof.age ?? null,
+        sexuality: prof.sexuality ?? null,
+        pronouns: prof.pronouns ?? null,
+        genders: prof.genders,
+        sexualOrientations: prof.sexualOrientations,
+        romanticOrientations: prof.romanticOrientations,
+        pronounTags: prof.pronounTags,
+        location: prof.location ?? prof.customLocation ?? null,
+        fieldVisibility: prof.fieldVisibility,
+      },
+      { isOwner: true, isFriend: false, asPublicProfileView: true },
+    )
+  }, [signedInLive, profileMe.data?.profile])
   const displayPronouns =
-    signedInLive
-      ? formatPronounDisplay(
-          profileMe.data?.profile?.pronounTags ??
-            (p?.pronouns ? [p.pronouns] : null),
-        ) || undefined
-      : undefined
-  const displayAgeLabel =
-    signedInLive && profileMe.data?.profile?.age != null ?
-      String(profileMe.data.profile.age)
+    signedInLive ?
+      formatPronounDisplay(
+        visibleIdentity?.pronounTags ??
+          (visibleIdentity?.pronouns ? [visibleIdentity.pronouns] : null),
+      ) || undefined
     : undefined
+  const displayAgeLabel =
+    signedInLive && visibleIdentity?.age != null ? String(visibleIdentity.age) : undefined
   const displayLifestyleActivity =
     signedInLive ? profileMe.data?.profile?.lifestyleActivity?.trim() || undefined : undefined
   const memberSince = signedInLive ? profileMe.data?.user?.memberSince : undefined
@@ -307,6 +334,10 @@ export default function ProfilePageClient() {
     signedInLive
       ? (p?.displayName?.trim() || profileMe.data?.user?.username || remote?.user?.username || viewerUsername || '')
       : (p?.displayName?.trim() || remote?.user?.username || person?.username || viewerUsername || MOCK_VIEWER_USERNAME)
+  const displayLocationForProfile =
+    signedInLive ?
+      (visibleIdentity?.location?.trim() || '')
+    : (p?.location ?? storedProfile?.location ?? person?.location ?? 'Shippensburg, Pennsylvania')
   const serverKinks = profileMe.data?.kinks ?? remote?.kinks
 
   const retryProfileLoad = useCallback(() => {
@@ -456,8 +487,13 @@ export default function ProfilePageClient() {
   const profileTabCounts = useMemo((): PublicProfileTabCounts | undefined => {
     const count = connectionsSummary?.totalCount
     if (count == null) return undefined
-    return { Connections: count }
+    return { Community: count }
   }, [connectionsSummary?.totalCount])
+
+  const communityVisibleSections = useMemo(
+    (): CommunitySection[] => ['relationships', 'connections', 'feedback'],
+    [],
+  )
 
   const visibleTabs = useMemo(
     () => getVisiblePublicProfileTabs(tabVisibility),
@@ -484,12 +520,12 @@ export default function ProfilePageClient() {
     displayName,
     username: displayUsername,
     bio: displayBio || null,
-    location: displayLocation || 'Unknown',
+    location: displayLocationForProfile || 'Unknown',
     ageLabel: displayAgeLabel,
     pronouns: displayPronouns,
-    genders: profileMe.data?.profile?.genders ?? [],
-    sexualOrientations: profileMe.data?.profile?.sexualOrientations ?? [],
-    romanticOrientations: profileMe.data?.profile?.romanticOrientations ?? [],
+    genders: visibleIdentity?.genders ?? [],
+    sexualOrientations: visibleIdentity?.sexualOrientations ?? [],
+    romanticOrientations: visibleIdentity?.romanticOrientations ?? [],
     roles: displayRoles,
     lookingFor: displayLookingFor,
     kinks: serverKinks ?? [],
@@ -506,10 +542,8 @@ export default function ProfilePageClient() {
     eventsAttended: pastAttendedEvents.length,
     educationContributions: journalPublishedList.length + eduTeachingCredits.length,
     viewerIsOwner: true as const,
-    pronounTags:
-      profileMe.data?.profile?.pronounTags ??
-      (p?.pronouns ? [p.pronouns] : undefined),
-    onAddReference: () => selectTab('Reviews'),
+    pronounTags: visibleIdentity?.pronounTags ?? undefined,
+    onAddReference: () => selectTab('Community', 'feedback'),
     heroActions: ownerHeroActions,
   }
 
@@ -563,25 +597,52 @@ export default function ProfilePageClient() {
           onSelect={selectTab}
           tabCounts={profileTabCounts}
         >
-            {activeTab === 'Relationships' && (
-              <EmptyState
-                title="Connections & relationships"
-                message="Relationship and D/s labels are managed in profile edit. They appear here publicly when you add them."
-                ctaLabel="Edit relationships"
-                ctaHref="/profile/edit/relationships"
-                inline
+            {activeTab === 'Community' && (
+              <ProfileCommunityTab
+                activeSection={communitySection}
+                onSectionChange={selectCommunitySection}
+                visibleSections={communityVisibleSections}
+                relationships={
+                  <EmptyState
+                    title="Connections & relationships"
+                    message="Relationship and D/s labels are managed in profile edit. They appear here publicly when you add them."
+                    ctaLabel="Edit relationships"
+                    ctaHref="/profile/edit/relationships"
+                    inline
+                  />
+                }
+                connections={
+                  viewerUsername ?
+                    <ProfileConnectionsTab
+                      username={viewerUsername}
+                      listVisible={connectionsSummary?.listVisible ?? true}
+                      totalCount={connectionsSummary?.totalCount ?? 0}
+                      mutualCount={connectionsSummary?.mutualCount ?? null}
+                      viewerIsOwner
+                    />
+                  : null
+                }
+                feedback={
+                  <ProfileReviewsTab
+                    viewerIsOwner
+                    username={viewerUsername ?? ''}
+                    viewerUsername={viewerUsername}
+                    isAuthenticated={isAuthenticated}
+                    references={[]}
+                    incoming={[]}
+                    loading={false}
+                    viewerHasPendingOrAccepted={false}
+                    refCategory="general"
+                    refNote=""
+                    refNoteId="owner-reviews"
+                    onRefCategoryChange={() => {}}
+                    onRefNoteChange={() => {}}
+                    onOfferReference={() => {}}
+                    onRespondIncoming={() => {}}
+                  />
+                }
               />
             )}
-
-            {activeTab === 'Connections' && viewerUsername ?
-              <ProfileConnectionsTab
-                username={viewerUsername}
-                listVisible={connectionsSummary?.listVisible ?? true}
-                totalCount={connectionsSummary?.totalCount ?? 0}
-                mutualCount={connectionsSummary?.mutualCount ?? null}
-                viewerIsOwner
-              />
-            : null}
 
             {activeTab === 'ISO' && (
               isAuthenticated && !isFallback && remote?.user ?
@@ -649,6 +710,9 @@ export default function ProfilePageClient() {
             {activeTab === 'Media' && (
               <ProfileMediaTabPanel
                 id={PROFILE_MEDIA_GALLERY_ID}
+                username={viewerUsername ?? ''}
+                apiBacked={signedInLive}
+                viewerIsOwner
                 writing={
                   !isAuthenticated || isFallback ?
                     <p className="text-sm text-dc-text-muted">Sign in with a full account to see your writing on the server.</p>
@@ -661,7 +725,7 @@ export default function ProfilePageClient() {
                       formatTeachingDate={formatTeachingCreditDate}
                     />
                 }
-                photos={
+                profilePhotosSlot={
                   <ProfilePhotoManager
                     apiBacked={signedInLive}
                     embedded
@@ -669,26 +733,6 @@ export default function ProfilePageClient() {
                     onPhotosChanged={refreshProfilePhotos}
                   />
                 }
-              />
-            )}
-
-            {activeTab === 'Reviews' && (
-              <ProfileReviewsTab
-                viewerIsOwner
-                username={viewerUsername ?? ''}
-                viewerUsername={viewerUsername}
-                isAuthenticated={isAuthenticated}
-                references={[]}
-                incoming={[]}
-                loading={false}
-                viewerHasPendingOrAccepted={false}
-                refCategory="general"
-                refNote=""
-                refNoteId="owner-reviews"
-                onRefCategoryChange={() => {}}
-                onRefNoteChange={() => {}}
-                onOfferReference={() => {}}
-                onRespondIncoming={() => {}}
               />
             )}
         </ProfileExtendedSection>

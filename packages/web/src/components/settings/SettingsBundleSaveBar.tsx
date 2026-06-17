@@ -2,7 +2,11 @@ import Button from '@/components/ui/Button'
 import StatusBanner from '@/components/ui/StatusBanner'
 import { useSettingsContext } from '@/app/settings/SettingsContext'
 
-export default function SettingsBundleSaveBar() {
+type Props = {
+  profilePrivacyNote?: boolean
+}
+
+export default function SettingsBundleSaveBar({ profilePrivacyNote = false }: Props) {
   const { saveError, saving, saved, saveSettings } = useSettingsContext()
 
   return (
@@ -12,6 +16,11 @@ export default function SettingsBundleSaveBar() {
       <Button type="button" disabled={saving} onClick={() => void saveSettings()}>
         {saving ? 'Saving…' : 'Save settings'}
       </Button>
+      {profilePrivacyNote ?
+        <p className="text-xs text-dc-muted">
+          Also saves profile field visibility, location visibility, and people-search discoverability from this page.
+        </p>
+      : null}
     </div>
   )
 }

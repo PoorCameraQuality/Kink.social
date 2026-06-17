@@ -1,3 +1,8 @@
+import {
+  canViewerSeeGroupMemberInPublicList,
+  isGroupStaffRole,
+  type GroupMemberListVisibility,
+} from '@c2k/shared'
 import { and, eq } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { viewerCanPatchEvent } from './virtual-event-join-visibility.js'
@@ -61,6 +66,46 @@ export async function canViewGroup(
   if (!viewerUserId) return false
   const m = await getGroupMembership(g.id, viewerUserId)
   return Boolean(m)
+}
+
+export function viewerIsGroupStaff(
+  group: { ownerId: string },
+  membership: { role: string } | null,
+  viewerUserId: string | null,
+): boolean {
+  if (!viewerUserId) return false
+  if (group.ownerId === viewerUserId) return true
+  return isGroupStaffRole(membership?.role ?? null)
+}
+
+export function filterGroupMembersForViewer<
+  T extends {
+    userId: string
+    role: string
+    memberListVisibility: GroupMemberListVisibility
+  },
+>(
+  members: T[],
+  ctx: {
+    viewerUserId: string | null
+    groupOwnerId: string
+    viewerMembership: { role: string } | null
+    isSiteStaff: boolean
+  },
+): T[] {
+  const isGroupStaff = viewerIsGroupStaff(
+    { ownerId: ctx.groupOwnerId },
+    ctx.viewerMembership,
+    ctx.viewerUserId,
+  )
+  return members.filter((m) =>
+    canViewerSeeGroupMemberInPublicList(m.memberListVisibility, m.role, {
+      isOwner: ctx.viewerUserId === ctx.groupOwnerId,
+      isGroupStaff,
+      isSiteStaff: ctx.isSiteStaff,
+      isSelf: ctx.viewerUserId === m.userId,
+    }),
+  )
 }
 
 /** Whether an event row should appear on a group calendar/list for this viewer. */

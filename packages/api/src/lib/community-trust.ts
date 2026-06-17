@@ -747,9 +747,19 @@ async function loadSharedContext(
 
           sql`${schema.groupMembers.groupId} IN (
 
-            SELECT group_id FROM group_members WHERE user_id = ${viewerUserId}
+            SELECT gm.group_id FROM group_members gm
+            WHERE gm.user_id = ${viewerUserId}
+            AND (
+              gm.member_list_visibility = 'visible'
+              OR gm.role IN ('owner', 'admin', 'moderator')
+            )
 
-          )`
+          )`,
+
+          sql`(
+            ${schema.groupMembers.memberListVisibility} = 'visible'
+            OR ${schema.groupMembers.role} IN ('owner', 'admin', 'moderator')
+          )`,
 
         )
 

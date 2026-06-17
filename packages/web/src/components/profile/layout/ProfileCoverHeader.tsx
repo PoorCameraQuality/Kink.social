@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
 
 import type { ProfilePhotoDisplaySettings } from '@c2k/shared'
-import { PROFILE_HERO_PHOTO_FRAME_CLASS } from '@c2k/shared'
 
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
 import ProfilePhotoImage from '@/components/profile/ProfilePhotoImage'
 import ProfilePhotoCredit from '@/components/profile/ProfilePhotoCredit'
 import ProfilePill from '@/components/profile/story/ProfilePill'
 import { profileStoryEyebrow } from '@/components/profile/story/profile-story-classes'
+import { IconCamera } from '@/components/profile/story/ProfileStoryIcons'
 import { cn } from '@/lib/cn'
 
 type Props = {
@@ -40,7 +40,16 @@ function galleryCountLabel(count: number): string {
   return count === 1 ? '1 photo' : `${count} photos`
 }
 
-/** Desktop cover band with overlapping avatar — identity zone top-left, actions top-right. */
+function IdentityFact({ label, value }: { label: string; value: string }) {
+  return (
+    <>
+      <dt className="text-xs font-medium text-dc-muted">{label}</dt>
+      <dd className="text-sm text-dc-text">{value}</dd>
+    </>
+  )
+}
+
+/** Desktop hero — large portrait photo with identity facts beside it. */
 export default function ProfileCoverHeader({
   displayName,
   username,
@@ -66,94 +75,110 @@ export default function ProfileCoverHeader({
   const showGalleryAffordance = Boolean(onOpenGallery)
   const galleryLabel = showGalleryAffordance ? galleryCountLabel(photoCount) : null
 
-  const metaParts: string[] = []
-  if (ageLabel) metaParts.push(ageLabel)
-  if (genderLabel) metaParts.push(genderLabel)
-  if (orientationLabel) metaParts.push(orientationLabel)
-  if (showLocation) metaParts.push(location)
-  if (pronouns) metaParts.push(pronouns)
+  const identityFacts: { label: string; value: string }[] = []
+  if (ageLabel) identityFacts.push({ label: 'Age', value: ageLabel })
+  if (genderLabel) identityFacts.push({ label: 'Gender', value: genderLabel })
+  if (orientationLabel) identityFacts.push({ label: 'Orientation', value: orientationLabel })
+  if (showLocation) identityFacts.push({ label: 'Location', value: location })
+  if (pronouns) identityFacts.push({ label: 'Pronouns', value: pronouns })
 
-  const photoFrameClass = `${PROFILE_HERO_PHOTO_FRAME_CLASS} shadow-[0_16px_40px_-20px_rgba(0,0,0,0.55)] ring-2 ring-dc-surface ring-offset-2 ring-offset-dc-bg`
+  const photoFrameClass = cn(
+    'relative overflow-hidden rounded-2xl bg-dc-surface-muted',
+    'h-[240px] w-[192px] sm:h-[280px] sm:w-[224px] xl:h-[320px] xl:w-[256px]',
+    'shadow-[0_16px_40px_-20px_rgba(0,0,0,0.55)] ring-2 ring-dc-surface ring-offset-2 ring-offset-dc-bg',
+  )
 
   const photoContent =
     photoUrl ?
       <ProfilePhotoImage src={photoUrl} displaySettings={photoDisplaySettings} className="h-full w-full" />
     : <div className="flex h-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-dc-accent/15 via-dc-surface-muted to-dc-elevated-solid p-4 text-center">
         <PlaceholderAvatar size="lg" className="!rounded-2xl" />
+        <p className="text-xs text-dc-muted/90">Add a profile photo</p>
       </div>
+
+  const galleryBadge =
+    galleryLabel ?
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent px-3 pb-3 pt-10">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white">
+          <IconCamera className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {galleryLabel}
+        </span>
+      </span>
+    : null
+
+  const photoFrame = (
+    <div className={photoFrameClass}>
+      {photoContent}
+      {galleryBadge}
+    </div>
+  )
 
   return (
     <header
       className={cn(
-        'relative mb-6 overflow-hidden rounded-2xl border border-white/[0.07] bg-dc-elevated/40 shadow-[var(--dc-shadow-soft)] c2k-profile-hero',
+        'relative mb-6 overflow-hidden rounded-2xl border border-white/[0.07] bg-dc-elevated/40 p-6 shadow-[var(--dc-shadow-soft)] c2k-profile-hero sm:p-7 xl:p-8',
         className,
       )}
     >
-      <div className="h-28 bg-gradient-to-br from-dc-accent/20 via-dc-surface-muted to-dc-elevated-solid sm:h-32" aria-hidden />
+      <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-8">
+        <div className="shrink-0">
+          {showGalleryAffordance ?
+            <button
+              type="button"
+              onClick={onOpenGallery}
+              className="group block text-left"
+              aria-label={
+                photoCount > 0 ?
+                  `Open photo gallery, ${photoCount} ${photoCount === 1 ? 'photo' : 'photos'}`
+                : 'Add profile photos'
+              }
+            >
+              <div className="transition-transform group-hover:scale-[1.01] group-active:scale-[0.99]">{photoFrame}</div>
+            </button>
+          : photoFrame}
+          <ProfilePhotoCredit caption={photoCaption} className="mt-2.5 max-w-[192px] sm:max-w-[224px] xl:max-w-[256px]" />
+        </div>
 
-      <div className="relative px-5 pb-5 sm:px-6 sm:pb-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="-mt-14 flex min-w-0 flex-1 items-end gap-4 sm:-mt-16">
-            {showGalleryAffordance ?
-              <button
-                type="button"
-                onClick={onOpenGallery}
-                className="group shrink-0"
-                aria-label={
-                  photoCount > 0 ?
-                    `Open photo gallery, ${photoCount} ${photoCount === 1 ? 'photo' : 'photos'}`
-                  : 'Add profile photos'
-                }
-              >
-                <div
-                  className={`${photoFrameClass} relative h-[112px] w-[112px] overflow-hidden transition-transform group-hover:scale-[1.02] sm:h-[128px] sm:w-[128px]`}
-                >
-                  {photoContent}
-                  {galleryLabel ?
-                    <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-2 pb-2 pt-6 text-[10px] font-medium text-white">
-                      {galleryLabel}
-                    </span>
-                  : null}
-                </div>
-              </button>
-            : <div className={`${photoFrameClass} relative h-[112px] w-[112px] overflow-hidden sm:h-[128px] sm:w-[128px]`}>{photoContent}</div>}
-
-            <div className="min-w-0 pb-1">
-              <h1 className="font-display text-2xl font-bold tracking-tight text-dc-text sm:text-3xl break-words">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+            <div className="min-w-0">
+              <h1 className="break-words font-display text-3xl font-bold tracking-tight text-dc-text xl:text-4xl">
                 {displayName}
               </h1>
               {displayName !== username ?
-                <p className="mt-0.5 text-sm text-dc-muted">@{username}</p>
+                <p className="mt-1 text-sm text-dc-muted">@{username}</p>
               : null}
               {tagline ?
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-dc-text-muted italic line-clamp-2">
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-dc-text-muted italic line-clamp-3">
                   &ldquo;{tagline}&rdquo;
                 </p>
               : null}
             </div>
+
+            <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>
           </div>
 
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:pb-1">{actions}</div>
-        </div>
-
-        <ProfilePhotoCredit caption={photoCaption} className="mt-2 max-w-[128px]" />
-
-        {metaParts.length > 0 ?
-          <p className="mt-3 text-sm text-dc-text-muted">{metaParts.join(' · ')}</p>
-        : null}
-
-        {roles.length > 0 ?
-          <div className="mt-3">
-            <p className={profileStoryEyebrow}>Roles</p>
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
-              {roles.map((role) => (
-                <ProfilePill key={role} className="text-xs px-2.5 py-0.5">
-                  {role}
-                </ProfilePill>
+          {identityFacts.length > 0 ?
+            <dl className="mt-5 grid max-w-lg grid-cols-[minmax(5.5rem,auto)_1fr] gap-x-5 gap-y-2.5 rounded-xl bg-dc-surface-muted/30 px-4 py-3.5 ring-1 ring-inset ring-white/[0.05]">
+              {identityFacts.map((fact) => (
+                <IdentityFact key={fact.label} label={fact.label} value={fact.value} />
               ))}
+            </dl>
+          : null}
+
+          {roles.length > 0 ?
+            <div className="mt-5">
+              <p className={profileStoryEyebrow}>Roles</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {roles.map((role) => (
+                  <ProfilePill key={role} className="px-2.5 py-0.5 text-xs">
+                    {role}
+                  </ProfilePill>
+                ))}
+              </div>
             </div>
-          </div>
-        : null}
+          : null}
+        </div>
       </div>
     </header>
   )

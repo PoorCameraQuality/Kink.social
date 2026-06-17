@@ -21,6 +21,7 @@ import {
   promoteQuarantineToPublic,
   publicMediaObjectKey,
   publicUrlForKey,
+  isBrowserReachablePublicUrl,
   putObject,
   quarantineObjectKey,
 } from './s3-upload.js'
@@ -42,7 +43,7 @@ export class MediaUploadValidationError extends Error {
 export type ProcessedUploadResult = {
   quarantineKey: string
   sha256Hash: string
-  mimeType: AllowedImageMime
+  mimeType: string
   sizeBytes: number
   width: number
   height: number
@@ -116,6 +117,54 @@ export async function processIncomingImageUpload(params: {
   }
 }
 
+const ALLOWED_VIDEO_MIMES = new Set(['video/mp4', 'video/webm'])
+
+/** Store video in quarantine without transcoding (alpha). */
+export async function processIncomingVideoUpload(params: {
+  userId: string
+  buffer: Buffer
+  filename: string
+  declaredMime?: string | null
+}): Promise<Omit<ProcessedUploadResult, 'exifStripped' | 'width' | 'height'> & { width: number; height: number; exifStripped: false }> {
+  const mime = (params.declaredMime ?? '').toLowerCase()
+  if (!ALLOWED_VIDEO_MIMES.has(mime)) {
+    throw new MediaUploadValidationError('Video must be MP4 or WebM')
+  }
+  if (params.buffer.length > 100 * 1024 * 1024) {
+    throw new MediaUploadValidationError('Video file is too large (max 100MB)')
+  }
+
+  const hash = sha256(params.buffer)
+  const ext = mime === 'video/webm' ? '.webm' : '.mp4'
+  const quarantineKey = quarantineObjectKey(params.userId, randomUUID(), ext)
+  const bucket = defaultBucket()
+  const client = getS3Client()
+
+  if (!client && process.env.MEDIA_PIPELINE_ALLOW_NO_S3 !== '1') {
+    throw new MediaUploadValidationError('Upload storage is not configured')
+  }
+
+  if (client) {
+    await putObject(client, {
+      Bucket: bucket,
+      Key: quarantineKey,
+      Body: params.buffer,
+      ContentType: mime,
+    })
+  }
+
+  return {
+    quarantineKey,
+    sha256Hash: hash,
+    mimeType: mime,
+    sizeBytes: params.buffer.length,
+    width: 0,
+    height: 0,
+    storageBucket: bucket,
+    exifStripped: false,
+  }
+}
+
 export function resolveMediaServingKey(asset: MediaAsset): string | null {
   if (asset.publicStorageKey && isPublicStorageState(asset.storageState)) {
     return asset.publicStorageKey
@@ -134,19 +183,50 @@ export function resolveMediaServingKey(asset: MediaAsset): string | null {
 export function resolveMediaPublicUrl(asset: MediaAsset): string | null {
   if (!isPublicStorageState(asset.storageState) && asset.storageState !== null) {
     if (asset.storageKey.startsWith('http') && isMediaPublishedStatus(asset.uploadStatus as MediaUploadStatus)) {
-      return asset.storageKey
+      return isBrowserReachablePublicUrl(asset.storageKey) ? asset.storageKey : null
     }
     if (!asset.publicStorageKey) return null
   }
   const key = asset.publicStorageKey ?? (asset.storageKey.startsWith('http') ? null : asset.storageKey)
   if (!key || key.startsWith('http')) {
-    return key?.startsWith('http') ? key : null
+    return key?.startsWith('http') && isBrowserReachablePublicUrl(key) ? key : null
   }
-  return publicUrlForKey(key, asset.storageBucket ?? undefined)
+  const url = publicUrlForKey(key, asset.storageBucket ?? undefined)
+  return url && isBrowserReachablePublicUrl(url) ? url : null
 }
 
 export function mediaContentProxyPath(mediaAssetId: string): string {
   return `/api/v1/media/assets/${mediaAssetId}/content`
+}
+
+/** Promote a quarantined scope-branding upload (group/org banner, logo, share) to a public URL. */
+export async function promoteQuarantineToScopeBrandingUrl(params: {
+  userId: string
+  quarantineKey: string
+  scopePath: string
+  assetName: 'banner' | 'logo' | 'share'
+}): Promise<string> {
+  const expectedPrefix = `quarantine/${params.userId}/`
+  if (!params.quarantineKey.startsWith(expectedPrefix)) {
+    throw new MediaUploadValidationError('Invalid upload reference')
+  }
+  const extMatch = params.quarantineKey.match(/(\.[a-z0-9]+)$/i)
+  const ext = extMatch?.[1] ?? '.jpg'
+  const objectId = randomUUID()
+  const publicKey = `${params.scopePath}/${params.assetName}-${objectId}${ext}`
+  const bucket = defaultBucket()
+  const client = getS3Client()
+  if (!client && process.env.MEDIA_PIPELINE_ALLOW_NO_S3 !== '1') {
+    throw new MediaUploadValidationError('Upload storage is not configured')
+  }
+  if (client) {
+    await promoteQuarantineToPublic(client, params.quarantineKey, publicKey, bucket)
+  }
+  const publicUrl = publicUrlForKey(publicKey, bucket)
+  if (!publicUrl) {
+    throw new MediaUploadValidationError('Upload succeeded but no public URL is configured')
+  }
+  return publicUrl
 }
 
 export type MediaScanRunResult = {

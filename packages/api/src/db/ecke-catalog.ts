@@ -12,6 +12,7 @@ export type EckeEventRow = {
   slug: string
   description: string
   category: string
+  imageUrl?: string | null
 }
 
 export type EckeVendorRow = {
@@ -21,6 +22,8 @@ export type EckeVendorRow = {
   location: string
   categories: string[]
   website?: string
+  logoUrl?: string | null
+  productImageUrl?: string | null
 }
 
 export type EckeDungeonRow = {
@@ -29,6 +32,8 @@ export type EckeDungeonRow = {
   location: string
   category: string
   description: string
+  logoUrl?: string | null
+  website?: string | null
 }
 
 export type EckePersonaRow = {
