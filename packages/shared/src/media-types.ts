@@ -330,6 +330,13 @@ export function explicitCannotBePublicPreview(
   return visibility === MEDIA_VISIBILITIES.publicPreview && isExplicitRating(rating)
 }
 
+/** Whether media at this visibility may use unauthenticated direct object URLs (MinIO/Caddy). */
+export function visibilityAllowsAnonymousDirectUrl(
+  visibility: MediaVisibility | null | undefined,
+): boolean {
+  return visibility === MEDIA_VISIBILITIES.publicPreview
+}
+
 export function isMultiPersonDepiction(depictedPeople: DepictedPeople): boolean {
   return (
     depictedPeople === DEPICTED_PEOPLE.meAndOtherAdults ||

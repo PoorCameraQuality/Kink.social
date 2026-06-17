@@ -6,6 +6,7 @@ import {
   SCAN_STATUSES,
   isMediaPublishedStatus,
   isPublicStorageState,
+  visibilityAllowsAnonymousDirectUrl,
   type MediaPublishLane,
   type MediaUploadStatus,
   type ScanStatus,
@@ -199,6 +200,15 @@ export function mediaContentProxyPath(mediaAssetId: string): string {
   return `/api/v1/media/assets/${mediaAssetId}/content`
 }
 
+/** Client-facing URL: direct public object only when visibility allows anonymous access; else auth proxy. */
+export function resolveMediaClientUrl(asset: MediaAsset): string {
+  if (canExposePublicUrl(asset)) {
+    const publicUrl = resolveMediaPublicUrl(asset)
+    if (publicUrl) return publicUrl
+  }
+  return mediaContentProxyPath(asset.id)
+}
+
 /** Promote a quarantined scope-branding upload (group/org banner, logo, share) to a public URL. */
 export async function promoteQuarantineToScopeBrandingUrl(params: {
   userId: string
@@ -275,9 +285,43 @@ export async function promoteMediaAssetToPublic(params: {
     .limit(1)
   if (!asset) return null
 
+  const visibility = asset.visibility as MediaVisibility | null
+  const now = new Date()
+
+  async function syncProfilePhotoServingUrls(updated: MediaAsset) {
+    const servingUrl = resolveMediaClientUrl(updated)
+    const photoRows = await db
+      .update(schema.profilePhotos)
+      .set({ url: servingUrl })
+      .where(eq(schema.profilePhotos.mediaAssetId, params.mediaAssetId))
+      .returning({ profileId: schema.profilePhotos.profileId, sortOrder: schema.profilePhotos.sortOrder })
+    const primary = photoRows.find((row) => row.sortOrder === 0) ?? photoRows[0]
+    if (primary?.profileId) {
+      await db
+        .update(schema.profiles)
+        .set({ avatarUrl: servingUrl, updatedAt: new Date() })
+        .where(eq(schema.profiles.id, primary.profileId))
+    }
+  }
+
+  /** Restricted visibility: scan-approved but stay in quarantine; serve only via auth proxy. */
+  if (!visibilityAllowsAnonymousDirectUrl(visibility)) {
+    const [updated] = await db
+      .update(schema.mediaAssets)
+      .set({
+        storageState: MEDIA_STORAGE_STATES.validatedPrivate,
+        promotedAt: now,
+        promotedByUserId: params.promotedByUserId,
+        updatedAt: now,
+      })
+      .where(eq(schema.mediaAssets.id, params.mediaAssetId))
+      .returning()
+    if (updated) await syncProfilePhotoServingUrls(updated)
+    return updated ?? null
+  }
+
   const quarantineKey = asset.quarantineStorageKey ?? asset.storageKey
   if (!quarantineKey || quarantineKey.startsWith('http')) {
-    const now = new Date()
     const [updated] = await db
       .update(schema.mediaAssets)
       .set({
@@ -300,9 +344,6 @@ export async function promoteMediaAssetToPublic(params: {
     await promoteQuarantineToPublic(client, quarantineKey, publicKey, bucket)
   }
 
-  const publicUrl = publicUrlForKey(publicKey, bucket)
-  const now = new Date()
-
   const [updated] = await db
     .update(schema.mediaAssets)
     .set({
@@ -316,20 +357,7 @@ export async function promoteMediaAssetToPublic(params: {
     .where(eq(schema.mediaAssets.id, params.mediaAssetId))
     .returning()
 
-  if (updated && publicUrl) {
-    const photoRows = await db
-      .update(schema.profilePhotos)
-      .set({ url: publicUrl })
-      .where(eq(schema.profilePhotos.mediaAssetId, params.mediaAssetId))
-      .returning({ profileId: schema.profilePhotos.profileId, sortOrder: schema.profilePhotos.sortOrder })
-    const primary = photoRows.find((row) => row.sortOrder === 0) ?? photoRows[0]
-    if (primary?.profileId) {
-      await db
-        .update(schema.profiles)
-        .set({ avatarUrl: publicUrl, updatedAt: new Date() })
-        .where(eq(schema.profiles.id, primary.profileId))
-    }
-  }
+  if (updated) await syncProfilePhotoServingUrls(updated)
 
   return updated ?? null
 }
@@ -420,7 +448,7 @@ export async function finalizeMediaAfterAttestation(params: {
     uploadStatus === MEDIA_UPLOAD_STATUSES.autoApproved &&
     scanStatus === SCAN_STATUSES.passed
   ) {
-    await promoteMediaAssetToPublic({
+    const promoted = await promoteMediaAssetToPublic({
       mediaAssetId: params.mediaAssetId,
       promotedByUserId: params.userId,
     })
@@ -435,8 +463,8 @@ export async function finalizeMediaAfterAttestation(params: {
     return {
       uploadStatus,
       scanStatus,
-      storageState: MEDIA_STORAGE_STATES.approvedPublic,
-      promoted: true,
+      storageState: promoted?.storageState ?? MEDIA_STORAGE_STATES.approvedPublic,
+      promoted: Boolean(promoted),
       scannerResults: scanRun.scannerResults,
     }
   }
@@ -455,8 +483,9 @@ export async function finalizeMediaAfterAttestation(params: {
 
 export function canExposePublicUrl(asset: MediaAsset): boolean {
   if (!isPublicStorageState(asset.storageState) || !resolveMediaPublicUrl(asset)) return false
-  const rating = asset.contentRating as MediaContentRating | null
   const visibility = asset.visibility as MediaVisibility | null
+  if (!visibilityAllowsAnonymousDirectUrl(visibility)) return false
+  const rating = asset.contentRating as MediaContentRating | null
   if (rating && visibility && !explicitMediaAllowsPublicUrl(rating, visibility)) {
     return false
   }
