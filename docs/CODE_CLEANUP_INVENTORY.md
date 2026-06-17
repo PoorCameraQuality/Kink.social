@@ -1,7 +1,7 @@
 # Code cleanup inventory
 
-**Last updated:** 2026-06-17  
-**Pass:** Deploy Slimming and Repo Hygiene Audit Pass 1  
+**Last updated:** 2026-06-17 (Verification Pass 2)  
+**Pass:** Deploy Slimming and Repo Hygiene Audit Pass 1 + Verification Pass 2  
 **Rule:** Unknown items are **inventoried only** — no deletions in this pass except proven generated tracked files.
 
 Related: [`REPO_MAP.md`](./REPO_MAP.md)
@@ -52,11 +52,12 @@ Related: [`REPO_MAP.md`](./REPO_MAP.md)
 | Field | Value |
 |-------|-------|
 | **Paths** | 62 tracked files under [`src/`](../src) |
+| **Deprecation note** | [`src/README.md`](../src/README.md) added Pass 2 — historical pre-Vite tree; **`packages/web` is canonical** |
 | **Why suspicious** | Pre-Vite Next.js-era components; canonical app is `packages/web` |
 | **Searches** | No `package.json` script imports; no `from '../src'` in packages |
-| **Docker/deploy** | Included in tarball today but not used by `npm run build` |
+| **Docker/deploy** | Was included in pre-`.deployignore` tarballs; harmless at ~small size; not used by build |
 | **Risk** | Low for runtime; medium for confusion |
-| **Recommendation** | **archive in later pass** — add deprecation README in `src/` first; do not delete until import audit on full tree |
+| **Recommendation** | **archive in later pass** — after one release cycle with `src/README.md` in place; do not delete until import audit complete |
 
 Sample duplicates: `src/components/LoginCard.tsx`, `src/components/BottomNav.tsx` vs `packages/web/src/components/…`
 
@@ -128,10 +129,41 @@ No production passwords or API keys found in tracked source files during this pa
 
 ---
 
+## Verification Pass 2 (2026-06-17)
+
+### Deploy tarball measurement
+
+| Metric | Value |
+|--------|--------|
+| Command | `tar -czf .deploy-test-verify.tgz --exclude-from=.deployignore -C . .` |
+| Old tarball (pre-`.deployignore`) | **681.39 MB** (`.deploy-c2k-full.tgz`) |
+| New tarball | **24.01 MB** |
+| Reduction | **~657 MB (~96%)** |
+| `docs/audits/` in tarball | **No** (grep of listing: zero matches) |
+| Old deploy tarballs in tarball | **No** |
+| `node_modules`, logs, `test-out.txt` | **No** |
+
+Top included areas: `packages/`, `docs/` (tracked markdown only, no `docs/audits`), `scripts/`, `docker/`, root config.
+
+### CI
+
+Branch pushes alone do **not** trigger CI (workflow: `pull_request` + `push` to `main` only). Pass 2 opened/updated PR to trigger Node 20 CI — see PR link in operator report.
+
+### Local verification (Pass 2)
+
+| Command | Result |
+|---------|--------|
+| `npm run typecheck` | **Pass** |
+| `npm run build` | **Pass** |
+| `npm run test -w @c2k/api` | **553/553 pass** (Node v24.5.0) |
+
+---
+
 ## Recommended next cleanup pass
 
-1. Add `src/README.md` marking tree deprecated; grep entire repo for any stray imports.
-2. Per-row remediation of 26 legacy profile media rows (see [`PUBLIC_ALPHA_PROMOTION.md`](./PUBLIC_ALPHA_PROMOTION.md)).
-3. Optionally split `docs/audits/` out of workstation entirely or add `npm run clean:audits`.
-4. Consolidate `_deploy-eod` / `_deploy-ui` tarball creation into shared helper using `.deployignore`.
-5. Archive or delete top-level `src/` after one release cycle with no references.
+1. ~~Add `src/README.md` marking tree deprecated~~ **Done (Pass 2)**
+2. Confirm CI green on PR merge path (Node 20)
+3. Per-row remediation of 26 legacy profile media rows (see [`PUBLIC_ALPHA_PROMOTION.md`](./PUBLIC_ALPHA_PROMOTION.md))
+4. Optionally split `docs/audits/` out of workstation entirely or add `npm run clean:audits`
+5. Consolidate `_deploy-eod` / `_deploy-ui` tarball creation into shared helper using `.deployignore`
+6. Archive or delete top-level `src/` after one release cycle with no references
