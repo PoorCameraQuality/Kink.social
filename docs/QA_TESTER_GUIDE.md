@@ -4,6 +4,8 @@
 
 Quick reference for beta and pilot testers. Covers wayfinding conventions (G1), home feed data sources (G4), messaging surfaces (N1), and platform moderation (N2).
 
+**Alpha environment:** **https://kink.social** is a **public-facing alpha** test server — anyone may browse. It is **not** final public launch: expect bugs, incomplete areas, and fictional seeded test data in some surfaces. Structured QA: [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md). Operator prep: [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md).
+
 **Related:** [`docs/WAYFINDING.md`](./WAYFINDING.md) · [`docs/FEATURE_REGISTRY.md`](./FEATURE_REGISTRY.md) · [`docs/PILOT_READINESS.md`](./PILOT_READINESS.md) · [`docs/ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) · [`docs/VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md) · [`docs/E2E.md`](./E2E.md) · [`docs/SMOKE_CHECKLIST.md`](./SMOKE_CHECKLIST.md)
 
 **Automated coverage:** `npm run test:e2e` (full Playwright matrix) · `npm run verify:alpha` (local alpha gate) · `npm run audit:ui-inventory` (static route table in [`audits/ui/generated/ROUTES_TABLE.md`](./audits/ui/generated/ROUTES_TABLE.md))

@@ -2,6 +2,8 @@
 
 Fictional, append-only database content for testing the kink.social social loop **without** client-side demo padding and **without** wiping East Coast Kink Events (ECKE) listings.
 
+**Context:** On the **public-facing alpha** server, this seed creates **fictional `alpha_*` personas and posts** for structured QA. They are **not real community members** — do not present seed content as organic community proof.
+
 **QA walkthrough:** After seeding, use [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) for step-by-step tester checklists. **VPS operator prep:** [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md).
 
 ## What it creates

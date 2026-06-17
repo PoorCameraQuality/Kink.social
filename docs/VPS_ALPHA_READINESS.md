@@ -1,26 +1,28 @@
 # VPS alpha readiness (operator checklist)
 
 **Last updated:** 2026-06-17  
-**Audience:** Operator preparing kink.social for invite-only alpha testers on VPS/staging  
+**Audience:** Operator preparing kink.social for **public-facing alpha** on VPS/staging  
 **Related:** [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) · [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md) · [`PILOT_READINESS.md`](./PILOT_READINESS.md) · [`ALPHA_DEPLOYMENT.md`](./ALPHA_DEPLOYMENT.md) · [`SERVER_CUTOVER_LOG.md`](./SERVER_CUTOVER_LOG.md)
 
 ---
 
 ## 1. Purpose
 
-This checklist prepares a **VPS or staging alpha** environment for **human testers**. It is the operator companion to the tester walkthrough in [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md).
+This checklist prepares a **VPS or staging public-facing alpha** environment for **internal browser QA** and, when ready, **structured tester feedback**. It is the operator companion to the tester walkthrough in [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md).
 
 ### What this is
 
-- Invite-only alpha readiness on a controlled server
+- **Public-facing alpha** readiness on an open alpha test server (visitors may browse)
 - Non-destructive verification steps where possible
-- Smoke and privacy checks before sending invites
+- Smoke and privacy checks **before actively promoting alpha testing** or sending people through the full QA journey
 
 ### What this is not
 
-- A **public launch** checklist
+- A **final public launch** checklist
 - A **production hardening certification** (see [`VPS_SECURITY_HARDENING.md`](./VPS_SECURITY_HARDENING.md) separately)
 - Permission to run **database wipes**, full `db:seed`, or unplanned password resets on live alpha accounts
+
+**Alpha expectations:** The site may be visible to anyone, but it is still **in alpha** — under active testing, incomplete in some areas, subject to bugs, and may include **fictional seeded test data**. Users should not be encouraged to upload sensitive real personal information beyond what they knowingly choose to share.
 
 ### Database policy
 
@@ -33,8 +35,8 @@ Do **not** run destructive database commands during alpha prep unless you have a
 | Environment | Typical host | Safe operations | Avoid |
 |-------------|--------------|-----------------|-------|
 | **Local dev** | `localhost`, Docker Compose dev | `npm run dev`, Mailpit, `db:migrate-incremental`, alpha seeds with guards | Pointing local tools at production `DATABASE_URL` |
-| **Staging / VPS alpha** | kink.social or staging domain | Deploy, migrate, health checks, guarded seeds, invite-only registration | `db:wipe`, volume deletes, password resets on seeded/owner accounts |
-| **Production / public launch** | Live user traffic | This doc is **not** the launch gate | Treating alpha shortcuts as launch-ready |
+| **Staging / VPS alpha** | kink.social or staging domain | Deploy, migrate, health checks, guarded seeds; **public visitors may browse**; registration per env (`C2K_REGISTRATION_*`) | `db:wipe`, volume deletes, password resets on seeded/owner accounts |
+| **Production / final launch** | Live user traffic at launch quality | This doc is **not** the launch gate | Treating alpha shortcuts as launch-ready |
 
 **Command safety (summary):**
 
@@ -76,10 +78,16 @@ Verify on the server `.env.production` (or equivalent). Template: [`.env.product
 
 ### Registration
 
-| Variable | Purpose | Required for alpha? | How to verify | Notes |
-|----------|---------|---------------------|---------------|-------|
-| `C2K_REGISTRATION_INVITE_CODE` | Invite gate | Recommended | Register fails without code | Distribute securely to testers |
-| `C2K_REGISTRATION_OPEN` | Open signup | Optional | `false` for invite-only | Default closed when invite set |
+Registration behavior is **env-driven**, not implied by “public-facing alpha.” Check live policy: `GET /api/auth/registration-policy` → `{ registrationOpen, inviteRequired }`.
+
+| Variable | Purpose | When set | How to verify | Notes |
+|----------|---------|----------|---------------|-------|
+| `C2K_REGISTRATION_OPEN` | Allow signup | Unset or not `false` | Policy shows `registrationOpen: true` | Set `false` to close signup quickly |
+| `C2K_REGISTRATION_INVITE_CODE` | Invite gate | Non-empty string | Policy shows `inviteRequired: true`; register fails without matching code | **Only describe signup as invite-gated when this is set** |
+
+If registration is **open** during alpha: say so in tester comms and ensure alpha warnings (18+, terms, bug path, fictional seed data) are visible.
+
+If registration **requires an invite code**: document that explicitly — it is separate from whether the **site is publicly viewable**.
 
 ### Mail / password reset (config only)
 
@@ -235,9 +243,9 @@ ALLOW_ALPHA_SOCIAL_SEED=true USE_DATABASE=true npm run seed:alpha-social
 
 ## 8. Alpha smoke test checklist (operator)
 
-Short pass before inviting testers. Use [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) for full detail.
+Short pass **before actively promoting alpha testing** or sending structured testers through the full journey. Public visitors may already browse; this gate is for **serious use** and **promotion**. Full detail: [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md).
 
-- [ ] Register with **invite code** (fictional profile data)
+- [ ] Register (with invite code **only if** `inviteRequired` is true) using fictional profile data
 - [ ] Log in as **seeded user** (`alpha_social` if seed ran)
 - [ ] Visit **Home**; no fake signed-in padding
 - [ ] **Create a post**; react/comment
@@ -326,19 +334,20 @@ Short pass before inviting testers. Use [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURN
 
 ---
 
-## 13. Tester invite checklist
+## 13. Structured tester checklist
 
-Before sending invites:
+Before **actively promoting alpha testing** or asking people to run the full QA journey:
 
 - [ ] Backup exists and backup id recorded
 - [ ] Health checks pass (section 6)
 - [ ] Seed users verified (if seed ran)
-- [ ] Invite code tested once
+- [ ] Registration policy verified (`/api/auth/registration-policy`) and comms match env
 - [ ] Link testers to [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md)
 - [ ] Bug report template in section 6 of QA journey shared
 - [ ] **Known issues** list prepared (section 14 below)
-- [ ] Tester expectations: fictional data only, no destructive DB actions
+- [ ] Tester expectations: fictional data only, no destructive DB actions, alpha-not-launch
 - [ ] **Database wipe policy** communicated: operators do not wipe during test window
+- [ ] **Public-facing alpha safety** verified (section 17)
 
 ---
 
@@ -368,7 +377,7 @@ Capture before rollback: API/worker logs, `docker compose ps`, last good git tag
 | Stop traffic | `docker compose -f docker-compose.prod.yml stop` (or scale web to 0) |
 | Revert app | Redeploy **previous image tag** or `git checkout <prev>` + rebuild |
 | Restore database | Restore from **backup** (pg_restore or operator script); not inline `DROP DATABASE` |
-| Disable registration quickly | Set `C2K_REGISTRATION_OPEN=false` and rotate/remove invite code |
+| Disable registration quickly | Set `C2K_REGISTRATION_OPEN=false`; rotate/remove `C2K_REGISTRATION_INVITE_CODE` if used |
 | Disable uploads quickly | Set relevant `C2K_ALPHA_DISABLE_*` flags; restart API |
 | Disable password reset if mail broken | `C2K_PASSWORD_RESET_ENABLED=false`; restart API |
 | Notify | Owner, moderators, active testers with status and ETA |
@@ -390,4 +399,33 @@ Record rollback in [`SERVER_CUTOVER_LOG.md`](./SERVER_CUTOVER_LOG.md).
 
 ---
 
-*When health, seed, smoke, and invite checklists are green, invite testers and track feedback using the QA journey doc.*
+## 17. Public-facing alpha safety (operator verify)
+
+Before leaving the server visible or promoting testing, confirm:
+
+- [ ] **18+ expectations** are visible at registration and/or landing
+- [ ] **Terms**, **Privacy**, **Community Guidelines**, and **Content Guidelines** are reachable (`/terms`, `/privacy`, `/guidelines`, content policy surfaces)
+- [ ] **Alpha status** is clear in UI copy (not presented as final launch)
+- [ ] **Bug report path** is easy to find (QA journey template or support channel)
+- [ ] Users are **not encouraged** to upload sensitive real personal information during testing
+- [ ] **Public pages** do not expose hidden/private user data (spot-check profiles, events, groups)
+- [ ] **Fake/demo/seed data** is not presented as real community claims without context (see [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md))
+
+---
+
+## 18. Readiness verdict template
+
+Use this framing in execution logs and operator reports:
+
+| Question | Typical alpha answer |
+|----------|----------------------|
+| **Public visitors allowed?** | Yes — open alpha test environment; anyone may browse |
+| **Ready to actively promote for alpha testing?** | After internal browser QA + operator smoke |
+| **Ready for structured tester QA?** | After promotion gate above; share [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) |
+| **Ready for full public launch?** | **No** — alpha is not launch |
+
+Do **not** use “external testers wait” unless you mean **structured testers** should wait for the QA guide — casual visitors may already view the site.
+
+---
+
+*When health, seed, smoke, and structured tester checklists are green, promote alpha testing and track feedback using the QA journey doc.*

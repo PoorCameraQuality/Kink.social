@@ -10,7 +10,7 @@ Running journal for operator execution passes against the live VPS alpha stack. 
 
 **Operator:** Cursor agent (local workstation)  
 **Target label:** VPS alpha — **kink.social** (`srv1747903`, stack `/opt/c2k` per cutover log)  
-**Environment class:** Invite-only VPS alpha (not public launch)  
+**Environment class:** Public-facing VPS alpha (open for visitors; not final public launch)  
 **Compose files (expected):** `docker-compose.prod.yml` + `docker-compose.prod.vps.yml`  
 **Local repo reference (not deployed this pass):** branch `desktop-ui-sprint-3-visual-polish`, commit `6d1a0df604ab9a0e8f24a221f82e2e4f97ac27dc` (many uncommitted local changes; not pushed/deployed)
 
@@ -116,8 +116,10 @@ npm run test
 
 | Question | Answer |
 |----------|--------|
-| Ready for internal dry run (full social seed QA)? | **No** — seed and authenticated smoke pending |
-| External testers should wait? | **Yes** |
+| Public visitors allowed? | **Yes** (site publicly reachable; registration policy not verified this pass) |
+| Ready to actively promote for alpha testing? | **No** — seed and authenticated smoke pending |
+| Ready for structured tester QA? | **No** |
+| Ready for full public launch? | **No** |
 
 ---
 
@@ -125,7 +127,7 @@ npm run test
 
 **Operator:** Cursor agent (local workstation → VPS SSH)  
 **Target:** **kink.social** (`srv1747903`, `/opt/c2k`)  
-**Environment class:** Invite-only VPS alpha (not public launch)  
+**Environment class:** Public-facing VPS alpha (open for visitors; not final public launch)  
 **Compose:** `docker-compose.prod.yml` + `docker-compose.prod.vps.yml`  
 **Local commit (built + pushed):** `917e831c32df3fde80611d72c9da6c22fead60ea` — *Harden social spine and add alpha readiness tooling*  
 **Deploy method:** Tarball upload (VPS `/opt/c2k` is **not** a git clone; `git pull` unavailable)  
@@ -224,7 +226,7 @@ ALLOW_ALPHA_SOCIAL_SEED=true FORCE_ALPHA_SOCIAL_SEED_ON_PROD=true USE_DATABASE=t
 | `/api/v1/groups` | 200 |
 | `/api/v1/events?upcoming=true` | 200, ECKE titles present |
 
-Browser UI walkthrough (Home, People, Groups, Events, Settings) **not fully automated** this pass — API-level smoke only.
+Browser UI walkthrough (Home, People, Groups, Events, Settings) **not fully automated** this pass — run **Internal Browser QA Pass 1** per [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) §12 before active promotion.
 
 ### Privacy smoke (seed personas)
 
@@ -255,13 +257,116 @@ Full blocked-user / private-group / count-only attendee / media-scoped checks de
 1. VPS deploy path is tarball-based, not git — record commit hash in runbook when deploying.
 2. `npm run test` fails locally on Node 24 (tsx/tsconfig path), unrelated to VPS.
 3. Some smoke probes used wrong paths (`/api/v1/people`, `/api/v1/social-graph/connections`) — correct routes include `/api/v1/profiles`, `/api/v1/connections`.
-4. Human browser QA, upload smoke, and staff moderation flows still needed before external invite.
+4. Human browser QA, upload smoke, and staff moderation flows still needed **before actively promoting alpha testing**.
 
 ### Readiness verdict (Pass 2)
 
 | Question | Answer |
 |----------|--------|
-| Ready for **internal** dry run (seed + login + core API smoke)? | **Yes** — operator/human should run [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) in browser |
-| External testers should wait? | **Yes** until browser QA + upload/staff smokes complete |
+| Public visitors allowed? | **Yes** — alpha server open for visitors |
+| Ready to actively promote for alpha testing? | **Not yet** — complete Internal Browser QA Pass 1 first |
+| Ready for structured tester QA? | **After** browser QA + upload/staff smokes |
+| Ready for full public launch? | **No** |
+
+---
+
+## Framing correction — 2026-06-17 (docs only)
+
+**Change:** kink.social is documented as **public-facing alpha** (open for visitors), not invite-only by default. Registration is **env-driven** — verify with `GET /api/auth/registration-policy`.
+
+**Live check (this pass):** `{"registrationOpen":true,"inviteRequired":false}` — registration is **open during alpha**; docs updated to match.
+
+**Docs updated:** [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md), [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md), [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md), [`PILOT_READINESS.md`](./PILOT_READINESS.md), [`QA_TESTER_GUIDE.md`](./QA_TESTER_GUIDE.md), this log; UI `AlphaNotice` copy.
+
+**Still not launch:** Alpha warnings, fictional seed data, and internal browser QA before active promotion remain required.
+
+**Remaining doc mismatches (not in this pass scope):** [`SERVER_CUTOVER_LOG.md`](./SERVER_CUTOVER_LOG.md), [`FEATURE_REGISTRY.md`](./FEATURE_REGISTRY.md), [`ALPHA_DEPLOYMENT.md`](./ALPHA_DEPLOYMENT.md), [`BACKLOG_QUEUE.md`](./BACKLOG_QUEUE.md) still mention invite-only alpha in places — update when those files are next touched.
+
+---
+
+## Pass 3 — 2026-06-17 (Internal Browser QA Pass 1)
+
+**Operator:** Cursor agent (Cursor IDE browser automation + API-assisted privacy checks)  
+**Target:** **https://kink.social** — public-facing VPS alpha  
+**Deployed commit (tarball):** `917e831` (social spine + seed); log/docs `14c69f8`  
+**Primary account:** `alpha_social` (seed password from [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md); not printed here)  
+**Browser method:** Cursor IDE browser MCP (Chromium); mobile via CDP `390×844` emulation  
+**Password reset:** Not tested (no form submit, no email, no token, no password change)  
+**Destructive DB:** None  
+
+### Environment confirmation
+
+| Item | Result |
+|------|--------|
+| Public-facing alpha | **Yes** — unauthenticated `GET /` → 200 |
+| Registration policy | `registrationOpen: true`, `inviteRequired: false` |
+| Seeded login | **Pass** — `alpha_social` → onboarding then `/home` |
+
+### Area results (browser unless noted)
+
+| Area | Route | Account | Result | Notes |
+|------|-------|---------|--------|-------|
+| Login | `/?login=1` | `alpha_social` | **Pass** | Lands on 7-step onboarding first visit; completes to Home |
+| Home | `/home` | `alpha_social` | **Pass** | Following / Near you / Trending; seeded feed + composer; `ALPHA TEST` badges; no client demo padding |
+| People | `/people` | `alpha_social` | **Pass** | Follow vs Connect copy; seeded suggestions (`alpha_mod`); 2 directory members |
+| Profile | `/profile` | `alpha_social` | **Pass** | Recent posts, RSVPs, groups, **Add photos** CTA |
+| Connections | `/connections` | `alpha_social` | **Pass** (API) | Browser nav partial; API: 5 connections; Activity shows pending request from `alpha_newbie` |
+| Groups | `/groups` | `alpha_social` | **Pass** | Seeded alpha groups listed (`alpha-social-regional-hub`, etc.) |
+| Group forums | `/groups/{id}?tab=Forums` | `alpha_social` | **Pass** | Regional hub opens; forum tab loads |
+| Events | `/events`, `/events/{id}` | `alpha_social` | **Pass** (API+partial UI) | ECKE title **Twisted Tryst** in API; event detail route loads |
+| Messaging | `/messaging` | `alpha_social` | **Pass** | Main / Requests / ISO; accepted thread (Quinn Park); safety copy |
+| Notifications | `/notifications` | `alpha_social` | **Pass** (via Activity) | Connection accept + DM previews on `/activity` |
+| Activity | `/activity` | `alpha_social` | **Pass** | Explains broader recap; links to settings/messages |
+| Settings privacy | `/settings/privacy` | `alpha_social` | **Pass** | Page loads (authenticated shell) |
+| Upload | `/profile` + `POST /api/profile/me/photos` | `alpha_social` | **Partial** | API route **`/api/profile/me/photos`** → 200 `{photos:[]}`. UI shows **Add photos**. File upload not executed this pass |
+| Admin/mod | `/moderation` | `alpha_social`, `alpha_mod` | **Blocked** | UI: “not platform staff”; API moderation → 403. No owner/site-admin creds in seed doc |
+| Mobile | `/home` (390px) | `alpha_social` | **Pass** | Bottom nav (Home/Explore/Events/Messages/Me); feed usable; badges visible |
+| Desktop | core routes | `alpha_social` | **Pass** | Three-column Home/People; rails render |
+
+### Privacy smoke (API + browser where noted)
+
+| Scenario | Result |
+|----------|--------|
+| Only-me post (`alpha_private`) | **Pass** — author sees posts; `alpha_newbie` sees `items:[]` |
+| Connections-only (`alpha_connected`) | **Pass** — non-connection sees 0 posts |
+| Blocked user in search (`alpha_blocked` as `alpha_blocker`) | **Pass** — 0 results |
+| Undiscoverable (`alpha_quiet` search) | **Pass** — empty `/api/v1/profiles?q=alpha_quiet` |
+| Non-staff moderation | **Pass** — 403 |
+| Private group forum (non-member) | **Not fully verified** — private group not in discover list for quick API probe |
+| Count-only attendees | **Not verified in browser** this pass |
+| DM preview in Activity | **Acceptable** — seed-tagged body visible to recipient only (not public surface) |
+
+### Console errors
+
+None captured in automation session (no persistent error overlay; no loading loops observed on Home after onboarding).
+
+### Screenshots (local temp; no secrets)
+
+| File | Area |
+|------|------|
+| `qa-pass1-home-desktop.png` | Home desktop |
+| `qa-pass1-people-desktop.png` | People |
+| `qa-pass1-messaging-desktop.png` | Messaging |
+| `qa-pass1-home-mobile.png` | Home mobile |
+
+Saved under Cursor screenshots temp path on operator workstation.
+
+### Known blockers / polish before active promotion
+
+1. **Upload smoke incomplete** — identify UI file picker + run safe image upload through profile composer.
+2. **Staff moderation smoke blocked** — need site owner/admin UUID account (not seeded `alpha_mod` group mod).
+3. **Onboarding gate** on first seeded login — expected for new accounts; document for structured testers.
+4. **Seed markers visible** (`[alpha_social_seed:…]`, `ALPHA TEST` badges) — good for alpha honesty; may want softer presentation before broad promotion.
+5. **Private group / count-only attendee** privacy scenarios need dedicated browser pass with persona switching.
+
+### Readiness verdict (Pass 3)
+
+| Question | Answer |
+|----------|--------|
+| Public visitors allowed? | **Yes** |
+| Safe to leave visible? | **Yes with caveats** — no obvious public privacy leaks; seed/test labeling visible |
+| Ready to actively promote for alpha testing? | **Not yet** — finish upload + staff smokes; optional seed-marker polish |
+| Ready for structured tester QA? | **Yes** — share [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) with seeded accounts |
+| Ready for full public launch? | **No** |
 
 ---

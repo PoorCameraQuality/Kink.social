@@ -28,15 +28,17 @@ You are testing **real product behavior** with honest empty states, privacy rule
 
 | Assumption | Detail |
 |------------|--------|
-| **Recommended environment** | Staging or VPS **alpha** (e.g. invite-only kink.social alpha). Not a public launch smoke test. |
-| **Registration** | Invite-only when `C2K_REGISTRATION_INVITE_CODE` is set. Ask the operator for a code. |
-| **Alpha social seed** | May be present: fictional `alpha_*` users and social content. See [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md). |
+| **Environment** | **Public-facing alpha** on kink.social (or staging). Anyone may visit and browse. This is **not** final public launch. |
+| **Registration** | Check `GET /api/auth/registration-policy`. If `inviteRequired: true`, ask the operator for a code. If `registrationOpen: true` and no invite required, registration is open during alpha — still use fictional profile data. |
+| **Alpha social seed** | May be present: fictional `alpha_*` users and social content. See [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md). Do not treat seed personas as real community members. |
 | **ECKE event data** | Realistic East Coast event listings may already exist. **Do not delete or reset** that data during QA. |
 | **Database** | Testers must **not** run wipe, truncate, or destructive seed scripts. |
 | **Personal data** | Use fictional names, `example.test` emails, and broad fake regions. **Do not** use real phone numbers, home addresses, or identifiable photos of real people. |
 | **Screenshots** | Blur or crop DMs, notifications, and attendee lists before sharing externally. |
 
 **Operator note:** Run the alpha social seed only on environments where it is intended. Never run it against production without explicit operator approval. See seed doc for guards.
+
+**Visitor vs structured tester:** Casual visitors may already view the site. This journey is for **structured QA** — run internally **before actively promoting alpha testing** or asking people to use the product deeply.
 
 ---
 
@@ -67,7 +69,7 @@ Override only if the operator set `ALPHA_SOCIAL_SEED_PASSWORD`.
 | `alpha_hidden_member` | Private group member | Hidden membership on profile | Default seed password |
 | `alpha_photog` | Media creator | Profile richness, vendor adjacency | Default seed password |
 
-If seed is **not** present, register a fresh invite account and use this guide for structure; privacy table scenarios marked "seed" will be skip or N/A.
+If seed is **not** present, register a fresh account (with invite code only if required) and use this guide for structure; privacy table scenarios marked "seed" will be skip or N/A.
 
 ---
 
@@ -77,8 +79,9 @@ Work top to bottom once per environment. Check boxes as you go. Note pass/fail i
 
 ### A. Registration and login
 
-- [ ] Open the landing page. Value proposition and sign-in entry are obvious.
-- [ ] If registration is open: register with a valid **invite code** (fictional profile data only).
+- [ ] Open the landing page. Value proposition, **alpha status**, and sign-in entry are obvious.
+- [ ] Confirm **18+**, Terms, Privacy, and Community/Content Guidelines are reachable before or during signup.
+- [ ] If `registrationOpen`: register using fictional profile data; use **invite code only if** `inviteRequired` (check operator or `/api/auth/registration-policy`).
 - [ ] If seed exists: log in as `alpha_social` (or your fresh account).
 - [ ] Confirm there is no confusing "check your email to continue" dead end unless SMTP is known to be on.
 - [ ] On login page: password reset link or copy exists (actual email delivery optional unless operator confirmed SMTP).
@@ -286,24 +289,25 @@ After the journey, answer briefly (bullet points are fine):
 
 ---
 
-## 8. Operator checklist before inviting testers
+## 8. Operator checklist before structured tester QA
 
-Complete before sharing invite codes:
+Complete **before actively promoting alpha testing** or asking people to run this journey deeply. Public visitors may already browse kink.social.
 
 - [ ] Deploy latest build to target environment
 - [ ] Verify required env vars (see [`ALPHA_DEPLOYMENT.md`](./ALPHA_DEPLOYMENT.md), [`FEATURE_REGISTRY.md`](./FEATURE_REGISTRY.md))
 - [ ] Run DB migrations (`db:migrate-incremental`)
 - [ ] Run **alpha social seed** only if intended (`ALLOW_ALPHA_SOCIAL_SEED=true`); **never** on production without explicit approval
 - [ ] Do **not** run `db:wipe` or full destructive `db:seed` before tester session
-- [ ] Confirm **invite code** (`C2K_REGISTRATION_INVITE_CODE`) and share securely
-- [ ] Confirm **SMTP** / password reset if testers must reset passwords
+- [ ] Confirm **registration policy** (`GET /api/auth/registration-policy`) and comms match env (open vs invite-gated)
+- [ ] Confirm **SMTP** / password reset config if testers must reset passwords (do not test reset on VPS without operator approval)
 - [ ] Confirm **S3 / uploads** if photo tests are in scope
 - [ ] Confirm owner / admin / mod accounts and UUIDs for escalation
 - [ ] Hit **health endpoints** (`/api/health`, mail health if applicable)
 - [ ] Create or confirm **test accounts** (seed or manual)
 - [ ] Take **baseline screenshots** of Home, People, one group, one event
 - [ ] Confirm **database backup** exists before multi-tester sessions
-- [ ] Share this doc and [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md) with testers
+- [ ] Verify **public-facing alpha safety** (see [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md) §17)
+- [ ] Share this doc and [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md) with structured testers
 
 ---
 
@@ -353,7 +357,20 @@ npm run verify:alpha        # local automated alpha gate
 npm run test:e2e:alpha-gate # Playwright alpha routes
 ```
 
-Human testers can ignore these; operators run them before inviting people.
+Human testers can ignore these; operators run them **before actively promoting alpha testing**.
+
+---
+
+## 12. Internal Browser QA Pass 1 — verdict questions
+
+After completing this journey in a browser, answer:
+
+1. Is the **public-facing alpha safe to leave visible** (no obvious privacy leaks to logged-out or casual visitors)?
+2. Is it **ready to actively promote** for alpha testing?
+3. Are there **blocker bugs** before asking people to use it seriously?
+4. Are there **privacy leaks** visible to normal users?
+
+Use the readiness template in [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md) §18 when filing operator reports.
 
 ---
 
