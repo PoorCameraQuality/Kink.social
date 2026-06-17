@@ -147,7 +147,14 @@ Top included areas: `packages/`, `docs/` (tracked markdown only, no `docs/audits
 
 ### CI
 
-Branch pushes alone do **not** trigger CI (workflow: `pull_request` + `push` to `main` only). Pass 2 opened/updated PR to trigger Node 20 CI — see PR link in operator report.
+Branch pushes alone do **not** trigger CI (workflow: `pull_request` + `push` to `main` only). Pass 2 opened **PR #6** to trigger Node 20 CI.
+
+| Run | SHA | Job | Result |
+|-----|-----|-----|--------|
+| [27711330251](https://github.com/PoorCameraQuality/Kink.social/actions/runs/27711330251) | `cff0815` | **`check`** | **Success** — typecheck, build, dc-classes, API unit tests |
+| [27711330251](https://github.com/PoorCameraQuality/Kink.social/actions/runs/27711330251) | `cff0815` | **`check-db`** | **In progress / slow** at last poll — DB integration smokes step (known long-runner on this repo) |
+
+PR: https://github.com/PoorCameraQuality/Kink.social/pull/6
 
 ### Local verification (Pass 2)
 
