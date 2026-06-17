@@ -14,6 +14,7 @@ import {
   type ActivityInboxItem,
 } from '@/hooks/useApiActivityInbox'
 import { shortTime } from '@/lib/format-time'
+import { ACTIVITY_PAGE_INTRO } from '@/lib/notifications-copy'
 
 function kindLabel(kind: ActivityInboxItem['kind']): string {
   if (kind === 'message') return 'Message'
@@ -45,9 +46,7 @@ export default function ActivityPageClient() {
 
             <header className="mt-4 mb-6">
               <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">Activity</h1>
-              <p className="mt-2 text-sm leading-relaxed text-dc-text-muted">
-                Messages, notifications, connection requests, and account updates in one timeline.
-              </p>
+              <p className="mt-2 text-sm leading-relaxed text-dc-text-muted">{ACTIVITY_PAGE_INTRO}</p>
             </header>
 
             <ActivityTabs active={filter} onChange={setFilter} />

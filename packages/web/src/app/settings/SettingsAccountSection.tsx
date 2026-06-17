@@ -40,10 +40,20 @@ export default function SettingsAccountSection({
         />
         <div className="mt-2">
           <SettingsAccountRow
-            label="Nickname"
-            value={viewerUsername ?? '-'}
-            action={<SettingsAccountActionLink to="/profile/edit">Change</SettingsAccountActionLink>}
-            hint="Your public username on profile URLs and @mentions."
+            label="Username"
+            value={viewerUsername ? `@${viewerUsername}` : '-'}
+            action={
+              <Link to="/support" className="text-sm font-medium text-dc-accent hover:underline">
+                Request change
+              </Link>
+            }
+            hint="Permanent @handle for profile URLs and mentions. To change it, contact support. Display name is editable under Profile edit."
+          />
+          <SettingsAccountRow
+            label="Display name"
+            value="Edit on your profile"
+            action={<SettingsAccountActionLink to="/profile/edit">Edit profile</SettingsAccountActionLink>}
+            hint="Shown at the top of your public profile. This is not your login username."
           />
           <SettingsAccountRow
             label="Email"

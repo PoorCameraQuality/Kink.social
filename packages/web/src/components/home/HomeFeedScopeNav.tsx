@@ -19,9 +19,9 @@ type Props = {
 }
 
 const SCOPE_HELPER: Record<'following' | 'near-you' | 'trending', string> = {
-  following: 'Posts from people and groups you follow.',
-  'near-you': 'Local posts and activity near your area.',
-  trending: 'What the community is talking about right now.',
+  following: 'Activity from people you follow or connect with.',
+  'near-you': 'Public posts from the wider community, shaped by privacy and safety settings.',
+  trending: 'Explore community highlights across people, groups, events, and spaces.',
 }
 
 /**

@@ -22,6 +22,7 @@ const COMPACT_ACTIVITY_VERBS = new Set([
   'convention_pin',
   'org_join',
   'group_join',
+  'group_thread_created',
   'org_announcement',
   'presenter_assigned',
   'loved',
@@ -60,9 +61,12 @@ function reasonTextForItem(item: FollowingFeedItem, viewerId: string): string | 
   switch (item.verb) {
     case 'group_join':
       return 'From a group you joined'
+    case 'group_thread_created':
+      return 'From a group discussion you can access'
     case 'event_rsvp':
+      return 'From someone you follow'
     case 'event_created':
-      return 'Because you are attending this event'
+      return 'From someone you follow'
     default:
       return 'From someone you follow'
   }

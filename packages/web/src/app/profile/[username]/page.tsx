@@ -46,6 +46,8 @@ import {
 import type { ApiEducationArticle } from '@/lib/education-article-types'
 import TsReportModal, { type TsReportTarget } from '@/components/moderation/TsReportModal'
 import EmptyState from '@/components/ui/EmptyState'
+import ProfileRecentPostsSection from '@/components/profile/ProfileRecentPostsSection'
+import { useApiProfileFeedPosts, useApiMyProfileFeedPosts } from '@/hooks/useApiProfileFeedPosts'
 
 function formatTeachingCreditDate(isoDate: string | null): string {
   if (!isoDate) return ''
@@ -165,6 +167,10 @@ export default function ProfileUsernamePage() {
     Boolean(publicProfile?.user) && username !== viewerUsername && isAuthenticated && !isFallback
   const { status: graphStatus, reload: reloadGraph } = useGraphStatus(username, apiBackedPublic)
   const [graphBusy, setGraphBusy] = useState(false)
+  const showProfilePosts = isAuthenticated && !isFallback && apiProfileStatus === 'ok'
+  const ownProfileFeedPosts = useApiMyProfileFeedPosts(showProfilePosts && viewerIsSelf, 10)
+  const publicProfileFeedPosts = useApiProfileFeedPosts(username, showProfilePosts && !viewerIsSelf, 10)
+  const profileFeedPosts = viewerIsSelf ? ownProfileFeedPosts : publicProfileFeedPosts
 
   const sendConnectionRequest = useCallback(async () => {
     if (!apiBackedPublic || connectBusy) return
@@ -687,6 +693,7 @@ export default function ProfileUsernamePage() {
       onToggleFollow={() => void toggleFollow()}
       onDismissConnectNotice={() => setConnectNotice(null)}
       mutualConnectionsCount={connectionsSummary?.mutualCount ?? undefined}
+      canMessage={!viewerIsSelf && (graphStatus?.canMessage === true)}
     />
   )
 
@@ -803,6 +810,22 @@ export default function ProfileUsernamePage() {
       }
       networkRail={socialSidebar}
       main={
+        <>
+          {showProfilePosts ?
+            <ProfileRecentPostsSection
+              viewerIsOwner={viewerIsSelf}
+              viewerUsername={viewerUsername}
+              profileUsername={username}
+              items={profileFeedPosts.items}
+              status={profileFeedPosts.status}
+              error={profileFeedPosts.error}
+              onRetry={() => void profileFeedPosts.reload()}
+              graphStatus={viewerIsSelf ? null : graphStatus}
+              canMessage={!viewerIsSelf && (graphStatus?.canMessage === true)}
+              onFollow={viewerIsSelf ? undefined : () => void toggleFollow()}
+              onConnect={viewerIsSelf ? undefined : () => void sendConnectionRequest()}
+            />
+          : null}
         <ProfileExtendedSection
           viewerIsOwner={viewerIsSelf}
           visibleTabs={visibleTabs}
@@ -908,6 +931,7 @@ export default function ProfileUsernamePage() {
               />
             )}
         </ProfileExtendedSection>
+        </>
       }
       footer={
         publicProfile?.user && username !== viewerUsername ?

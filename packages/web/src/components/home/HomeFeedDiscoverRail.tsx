@@ -78,8 +78,9 @@ export default function HomeFeedDiscoverRail({
     return (
       <aside className={className} aria-label="Suggested next steps">
         <RailGroup
-          label="Plan your week"
-          helper="Events near your saved location — open one if you are looking for something to do."
+          label="Events that can turn online connections into real community"
+          helper="Events and gatherings based on your area and RSVPs."
+          showHeader
         >
           <RailCard title="Upcoming near you" footerHref="/events" footerLabel="Browse events →">
             {upcomingNearYou.length > 0 ?
@@ -106,13 +107,13 @@ export default function HomeFeedDiscoverRail({
       aria-label="Discovery"
     >
       <RailGroup
-        label="Plan your week"
+        label="Events that can turn online connections into real community"
         helper="Events and gatherings based on your area and RSVPs."
         showHeader
       >
-        <RailCard title="Upcoming near you" footerHref="/events" footerLabel="See all →">
+        <RailCard title="Upcoming near you" footerHref="/events" footerLabel="Browse events →">
           <p className="mb-2.5 text-xs leading-relaxed text-dc-muted">
-            From events near your saved location — not paid placements.
+            From events near your saved location.
           </p>
           {upcomingNearYou.length > 0 ?
             <ul className="space-y-2.5">
@@ -129,8 +130,8 @@ export default function HomeFeedDiscoverRail({
         </RailCard>
       </RailGroup>
 
-      <RailGroup label="Grow your network" helper="People and profiles surfaced from your area and activity.">
-        <RailCard title="People you may know" footerHref="/people" footerLabel="See all →">
+      <RailGroup label="Groups to start finding your people" helper="People and profiles surfaced from your area and shared communities.">
+        <RailCard title="People you may know" footerHref="/people" footerLabel="Find people →">
           <p className="mb-2.5 text-xs leading-relaxed text-dc-muted">
             Suggested from shared communities and geography — dismiss anyone you are not interested in.
           </p>
@@ -171,8 +172,8 @@ export default function HomeFeedDiscoverRail({
       </RailGroup>
 
       {myGroups.length > 0 ?
-        <RailGroup label="Your groups" helper="Groups you belong to with recent discussion activity.">
-          <RailCard title="Groups you are in" footerHref="/groups" footerLabel="All groups →">
+        <RailGroup label="Groups to start finding your people" helper="Communities you belong to with recent discussion activity.">
+          <RailCard title="Groups you are in" footerHref="/groups" footerLabel="Explore groups →">
             <ul className="space-y-2">
               {myGroups.slice(0, 4).map((g) => (
                 <li key={g.id}>
@@ -191,10 +192,10 @@ export default function HomeFeedDiscoverRail({
         </RailGroup>
       : null}
 
-      <RailGroup label="See what is active" helper="Conversations and events gaining traction in the community.">
-        <RailCard title="Trending in the community" footerHref="/explore" footerLabel="See all →">
+      <RailGroup label="Explore further" helper="Posts, events, and conversations across the community.">
+        <RailCard title="Trending in the community" footerHref="/explore" footerLabel="Browse trending →">
           <p className="mb-2.5 text-xs leading-relaxed text-dc-muted">
-            Posts and events with recent engagement — open the Trending tab for the full list.
+            Open the Trending tab for the full list.
           </p>
           {trendingEvents.length > 0 ?
             <ul className="space-y-2.5">

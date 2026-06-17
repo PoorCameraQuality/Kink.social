@@ -137,7 +137,7 @@ function DropdownNotificationRow({
               visual.chipClass,
             )}
           >
-            {kindLabel(n.kind)}
+            {kindLabel(n.kind, n.title)}
           </span>
           {n.href && actionLabel ?
             <span className="text-[11px] font-medium text-dc-accent">{actionLabel}</span>

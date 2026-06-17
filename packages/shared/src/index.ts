@@ -29,6 +29,7 @@ export { buildCanonicalUrl, copyCanonicalLink, formatMemberSinceMonthYear } from
 export { isPublicPath } from './public-paths.js'
 export { safeInternalPath } from './safe-redirect.js'
 export { DEMO_USERNAMES, MOCK_VIEWER_USERNAME } from './demo-usernames.js'
+export { isEmailLikeUsername, usernameEqualsEmail, validatePublicUsername } from './username-validation.js'
 export * from './user-settings.js'
 export * from './onboarding.js'
 export * from './feed-story-catalog.js'

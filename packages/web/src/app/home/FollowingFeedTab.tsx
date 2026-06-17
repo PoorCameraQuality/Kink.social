@@ -64,8 +64,9 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
   )
 
   const composerPlaceholder = feedShell
-    ? 'Share an update with your community…'
+    ? 'Share an update, ask a question, or start a conversation…'
     : `What's on your mind, ${composerName}?`
+  const composerHint = feedShell ? 'Share an update, ask a question, or start a conversation.' : undefined
 
   return (
     <div className="w-full dc-panel-enter">
@@ -75,6 +76,7 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
           viewerInitial={viewerUsername ? viewerUsername.charAt(0).toUpperCase() : '?'}
           useDbComposer
           composerPlaceholder={composerPlaceholder}
+          composerHint={composerHint}
           onPosted={() => {
             feed.reload()
             onPosted?.()
@@ -86,6 +88,9 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
         aria-label="Share an update"
       >
         <Panel className="border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]">
+            <p className="mb-2 text-xs leading-relaxed text-dc-muted">
+              Share an update, ask a question, or start a conversation.
+            </p>
             <div className="flex gap-3">
               <div
                 className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-dc-accent/30 text-base font-semibold text-dc-accent"
@@ -150,41 +155,31 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
 
 
       {!filterComingSoon && feed.status === 'ready' && presentedItems.length === 0 ?
-        feed.connectionCount === 0 ?
-
-          <EmptyState
-
-            title="Follow people to see their activity here"
-
-            message="Connect with people you know. Their posts and event activity will show up in this feed."
-
-            nextSteps={['Open Discover People', 'Send a connection request', 'Return here for updates']}
-
-            ctaLabel="Find people"
-
-            ctaHref="/people"
-
-          />
-
-        : <EmptyState
-
-            title="Nothing yet"
-
-            message="Check Discover for events and conventions near you."
-
-            nextSteps={['Browse local events', 'Pin conventions to follow']}
-
-            ctaLabel="Open Discover"
-
-            ctaHref="/home?mode=discover&tab=Local"
-
-          />
-
+        <EmptyState
+          inline
+          variant="surface"
+          align="center"
+          className="rounded-2xl border border-dc-border/80 bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)]"
+          title="Your following feed is waiting for your people."
+          message="Follow members, connect with friends, join groups, or RSVP to events to start filling this space with real community activity."
+          actions={[
+            { label: 'Find people', href: '/people', primary: true },
+            { label: 'View connections', href: '/connections' },
+            { label: 'Explore groups', href: '/groups' },
+            { label: 'Browse events', href: '/events' },
+            {
+              label: 'Write a post',
+              onClick: () => {
+                document.getElementById('home-feed-composer')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              },
+            },
+          ]}
+        />
       : null}
 
       {!filterComingSoon && feed.status === 'ready' && presentedItems.length > 0 ?
         <p className="mb-3 text-sm leading-relaxed text-dc-text-muted">
-          Updates from people you are connected with, newest first.
+          Updates from people you follow or connect with, newest first.
         </p>
       : null}
 

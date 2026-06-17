@@ -1,19 +1,25 @@
 import { Link } from 'react-router-dom'
-import { GROUPS_SECTION_NAV } from '@/components/groups/groups-section-nav'
+import { groupsSectionNavForViewer } from '@/lib/group-detail-guards'
 import { resolveGroupsSectionNavMatch } from '@/lib/groups-section-mode'
 
 type Props = {
   pathname: string
   search: string
   invitationBadge?: number
+  showRealPersonalLibrary?: boolean
 }
 
-export default function GroupsSectionNavLinks({ pathname, search, invitationBadge = 0 }: Props) {
+export default function GroupsSectionNavLinks({
+  pathname,
+  search,
+  invitationBadge = 0,
+  showRealPersonalLibrary = false,
+}: Props) {
   const current = resolveGroupsSectionNavMatch(pathname, search)
-
+  const items = groupsSectionNavForViewer(showRealPersonalLibrary)
   return (
     <ul className="space-y-0.5" role="navigation" aria-label="Groups sections">
-      {GROUPS_SECTION_NAV.map((item) => {
+      {items.map((item) => {
         const active = item.match === current
         return (
           <li key={item.href}>

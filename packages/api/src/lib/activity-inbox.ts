@@ -1,6 +1,8 @@
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
+import { loadBlockedUserIds, loadUserIdsWhoBlockedUser } from './blocks.js'
 import { listConversationsForInbox } from './conversations-inbox.js'
+import { filterNotificationsForViewer } from './notification-privacy.js'
 
 export type ActivityInboxKind = 'notification' | 'message' | 'connection_request' | 'feed'
 
@@ -31,7 +33,7 @@ function notificationToInbox(row: {
       id: `notif-${row.id}`,
       kind: 'notification',
       title: 'Connection request',
-      body: `@${from} wants to connect.`,
+      body: `@${from} sent you a connection request.`,
       href: '/connections?tab=requests',
       unread,
       createdAt,
@@ -43,8 +45,24 @@ function notificationToInbox(row: {
       id: `notif-${row.id}`,
       kind: 'notification',
       title: 'Connection accepted',
-      body: `@${from} accepted your request.`,
-      href: '/connections',
+      body: `@${from} accepted your connection request.`,
+      href: `/profile/${encodeURIComponent(from)}`,
+      unread,
+      createdAt,
+    }
+  }
+  if (row.type === 'dm_request') {
+    const from =
+      typeof payload.senderUsername === 'string' ? payload.senderUsername
+      : 'Someone'
+    const convId = typeof payload.conversationId === 'string' ? payload.conversationId : ''
+    const displayName = from === 'Someone' ? 'Someone' : `@${from}`
+    return {
+      id: `notif-${row.id}`,
+      kind: 'notification',
+      title: 'Message request',
+      body: `${displayName} sent you a message request.`,
+      href: convId ? `/messaging?folder=requests&c=${encodeURIComponent(convId)}` : '/messaging?folder=requests',
       unread,
       createdAt,
     }
@@ -94,16 +112,22 @@ export async function listActivityInbox(params: {
       .orderBy(desc(schema.notifications.createdAt))
       .limit(40)
 
-    for (const row of notifRows) {
+    const visibleRows = await filterNotificationsForViewer(params.userId, notifRows)
+
+    for (const row of visibleRows) {
       const mapped = notificationToInbox(row)
       if (!mapped) continue
-      if (filter === 'requests' && mapped.href !== '/connections?tab=requests') continue
+      if (filter === 'requests' && !mapped.href.includes('requests')) continue
       if (filter === 'social' && mapped.kind === 'message') continue
       items.push(mapped)
     }
   }
 
   if (filter === 'all' || filter === 'requests') {
+    const blocked = new Set([
+      ...(await loadBlockedUserIds(params.userId)),
+      ...(await loadUserIdsWhoBlockedUser(params.userId)),
+    ])
     const pending = await db
       .select({
         id: schema.connections.id,
@@ -128,12 +152,13 @@ export async function listActivityInbox(params: {
     const names = new Map(users.map((u) => [u.id, u.username]))
 
     for (const p of pending) {
+      if (blocked.has(p.requesterId)) continue
       const uname = names.get(p.requesterId) ?? 'someone'
       items.push({
         id: `conn-${p.id}`,
         kind: 'connection_request',
         title: 'Connection request',
-        body: `@${uname} wants to connect.`,
+        body: `@${uname} sent you a connection request.`,
         href: '/connections?tab=requests',
         unread: true,
         createdAt: p.createdAt.toISOString(),

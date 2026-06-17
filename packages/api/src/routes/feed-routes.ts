@@ -30,6 +30,9 @@ import {
   ViewerUserNotFoundError,
 } from '../lib/user-settings-row.js'
 import { withAlphaLabel, withAlphaLabels } from '../lib/alpha-seed-labels.js'
+import { filterRowsForGlobalFeed, viewerCanAccessFeedPost, viewerCanAccessFeedPostById } from '../lib/feed-post-access.js'
+import { filterPostsMediaAttachmentsForViewer, filterQuotedPostsMediaForViewer } from '../lib/feed-media-attachments.js'
+import { listAuthorFeedPostsForProfile, resolveUserIdByUsername } from '../lib/profile-feed-posts.js'
 
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
@@ -169,7 +172,10 @@ async function loadAuthorProfile(userId: string): Promise<{ username: string; av
   return { username: row?.username ?? '', avatarUrl: row?.avatarUrl ?? null }
 }
 
-async function attachQuotedPosts(posts: ShapedFeedPost[]): Promise<Array<ShapedFeedPost & { quotedPost?: ShapedFeedPost }>> {
+async function attachQuotedPosts(
+  posts: ShapedFeedPost[],
+  viewerId: string | null,
+): Promise<Array<ShapedFeedPost & { quotedPost?: ShapedFeedPost }>> {
   const ids = [...new Set(posts.map((p) => p.repostOfId).filter(Boolean))] as string[]
   if (ids.length === 0) return posts.map((p) => ({ ...p }))
   const rows = await db
@@ -191,10 +197,21 @@ async function attachQuotedPosts(posts: ShapedFeedPost[]): Promise<Array<ShapedF
     .innerJoin(schema.users, eq(schema.feedPosts.authorId, schema.users.id))
     .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
     .where(inArray(schema.feedPosts.id, ids))
-  const byId = new Map(rows.map((r) => [r.id, shapePostRow(r)]))
+  const visibleRows = await filterRowsForGlobalFeed(viewerId, rows)
+  const byId = new Map(visibleRows.map((r) => [r.id, shapePostRow(r)]))
   return posts.map((p) =>
     p.repostOfId && byId.has(p.repostOfId) ? { ...p, quotedPost: byId.get(p.repostOfId)! } : { ...p }
   )
+}
+
+async function assertFeedPostAccessible(
+  viewerId: string | null,
+  postId: string,
+  reply: FastifyReply,
+): Promise<boolean> {
+  if (await viewerCanAccessFeedPostById(viewerId, postId)) return true
+  reply.status(404).send({ error: 'Not found' })
+  return false
 }
 
 async function attachLikeMetaToPosts<T extends { id: string }>(
@@ -286,7 +303,9 @@ export async function registerFeedRoutes(app: FastifyInstance) {
       rows.map((row) => row.repostOfId),
     )
 
-    const shaped = rows
+    const visibleRows = await filterRowsForGlobalFeed(viewerId, rows)
+
+    const shaped = visibleRows
       .map(shapePostRow)
       .filter((p) => {
         if (hideKinds.has(p.kind)) return false
@@ -294,8 +313,9 @@ export async function registerFeedRoutes(app: FastifyInstance) {
         return !postMatchesMutedTags(p.mentions, mutedTagIds, inheritedTags)
       })
       .slice(0, limit)
-    const withQuotes = await attachQuotedPosts(shaped)
-    const withLikes = await attachLikeMetaToPosts(viewerId, withQuotes)
+    const withQuotes = await attachQuotedPosts(shaped, viewerId)
+    const withVisibleMedia = await filterQuotedPostsMediaForViewer(viewerId, withQuotes)
+    const withLikes = await attachLikeMetaToPosts(viewerId, withVisibleMedia)
     const items = await withAlphaLabels('feed_post', withLikes)
     return reply.send({ items })
     } catch (e) {
@@ -313,31 +333,20 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     if (!user) return
     const q = req.query as { limit?: string }
     const limit = Math.min(100, Math.max(1, parseInt(String(q.limit ?? '50'), 10) || 50))
-    const rows = await db
-      .select({
-        id: schema.feedPosts.id,
-        authorId: schema.feedPosts.authorId,
-        kind: schema.feedPosts.kind,
-        title: schema.feedPosts.title,
-        body: schema.feedPosts.body,
-        bodyFormat: schema.feedPosts.bodyFormat,
-        attachments: schema.feedPosts.attachments,
-        mentions: schema.feedPosts.mentions,
-        repostOfId: schema.feedPosts.repostOfId,
-        createdAt: schema.feedPosts.createdAt,
-        updatedAt: schema.feedPosts.updatedAt,
-        username: schema.users.username,
-        avatarUrl: schema.profiles.avatarUrl,
-      })
-      .from(schema.feedPosts)
-      .innerJoin(schema.users, eq(schema.feedPosts.authorId, schema.users.id))
-      .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
-      .where(and(eq(schema.feedPosts.authorId, user.userId), ne(schema.feedPosts.kind, 'repost')))
-      .orderBy(desc(schema.feedPosts.createdAt))
-      .limit(limit)
-    const shaped = rows.map(shapePostRow)
-    const withLikes = await attachLikeMetaToPosts(user.userId, shaped)
-    const items = await withAlphaLabels('feed_post', withLikes)
+    const items = await listAuthorFeedPostsForProfile(user.userId, user.userId, limit)
+    return reply.send({ items })
+  })
+
+  app.get('/api/v1/users/:username/feed-posts', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { username } = req.params as { username: string }
+    const q = req.query as { limit?: string }
+    const limit = Math.min(100, Math.max(1, parseInt(String(q.limit ?? '10'), 10) || 10))
+    const authorId = await resolveUserIdByUsername(username)
+    if (!authorId) return reply.status(404).send({ error: 'Not found' })
+    const items = await listAuthorFeedPostsForProfile(user.userId, authorId, limit)
     return reply.send({ items })
   })
 
@@ -365,10 +374,14 @@ export async function registerFeedRoutes(app: FastifyInstance) {
       .where(eq(schema.feedPosts.id, postId))
       .limit(1)
     if (!row) return reply.status(404).send({ error: 'Not found' })
-    const shaped = shapePostRow(row)
-    const [withQuote] = await attachQuotedPosts([shaped])
     const viewerId = getViewerUserId(resolveViewerFromRequest(req).payload)
-    const [withLikes] = await attachLikeMetaToPosts(viewerId, [withQuote])
+    if (!(await viewerCanAccessFeedPost(viewerId, row.authorId))) {
+      return reply.status(404).send({ error: 'Not found' })
+    }
+    const shaped = shapePostRow(row)
+    const [withQuote] = await attachQuotedPosts([shaped], viewerId)
+    const [withVisibleMedia] = await filterQuotedPostsMediaForViewer(viewerId, [withQuote])
+    const [withLikes] = await attachLikeMetaToPosts(viewerId, [withVisibleMedia])
     const post = withLikes ? await withAlphaLabel('feed_post', withLikes) : withLikes
     return reply.send({ post })
   })
@@ -499,8 +512,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     const user = requireUser(req, reply)
     if (!user) return
     const { postId } = req.params as { postId: string }
-    const [orig] = await db.select({ id: schema.feedPosts.id }).from(schema.feedPosts).where(eq(schema.feedPosts.id, postId)).limit(1)
-    if (!orig) return reply.status(404).send({ error: 'Not found' })
+    if (!(await assertFeedPostAccessible(user.userId, postId, reply))) return
     const now = new Date()
     const [row] = await db
       .insert(schema.feedPosts)
@@ -532,8 +544,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     const user = requireUser(req, reply)
     if (!user) return
     const { postId } = req.params as { postId: string }
-    const [orig] = await db.select({ id: schema.feedPosts.id }).from(schema.feedPosts).where(eq(schema.feedPosts.id, postId)).limit(1)
-    if (!orig) return reply.status(404).send({ error: 'Not found' })
+    if (!(await assertFeedPostAccessible(user.userId, postId, reply))) return
     const meta = await setPostReaction(user.userId, postId, 'love')
     return reply.send({ liked: true, likeCount: meta.likeCount, reactionCounts: meta.reactionCounts, viewerReaction: meta.viewerReaction })
   })
@@ -543,6 +554,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     const user = requireUser(req, reply)
     if (!user) return
     const { postId } = req.params as { postId: string }
+    if (!(await assertFeedPostAccessible(user.userId, postId, reply))) return
     const meta = await clearPostReaction(user.userId, postId)
     return reply.send({ liked: false, likeCount: meta.likeCount, reactionCounts: meta.reactionCounts, viewerReaction: meta.viewerReaction })
   })
@@ -558,8 +570,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     if (!parsed.success || !isFeedReactionId(parsed.data.kind)) {
       return reply.status(400).send({ error: 'Invalid reaction kind' })
     }
-    const [orig] = await db.select({ id: schema.feedPosts.id }).from(schema.feedPosts).where(eq(schema.feedPosts.id, postId)).limit(1)
-    if (!orig) return reply.status(404).send({ error: 'Not found' })
+    if (!(await assertFeedPostAccessible(user.userId, postId, reply))) return
     const meta = await setPostReaction(user.userId, postId, parsed.data.kind)
     return reply.send({
       viewerReaction: meta.viewerReaction,
@@ -574,6 +585,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     const user = requireUser(req, reply)
     if (!user) return
     const { postId } = req.params as { postId: string }
+    if (!(await assertFeedPostAccessible(user.userId, postId, reply))) return
     const meta = await clearPostReaction(user.userId, postId)
     return reply.send({
       viewerReaction: meta.viewerReaction,
@@ -586,8 +598,8 @@ export async function registerFeedRoutes(app: FastifyInstance) {
   app.get('/api/v1/feed/posts/:postId/comments', async (req, reply) => {
     if (!requireDb(reply)) return
     const { postId } = req.params as { postId: string }
-    const [orig] = await db.select({ id: schema.feedPosts.id }).from(schema.feedPosts).where(eq(schema.feedPosts.id, postId)).limit(1)
-    if (!orig) return reply.status(404).send({ error: 'Not found' })
+    const viewerId = getViewerUserId(resolveViewerFromRequest(req).payload)
+    if (!(await assertFeedPostAccessible(viewerId, postId, reply))) return
     try {
       const limit = Math.min(100, Math.max(1, parseInt(String((req.query as { limit?: string }).limit ?? '50'), 10) || 50))
       const items = await listFeedPostComments(postId, limit)
@@ -611,8 +623,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     const { postId } = req.params as { postId: string }
     const parsed = commentBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
-    const [orig] = await db.select({ id: schema.feedPosts.id }).from(schema.feedPosts).where(eq(schema.feedPosts.id, postId)).limit(1)
-    if (!orig) return reply.status(404).send({ error: 'Not found' })
+    if (!(await assertFeedPostAccessible(user.userId, postId, reply))) return
     try {
       const comment = await createFeedPostComment(postId, user.userId, parsed.data.body)
       if (!comment) return reply.status(400).send({ error: 'Invalid comment' })
@@ -632,6 +643,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     const user = requireUser(req, reply)
     if (!user) return
     const { postId, commentId } = req.params as { postId: string; commentId: string }
+    if (!(await assertFeedPostAccessible(user.userId, postId, reply))) return
     const ok = await deleteFeedPostComment(commentId, user.userId)
     if (!ok) return reply.status(404).send({ error: 'Not found' })
     const commentCount = await loadFeedPostCommentCount(postId)

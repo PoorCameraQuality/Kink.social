@@ -5,6 +5,7 @@ import { suppressMobileBottomNav } from '@/lib/mobile-chrome'
 import { useAuth } from '@/contexts/AuthContext'
 import { useConversationsPreview } from '@/hooks/useConversationsPreview'
 import { useNotificationsList } from '@/hooks/useNotificationsList'
+import { scrollAppToTop } from '@/lib/scroll-app-to-top'
 
 const ICONS = {
   home: HomeIcon,
@@ -63,8 +64,6 @@ function isNavItemActive(pathname: string, href: string): boolean {
   }
   return navLinkIsActive(pathname, href)
 }
-
-import { scrollAppToTop } from '@/lib/scroll-app-to-top'
 
 export default function BottomNav() {
   const { pathname } = useLocation()

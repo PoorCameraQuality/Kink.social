@@ -55,8 +55,9 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
   const nextRsvp = myRsvps.status === 'ready' && myRsvps.items.length > 0 ? myRsvps.items[0] : null
 
   const quickActions = [
-    { label: 'Find events', href: '/events' },
-    { label: 'Browse groups', href: '/groups' },
+    { label: 'Find people', href: '/people' },
+    { label: 'Browse events', href: '/events' },
+    { label: 'Explore groups', href: '/groups' },
     ...(profileIncomplete ? [{ label: 'Complete profile', href: buildProfileOnboardingHref('/home') }] : []),
     { label: msgUnread > 0 ? `Messages (${msgUnread})` : 'Open messages', href: '/messaging' },
   ]
@@ -67,7 +68,12 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
         <h2 className="text-lg font-semibold text-dc-text">
           Welcome, <span className="text-dc-accent">{name}</span>
         </h2>
-        <p className="mt-1 text-sm text-dc-text-muted">Here is what is happening in your community.</p>
+        <p className="mt-1 text-sm text-dc-text-muted">
+          Home is your community center — follow people, connect with friends, join groups, and RSVP to events.
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-dc-muted">
+          Follow helps shape what you see. Connect is mutual and more personal.
+        </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {quickActions.map((action) => (
             <Link key={action.href} to={action.href} className={homeQuickActionChipClass}>
@@ -104,7 +110,7 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
       />
 
       <section className="rounded-2xl border border-dc-border bg-dc-elevated-solid/90 p-5">
-        <h3 className="text-base font-semibold text-dc-text">Recommended for you</h3>
+        <h3 className="text-base font-semibold text-dc-text">Groups to start finding your people</h3>
         {groups.length > 0 ?
           <ul className="mt-3 space-y-2">
             {groups.slice(0, 3).map((g) => (
@@ -120,7 +126,7 @@ export default function HomeFirstSessionDashboard({ events = [], groups = [], cl
       </section>
 
       <section className="rounded-2xl border border-dc-border bg-dc-elevated-solid/90 p-5">
-        <h3 className="text-base font-semibold text-dc-text">Upcoming events near you</h3>
+        <h3 className="text-base font-semibold text-dc-text">Events that can turn online connections into real community</h3>
         {events.length > 0 ?
           <ul className="mt-3 space-y-2">
             {events.slice(0, 3).map((ev) => (

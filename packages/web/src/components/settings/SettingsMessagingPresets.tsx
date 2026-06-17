@@ -11,11 +11,11 @@ const PRESETS: {
   {
     id: 'open',
     title: 'Open',
-    tagline: 'Anyone on Kink Social can reach your inbox.',
+    tagline: 'Anyone signed in can start a conversation with you.',
     rows: [
       { label: 'Connections', status: 'inbox' },
-      { label: 'People you follow', status: 'inbox' },
-      { label: 'Everyone else', status: 'inbox' },
+      { label: 'Shared group members', status: 'inbox' },
+      { label: 'Everyone else', status: 'request' },
     ],
   },
   {
@@ -24,17 +24,17 @@ const PRESETS: {
     tagline: 'Good default for most members.',
     rows: [
       { label: 'Connections', status: 'inbox' },
-      { label: 'People you follow', status: 'inbox' },
-      { label: 'Everyone else', status: 'request' },
+      { label: 'Shared group members', status: 'blocked' },
+      { label: 'Everyone else', status: 'blocked' },
     ],
   },
   {
     id: 'friends',
     title: 'Close circle',
-    tagline: 'Only friends can message you directly.',
+    tagline: 'Only connections can start a conversation with you.',
     rows: [
-      { label: 'Friends', status: 'inbox' },
-      { label: 'Connections', status: 'request' },
+      { label: 'Connections', status: 'inbox' },
+      { label: 'Shared group members', status: 'blocked' },
       { label: 'Everyone else', status: 'blocked' },
     ],
   },

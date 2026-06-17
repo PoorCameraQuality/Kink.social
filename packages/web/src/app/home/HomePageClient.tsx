@@ -20,6 +20,7 @@ import HomeFirstSessionDashboard from '@/components/home/HomeFirstSessionDashboa
 import LocalHomeFeed from '@/components/home/LocalHomeFeed'
 import HomeDashboardLeftRail from '@/components/home/HomeDashboardLeftRail'
 import HomeFeedScopeNav from '@/components/home/HomeFeedScopeNav'
+import HomeSocialGuidance from '@/components/home/HomeSocialGuidance'
 import HomeFeedDiscoverRail from '@/components/home/HomeFeedDiscoverRail'
 import TrendingItemCard from '@/components/home/TrendingItemCard'
 import VendorListingMiniCard from '@/components/home/VendorListingMiniCard'
@@ -34,6 +35,7 @@ import {
 } from '@/data/mock-data'
 import { presentHomeFeedPosts } from '@/lib/following-feed-demo'
 import { useAuth, useViewerUsername } from '@/contexts/AuthContext'
+import { useHomeSocialGuidancePrefs } from '@/hooks/useHomeSocialGuidancePrefs'
 import { useHomeSurface } from '@/hooks/useHomeSurface'
 import { useApiEducationArticles } from '@/hooks/useApiEducationArticles'
 import { useApiMediaShows } from '@/hooks/useApiMediaShows'
@@ -65,13 +67,13 @@ function formatEducationReadMinutes(readingMinutes: number | null | undefined): 
 }
 
 const HOME_DISCOVER_TAB_BLURB: Partial<Record<HomeTab, string>> = {
-  Events: 'Find munches, classes, conventions, and play parties worth your time.',
+  Events: 'Events that can turn online connections into real-world community.',
   Conventions: 'Multi-day gatherings and conference-style events in the community.',
-  Groups: 'Communities to join, lurk in, or stay involved with over time.',
-  Vendors: 'Makers, shops, and creators serving the kink community.',
+  Groups: 'Groups to start finding your people and ongoing conversations.',
+  Vendors: 'Vendors your community may want to know.',
   Education: 'Guides and perspectives from community educators and writers.',
   Media: 'Podcasts, shows, and channels from community creators.',
-  Trending: 'Active conversations and community signals across the network.',
+  Trending: 'Explore posts, events, and conversations across the network.',
 }
 
 export default function HomePageClient() {
@@ -79,6 +81,7 @@ export default function HomePageClient() {
   const location = useLocation()
   const viewerUsername = useViewerUsername()
   const { isAuthenticated, isFallback } = useAuth()
+  const socialGuidance = useHomeSocialGuidancePrefs(viewerUsername)
   const { feed: memberFeed } = useOnboardingState(isAuthenticated && !isFallback)
   const [searchParams, setSearchParams] = useSearchParams()
   const tabParam = searchParams.get('tab')
@@ -453,9 +456,9 @@ export default function HomePageClient() {
         </div>
       : null}
       <div className="border-t border-dc-border pt-6">
-        <h3 className="text-sm font-semibold text-dc-text mb-2">Join a group</h3>
+        <h3 className="text-sm font-semibold text-dc-text mb-2">Groups to start finding your people</h3>
         <p className="text-xs text-dc-muted mb-3">
-          Public groups are open join; private and invite-only groups use apply flows in production.
+          Join a group to find ongoing conversations and people who share your interests.
         </p>
         <div className="space-y-2">
           {homeJoinGroups.map((g) => (
@@ -494,7 +497,7 @@ export default function HomePageClient() {
       </div>
       {vendorCarouselItems.length > 0 ?
         <div className="bg-dc-elevated-solid rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)]">
-          <h3 className="text-sm font-semibold text-dc-text mb-3">Suggested picks</h3>
+          <h3 className="text-sm font-semibold text-dc-text mb-3">Vendors your community may want to know</h3>
           <p className="text-xs text-dc-muted mb-2">One listing per shop. Refreshes as you interact with the feed.</p>
           <AutoScrollRow aria-label="Suggested vendor picks">
             {vendorCarouselItems.map((v) => (
@@ -656,6 +659,14 @@ export default function HomePageClient() {
   const showDevHeadline =
     import.meta.env.DEV && import.meta.env.VITE_SHOW_HOME_DEBUG === 'true' && surfaceHeadline.visible
 
+  const sparseLocalFeed = apiFeedSettled && localFeedPosts.length <= 2
+  const showSocialGuidance =
+    isAuthenticated &&
+    !isFallback &&
+    showFeedThreeColumn &&
+    socialGuidance.visible &&
+    (!returningMember || sparseLocalFeed)
+
   const discoverTabBlurb = HOME_DISCOVER_TAB_BLURB[activeTab] ?? null
 
   const discoverRailProps = useMemo(
@@ -777,6 +788,9 @@ export default function HomePageClient() {
             <div className="mb-4 hidden lg:block">
               <HomeFeedScopeNav />
             </div>
+          : null}
+          {showSocialGuidance ?
+            <HomeSocialGuidance className="mb-3" onDismiss={socialGuidance.dismiss} />
           : null}
           {apiBackedHome && homeMode === 'Following' ?
             <>

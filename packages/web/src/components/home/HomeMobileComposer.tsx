@@ -6,6 +6,7 @@ type Props = {
   viewerInitial: string
   useDbComposer: boolean
   composerPlaceholder: string
+  composerHint?: string
   onPosted: () => void
   compact?: boolean
 }
@@ -15,6 +16,7 @@ export default function HomeMobileComposer({
   viewerInitial,
   useDbComposer,
   composerPlaceholder,
+  composerHint,
   onPosted,
   compact = false,
 }: Props) {
@@ -26,7 +28,10 @@ export default function HomeMobileComposer({
       className={`scroll-mt-24 dc-rail-card rounded-2xl border border-dc-border/80 bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)] ${compact ? 'mb-2 p-2.5' : 'mb-2.5 p-3'}`}
       aria-label="Share with the community"
     >
-      <h2 className={`font-semibold text-dc-text ${compact ? 'sr-only' : 'mb-2.5 text-sm'}`}>Share with the community</h2>
+      <h2 className={`font-semibold text-dc-text ${compact ? 'sr-only' : 'mb-1 text-sm'}`}>Share with the community</h2>
+      {composerHint ?
+        <p className={`text-dc-muted ${compact ? 'sr-only' : 'mb-2 text-xs leading-relaxed'}`}>{composerHint}</p>
+      : null}
       <HomeFeedShellComposer
         viewerUsername={viewerUsername}
         viewerInitial={viewerInitial}

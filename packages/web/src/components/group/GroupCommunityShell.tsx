@@ -5,6 +5,8 @@ import CommunityHubShell from '@/components/ui/CommunityHubShell'
 import CopyLinkOverflowMenu from '@/components/ui/CopyLinkOverflowMenu'
 import { mediaDisplayUrl } from '@/lib/media-display-url'
 
+export { API_GROUP_TABS, MOCK_GROUP_TABS, MOCK_ONLY_GROUP_TABS, groupCommunityTabs } from '@/lib/group-community-tabs'
+
 function groupInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return '?'
@@ -19,16 +21,6 @@ function moderatorCapabilityLine(role: string): string | null {
   return null
 }
 
-/** Mock/demo slug groups - full tab set including mock-only sections. */
-export const MOCK_GROUP_TABS = ['Channels', 'Events', 'Members', 'Resources', 'Photos'] as const
-/** API-backed UUID groups - mock Channels/Resources/Photos hidden until API exists. */
-export const API_GROUP_TABS = ['Forums', 'Feedback', 'Events', 'Members'] as const
-export const MOCK_ONLY_GROUP_TABS = ['Channels', 'Resources', 'Photos'] as const
-
-export function groupCommunityTabs(apiBacked: boolean): readonly string[] {
-  return apiBacked ? API_GROUP_TABS : MOCK_GROUP_TABS
-}
-
 export interface GroupCommunityShellProps {
   name: string
   groupId: string
@@ -40,6 +32,8 @@ export interface GroupCommunityShellProps {
   placeLabel?: string | null
   /** Purpose category pill */
   category?: string | null
+  visibility?: 'public' | 'private' | 'invite-only' | null
+  description?: string | null
   tags?: string[]
   viewerRole?: string | null
   isMember: boolean
@@ -66,6 +60,8 @@ export default function GroupCommunityShell({
   parentOrganization,
   placeLabel,
   category,
+  visibility,
+  description,
   tags,
   viewerRole,
   isMember,
@@ -129,9 +125,18 @@ export default function GroupCommunityShell({
                 {memberCount} {memberCount === 1 ? 'member' : 'members'}
                 {placeLabel ? ` · Serving ${placeLabel}` : null}
               </p>
+              {description ?
+                <p className="mt-2 text-sm leading-relaxed text-dc-text-muted line-clamp-3">{description}</p>
+              : null}
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <span className="rounded-lg border border-dc-border bg-dc-elevated-muted px-2 py-0.5 text-xs text-dc-text-muted">
-                  {isMember ? 'Member' : 'Open to join'}
+                  {isMember ?
+                    'You are a member'
+                  : visibility === 'private' ?
+                    'Private — join to participate'
+                  : visibility === 'invite-only' ?
+                    'Invite only'
+                  : 'Open to join'}
                 </span>
                 <span className="rounded-lg border border-dc-border bg-dc-elevated-muted px-2 py-0.5 text-xs text-dc-text-muted">
                   Community rules apply

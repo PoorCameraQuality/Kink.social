@@ -14,6 +14,7 @@ import bcrypt from 'bcryptjs'
 import { count, eq } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { z } from 'zod'
+import { validatePublicUsername } from '@c2k/shared'
 import { getMockPersonByUsername } from '../data/mock-seeds.js'
 import { db, schema } from '../db/index.js'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
@@ -273,6 +274,10 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       return reply.status(400).send({ error: 'Invalid body' })
     }
     const { username, email, password } = parsed.data
+    const usernameError = validatePublicUsername(username, email)
+    if (usernameError) {
+      return reply.status(400).send({ error: usernameError })
+    }
     const now = new Date()
     const regIpPrefix = registrationIpPrefixFromRequest(req)
     const hash = await bcrypt.hash(password, 12)

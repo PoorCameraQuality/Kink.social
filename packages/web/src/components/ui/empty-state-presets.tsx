@@ -45,11 +45,16 @@ export const EMPTY_STATE_PRESETS = {
     icon: <MessageEmptyIcon />,
   },
   noNotifications: {
-    title: 'No notifications',
-    message: 'You are caught up. New activity will appear here.',
-    ctaLabel: 'Go home',
-    ctaHref: '/home',
+    title: 'No notifications yet.',
+    message:
+      'When someone messages you, accepts a connection, replies, reacts, or sends something that needs your attention, it will appear here.',
     icon: <NotificationEmptyIcon />,
+    actions: [
+      { label: 'Find people', href: '/people', primary: true },
+      { label: 'View connections', href: '/connections' },
+      { label: 'Open messages', href: '/messaging' },
+      { label: 'Explore groups', href: '/groups' },
+    ],
   },
   noSavedItems: {
     title: 'Nothing saved yet',
@@ -109,11 +114,14 @@ export const EMPTY_STATE_PRESETS = {
     icon: <AlertEmptyIcon />,
   },
   noActivity: {
-    title: 'No activity yet',
-    message: 'Messages, notifications, and connection requests will appear here as you use Kink Social.',
+    title: 'No activity yet.',
+    message:
+      'Follow members, join groups, RSVP to events, and post updates to start building a real activity stream.',
     actions: [
       { label: 'Find people', href: '/people', primary: true },
+      { label: 'Explore groups', href: '/groups' },
       { label: 'Browse events', href: '/events' },
+      { label: 'Write a post', href: '/home?mode=discover&tab=Local#home-feed-composer' },
     ],
   },
   noMyPosts: {

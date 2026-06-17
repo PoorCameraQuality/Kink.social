@@ -11,6 +11,10 @@ import {
 } from './feed-following-filters.js'
 import { followingIds } from './following-ids.js'
 import { enrichPostsWithLikeMeta } from './post-like-meta.js'
+import { filterVisibleFeedAttachments, sanitizeFollowingFeedActivityItemsForViewer } from './feed-media-attachments.js'
+import { filterRowsForGroupForumActivity, buildGroupForumThreadDeepLink } from './group-forum-activity.js'
+import { filterRowsForEventActivity } from './event-activity.js'
+import { filterRowsForConventionActivity } from './convention-activity.js'
 import { extractTagIdsFromMentions, getMutedTagIds, hydrateRepostSourceTagIds, postMatchesMutedTags } from './muted-tags.js'
 import { ensureUserSettingsRow } from './user-settings-row.js'
 
@@ -66,6 +70,9 @@ function deepLinkForActivity(verb: string, objectType: string, objectId: string,
     if (typeof orgSlug === 'string') return `/orgs/${orgSlug}`
   }
   if (verb === 'group_join' && objectType === 'group') return `/groups/${objectId}`
+  if (verb === 'group_thread_created' && objectType === 'forum_thread') {
+    return buildGroupForumThreadDeepLink(metadata, objectId) ?? '/home'
+  }
   if (
     (verb === 'loved' || verb === 'reacted' || verb === 'post_love') &&
     objectType === 'feed_post'
@@ -323,7 +330,11 @@ export async function getFollowingFeed(params: {
     return b.id.localeCompare(a.id)
   })
 
-  const filtered = decoded ? merged.filter((row) => beforeCursor(row, decoded)) : merged
+  let visibleMerged = await filterRowsForGroupForumActivity(params.viewerId, merged)
+  visibleMerged = await filterRowsForEventActivity(params.viewerId, visibleMerged)
+  visibleMerged = await filterRowsForConventionActivity(params.viewerId, visibleMerged)
+
+  const filtered = decoded ? visibleMerged.filter((row) => beforeCursor(row, decoded)) : visibleMerged
   const page = filtered.slice(0, params.limit)
   let items = page.map((row) => (row.source === 'post' ? shapePostItem(row) : shapeActivityItem(row)))
 
@@ -350,6 +361,21 @@ export async function getFollowingFeed(params: {
   }
 
   items = aggregateFollowingFeedItems(items)
+
+  items = await sanitizeFollowingFeedActivityItemsForViewer(params.viewerId, items)
+
+  items = await Promise.all(
+    items.map(async (item) => {
+      if (item.kind !== 'post' || !item.post) return item
+      return {
+        ...item,
+        post: {
+          ...item.post,
+          attachments: await filterVisibleFeedAttachments(params.viewerId, item.post.attachments),
+        },
+      }
+    }),
+  )
 
   const last = page[page.length - 1]
   const nextCursor =
@@ -419,8 +445,11 @@ export async function getFollowingFeedCounts(viewerId: string): Promise<Followin
 
   const activityRows = await db
     .select({
+      id: schema.feedActivities.id,
       verb: schema.feedActivities.verb,
       objectType: schema.feedActivities.objectType,
+      objectId: schema.feedActivities.objectId,
+      metadata: schema.feedActivities.metadata,
       actorId: schema.feedActivities.actorId,
       createdAt: schema.feedActivities.createdAt,
     })
@@ -463,6 +492,14 @@ export async function getFollowingFeedCounts(viewerId: string): Promise<Followin
     if (bucket === 'photos' || bucket === 'video' || bucket === 'articles') counts[bucket]++
   }
 
+  const activityCountCandidates: Array<{
+    id: string
+    actorId: string
+    verb: string
+    objectId?: string
+    metadata?: Record<string, unknown>
+  }> = []
+
   for (const a of activityRows) {
     if (
       !actorFeedActivityAllowed({
@@ -479,6 +516,22 @@ export async function getFollowingFeedCounts(viewerId: string): Promise<Followin
     if (!matchesFollowingFilter('activity', 'all', hideKinds, { verb: a.verb, objectType: a.objectType })) {
       continue
     }
+    activityCountCandidates.push({
+      id: a.id,
+      actorId: a.actorId,
+      verb: a.verb,
+      objectId: a.objectId,
+      metadata: (a.metadata as Record<string, unknown>) ?? {},
+    })
+  }
+
+  let visibleActivities = await filterRowsForGroupForumActivity(viewerId, activityCountCandidates)
+  visibleActivities = await filterRowsForEventActivity(viewerId, visibleActivities)
+  visibleActivities = await filterRowsForConventionActivity(viewerId, visibleActivities)
+  const visibleActivityIds = new Set(visibleActivities.map((r) => r.id))
+
+  for (const a of activityRows) {
+    if (!visibleActivityIds.has(a.id)) continue
     counts.all++
     const bucket = bucketForActivity(a.verb)
     if (bucket) counts[bucket]++

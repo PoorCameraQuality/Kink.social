@@ -7,6 +7,8 @@ import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { db, schema } from '../db/index.js'
 import { loadAcceptedFriendUserIds } from '../lib/accepted-friends.js'
 import { isBlockedPair, loadBlockedUserIds } from '../lib/blocks.js'
+import { assertCanInitiateDm, resolveProfileMessageHint } from '../lib/dm-privacy.js'
+import { getDmRequestStatusBetween } from '../lib/conversation-dm-status.js'
 import { redactListProfileIdentityFields } from '../lib/profile-field-redaction.js'
 import { loadFollowerUserIds, loadFollowingUserIds } from '../lib/follows.js'
 import { emitActivity } from '../lib/feed-activities.js'
@@ -117,11 +119,24 @@ export async function registerSocialGraphRoutes(app: FastifyInstance) {
         and(eq(schema.userFollows.followerId, target.id), eq(schema.userFollows.followingId, viewerId))
       )
       .limit(1)
+    const connected = connectionStatus === 'connected'
+    const dmGate = await assertCanInitiateDm(viewerId, target.id)
+    const canMessage = dmGate.ok
+    const messageHint = resolveProfileMessageHint({
+      canMessage: dmGate.ok,
+      gateError: dmGate.ok ? undefined : dmGate.error,
+      connected,
+    })
+    const dmRequest = await getDmRequestStatusBetween(viewerId, target.id)
     return reply.send({
       connectionStatus,
       isFollowing: Boolean(followOut),
       isFollowedBy: Boolean(followIn),
       connectionId: conn?.id ?? null,
+      canMessage,
+      messageHint,
+      dmRequestStatus: dmRequest.status,
+      dmConversationId: dmRequest.conversationId,
     })
   })
 

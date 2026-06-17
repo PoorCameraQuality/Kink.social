@@ -1,6 +1,6 @@
 const FOLDER_HINTS = {
-  main: 'Accepted conversations',
-  requests: 'New people waiting for approval',
+  main: 'Accepted conversations you can read and reply to',
+  requests: 'New conversations from people you are not connected with yet. Accept to reply.',
   iso: 'Replies from personal or convention ISO boards',
 } as const
 

@@ -34,11 +34,13 @@ import type { UserEcosystemPayload } from '@/lib/user-ecosystem'
 import { fetchUserEcosystem, vendorProfilePath } from '@/lib/user-ecosystem'
 import type { ApiEducationArticle } from '@/lib/education-article-types'
 import ProfileMeHub from '@/components/profile/ProfileMeHub'
+import ProfileRecentPostsSection from '@/components/profile/ProfileRecentPostsSection'
 import EmptyState from '@/components/ui/EmptyState'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
 import ProfileOwnerActions from '@/components/profile/ProfileOwnerActions'
 import { formatMyRsvpLabel, useApiMyRsvps } from '@/hooks/useApiMyRsvps'
 import { useApiProfileMe } from '@/hooks/useApiProfileMe'
+import { useApiMyProfileFeedPosts } from '@/hooks/useApiProfileFeedPosts'
 import { clearProfileEditLocalOverrides, PROFILE_EDIT_STORAGE_KEY } from '@/lib/profileEditLocalStorage'
 import { formatPronounDisplay, pickPrimaryProfilePhoto, visibleProfileIdentityFields } from '@c2k/shared'
 
@@ -165,6 +167,7 @@ export default function ProfilePageClient() {
   const signedInLive = isAuthenticated && !isFallback
   const useMockProfile = !signedInLive
   const profileMe = useApiProfileMe(signedInLive && authStatus === 'ready')
+  const profileFeedPosts = useApiMyProfileFeedPosts(signedInLive, 10)
   const profileApiReady = profileMe.status === 'ready'
   const profileApiLoading = signedInLive && profileMe.status === 'loading'
 
@@ -590,6 +593,18 @@ export default function ProfilePageClient() {
       desktopSidebar={ownerLayout ? <ProfileStorySidebar {...ownerLayout.sidebar} /> : null}
       networkRail={socialSidebar}
       main={
+        <>
+          {signedInLive && displayUsername ?
+            <ProfileRecentPostsSection
+              viewerIsOwner
+              viewerUsername={viewerUsername}
+              profileUsername={displayUsername}
+              items={profileFeedPosts.items}
+              status={profileFeedPosts.status}
+              error={profileFeedPosts.error}
+              onRetry={() => void profileFeedPosts.reload()}
+            />
+          : null}
         <ProfileExtendedSection
           viewerIsOwner
           visibleTabs={visibleTabs}
@@ -736,6 +751,7 @@ export default function ProfilePageClient() {
               />
             )}
         </ProfileExtendedSection>
+        </>
       }
       afterGrid={!profileApiLoading ? <ProfileMeHub /> : null}
     />

@@ -38,6 +38,8 @@ import { getModerationQueue } from '../lib/moderation-queue.js'
 import { rateLimitRoute } from '../lib/rate-limit-config.js'
 import { parseOrgFeatureFlags } from '../lib/org-features.js'
 import { loadAcceptedFriendUserIds } from '../lib/accepted-friends.js'
+import { loadBlockedUserIds, loadUserIdsWhoBlockedUser } from '../lib/blocks.js'
+import { filterBlockedUserIds } from '../lib/people-discovery.js'
 import { assertCanInitiateDm, assertCanSendDmMessage } from '../lib/dm-privacy.js'
 import { emitActivity } from '../lib/feed-activities.js'
 import { emitVendorShopLiveIfEligible } from '../lib/vendor-shop-feed.js'
@@ -119,6 +121,13 @@ async function findExistingDmPair(userIdA: string, userIdB: string): Promise<str
     }
   }
   return null
+}
+
+async function findGroupByIdOrSlug(groupKey: string) {
+  const [byId] = await db.select().from(schema.groups).where(eq(schema.groups.id, groupKey)).limit(1)
+  if (byId) return byId
+  const [bySlug] = await db.select().from(schema.groups).where(eq(schema.groups.slug, groupKey)).limit(1)
+  return bySlug ?? null
 }
 
 async function usersAreConnected(userIdA: string, userIdB: string): Promise<boolean> {
@@ -213,6 +222,13 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     const viewer = resolveViewerFromRequest(req)
     const viewerId = getViewerUserId(viewer.payload)
     const friendIds = viewerId ? await loadAcceptedFriendUserIds(viewerId) : new Set<string>()
+    const blockedActorIds =
+      viewerId ?
+        new Set([
+          ...(await loadBlockedUserIds(viewerId)),
+          ...(await loadUserIdsWhoBlockedUser(viewerId)),
+        ])
+      : new Set<string>()
     const visibilityFilter = viewerId
       ? or(eq(schema.profiles.visibility, 'PUBLIC'), eq(schema.profiles.visibility, 'MEMBERS'))
       : eq(schema.profiles.visibility, 'PUBLIC')
@@ -256,9 +272,12 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       .orderBy(asc(schema.users.username))
       .limit(fetchLimit)
 
-    const filtered = rows
-      .filter((r) => r.discoverableInPeopleSearch || (viewerId !== null && r.userId === viewerId))
-      .filter((r) => passesGenderDiscoveryFilter(r, genderTrim, viewerId, friendIds))
+    const filtered = filterBlockedUserIds(
+      blockedActorIds,
+      rows
+        .filter((r) => r.discoverableInPeopleSearch || (viewerId !== null && r.userId === viewerId))
+        .filter((r) => passesGenderDiscoveryFilter(r, genderTrim, viewerId, friendIds)),
+    )
 
     const items = filtered
       .map((r) =>
@@ -714,10 +733,11 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
 
   app.get('/api/v1/groups/:groupId', async (req, reply) => {
     if (!requireDb(reply)) return
-    const { groupId } = req.params as { groupId: string }
-    const [g] = await db.select().from(schema.groups).where(eq(schema.groups.id, groupId)).limit(1)
+    const { groupId: groupKey } = req.params as { groupId: string }
+    const g = await findGroupByIdOrSlug(groupKey)
     if (!g) return reply.status(404).send({ error: 'Not found' })
     if (g.disbandedAt) return reply.status(404).send({ error: 'Not found' })
+    const groupId = g.id
     const viewer = resolveViewerFromRequest(req)
     const viewerId = getViewerUserId(viewer.payload)
     const [rawMembership] = viewerId
@@ -2055,6 +2075,10 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     const limit = Math.min(30, Math.max(1, parseInt(String(q.limit ?? '12'), 10) || 12))
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
     const friendIds = await loadAcceptedFriendUserIds(viewerId)
+    const blockedActorIds = new Set([
+      ...(await loadBlockedUserIds(viewerId)),
+      ...(await loadUserIdsWhoBlockedUser(viewerId)),
+    ])
 
     if (q.source === 'nearby') {
       const [vp] = await db
@@ -2077,6 +2101,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
           avatarUrl: schema.profiles.avatarUrl,
           lastActiveAt: schema.profiles.updatedAt,
           fieldVisibility: schema.profiles.fieldVisibility,
+          discoverableInPeopleSearch: schema.profiles.discoverableInPeopleSearch,
           privacySettings: schema.userSettings.privacySettings,
         })
         .from(schema.users)
@@ -2092,13 +2117,17 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         )
         .orderBy(desc(schema.profiles.updatedAt))
         .limit(Math.min(80, limit * 4))
-      const filtered = candidates
-        .filter((c) => passesLocationDiscoveryFilter(c, viewerId, friendIds))
-        .filter((c) => normalizePrivacySettings(c.privacySettings ?? {}).appearInRegionalPeopleSuggestions)
-        .filter(
-          (c) =>
-            normalizePrivacySettings(c.privacySettings ?? {}).feedActivityPrivacy.showInConnectionSuggestions,
-        )
+      const filtered = filterBlockedUserIds(
+        blockedActorIds,
+        candidates
+          .filter((c) => c.discoverableInPeopleSearch)
+          .filter((c) => passesLocationDiscoveryFilter(c, viewerId, friendIds))
+          .filter((c) => normalizePrivacySettings(c.privacySettings ?? {}).appearInRegionalPeopleSuggestions)
+          .filter(
+            (c) =>
+              normalizePrivacySettings(c.privacySettings ?? {}).feedActivityPrivacy.showInConnectionSuggestions,
+          ),
+      )
         .slice(0, limit)
         .map(({ privacySettings: _p, fieldVisibility: _fv, ...rest }) =>
           redactListProfileIdentityFields(rest, viewerId, friendIds),
@@ -2131,6 +2160,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         avatarUrl: schema.profiles.avatarUrl,
         lastActiveAt: schema.profiles.updatedAt,
         fieldVisibility: schema.profiles.fieldVisibility,
+        discoverableInPeopleSearch: schema.profiles.discoverableInPeopleSearch,
         privacySettings: schema.userSettings.privacySettings,
         sharedCount: count(),
       })
@@ -2157,18 +2187,23 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         schema.profiles.avatarUrl,
         schema.profiles.updatedAt,
         schema.profiles.fieldVisibility,
+        schema.profiles.discoverableInPeopleSearch,
         schema.userSettings.privacySettings,
       )
       .orderBy(desc(count()))
       .limit(limit + 5)
 
-    const filtered = others
-      .filter((o) => o.userId !== viewerId)
-      .filter(
-        (o) => normalizePrivacySettings(o.privacySettings ?? {}).feedActivityPrivacy.showInConnectionSuggestions,
-      )
+    const filtered = filterBlockedUserIds(
+      blockedActorIds,
+      others
+        .filter((o) => o.userId !== viewerId)
+        .filter((o) => o.discoverableInPeopleSearch)
+        .filter(
+          (o) => normalizePrivacySettings(o.privacySettings ?? {}).feedActivityPrivacy.showInConnectionSuggestions,
+        ),
+    )
       .slice(0, limit)
-      .map(({ privacySettings: _p, fieldVisibility: _fv, ...rest }) =>
+      .map(({ privacySettings: _p, fieldVisibility: _fv, discoverableInPeopleSearch: _d, ...rest }) =>
         redactListProfileIdentityFields(rest, viewerId, friendIds),
       )
     return reply.send({ items: filtered })
@@ -3341,9 +3376,15 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     ])
     if (!connected) {
       try {
+        const [sender] = await db
+          .select({ username: schema.users.username })
+          .from(schema.users)
+          .where(eq(schema.users.id, user.userId))
+          .limit(1)
         await createNotification(otherId, 'dm_request', {
           conversationId: conv.id,
           fromUserId: user.userId,
+          senderUsername: sender?.username ?? undefined,
         })
       } catch (err) {
         req.log.warn({ err }, 'dm_request notification failed')
@@ -3566,7 +3607,9 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       .where(eq(schema.notifications.userId, user.userId))
       .orderBy(desc(schema.notifications.createdAt))
       .limit(100)
-    return reply.send({ items: rows })
+    const { filterNotificationsForViewer } = await import('../lib/notification-privacy.js')
+    const items = await filterNotificationsForViewer(user.userId, rows)
+    return reply.send({ items })
   })
 
   app.post('/api/v1/notifications/:notificationId/read', async (req, reply) => {

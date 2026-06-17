@@ -1,5 +1,11 @@
 import { Link } from 'react-router-dom'
 import type { GraphStatus } from '@/hooks/useGraphStatus'
+import { MESSAGE_REQUEST_SENT_LABEL, MESSAGE_REQUEST_WAITING_COPY } from '@/lib/notifications-copy'
+import {
+  PROFILE_MESSAGING_HELPER,
+  profileMessageHintCopy,
+} from '@/lib/messaging-copy'
+import { PROFILE_ACTION_HELPER } from '@/lib/social-graph-copy'
 
 type ConnectNotice = { kind: 'success' | 'error'; text: string } | null
 
@@ -12,6 +18,7 @@ type Props = {
   graphBusy: boolean
   connectNotice: ConnectNotice
   isAuthenticated: boolean
+  canMessage?: boolean
   onConnect: () => void
   onToggleFollow: () => void
   onDismissConnectNotice: () => void
@@ -27,12 +34,15 @@ export default function ProfileViewerActions({
   graphBusy,
   connectNotice,
   isAuthenticated: _isAuthenticated,
+  canMessage = false,
   onConnect,
   onToggleFollow,
   onDismissConnectNotice,
   mutualConnectionsCount,
 }: Props) {
   const isSelf = username === viewerUsername
+  const canShowMessage = canMessage || graphStatus?.canMessage === true
+  const messageHintCopy = profileMessageHintCopy(graphStatus?.messageHint)
 
   if (isSelf) {
     return (
@@ -100,13 +110,40 @@ export default function ProfileViewerActions({
             Find on Kink Social
           </Link>
         )}
-        <Link
-          to={`/messaging?user=${encodeURIComponent(username)}`}
-          className="inline-flex items-center justify-center px-4 py-2 min-h-11 bg-dc-elevated-solid hover:bg-dc-elevated-muted text-dc-text text-sm font-medium rounded-xl border border-dc-border"
-        >
-          Message
-        </Link>
+        {canShowMessage ?
+          graphStatus?.dmRequestStatus === 'pending_outgoing' ?
+            <Link
+              to={
+                graphStatus.dmConversationId ?
+                  `/messaging?c=${encodeURIComponent(graphStatus.dmConversationId)}`
+                : `/messaging?user=${encodeURIComponent(username)}`
+              }
+              className="inline-flex min-h-11 items-center justify-center px-4 py-2 text-sm font-medium text-dc-muted rounded-xl border border-dc-border hover:border-dc-accent-border hover:text-dc-text"
+            >
+              {MESSAGE_REQUEST_SENT_LABEL}
+            </Link>
+          : <Link
+              to={`/messaging?user=${encodeURIComponent(username)}`}
+              className="inline-flex items-center justify-center px-4 py-2 min-h-11 bg-dc-elevated-solid hover:bg-dc-elevated-muted text-dc-text text-sm font-medium rounded-xl border border-dc-border"
+            >
+              Message
+            </Link>
+        : null}
       </div>
+
+      {apiBacked && !isSelf ?
+        <p className="text-xs leading-relaxed text-dc-muted">
+          {graphStatus?.dmRequestStatus === 'pending_outgoing' ?
+            MESSAGE_REQUEST_WAITING_COPY
+          : canShowMessage ?
+            graphStatus?.messageHint === 'request_pending' ?
+              profileMessageHintCopy('request_pending')
+            : graphStatus?.connectionStatus === 'connected' ?
+              PROFILE_ACTION_HELPER
+            : PROFILE_MESSAGING_HELPER
+          : messageHintCopy ?? PROFILE_MESSAGING_HELPER}
+        </p>
+      : null}
 
       {mutualConnectionsCount != null &&
       mutualConnectionsCount > 0 &&

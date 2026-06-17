@@ -26,6 +26,7 @@ export type InboxListItem = {
   folder: 'main' | 'requests' | 'iso'
   isFavorite: boolean
   isPinned: boolean
+  awaitingPartnerAcceptance: boolean
 }
 
 export async function listConversationsForInbox(params: InboxListParams): Promise<InboxListItem[]> {
@@ -126,6 +127,9 @@ export async function listConversationsForInbox(params: InboxListParams): Promis
     }
 
     const primaryOther = others[0]
+    const awaitingPartnerAcceptance =
+      conv?.initiatorUserId === userId &&
+      others.some((o) => o.acceptanceStatus === 'PENDING')
     items.push({
       id: convId,
       title,
@@ -137,6 +141,7 @@ export async function listConversationsForInbox(params: InboxListParams): Promis
       folder: isIsoThread ? 'iso' : isRequest ? 'requests' : 'main',
       isFavorite: myPart.isFavorite,
       isPinned: Boolean(myPart.pinnedAt),
+      awaitingPartnerAcceptance,
     })
   }
 

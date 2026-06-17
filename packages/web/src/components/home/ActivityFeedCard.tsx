@@ -18,6 +18,7 @@ import {
   followingFeedDeepLinkLabel,
   formatFeedTimeShort,
   isCompactFollowingActivity,
+  resolveGroupThreadActivityDeepLink,
 } from '@/lib/following-feed-present'
 
 type Props = {
@@ -112,6 +113,14 @@ function verbLabel(verb: string, actorUsername: string, object?: Record<string, 
         : `${actorUsername} posted an organization announcement`
     case 'group_join':
       return groupName ? `${actorUsername} joined ${groupName}` : `${actorUsername} joined a group`
+    case 'group_thread_created': {
+      const threadTitle = typeof object?.threadTitle === 'string' ? object.threadTitle.trim() : null
+      if (groupName && threadTitle) {
+        return `${actorUsername} started a discussion in ${groupName}: ${threadTitle}`
+      }
+      if (groupName) return `${actorUsername} started a discussion in ${groupName}`
+      return `${actorUsername} started a group discussion`
+    }
     case 'vendor_shop_live': {
       const shopName = typeof object?.displayName === 'string' ? object.displayName : null
       return shopName ? `${actorUsername} opened ${shopName}` : `${actorUsername} published their vendor shop`
@@ -138,6 +147,8 @@ function verbBadgeLabel(verb: string): string {
     case 'org_announcement':
       return 'Organizer announcement'
     case 'group_join':
+      return 'Group discussion'
+    case 'group_thread_created':
       return 'Group discussion'
     case 'vendor_shop_live':
       return 'Vendor'
@@ -483,7 +494,11 @@ function VendorShopFeedCard({ item }: Props) {
 
 function CompactActivityFeedCard({ item }: Props) {
   const object = item.object
-  const copyPath = item.deepLink && item.deepLink !== '/home' ? item.deepLink : null
+  const copyPath =
+    item.verb === 'group_thread_created' ?
+      resolveGroupThreadActivityDeepLink(item.deepLink, object)
+    : item.deepLink && item.deepLink !== '/home' ? item.deepLink
+    : null
   const linkLabel = followingFeedDeepLinkLabel(item.verb)
   const partnerUsername =
     typeof object?.partnerUsername === 'string' && object.partnerUsername.trim() ?
