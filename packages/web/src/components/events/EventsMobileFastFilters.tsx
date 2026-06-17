@@ -92,12 +92,7 @@ export default function EventsMobileFastFilters({
           type="button"
           aria-pressed={chip.active}
           onClick={chip.onClick}
-          className={cn(
-            'shrink-0 min-h-9 rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent',
-            chip.active ?
-              'bg-dc-accent text-dc-accent-foreground'
-            : 'border border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:text-dc-text',
-          )}
+          className={cn('dc-chip focus-visible:outline-none', chip.active && 'dc-chip--active')}
         >
           {chip.label}
         </button>

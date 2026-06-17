@@ -2,6 +2,10 @@ import { Link } from 'react-router-dom'
 import EventSaveButton from '@/components/events/EventSaveButton'
 import TagLink from '@/components/TagLink'
 import {
+  cardSurfaceInteractiveClass,
+  cardSurfaceSolidClass,
+} from '@/lib/card-surface'
+import {
   filterPublicEventTags,
   formatEventListDateBlock,
   formatEventLocationForDisplay,
@@ -26,7 +30,7 @@ export default function EventsListRow({ event }: Props) {
     : `${event.rsvpCount} going`
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-soft)] transition-colors hover:border-dc-accent-border/40 lg:hover:shadow-[var(--dc-shadow-panel)]">
+    <article className={`overflow-hidden ${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass}`}>
       <div className="flex gap-3 p-3 sm:p-4">
         <div className="c2k-event-date-badge flex min-w-[3.75rem] shrink-0 flex-col items-center justify-center py-2">
           <span className="text-[10px] font-bold uppercase tracking-wide text-dc-accent">{weekday}</span>

@@ -79,8 +79,8 @@
 
   @media (hover: hover) and (pointer: fine) {
     .dc-card-polish:hover {
-      border-color: color-mix(in srgb, var(--dc-accent) 28%, var(--dc-border));
-      box-shadow: var(--dc-shadow-panel, 0 8px 32px rgba(0, 0, 0, 0.35)), var(--dc-glass-inset);
+      border-color: var(--dc-border-card-hover, color-mix(in srgb, var(--dc-accent) 28%, var(--dc-border)));
+      box-shadow: var(--dc-shadow-hover, var(--dc-shadow-panel, 0 8px 32px rgba(0, 0, 0, 0.35))), var(--dc-glass-inset);
     }
   }
 

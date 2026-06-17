@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { cardSurfaceSolidClass } from '@/lib/card-surface'
 
 const DISMISS_KEY = 'c2k:messaging-safety-dismissed'
 
@@ -114,7 +115,7 @@ export default function MessagingSafetyPanel({ variant = 'sidebar', defaultOpen 
   }
 
   return (
-    <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
+    <div className={`${cardSurfaceSolidClass} p-4`}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

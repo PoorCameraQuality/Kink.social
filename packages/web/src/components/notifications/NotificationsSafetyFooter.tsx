@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
+import { cardSurfaceSolidClass } from '@/lib/card-surface'
 
 export default function NotificationsSafetyFooter({ className = '' }: { className?: string }) {
   return (
-    <footer className={`rounded-2xl border border-dc-border bg-dc-elevated-solid p-3 shadow-[var(--dc-shadow-soft)] sm:p-4 ${className}`.trim()}>
+    <footer className={`${cardSurfaceSolidClass} p-3 sm:p-4 ${className}`.trim()}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex gap-3">
           <span
