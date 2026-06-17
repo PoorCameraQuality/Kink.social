@@ -1,6 +1,6 @@
 # Server cutover log
 
-**Last updated:** 2026-06-17 (VPS alpha execution pass 1 — remote smoke only)
+**Last updated:** 2026-06-17 (VPS alpha execution pass 2 — deploy + alpha social seed)
 
 **Execution journal:** [`VPS_ALPHA_EXECUTION_LOG.md`](./VPS_ALPHA_EXECUTION_LOG.md) · **Operator checklist:** [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md)
 
