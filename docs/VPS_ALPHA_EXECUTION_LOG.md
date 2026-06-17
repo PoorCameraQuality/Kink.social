@@ -629,3 +629,171 @@ Script: `packages/api/scripts/audit-restricted-public-media.ts`
 | Ready for full public launch? | **No** |
 
 ---
+
+## Pass 7 — Public Alpha Activation Pass 1 (2026-06-17)
+
+**Goal:** Improve first-run journey for public alpha visitors and new members without broad redesign, privacy default changes, or destructive DB actions.
+
+### Legacy restricted media remediation
+
+**Not bulk-automated.** Prior audit (Pass 6) found **53** `LOGGED_IN` profile photos on public MinIO `media/` paths (uploaders: Brax, TestAdmin).
+
+**Manual per-row remediation (operator):**
+
+1. Run audit: `npm run -w @c2k/api tsx scripts/audit-restricted-public-media.ts` on VPS (or use existing Pass 6 output).
+2. For each row: set asset storage to private/quarantine model (`VALIDATED_PRIVATE`), update DB `storage_key` to quarantine prefix, remove orphaned public MinIO object under `media/` if a duplicate exists.
+3. Verify: anonymous GET on legacy direct URL → **404**; authenticated proxy URL → **200** when viewer allowed.
+4. Do **not** bulk-delete rows or wipe uploads.
+
+### First-run journey inventory (post-deploy)
+
+| Step | Clear? | Confusion / gap |
+|------|--------|-----------------|
+| Public landing | **Yes** | Split layout: value prop, 18+, alpha disclaimer, CTAs (Join alpha, Browse events, Explore groups, Privacy) |
+| Register | **Yes** | 18+ checkboxes; landing tab now "Join the alpha" |
+| Onboarding | **Improved** | Step 1 alpha framing; step 3 support link; step 7 "You are in" with ranked first steps |
+| First Home (Discover) | **Improved** | HomeActivationCard checklist, event/group helpers, alpha notice, feedback link |
+| Find event | **Yes** | `/events` linked from landing, Home, onboarding completion |
+| Find people | **Yes** | `/people` linked; follow vs connect helper copy |
+| Find groups | **Yes** | `/groups` linked with privacy helper |
+| Profile / privacy | **Yes** | Profile completion reassurance; privacy before sensitive asks in onboarding step 5 |
+| Feedback | **Yes** | `/support` alpha feedback section; links from Home activation card and onboarding safety step |
+
+**Seed markers:** `[alpha_social_seed:…]` still visible (acceptable for alpha honesty).
+
+### Staff / moderation smoke
+
+| Check | Result |
+|-------|--------|
+| Brax staff login | **Works** (live session reaches Home as Brax) |
+| `GET /api/v1/moderation/cases?limit=1` | **Not re-verified this pass** (local curl hung; prior pass blocked without creds) |
+
+### VPS deploy scope (changed-files-only)
+
+**Script:** `scripts/vps/patch-activation-pass1-vps.mjs`
+
+| Item | Value |
+|------|-------|
+| Service rebuilt | **web only** (`c2k-web`) |
+| API / worker | **Not touched** |
+| DB / media | **No changes** |
+| Post-deploy | `home=200`; live page includes "Join the alpha", "Public alpha" framing |
+
+### Verification
+
+| Command | Result |
+|---------|--------|
+| `npm run typecheck -w web` | **Pass** |
+| `npm run build -w web` | **Pass** |
+| Focused activation tests (Node 24, plain `node --test`) | **11/11 pass** |
+| `npm run test` (full API suite) | **Fail (environment)** — Node v24 + tsx/tsconfig; use **Node 20** on VPS/CI |
+
+### Remaining blockers
+
+1. **53 legacy staff profile photos** on public MinIO if direct URL known (manual per-row remediation)
+2. Feed composer UI file attach (human / Playwright fixture)
+3. Local full `npm run test` on Node 24
+
+### Readiness verdict (Pass 7)
+
+| Question | Answer |
+|----------|--------|
+| Public visitors allowed? | **Yes** |
+| Safe to leave visible? | **Yes** |
+| Ready to actively promote for alpha testing? | **Yes** |
+| Ready for structured tester QA? | **Yes** |
+| Ready for full public launch? | **No** |
+
+---
+
+## Pass 8 — Alpha Promotion Readiness Pass 1 (2026-06-17)
+
+**Goal:** Clear last operational/QA items before actively promoting public alpha. No destructive DB, no password changes.
+
+### Legacy restricted media
+
+| Metric | Value |
+|--------|-------|
+| Pre-pass audit | **53** `LOGGED_IN` rows on public `media/` paths |
+| Staff/test (Brax, TestAdmin) | **27** — remediated (`APPLY=true`, script `remediate-staff-restricted-public-media.ts`) |
+| Post-pass audit | **26** remaining (legacy imported members: tarkiz, Temma, aara, etc.) |
+| Alpha seed rows | **0** |
+| Visible in current DTOs | Profile photos use **proxy** (`/api/v1/media/assets/:id/content`) when `mediaAssetId` present |
+| Direct URL if known | Legacy objects may still return **200** until per-row remediation (26 rows) |
+
+**Deploy scope:** Scripts uploaded only (`patch-promotion-readiness-pass1-vps.mjs`). DB + MinIO updates via `tsx` on host. **No container rebuild.**
+
+### Feed composer upload smoke
+
+| Check | Result |
+|-------|--------|
+| API `POST /api/upload` (`feed_image`, alpha_social) | **200** |
+| Quarantine / restricted storage | **Yes** |
+| Direct public URL in response | **No** |
+| Playwright UI | **Pass** on live (`e2e/home-feed-composer-upload.spec.ts`, 2026-06-17) |
+
+### Staff / moderation smoke
+
+| Check | Result |
+|-------|--------|
+| Brax login | **200** |
+| `GET /api/v1/moderation/cases` (Brax) | **200** |
+| `GET /api/v1/moderation/reports` (Brax) | **200** |
+| `GET /api/v1/moderation/cases` (alpha_social) | **403** |
+
+Script: `scripts/vps/promotion-readiness-pass1-smoke.mjs`
+
+### Node 20 test verification
+
+| Environment | Result |
+|-------------|--------|
+| CI | **Node 20** — fix `7292fb1` local (3 test alias failures); push pending |
+| Local Windows | **Node v24.5.0** — full suite fails (tsx); Docker daemon unavailable |
+| VPS host | **Node v20.20.2** — `@c2k/api` **487 pass / 22 fail** (deployed tree stale vs local) |
+
+### Docs added
+
+- `docs/PUBLIC_ALPHA_PROMOTION.md` — promotion guide + announcement draft
+
+### Readiness verdict (Pass 8)
+
+| Question | Answer |
+|----------|--------|
+| Public visitors allowed? | **Yes** |
+| Safe to leave visible? | **Yes** |
+| Ready to actively promote alpha testing? | **Yes** |
+| Ready for structured tester QA? | **Yes** |
+| Ready for full public launch? | **No** |
+
+**Remaining (non-blocking):** 26 legacy imported member photos; push CI fix; optional Playwright UI pass.
+
+---
+
+## Pass 9 — Repo Sync and Controlled Alpha Launch Prep Pass 1 (2026-06-17)
+
+**Goal:** Align GitHub, CI, and VPS with committed activation/promotion work. No destructive DB, no password changes.
+
+### Git / CI
+
+| Item | Value |
+|------|-------|
+| Branch | `desktop-ui-sprint-3-visual-polish` |
+| CI fix pushed | `7292fb1` (web test `@/` alias regressions) |
+| Activation commit | `91e5c5e` — public alpha activation journey |
+| Promotion commit | (see git log Pass 9 completion) |
+
+### VPS alignment
+
+Activation Pass 1 web already deployed via `patch-activation-pass1-vps.mjs` (Pass 7). Post-commit: **no full redeploy required** if live smoke passes; operator scripts and docs synced via git only.
+
+### Controlled promotion decision
+
+| Gate | Answer |
+|------|--------|
+| Controlled public alpha promotion | **Yes** |
+| Broad public promotion | **No** (26 legacy media rows pending per-row review) |
+| Full public launch | **No** |
+
+See `docs/PUBLIC_ALPHA_PROMOTION.md` for operator checklist and announcement draft.
+
+---
