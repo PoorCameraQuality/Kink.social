@@ -130,4 +130,58 @@ describe('group membership privacy (DB)', { skip: !runDbIntegration }, () => {
       await app.close()
     }
   })
+
+  test('private group detail returns 404 for anonymous and non-members; member can view', async () => {
+    const owner = await insertCiUser(`${tag}_priv_owner`)
+    const member = await insertCiUser(`${tag}_priv_member`)
+    const stranger = await insertCiUser(`${tag}_priv_stranger`)
+    const privateGroupId = randomUUID()
+    userIds.push(owner.id, member.id, stranger.id)
+
+    const now = new Date()
+    for (const userId of [owner.id, member.id, stranger.id]) {
+      await db.insert(schema.profiles).values({ userId, displayName: userId.slice(0, 8), updatedAt: now })
+    }
+
+    await db.insert(schema.groups).values({
+      id: privateGroupId,
+      slug: `ci-grp-private-${tag}`,
+      name: 'CI Private Group',
+      ownerId: owner.id,
+      visibility: 'private',
+    })
+    await db.insert(schema.groupMembers).values([
+      { groupId: privateGroupId, userId: owner.id, role: 'owner', memberListVisibility: 'visible' },
+      { groupId: privateGroupId, userId: member.id, role: 'member', memberListVisibility: 'visible' },
+    ])
+
+    const app = await buildCookieApp(async (a) => {
+      const { registerEcosystemStubRoutes } = await import('../routes/ecosystem-stubs.js')
+      await registerEcosystemStubRoutes(a)
+    })
+
+    try {
+      const anon = await app.inject({ method: 'GET', url: `/api/v1/groups/${privateGroupId}` })
+      assert.equal(anon.statusCode, 404)
+
+      const strangerView = await app.inject({
+        method: 'GET',
+        url: `/api/v1/groups/${privateGroupId}`,
+        headers: cookieHeader(stranger.id, stranger.username),
+      })
+      assert.equal(strangerView.statusCode, 404)
+
+      const memberView = await app.inject({
+        method: 'GET',
+        url: `/api/v1/groups/${privateGroupId}`,
+        headers: cookieHeader(member.id, member.username),
+      })
+      assert.equal(memberView.statusCode, 200)
+      assert.equal(memberView.json().group.name, 'CI Private Group')
+    } finally {
+      await app.close()
+      await db.delete(schema.groupMembers).where(eq(schema.groupMembers.groupId, privateGroupId))
+      await db.delete(schema.groups).where(eq(schema.groups.id, privateGroupId))
+    }
+  })
 })
