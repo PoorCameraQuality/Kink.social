@@ -16,6 +16,8 @@ import CommunityTrustChip from '@/components/trust/CommunityTrustChip'
 import DmTrustContext from '@/components/trust/DmTrustContext'
 import { conversationTarget, messageTarget } from '@/lib/moderation/report-targets'
 import { useAuth } from '@/contexts/AuthContext'
+import { useMaxMd } from '@/hooks/useMaxMd'
+import { useVisualViewportBottomInset } from '@/hooks/useVisualViewportBottomInset'
 import { mockConversations } from '@/data/mock-data'
 import { getMockPersonByUsername } from '@/data/mock-seeds'
 
@@ -87,6 +89,12 @@ export default function MessagingPage() {
   const [partnerUsernameByConvId, setPartnerUsernameByConvId] = useState<Record<string, string>>({})
   const [loadError, setLoadError] = useState<string | null>(null)
   const openedUserRef = useRef<string | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const threadMenuRef = useRef<HTMLDivElement>(null)
+  const [threadMenuOpen, setThreadMenuOpen] = useState(false)
+  const isMobile = useMaxMd()
+  const inMobileThread = isMobile && Boolean(selectedConversation)
+  const keyboardInset = useVisualViewportBottomInset(inMobileThread)
   const [deepLinkError, setDeepLinkError] = useState<string | null>(null)
   const [deepLinkBusy, setDeepLinkBusy] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
@@ -366,6 +374,25 @@ export default function MessagingPage() {
     setSendError(null)
   }, [selectedConversation])
 
+  const scrollToLatest = useCallback((smooth = false) => {
+    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'end' })
+  }, [])
+
+  useEffect(() => {
+    if (!threadMenuOpen) return
+    const onPointerDown = (event: MouseEvent) => {
+      if (threadMenuRef.current && !threadMenuRef.current.contains(event.target as Node)) {
+        setThreadMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    return () => document.removeEventListener('mousedown', onPointerDown)
+  }, [threadMenuOpen])
+
+  useEffect(() => {
+    setThreadMenuOpen(false)
+  }, [selectedConversation])
+
   const activeConv = selectedConversation ? conversationRows.find((c) => c.id === selectedConversation) : null
   const activePartnerUsername = activeConv ?
     activeConv.partnerUsername?.trim() ||
@@ -405,6 +432,11 @@ export default function MessagingPage() {
       : mockMessagesByConv[activeConv.id] ?? MOCK_MESSAGES
     : []
 
+  useEffect(() => {
+    if (!selectedConversation || threadMessagesLoading) return
+    scrollToLatest(false)
+  }, [selectedConversation, threadMessagesLoading, threadMessages.length, scrollToLatest])
+
   const handleSend = async () => {
     if (!activeConv || !messageText.trim()) return
     const text = messageText.trim()
@@ -425,6 +457,7 @@ export default function MessagingPage() {
         setMessageText('')
         await loadMessagesFor(activeConv.id)
         await loadConversations()
+        scrollToLatest(true)
       } catch {
         setSendError('Network error sending message.')
       }
@@ -438,7 +471,32 @@ export default function MessagingPage() {
       ],
     }))
     setMessageText('')
+    scrollToLatest(true)
   }
+
+  const deleteActiveConversation = useCallback(async () => {
+    if (!activeConv) return
+    if (!window.confirm('Delete this conversation from your inbox?')) return
+    if (apiBackedMessaging) {
+      try {
+        const r = await fetch(`/api/v1/me/conversations/${encodeURIComponent(activeConv.id)}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        })
+        if (!r.ok) {
+          const j = (await r.json().catch(() => ({}))) as { error?: string }
+          setSendError(j.error ?? 'Could not delete conversation.')
+          return
+        }
+        selectConversation(null)
+        await loadConversations()
+      } catch {
+        setSendError('Network error deleting conversation.')
+      }
+      return
+    }
+    selectConversation(null)
+  }, [activeConv, apiBackedMessaging, loadConversations, selectConversation])
 
   const filteredConversations = conversationRows.filter((c) => {
     if (isAuthenticated && apiConversations !== null && convSearch.trim()) return true
@@ -491,24 +549,29 @@ export default function MessagingPage() {
     <div
       className={cn(
         shellDirectoryClass,
-        'c2k-mobile-scroll-pad c2k-mobile-viewport-fill flex min-h-0 flex-1 flex-col py-2 sm:py-3',
+        'flex min-h-0 flex-1 flex-col',
+        inMobileThread ?
+          'max-md:h-[calc(100dvh-var(--c2k-sticky-below-header))] overflow-hidden max-md:py-0'
+        : 'flex-1 py-2 sm:py-3',
       )}
     >
-      <header className="mb-1 shrink-0 sm:mb-2">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-dc-text sm:text-2xl">Messages</h1>
-            <p className="mt-0.5 hidden text-sm text-dc-text-muted sm:block">Private conversations, requests, and ISO replies.</p>
+      {!inMobileThread ?
+        <header className="mb-1 shrink-0 sm:mb-2">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-dc-text sm:text-2xl">Messages</h1>
+              <p className="mt-0.5 hidden text-sm text-dc-text-muted sm:block">Private conversations, requests, and ISO replies.</p>
+            </div>
+            <Link
+              to="/support"
+              className="hidden min-h-touch items-center gap-1.5 rounded-xl border border-dc-border px-3 text-sm font-medium text-dc-accent hover:bg-dc-accent-muted sm:inline-flex"
+            >
+              Help
+            </Link>
           </div>
-          <Link
-            to="/support"
-            className="hidden min-h-touch items-center gap-1.5 rounded-xl border border-dc-border px-3 text-sm font-medium text-dc-accent hover:bg-dc-accent-muted sm:inline-flex"
-          >
-            Help
-          </Link>
-        </div>
-      </header>
-      <MessagingSafetyPanel variant="banner" />
+        </header>
+      : null}
+      {!inMobileThread ? <MessagingSafetyPanel variant="banner" /> : null}
       {loadError && isAuthenticated ? <LoadErrorBanner className="mb-2 shrink-0" message={loadError} onRetry={() => void loadConversations()} /> : null}
       {deepLinkError && isAuthenticated ?
         <StatusBanner tone="error" className="mb-2">
@@ -523,17 +586,17 @@ export default function MessagingPage() {
             </button>
           </div>
         </StatusBanner>
-      : deepLinkBusy && isAuthenticated ?
+      : deepLinkBusy && isAuthenticated && !inMobileThread ?
         <p className="mb-2 text-sm text-dc-text-muted" role="status">
           Opening conversation with @{searchParams.get('user')?.trim()}…
         </p>
       : null}
-      {!isAuthenticated ?
+      {!isAuthenticated && !inMobileThread ?
         <p className="mb-2 shrink-0 text-sm text-dc-muted">Showing demo threads. Log in to load your real conversations.</p>
       : null}
 
-      <div className="flex min-h-0 flex-1 gap-4 overflow-hidden">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-0 overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated/95 lg:flex-row">
+      <div className={cn('flex min-h-0 flex-1 gap-4 overflow-hidden', inMobileThread && 'gap-0')}>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-0 overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated/95 max-md:rounded-none max-md:border-0 lg:flex-row">
         <aside
           className={`flex w-full shrink-0 flex-col border-b border-dc-border lg:w-[min(100%,340px)] lg:border-b-0 lg:border-r ${
             selectedConversation ? 'hidden lg:flex' : 'flex'
@@ -672,7 +735,11 @@ export default function MessagingPage() {
         </aside>
 
         <main
-          className={`flex-1 flex flex-col min-h-0 ${selectedConversation ? 'flex' : 'hidden lg:flex'}`}
+          className={cn(
+            'flex min-h-0 flex-1 flex-col',
+            selectedConversation ? 'flex' : 'hidden lg:flex',
+            inMobileThread && 'overflow-hidden',
+          )}
         >
           {activeConv ? (
             <>
@@ -734,16 +801,49 @@ export default function MessagingPage() {
                       Report
                     </Link>
                   )}
-                  <button type="button" className="min-h-11 min-w-11 p-2 text-dc-muted hover:text-dc-text" aria-label="More actions">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
-                  </button>
+                  <div ref={threadMenuRef} className="relative">
+                    <button
+                      type="button"
+                      className="min-h-11 min-w-11 p-2 text-dc-muted hover:text-dc-text"
+                      aria-label="More actions"
+                      aria-haspopup="menu"
+                      aria-expanded={threadMenuOpen}
+                      onClick={() => setThreadMenuOpen((open) => !open)}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                      </svg>
+                    </button>
+                    {threadMenuOpen ?
+                      <div
+                        role="menu"
+                        className="absolute right-0 top-full z-30 mt-1 min-w-[11rem] overflow-hidden rounded-xl border border-dc-border bg-dc-elevated-solid py-1 shadow-[var(--dc-shadow-panel)]"
+                      >
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="block w-full min-h-11 px-3 py-2 text-left text-sm text-dc-danger hover:bg-dc-elevated-muted"
+                          onClick={() => {
+                            setThreadMenuOpen(false)
+                            void deleteActiveConversation()
+                          }}
+                        >
+                          Delete conversation
+                        </button>
+                      </div>
+                    : null}
+                  </div>
                 </div>
               </div>
               <DmTrustContext partnerUsername={activePartnerUsername} />
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-4" aria-live="polite">
+              <div
+                className={cn(
+                  'flex-1 min-h-0 overflow-y-auto p-4 space-y-4',
+                  inMobileThread && 'pb-4',
+                )}
+                aria-live="polite"
+              >
                 {threadMessagesLoading ?
                   <div className="dc-panel-enter" aria-busy="true" role="status">
                     <p className="sr-only">Loading messages…</p>
@@ -788,16 +888,27 @@ export default function MessagingPage() {
                             )
                           })()
                         : null}
-                        <p className="text-sm">{msg.text}</p>
+                        <p className="whitespace-pre-wrap text-sm">{msg.text}</p>
                         <p className="text-xs opacity-70 mt-1">{msg.time}</p>
                       </div>
                     </div>
                   ))
                 )}
+                {inMobileThread ? <div className="h-28 shrink-0" aria-hidden /> : null}
+                <div ref={messagesEndRef} aria-hidden className="h-px w-full shrink-0" />
               </div>
 
+              <div
+                className={cn(
+                  'shrink-0 border-t border-dc-border bg-dc-elevated-solid',
+                  inMobileThread ?
+                    'fixed inset-x-0 z-20 shadow-[0_-8px_24px_rgba(0,0,0,0.35)]'
+                  : '',
+                )}
+                style={inMobileThread ? { bottom: keyboardInset } : undefined}
+              >
               {sendError ?
-                <div className="mx-4 mb-0 rounded-xl border border-red-500/30 bg-red-950/25 px-3 py-2 text-sm text-red-200" role="alert">
+                <div className="mx-4 mt-3 rounded-xl border border-red-500/30 bg-red-950/25 px-3 py-2 text-sm text-red-200" role="alert">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <p className="flex-1">{sendError}</p>
                     <button
@@ -811,39 +922,48 @@ export default function MessagingPage() {
                 </div>
               : null}
 
-              <div className="safe-area-pb flex items-end gap-2 border-t border-dc-border p-4">
-                <button type="button" className="min-h-11 min-w-11 p-2 text-dc-muted hover:text-dc-text rounded-lg" aria-label="Attach file">
+              <div className="safe-area-pb flex items-end gap-2 p-3 sm:p-4">
+                <button type="button" className="min-h-11 min-w-11 shrink-0 p-2 text-dc-muted hover:text-dc-text rounded-lg" aria-label="Attach file">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                   </svg>
                 </button>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <label htmlFor={messageInputId} className="sr-only">
                     Message to {activeConv.name}
                   </label>
-                  <input
+                  <textarea
                     id={messageInputId}
-                    type="text"
+                    rows={inMobileThread ? 2 : 3}
                     placeholder="Type a message…"
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
+                    onFocus={(e) => {
+                      requestAnimationFrame(() => {
+                        e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+                      })
+                    }}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
+                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                         e.preventDefault()
                         void handleSend()
                       }
                     }}
-                    className="w-full min-h-11 px-4 py-2 bg-dc-surface-muted border border-dc-border rounded-xl text-dc-text placeholder-dc-muted text-sm focus:border-dc-accent outline-none"
+                    className="w-full min-h-11 max-h-32 resize-y rounded-xl border border-dc-border bg-dc-surface-muted px-4 py-2.5 text-sm text-dc-text placeholder-dc-muted focus:border-dc-accent outline-none"
                   />
+                  <p className="mt-1 hidden text-[11px] text-dc-muted sm:block">
+                    Enter for a new line · Ctrl+Enter to send
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => void handleSend()}
                   disabled={!messageText.trim()}
-                  className="min-h-11 px-4 py-2 bg-dc-accent hover:bg-dc-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-dc-text text-sm font-medium rounded-xl"
+                  className="min-h-11 shrink-0 rounded-xl bg-dc-accent px-4 py-2 text-sm font-medium text-dc-text hover:bg-dc-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Send
                 </button>
+              </div>
               </div>
             </>
           ) : (

@@ -32,6 +32,10 @@ function LandingCheckbox({
     landing ?
       'border-[var(--pub-border)] bg-white/[0.04]'
     : 'border-dc-border bg-dc-surface-muted'
+  const checkedClass =
+    landing ?
+      'border-[var(--pub-gold-bright)] bg-[var(--pub-gold-bright)] text-[#0a0908]'
+    : 'border-dc-accent bg-dc-accent text-white'
   return (
     <label className="flex cursor-pointer items-start gap-2.5 py-0.5">
       <span className="relative mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center">
@@ -39,16 +43,16 @@ function LandingCheckbox({
           type="checkbox"
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          className="absolute inset-0 z-10 h-9 w-9 cursor-pointer opacity-0"
+          className="absolute inset-0 z-10 h-9 w-9 cursor-pointer opacity-0 focus:outline-none"
         />
         <span
           aria-hidden
           className={`pointer-events-none flex h-5 w-5 items-center justify-center rounded border ${boxClass} ${
-            checked ? 'border-dc-accent bg-dc-accent text-dc-accent-foreground' : ''
+            checked ? checkedClass : ''
           }`}
         >
           {checked ?
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
             </svg>
           : null}

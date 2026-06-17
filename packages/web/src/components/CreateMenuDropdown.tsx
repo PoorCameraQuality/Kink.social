@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOrganizerOrgScopes } from '@/hooks/useOrganizerOrgScopes'
+import { homeNearYouHref } from '@/lib/community-nav'
 
 export type CreateMenuItem = {
   id: string
@@ -97,7 +98,7 @@ function useCreateMenuSections(): CreateSection[] {
         id: 'post',
         label: 'Post',
         description: 'Share an update with your community',
-        to: '/home?tab=Local#home-feed-composer',
+        to: `${homeNearYouHref()}#home-feed-composer`,
         icon: <ShareIcon />,
       },
       {

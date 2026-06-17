@@ -161,7 +161,14 @@ export default function HomePageClient() {
       return
     }
     if (n) setActiveTab(n)
-  }, [tabParam, navigate])
+    if (n === 'Local' && normalizeHomeMode(modeParam) !== 'Discover') {
+      setHomeMode('Discover')
+      const p = new URLSearchParams(searchParams)
+      p.set('mode', 'discover')
+      p.set('tab', 'Local')
+      setSearchParams(p, { replace: true })
+    }
+  }, [tabParam, modeParam, navigate, searchParams, setSearchParams])
 
   useEffect(() => {
     const m = normalizeHomeMode(modeParam)

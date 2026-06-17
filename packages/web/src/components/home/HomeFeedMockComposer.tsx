@@ -38,9 +38,9 @@ export default function HomeFeedMockComposer({
     setAudioUrls((u) => [...u, MOCK_AUDIO_SAMPLE_URL])
   }, [])
 
-  const canPost =
-    Boolean(viewerUsername) &&
-    (text.trim().length > 0 || imageUrls.length > 0 || audioUrls.length > 0)
+  const hasDraft = text.trim().length > 0 || imageUrls.length > 0 || audioUrls.length > 0
+
+  const canPost = Boolean(viewerUsername) && hasDraft
 
   const submit = useCallback(() => {
     if (!viewerUsername || !canPost) return
@@ -125,9 +125,9 @@ export default function HomeFeedMockComposer({
         </ul>
       )}
       <div className="flex flex-wrap items-center justify-end gap-2">
-        {(!shellMode || shellMode === 'mobile' || focused) && (
+        {(!shellMode || shellMode === 'mobile' || focused || hasDraft) && (
           <>
-        {shellMode !== 'mobile' && (!shellMode || focused) ?
+        {shellMode !== 'mobile' && (!shellMode || focused || hasDraft) ?
         <div className="mr-auto flex flex-wrap items-center gap-1.5">
           <button
             type="button"
@@ -163,6 +163,7 @@ export default function HomeFeedMockComposer({
         : null}
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={submit}
           disabled={!canPost}
           className="min-h-10 shrink-0 rounded-lg bg-dc-accent px-4 text-sm font-medium text-dc-accent-foreground hover:bg-dc-accent-hover disabled:cursor-not-allowed disabled:opacity-50"

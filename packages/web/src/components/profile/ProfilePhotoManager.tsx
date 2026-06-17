@@ -1,11 +1,13 @@
 import { useEffect } from 'react'
 import PhotoUpload from '@/components/PhotoUpload'
+import ProfilePhotoImage from '@/components/profile/ProfilePhotoImage'
 import MediaAttestationModal from '@/components/media/MediaAttestationModal'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
 import { ProfilePhotoGridSkeleton } from '@/components/ui/skeleton'
 import { MediaUploadProgressOverlay } from '@/components/media/MediaUploadProgress'
 import { useProfilePhotos } from '@/hooks/useProfilePhotos'
 import type { MockProfilePhoto } from '@/data/mock-data'
+import { mediaDisplayUrl } from '@/lib/media-display-url'
 import { PROFILE_PHOTO_GUIDELINES, PROFILE_PHOTO_PENDING_REVIEW_DETAIL, PROFILE_PHOTO_PENDING_REVIEW_SHORT } from '@c2k/shared'
 
 type ProfilePhotoManagerProps = {
@@ -165,7 +167,9 @@ export default function ProfilePhotoManager({
                 </div>
               </div>
             : null}
-            {photos.map((photo) => (
+            {photos.map((photo) => {
+              const displayUrl = mediaDisplayUrl(photo.url)
+              return (
               <div
                 key={photo.id}
                 className="group relative flex aspect-square flex-col overflow-hidden rounded-xl bg-dc-elevated-solid"
@@ -177,17 +181,25 @@ export default function ProfilePhotoManager({
                       <p className="text-[10px] text-dc-muted">{PROFILE_PHOTO_PENDING_REVIEW_DETAIL}</p>
                     </div>
                   ) : null}
-                  {photo.url ? (
-                    <img src={photo.url} alt={photo.caption ?? 'Profile photo'} className="h-full w-full object-cover" />
-                  ) : (
-                    <svg className="h-12 w-12 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
+                  {displayUrl ?
+                    <ProfilePhotoImage
+                      src={photo.url}
+                      alt={photo.caption ?? 'Profile photo'}
+                      displaySettings={photo.displaySettings}
+                      className="h-full w-full object-cover"
+                    />
+                  : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-1 p-3 text-center">
+                      <svg className="h-12 w-12 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <p className="text-[10px] text-dc-muted">Photo unavailable</p>
+                    </div>
                   )}
                 </div>
                 <div className="bg-dc-elevated-solid/50 p-2">
@@ -220,7 +232,9 @@ export default function ProfilePhotoManager({
                     </div>
                   ) : (
                     <>
-                      <p className="truncate text-xs text-dc-text-muted">{photo.caption ?? 'No caption'}</p>
+                      <p className="truncate text-xs text-dc-text-muted">
+                        {photo.caption?.trim() ? photo.caption : 'Add a caption'}
+                      </p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-3">
                         <button
                           type="button"
@@ -262,7 +276,8 @@ export default function ProfilePhotoManager({
                   </div>
                 ) : null}
               </div>
-            ))}
+              )
+            })}
           </div>
         ) : null}
       </div>

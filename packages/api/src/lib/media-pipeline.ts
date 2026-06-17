@@ -21,6 +21,7 @@ import {
   promoteQuarantineToPublic,
   publicMediaObjectKey,
   publicUrlForKey,
+  isBrowserReachablePublicUrl,
   putObject,
   quarantineObjectKey,
 } from './s3-upload.js'
@@ -182,15 +183,16 @@ export function resolveMediaServingKey(asset: MediaAsset): string | null {
 export function resolveMediaPublicUrl(asset: MediaAsset): string | null {
   if (!isPublicStorageState(asset.storageState) && asset.storageState !== null) {
     if (asset.storageKey.startsWith('http') && isMediaPublishedStatus(asset.uploadStatus as MediaUploadStatus)) {
-      return asset.storageKey
+      return isBrowserReachablePublicUrl(asset.storageKey) ? asset.storageKey : null
     }
     if (!asset.publicStorageKey) return null
   }
   const key = asset.publicStorageKey ?? (asset.storageKey.startsWith('http') ? null : asset.storageKey)
   if (!key || key.startsWith('http')) {
-    return key?.startsWith('http') ? key : null
+    return key?.startsWith('http') && isBrowserReachablePublicUrl(key) ? key : null
   }
-  return publicUrlForKey(key, asset.storageBucket ?? undefined)
+  const url = publicUrlForKey(key, asset.storageBucket ?? undefined)
+  return url && isBrowserReachablePublicUrl(url) ? url : null
 }
 
 export function mediaContentProxyPath(mediaAssetId: string): string {

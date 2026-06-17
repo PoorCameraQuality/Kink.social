@@ -4,10 +4,12 @@ import { HelmetProvider } from 'react-helmet-async'
 import { RouterProvider } from 'react-router-dom'
 import RootErrorBoundary from '@/components/RootErrorBoundary'
 import { clearStaleLocalServiceWorkers } from '@/dev-sw-cleanup'
+import { disableBrowserScrollRestoration } from '@/lib/scroll-app-to-top'
 import { router } from './router'
 import './app/globals.css'
 
 async function bootstrap() {
+  disableBrowserScrollRestoration()
   await clearStaleLocalServiceWorkers()
 
   const rootEl = document.getElementById('root')

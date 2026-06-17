@@ -48,7 +48,15 @@ type Props = {
   variant?: 'full' | 'home-desktop' | 'home-mobile'
 }
 
-export default function FeedComposerQuickActions({ variant = 'full' }: Props) {
+function withComposerCallbacks(actions: Action[], onPhoto?: () => void, onVideo?: () => void): Action[] {
+  return actions.map((action) => {
+    if (action.id === 'photo' && onPhoto) return { ...action, href: undefined, onClick: onPhoto }
+    if (action.id === 'video' && onVideo) return { ...action, href: undefined, onClick: onVideo }
+    return action
+  })
+}
+
+export default function FeedComposerQuickActions({ variant = 'full', onPhoto, onVideo }: Props) {
   const [moreOpen, setMoreOpen] = useState(false)
 
   const fullActions: Action[] = [
@@ -70,10 +78,13 @@ export default function FeedComposerQuickActions({ variant = 'full' }: Props) {
     { id: 'event', label: 'Event', href: '/events?create=event' },
   ]
 
-  const actions =
+  const actions = withComposerCallbacks(
     variant === 'home-mobile' ? homeMobileActions
     : variant === 'home-desktop' ? homeDesktopActions
-    : fullActions
+    : fullActions,
+    onPhoto,
+    onVideo,
+  )
 
   const chipClass =
     'inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-dc-text-muted transition-colors hover:bg-dc-elevated-hover hover:text-dc-text disabled:cursor-not-allowed disabled:opacity-50'

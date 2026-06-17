@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import {
@@ -74,6 +74,7 @@ function kinkSocialCrawlPolicy(mode: string) {
     },
     closeBundle() {
       const outDir = path.resolve(__dirname, 'dist')
+      mkdirSync(outDir, { recursive: true })
       writeFileSync(path.join(outDir, 'robots.txt'), robotsTxt, 'utf8')
       if (publicLaunch) {
         writeFileSync(path.join(outDir, 'sitemap.xml'), sitemapXml, 'utf8')

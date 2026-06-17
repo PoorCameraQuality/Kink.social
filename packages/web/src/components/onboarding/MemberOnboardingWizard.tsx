@@ -367,7 +367,7 @@ export default function MemberOnboardingWizard() {
   }
 
   return (
-    <PageShell maxWidth="lg" title="Welcome to kink.social" description="A short setup to help you get started." className={step === 7 ? 'pb-28 md:pb-6' : ''}>
+    <PageShell maxWidth="lg" title="Welcome to kink.social" description="A short setup to help you get started." className={step === 7 ? 'pb-[calc(var(--c2k-mobile-action-bar-total-h)+2rem)] md:pb-6' : ''}>
       <div className="mb-8">
         <OnboardingProgress step={step} total={ONBOARDING_STEP_COUNT} label={STEP_LABELS[step - 1]} />
       </div>

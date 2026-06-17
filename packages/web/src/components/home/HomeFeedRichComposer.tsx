@@ -96,6 +96,7 @@ export default function HomeFeedRichComposer({
 }: Props) {
 
   const [focused, setFocused] = useState(false)
+  const [hasDraft, setHasDraft] = useState(false)
   const [postError, setPostError] = useState<string | null>(null)
 
   const [posting, setPosting] = useState(false)
@@ -267,6 +268,12 @@ export default function HomeFeedRichComposer({
     ],
 
     content: '',
+
+    onUpdate: ({ editor: ed }) => {
+      const text = ed.getText().trim()
+      const hasImg = ed.getHTML().includes('<img')
+      setHasDraft(Boolean(text || hasImg))
+    },
 
     editorProps: {
 
@@ -496,6 +503,7 @@ export default function HomeFeedRichComposer({
       editor.commands.clearContent()
 
       setExtraAttachments([])
+      setHasDraft(false)
 
       onPosted()
 
@@ -594,7 +602,7 @@ export default function HomeFeedRichComposer({
 
       <div className="flex flex-wrap items-center justify-between gap-2">
 
-        {shellMode && !focused ?
+        {shellMode && !focused && !hasDraft ?
           null
         : shellMode === 'mobile' ?
           null
@@ -720,8 +728,15 @@ export default function HomeFeedRichComposer({
 
         </div>}
 
-        {(!shellMode || shellMode === 'mobile' || focused) && (
-          <Button type="button" variant="primary" disabled={posting} onClick={() => void submit()} className="ml-auto shrink-0">
+        {(!shellMode || shellMode === 'mobile' || focused || hasDraft) && (
+          <Button
+            type="button"
+            variant="primary"
+            disabled={posting}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => void submit()}
+            className="ml-auto shrink-0"
+          >
 
             {posting ? 'Posting…' : 'Post'}
 

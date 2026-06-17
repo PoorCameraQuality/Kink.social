@@ -2,6 +2,7 @@ import {
   ageFromBirthDate,
   capArray,
   formatMemberSinceMonthYear,
+  formatPlaceLocationLabel,
   formatPronounDisplay,
   parseProfileFieldVisibility,
   parsePronounTags,
@@ -178,7 +179,7 @@ async function resolveLocationFromPatch(
     }
     return {
       ok: true,
-      location: `${row.placeName}, ${row.stateName}`,
+      location: formatPlaceLocationLabel(row.placeName, row.stateName),
       placeId: u.zipPlaceId,
       stateId: row.stateId,
       customLocation: null,
@@ -231,7 +232,7 @@ async function resolveLocationFromPatch(
     }
     return {
       ok: true,
-      location: `${row.placeName}, ${row.stateName}`,
+      location: formatPlaceLocationLabel(row.placeName, row.stateName),
       placeId: nextPlaceId,
       stateId: row.stateId,
       customLocation: null,

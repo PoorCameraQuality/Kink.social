@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import HomeFeedMockComposer from '@/components/home/HomeFeedMockComposer'
 import HomeFeedRichComposer from '@/components/home/HomeFeedRichComposer'
 import FeedComposerQuickActions from '@/components/home/FeedComposerQuickActions'
@@ -39,7 +40,14 @@ export default function HomeFeedShellComposer({
   onPosted,
   shell,
 }: Props) {
+  const location = useLocation()
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (location.hash === '#home-feed-composer') {
+      setOpen(true)
+    }
+  }, [location.hash])
 
   const handlePosted = useCallback(() => {
     setOpen(false)

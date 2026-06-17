@@ -22,6 +22,7 @@
   font-family: var(--font-ui);
   background-color: var(--pub-bg);
   color: var(--pub-text);
+  color-scheme: dark;
   position: relative;
   overflow-x: hidden;
 }

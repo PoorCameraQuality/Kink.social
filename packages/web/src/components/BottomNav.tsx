@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { siteConfig } from '@/config/site.config'
 import { navLinkIsActive } from '@/lib/nav-link-active'
 import { suppressMobileBottomNav } from '@/lib/mobile-chrome'
@@ -64,8 +64,11 @@ function isNavItemActive(pathname: string, href: string): boolean {
   return navLinkIsActive(pathname, href)
 }
 
+import { scrollAppToTop } from '@/lib/scroll-app-to-top'
+
 export default function BottomNav() {
   const { pathname } = useLocation()
+  const [searchParams] = useSearchParams()
   const { isAuthenticated, isFallback } = useAuth()
   const { unreadCount: msgUnread } = useConversationsPreview()
   const { unreadCount: notifUnread } = useNotificationsList()
@@ -76,7 +79,7 @@ export default function BottomNav() {
     return null
   }
 
-  if (suppressMobileBottomNav(pathname)) {
+  if (suppressMobileBottomNav(pathname, searchParams)) {
     return null
   }
 
@@ -103,6 +106,9 @@ export default function BottomNav() {
               to={item.href === '/profile' ? '/profile' : item.href}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
+              onClick={() => {
+                scrollAppToTop()
+              }}
               className={`relative flex min-h-touch min-w-[4.25rem] flex-1 max-w-[5.5rem] flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 transition-colors ${
                 isActive ?
                   'bg-dc-accent-muted/60 font-semibold text-dc-accent'
