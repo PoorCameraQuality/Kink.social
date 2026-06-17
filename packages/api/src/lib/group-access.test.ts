@@ -1,6 +1,23 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { filterGroupMembersForViewer } from './group-access.js'
+import { canViewGroup, filterGroupMembersForViewer } from './group-access.js'
+
+describe('canViewGroup', () => {
+  const privateGroup = {
+    id: 'g1',
+    disbandedAt: null,
+    visibility: 'private' as const,
+    ownerId: 'owner-1',
+  }
+
+  it('allows public groups for anonymous viewers', async () => {
+    assert.equal(await canViewGroup({ ...privateGroup, visibility: 'public' }, null), true)
+  })
+
+  it('denies private groups for anonymous viewers', async () => {
+    assert.equal(await canViewGroup(privateGroup, null), false)
+  })
+})
 
 describe('filterGroupMembersForViewer', () => {
   const members = [

@@ -27,8 +27,8 @@ import {
   autoPublishProfileGalleryPhoto,
   rejectProfileGalleryMediaAsset,
 } from '../lib/profile-photo-policy.js'
-import { mediaContentProxyPath } from '../lib/media-pipeline.js'
-import { isBrowserReachablePublicUrl, publicUrlForKey } from '../lib/s3-upload.js'
+import { mediaContentProxyPath, resolveMediaClientUrl } from '../lib/media-pipeline.js'
+import { isBrowserReachablePublicUrl } from '../lib/s3-upload.js'
 
 import type { MediaAsset } from '../db/schema.js'
 
@@ -73,12 +73,7 @@ export type ProfilePhotoDto = {
 
 
 function profilePhotoServingUrl(mediaAssetId: string, media: MediaAsset | null | undefined): string {
-  if (media?.publicStorageKey) {
-    const publicUrl = publicUrlForKey(media.publicStorageKey, media.storageBucket ?? undefined)
-    if (publicUrl && isBrowserReachablePublicUrl(publicUrl)) return publicUrl
-  }
-  const legacy = media?.storageKey?.trim()
-  if (legacy?.startsWith('http') && isBrowserReachablePublicUrl(legacy)) return legacy
+  if (media) return resolveMediaClientUrl(media)
   return mediaContentProxyPath(mediaAssetId)
 }
 

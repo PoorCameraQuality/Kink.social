@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
-import { MEDIA_STORAGE_STATES, SCAN_STATUSES } from '@c2k/shared'
-import { canExposePublicUrl } from './media-pipeline.js'
+import {
+  MEDIA_CONTENT_RATINGS,
+  MEDIA_STORAGE_STATES,
+  MEDIA_VISIBILITIES,
+  SCAN_STATUSES,
+} from '@c2k/shared'
+import { canExposePublicUrl, mediaContentProxyPath, resolveMediaClientUrl } from './media-pipeline.js'
 import type { MediaAsset } from '../db/schema.js'
 
 function fakeAsset(overrides: Partial<MediaAsset> = {}): MediaAsset {
@@ -67,8 +72,55 @@ describe('media-pipeline visibility helpers', () => {
       publicStorageKey: 'media/u/photo.jpg',
       uploadStatus: 'AUTO_APPROVED',
       storageKey: 'media/u/photo.jpg',
+      contentRating: MEDIA_CONTENT_RATINGS.safePublic,
+      visibility: MEDIA_VISIBILITIES.publicPreview,
     })
-    const url = canExposePublicUrl(asset)
-    assert.equal(typeof url, 'boolean')
+    assert.equal(canExposePublicUrl(asset), true)
+  })
+
+  test('LOGGED_IN visibility does not expose direct public URL even when promoted', () => {
+    const asset = fakeAsset({
+      storageState: MEDIA_STORAGE_STATES.approvedPublic,
+      publicStorageKey: 'media/u/photo.jpg',
+      uploadStatus: 'AUTO_APPROVED',
+      storageKey: 'media/u/photo.jpg',
+      contentRating: MEDIA_CONTENT_RATINGS.safePublic,
+      visibility: MEDIA_VISIBILITIES.loggedIn,
+    })
+    assert.equal(canExposePublicUrl(asset), false)
+    assert.equal(resolveMediaClientUrl(asset), mediaContentProxyPath(asset.id))
+  })
+
+  test('PUBLIC_PREVIEW visibility may expose direct public URL when promoted', () => {
+    const prev = process.env.S3_PUBLIC_BASE_URL
+    process.env.S3_PUBLIC_BASE_URL = 'https://example.test/c2k-uploads'
+    try {
+      const asset = fakeAsset({
+        storageState: MEDIA_STORAGE_STATES.approvedPublic,
+        publicStorageKey: 'media/u/photo.jpg',
+        uploadStatus: 'AUTO_APPROVED',
+        storageKey: 'media/u/photo.jpg',
+        contentRating: MEDIA_CONTENT_RATINGS.safePublic,
+        visibility: MEDIA_VISIBILITIES.publicPreview,
+      })
+      assert.equal(canExposePublicUrl(asset), true)
+      assert.match(resolveMediaClientUrl(asset), /^https:\/\/example\.test\/c2k-uploads\//)
+    } finally {
+      if (prev === undefined) delete process.env.S3_PUBLIC_BASE_URL
+      else process.env.S3_PUBLIC_BASE_URL = prev
+    }
+  })
+
+  test('explicit on LOGGED_IN does not expose direct public URL', () => {
+    const asset = fakeAsset({
+      storageState: MEDIA_STORAGE_STATES.approvedPublic,
+      publicStorageKey: 'media/u/photo.jpg',
+      uploadStatus: 'AUTO_APPROVED',
+      storageKey: 'media/u/photo.jpg',
+      contentRating: MEDIA_CONTENT_RATINGS.explicitAdult,
+      visibility: MEDIA_VISIBILITIES.loggedIn,
+    })
+    assert.equal(canExposePublicUrl(asset), false)
+    assert.equal(resolveMediaClientUrl(asset), mediaContentProxyPath(asset.id))
   })
 })

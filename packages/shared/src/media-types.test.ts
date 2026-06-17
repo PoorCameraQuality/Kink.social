@@ -22,6 +22,7 @@ import {
   isKnownMediaVisibility,
   isKnownScanStatus,
   resolvePublishLane,
+  visibilityAllowsAnonymousDirectUrl,
 } from './media-types.js'
 
 describe('T&S-2 media-types (shared)', () => {
@@ -126,6 +127,9 @@ describe('T&S-2 media-types (shared)', () => {
     )
     assert.equal(isScanBlockingPublish(SCAN_STATUSES.pending), true)
     assert.equal(isScanBlockingPublish(SCAN_STATUSES.passed), false)
+    assert.equal(visibilityAllowsAnonymousDirectUrl(MEDIA_VISIBILITIES.publicPreview), true)
+    assert.equal(visibilityAllowsAnonymousDirectUrl(MEDIA_VISIBILITIES.loggedIn), false)
+    assert.equal(visibilityAllowsAnonymousDirectUrl(MEDIA_VISIBILITIES.groupOnly), false)
   })
 
   test('hasRequiredAttestations requires all boolean fields', () => {

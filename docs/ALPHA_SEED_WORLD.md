@@ -2,6 +2,8 @@
 
 Fictional, append-only database content for testing the kink.social social loop **without** client-side demo padding and **without** wiping East Coast Kink Events (ECKE) listings.
 
+**Context:** On the **public-facing alpha** server, this seed creates **fictional `alpha_*` personas and posts** for structured QA. They are **not real community members** — do not present seed content as organic community proof.
+
 **QA walkthrough:** After seeding, use [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) for step-by-step tester checklists. **VPS operator prep:** [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md).
 
 ## What it creates
@@ -71,10 +73,12 @@ Suggested accounts:
 | `alpha_open_dm` | Open messaging preset |
 | `alpha_connections_dm` | Connections-only messaging + pending request inbox |
 | `alpha_blocker` / `alpha_blocked` | Block relationship |
-| `alpha_hidden_member` | Hidden membership in private group |
+| `alpha_hidden_member` | Hidden membership in private group (`alpha-social-private-circle`) |
 | `alpha_mod` | Group moderator, forum threads |
 | `alpha_educator` | Presenter profile, education guild |
 | `alpha_vendor` | Vendor demo shop |
+
+**Private group QA path (fictional seed):** slug `alpha-social-private-circle` — not listed on public `/api/v1/groups`; members reach it via **`GET /api/v1/me/groups`** as `alpha_hidden_member`. Non-members (`alpha_newbie`) should receive access denied / not found on group detail and forum APIs.
 
 Emails: `alpha+<username>@example.test`
 

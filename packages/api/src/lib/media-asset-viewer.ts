@@ -4,6 +4,7 @@ import {
 import { getAdultContentPreference } from './adult-content-preference.js'
 import { getMediaAssetById, mediaAssetToPhotoDto } from './media-asset-service.js'
 import {
+  canExposePublicUrl,
   mediaContentProxyPath,
   resolveMediaPublicUrl,
   resolveMediaServingKey,
@@ -59,14 +60,10 @@ export async function getMediaAssetForViewer(
     blur = false
   }
 
-  const publicUrl = resolveMediaPublicUrl(asset)
+  const publicUrl = canExposePublicUrl(asset) ? resolveMediaPublicUrl(asset) : null
   let resolvedUrl: string | null = null
   if (!blur) {
-    if (publicUrl) {
-      resolvedUrl = publicUrl
-    } else if (isOwner) {
-      resolvedUrl = mediaContentProxyPath(asset.id)
-    }
+    resolvedUrl = publicUrl ?? mediaContentProxyPath(asset.id)
   }
 
   return {

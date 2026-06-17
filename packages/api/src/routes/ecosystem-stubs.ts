@@ -124,8 +124,11 @@ async function findExistingDmPair(userIdA: string, userIdB: string): Promise<str
 }
 
 async function findGroupByIdOrSlug(groupKey: string) {
-  const [byId] = await db.select().from(schema.groups).where(eq(schema.groups.id, groupKey)).limit(1)
-  if (byId) return byId
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(groupKey)
+  if (isUuid) {
+    const [byId] = await db.select().from(schema.groups).where(eq(schema.groups.id, groupKey)).limit(1)
+    if (byId) return byId
+  }
   const [bySlug] = await db.select().from(schema.groups).where(eq(schema.groups.slug, groupKey)).limit(1)
   return bySlug ?? null
 }
@@ -740,6 +743,9 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     const groupId = g.id
     const viewer = resolveViewerFromRequest(req)
     const viewerId = getViewerUserId(viewer.payload)
+    if (!(await canViewGroup(g, viewerId))) {
+      return reply.status(404).send({ error: 'Not found' })
+    }
     const [rawMembership] = viewerId
       ? await db
           .select()

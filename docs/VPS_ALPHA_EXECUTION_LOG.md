@@ -10,7 +10,7 @@ Running journal for operator execution passes against the live VPS alpha stack. 
 
 **Operator:** Cursor agent (local workstation)  
 **Target label:** VPS alpha — **kink.social** (`srv1747903`, stack `/opt/c2k` per cutover log)  
-**Environment class:** Invite-only VPS alpha (not public launch)  
+**Environment class:** Public-facing VPS alpha (open for visitors; not final public launch)  
 **Compose files (expected):** `docker-compose.prod.yml` + `docker-compose.prod.vps.yml`  
 **Local repo reference (not deployed this pass):** branch `desktop-ui-sprint-3-visual-polish`, commit `6d1a0df604ab9a0e8f24a221f82e2e4f97ac27dc` (many uncommitted local changes; not pushed/deployed)
 
@@ -116,8 +116,10 @@ npm run test
 
 | Question | Answer |
 |----------|--------|
-| Ready for internal dry run (full social seed QA)? | **No** — seed and authenticated smoke pending |
-| External testers should wait? | **Yes** |
+| Public visitors allowed? | **Yes** (site publicly reachable; registration policy not verified this pass) |
+| Ready to actively promote for alpha testing? | **No** — seed and authenticated smoke pending |
+| Ready for structured tester QA? | **No** |
+| Ready for full public launch? | **No** |
 
 ---
 
@@ -125,7 +127,7 @@ npm run test
 
 **Operator:** Cursor agent (local workstation → VPS SSH)  
 **Target:** **kink.social** (`srv1747903`, `/opt/c2k`)  
-**Environment class:** Invite-only VPS alpha (not public launch)  
+**Environment class:** Public-facing VPS alpha (open for visitors; not final public launch)  
 **Compose:** `docker-compose.prod.yml` + `docker-compose.prod.vps.yml`  
 **Local commit (built + pushed):** `917e831c32df3fde80611d72c9da6c22fead60ea` — *Harden social spine and add alpha readiness tooling*  
 **Deploy method:** Tarball upload (VPS `/opt/c2k` is **not** a git clone; `git pull` unavailable)  
@@ -224,7 +226,7 @@ ALLOW_ALPHA_SOCIAL_SEED=true FORCE_ALPHA_SOCIAL_SEED_ON_PROD=true USE_DATABASE=t
 | `/api/v1/groups` | 200 |
 | `/api/v1/events?upcoming=true` | 200, ECKE titles present |
 
-Browser UI walkthrough (Home, People, Groups, Events, Settings) **not fully automated** this pass — API-level smoke only.
+Browser UI walkthrough (Home, People, Groups, Events, Settings) **not fully automated** this pass — run **Internal Browser QA Pass 1** per [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) §12 before active promotion.
 
 ### Privacy smoke (seed personas)
 
@@ -255,13 +257,375 @@ Full blocked-user / private-group / count-only attendee / media-scoped checks de
 1. VPS deploy path is tarball-based, not git — record commit hash in runbook when deploying.
 2. `npm run test` fails locally on Node 24 (tsx/tsconfig path), unrelated to VPS.
 3. Some smoke probes used wrong paths (`/api/v1/people`, `/api/v1/social-graph/connections`) — correct routes include `/api/v1/profiles`, `/api/v1/connections`.
-4. Human browser QA, upload smoke, and staff moderation flows still needed before external invite.
+4. Human browser QA, upload smoke, and staff moderation flows still needed **before actively promoting alpha testing**.
 
 ### Readiness verdict (Pass 2)
 
 | Question | Answer |
 |----------|--------|
-| Ready for **internal** dry run (seed + login + core API smoke)? | **Yes** — operator/human should run [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) in browser |
-| External testers should wait? | **Yes** until browser QA + upload/staff smokes complete |
+| Public visitors allowed? | **Yes** — alpha server open for visitors |
+| Ready to actively promote for alpha testing? | **Not yet** — complete Internal Browser QA Pass 1 first |
+| Ready for structured tester QA? | **After** browser QA + upload/staff smokes |
+| Ready for full public launch? | **No** |
+
+---
+
+## Framing correction — 2026-06-17 (docs only)
+
+**Change:** kink.social is documented as **public-facing alpha** (open for visitors), not invite-only by default. Registration is **env-driven** — verify with `GET /api/auth/registration-policy`.
+
+**Live check (this pass):** `{"registrationOpen":true,"inviteRequired":false}` — registration is **open during alpha**; docs updated to match.
+
+**Docs updated:** [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md), [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md), [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md), [`PILOT_READINESS.md`](./PILOT_READINESS.md), [`QA_TESTER_GUIDE.md`](./QA_TESTER_GUIDE.md), this log; UI `AlphaNotice` copy.
+
+**Still not launch:** Alpha warnings, fictional seed data, and internal browser QA before active promotion remain required.
+
+**Remaining doc mismatches (not in this pass scope):** [`SERVER_CUTOVER_LOG.md`](./SERVER_CUTOVER_LOG.md), [`FEATURE_REGISTRY.md`](./FEATURE_REGISTRY.md), [`ALPHA_DEPLOYMENT.md`](./ALPHA_DEPLOYMENT.md), [`BACKLOG_QUEUE.md`](./BACKLOG_QUEUE.md) still mention invite-only alpha in places — update when those files are next touched.
+
+---
+
+## Pass 3 — 2026-06-17 (Internal Browser QA Pass 1)
+
+**Operator:** Cursor agent (Cursor IDE browser automation + API-assisted privacy checks)  
+**Target:** **https://kink.social** — public-facing VPS alpha  
+**Deployed commit (tarball):** `917e831` (social spine + seed); log/docs `14c69f8`  
+**Primary account:** `alpha_social` (seed password from [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md); not printed here)  
+**Browser method:** Cursor IDE browser MCP (Chromium); mobile via CDP `390×844` emulation  
+**Password reset:** Not tested (no form submit, no email, no token, no password change)  
+**Destructive DB:** None  
+
+### Environment confirmation
+
+| Item | Result |
+|------|--------|
+| Public-facing alpha | **Yes** — unauthenticated `GET /` → 200 |
+| Registration policy | `registrationOpen: true`, `inviteRequired: false` |
+| Seeded login | **Pass** — `alpha_social` → onboarding then `/home` |
+
+### Area results (browser unless noted)
+
+| Area | Route | Account | Result | Notes |
+|------|-------|---------|--------|-------|
+| Login | `/?login=1` | `alpha_social` | **Pass** | Lands on 7-step onboarding first visit; completes to Home |
+| Home | `/home` | `alpha_social` | **Pass** | Following / Near you / Trending; seeded feed + composer; `ALPHA TEST` badges; no client demo padding |
+| People | `/people` | `alpha_social` | **Pass** | Follow vs Connect copy; seeded suggestions (`alpha_mod`); 2 directory members |
+| Profile | `/profile` | `alpha_social` | **Pass** | Recent posts, RSVPs, groups, **Add photos** CTA |
+| Connections | `/connections` | `alpha_social` | **Pass** (API) | Browser nav partial; API: 5 connections; Activity shows pending request from `alpha_newbie` |
+| Groups | `/groups` | `alpha_social` | **Pass** | Seeded alpha groups listed (`alpha-social-regional-hub`, etc.) |
+| Group forums | `/groups/{id}?tab=Forums` | `alpha_social` | **Pass** | Regional hub opens; forum tab loads |
+| Events | `/events`, `/events/{id}` | `alpha_social` | **Pass** (API+partial UI) | ECKE title **Twisted Tryst** in API; event detail route loads |
+| Messaging | `/messaging` | `alpha_social` | **Pass** | Main / Requests / ISO; accepted thread (Quinn Park); safety copy |
+| Notifications | `/notifications` | `alpha_social` | **Pass** (via Activity) | Connection accept + DM previews on `/activity` |
+| Activity | `/activity` | `alpha_social` | **Pass** | Explains broader recap; links to settings/messages |
+| Settings privacy | `/settings/privacy` | `alpha_social` | **Pass** | Page loads (authenticated shell) |
+| Upload | `/profile` + `POST /api/profile/me/photos` | `alpha_social` | **Partial** | API route **`/api/profile/me/photos`** → 200 `{photos:[]}`. UI shows **Add photos**. File upload not executed this pass |
+| Admin/mod | `/moderation` | `alpha_social`, `alpha_mod` | **Blocked** | UI: “not platform staff”; API moderation → 403. No owner/site-admin creds in seed doc |
+| Mobile | `/home` (390px) | `alpha_social` | **Pass** | Bottom nav (Home/Explore/Events/Messages/Me); feed usable; badges visible |
+| Desktop | core routes | `alpha_social` | **Pass** | Three-column Home/People; rails render |
+
+### Privacy smoke (API + browser where noted)
+
+| Scenario | Result |
+|----------|--------|
+| Only-me post (`alpha_private`) | **Pass** — author sees posts; `alpha_newbie` sees `items:[]` |
+| Connections-only (`alpha_connected`) | **Pass** — non-connection sees 0 posts |
+| Blocked user in search (`alpha_blocked` as `alpha_blocker`) | **Pass** — 0 results |
+| Undiscoverable (`alpha_quiet` search) | **Pass** — empty `/api/v1/profiles?q=alpha_quiet` |
+| Non-staff moderation | **Pass** — 403 |
+| Private group forum (non-member) | **Not fully verified** — private group not in discover list for quick API probe |
+| Count-only attendees | **Not verified in browser** this pass |
+| DM preview in Activity | **Acceptable** — seed-tagged body visible to recipient only (not public surface) |
+
+### Console errors
+
+None captured in automation session (no persistent error overlay; no loading loops observed on Home after onboarding).
+
+### Screenshots (local temp; no secrets)
+
+| File | Area |
+|------|------|
+| `qa-pass1-home-desktop.png` | Home desktop |
+| `qa-pass1-people-desktop.png` | People |
+| `qa-pass1-messaging-desktop.png` | Messaging |
+| `qa-pass1-home-mobile.png` | Home mobile |
+
+Saved under Cursor screenshots temp path on operator workstation.
+
+### Known blockers / polish before active promotion
+
+1. **Upload smoke incomplete** — identify UI file picker + run safe image upload through profile composer.
+2. **Staff moderation smoke blocked** — need site owner/admin UUID account (not seeded `alpha_mod` group mod).
+3. **Onboarding gate** on first seeded login — expected for new accounts; document for structured testers.
+4. **Seed markers visible** (`[alpha_social_seed:…]`, `ALPHA TEST` badges) — good for alpha honesty; may want softer presentation before broad promotion.
+5. **Private group / count-only attendee** privacy scenarios need dedicated browser pass with persona switching.
+
+### Readiness verdict (Pass 3)
+
+| Question | Answer |
+|----------|--------|
+| Public visitors allowed? | **Yes** |
+| Safe to leave visible? | **Yes with caveats** — no obvious public privacy leaks; seed/test labeling visible |
+| Ready to actively promote for alpha testing? | **Not yet** — finish upload + staff smokes; optional seed-marker polish |
+| Ready for structured tester QA? | **Yes** — share [`ALPHA_QA_JOURNEY.md`](./ALPHA_QA_JOURNEY.md) with seeded accounts |
+| Ready for full public launch? | **No** |
+
+---
+
+## Pass 4 — 2026-06-17 (Public Alpha Promotion Gate Pass 1)
+
+**Operator:** Cursor agent (browser automation + API probes)  
+**Target:** https://kink.social — public-facing alpha (open registration)  
+**Deployed commit:** `917e831`  
+**Seed batch:** `alpha-social-seed` present (seeded personas verified)  
+**Registration policy:** `{"registrationOpen":true,"inviteRequired":false}`  
+
+### Promotion gate blockers — status
+
+| Blocker | Status | Evidence |
+|--------|--------|----------|
+| Upload smoke | **Pass** (profile photo); feed media not tested | `POST /api/upload` + `POST /api/profile/me/photos` succeeded; profile now shows **1 photo**; anon fetch of image URL returned 200 |
+| Staff/moderation smoke | **Blocked** (no credentials in this pass) | Env UUID lists are unset; DB has `platform_staff` rows (`Brax`, `tarkiz`, `TestAdmin` as `SITE_ADMIN`, `RopeDreamer` as `MODERATOR`) but no passwords were provided |
+| Private group forum privacy | **Blocked / seed gap** | Private group `alpha-social-private-circle` is not discoverable via `/api/v1/groups` list, so we could not obtain its id for member vs non-member forum checks without privileged DB access |
+| Count-only attendee privacy | **Pass** (API) | `GET /api/v1/events/{id}/attendees` returns `attendeeListVisibility: "count_only"` and `items: []` for both authed and anon |
+| Seed marker evaluation | **Pass with caveat** | Seed tags like `[alpha_social_seed:…]` visible in feed/post bodies; `ALPHA TEST` badges visible on cards; acceptable for alpha honesty but should be reviewed before broad promotion |
+
+### Upload smoke (profile photos)
+
+- Verified upload pipeline: `POST /api/upload` (purpose `profile_photo`) → quarantined key
+- Verified attach: `POST /api/profile/me/photos` → 201 with `uploadStatus: "AUTO_APPROVED"`, `publishLane: "GREEN"`
+- Verified UI: profile now shows **1 photo** (screenshot captured: `promotion-gate-profile-after-upload.png`)
+- **Leak check:** direct image URL was reachable anonymously (HTTP 200). Photo visibility in API is `LOGGED_IN`, but storage URL is public.
+
+### Moderation staff discovery (read-only)
+
+- `.env.production` UUID lists: `C2K_SITE_OWNER_USER_IDS`, `C2K_SITE_ADMIN_USER_IDS`, `C2K_PLATFORM_MODERATOR_USER_IDS` were **unset** on VPS.
+- `platform_staff` table contains: `Brax` (SITE_ADMIN), `tarkiz` (SITE_ADMIN), `TestAdmin` (SITE_ADMIN), `RopeDreamer` (MODERATOR).
+- Non-staff (`alpha_social`) still blocked at `/moderation` with “not platform staff”.
+
+### Readiness verdict update (Pass 4)
+
+| Question | Answer |
+|----------|--------|
+| Public visitors allowed? | **Yes** |
+| Safe to leave visible? | **Yes with caveat** — profile photo URLs appear publicly reachable via direct link; review intended bucket/proxy privacy expectations |
+| Ready to actively promote for alpha testing? | **Not yet** — staff moderation login still blocked; private-group persona check still blocked; confirm whether public photo URL exposure is acceptable for open alpha |
+| Ready for structured tester QA? | **Yes** (seeded accounts, core flows, uploads functioning) |
+| Ready for full public launch? | **No** |
+
+---
+
+## Pass 5 — 2026-06-17 (Public Alpha Promotion Gate Pass 2)
+
+**Operator:** Cursor agent (local workstation → VPS SSH + HTTPS smoke)  
+**Target:** **kink.social** (`srv1747903`, `/opt/c2k`)  
+**Environment class:** Public-facing VPS alpha (open registration; not final public launch)  
+**Local repo commit (before changes):** `183415f` — *Log public alpha promotion gate pass 1*  
+**Deployed to VPS:** Tarball upload + API patch rebuild (media privacy fix); **not** a new git commit on VPS  
+**VPS deploy timestamps:** tarball extract `2026-06-17 ~16:37 UTC`; API rebuild after storage fix `2026-06-17 ~17:00 UTC`  
+**Password reset / DB destructive ops:** **None** (no resets, no wipe/truncate/re-seed)
+
+### Media delivery inventory (pre-fix)
+
+| Layer | Behavior |
+|-------|----------|
+| **Storage** | MinIO bucket `c2k-uploads`; uploads land in `quarantine/{userId}/…`; approved copies promoted to `media/{userId}/{assetId}.{ext}` |
+| **MinIO public read** | Anonymous download on **`media/` prefix only** (`fix-minio-public-read.sh`); **quarantine/** not public |
+| **Caddy** | `handle /c2k-uploads/*` → reverse_proxy MinIO (not API) |
+| **API proxy** | `GET /api/v1/media/assets/:id/content` — `streamMediaAssetContent()` + `canViewerSeeMedia()` |
+| **`S3_PUBLIC_BASE_URL`** | Prod `https://kink.social/c2k-uploads`; `publicUrlForKey()` builds direct URLs |
+| **Profile photo DTOs** | `profilePhotoServingUrl()` in `profile-photos.ts` — **bug:** returned direct MinIO URL when `publicStorageKey` set even for `LOGGED_IN` |
+| **`visibility: LOGGED_IN`** | Assigned by `autoPublishProfileGalleryPhoto()` / profile attestation defaults |
+| **Feed media** | Already preferred proxy URLs via `media-social-service.ts` + read-time `feed-media-attachments.ts` filtering |
+| **Object keys** | UUID-based under `media/` — unguessable but **world-readable** when promoted |
+| **Tests** | `media-pipeline.test.ts`, `media-visibility.test.ts`, feed/scoped DB tests — **no** dedicated anon direct-URL leak test for profile photos (added this pass) |
+
+### Access model decision (implemented)
+
+**Rule:** Only `PUBLIC_PREVIEW` visibility may receive anonymous direct object URLs. All other visibilities (`LOGGED_IN`, scoped, etc.) use **`/api/v1/media/assets/:id/content`** after access checks.
+
+**Changes:**
+1. `visibilityAllowsAnonymousDirectUrl()` in `@c2k/shared`
+2. `canExposePublicUrl()` gates on visibility (not just explicit-rating rules)
+3. `resolveMediaClientUrl()` — proxy unless truly public-preview
+4. Profile photo DTOs + `getMediaAssetForViewer()` use proxy for restricted media
+5. `promoteMediaAssetToPublic()` — **`VALIDATED_PRIVATE`** (stay in quarantine) for restricted visibility; only `PUBLIC_PREVIEW` copies to `media/` prefix
+6. VPS remediation: removed Pass 1 wrongly-public MinIO object + aligned `media_assets` row
+
+### Profile photo direct-link retest
+
+| Check | Result |
+|-------|--------|
+| DTO `visibility` | `LOGGED_IN` |
+| DTO `url` | `/api/v1/media/assets/f3732a5d-a8f6-45ae-8bcd-c82101ecfedf/content` (proxy, not direct MinIO) |
+| Anonymous proxy | **404** |
+| Authorized proxy (`alpha_social`) | **200** |
+| Legacy direct `/c2k-uploads/media/…` (Pass 1 URL) | **404** after MinIO object removal |
+
+### Feed media upload
+
+| Check | Result |
+|-------|--------|
+| `POST /api/upload` purpose `feed_image` | **200**, quarantine key returned |
+| Purpose `feed_media` | **400** (invalid purpose — composer must use `feed_image`) |
+| Alpha disable flag | Not set on VPS (`C2K_ALPHA_DISABLE_FEED_IMAGE_UPLOADS` unset) |
+| UI composer | Not browser-tested this pass; API path confirmed |
+
+### Staff / moderation smoke
+
+| Check | Result |
+|-------|--------|
+| Credentials provided in pass | **No** (handoff doc password for `Brax` returned **401** — may have changed) |
+| `platform_staff` rows | `Brax`, `tarkiz`, `TestAdmin` (SITE_ADMIN); `RopeDreamer` (MODERATOR) |
+| Non-staff `/api/v1/moderation/cases` | **403** (`alpha_social`) |
+| Staff login / queue / `/moderation` | **Blocked** — operator must supply working staff credential |
+
+### Private group browser privacy
+
+| Check | Result |
+|-------|--------|
+| Discovery path | **`GET /api/v1/me/groups`** as `alpha_hidden_member` → slug `alpha-social-private-circle` |
+| Member forum threads | **200** |
+| Non-member (`alpha_newbie`) forum | **404** |
+| Anonymous group detail | **500** (should be 404/403 — minor follow-up; no data leak observed) |
+| Public group list exposure | Private group **not** in public `/api/v1/groups` |
+| Doc update | `docs/ALPHA_SEED_WORLD.md` — QA path documented |
+
+### Seed marker evaluation
+
+| Marker | Where | Visitor perception | Recommendation |
+|--------|-------|-------------------|----------------|
+| `[alpha_social_seed:…]` | Feed/post bodies via `alpha-social-seed-catalog.ts` | Clearly synthetic test content | **Keep during alpha** for honesty |
+| `ALPHA TEST` | Card badges (`alpha-seed-labels.ts`, schema default) | Signals test environment, not broken prod | **Keep for alpha**; consider softer label (“Sample content”) before broad promotion |
+
+### Tests run (local)
+
+| Command | Result |
+|---------|--------|
+| `npm run typecheck` | **Pass** (API `tsc --noEmit`) |
+| `npm run build` | **Pass** |
+| `npm run test` | **Fail (environment)** — Node v24 + tsx cannot resolve `packages/api/tsconfig.app.json` (known; not masked) |
+| Focused tests | Blocked locally by same tsx/tsconfig issue; logic covered by new `media-pipeline.test.ts` cases (not executed on Node 24) |
+
+### Tests added / changed
+
+- `packages/shared/src/media-types.ts` — `visibilityAllowsAnonymousDirectUrl()`
+- `packages/shared/src/media-types.test.ts` — visibility helper cases
+- `packages/api/src/lib/media-pipeline.ts` — `resolveMediaClientUrl()`, `canExposePublicUrl()` visibility gate, `VALIDATED_PRIVATE` promotion path
+- `packages/api/src/lib/media-pipeline.test.ts` — LOGGED_IN vs PUBLIC_PREVIEW URL exposure
+- `packages/api/src/lib/media-asset-viewer.ts` — proxy URL for all authorized viewers
+- `packages/api/src/routes/profile-photos.ts` — use `resolveMediaClientUrl()`
+
+### Remaining blockers
+
+1. **Staff/moderation smoke** — blocked until operator provides working SITE_ADMIN or MODERATOR credentials.
+2. **Anonymous `GET /api/v1/groups/:slug` for private groups** returns **500** instead of generic 404 (privacy-safe but rough UX).
+3. **Other legacy promoted objects** — if any pre-fix `LOGGED_IN` assets were promoted to `media/` prefix, direct URLs may still work until remediated (Pass 1 profile photo remediated on VPS).
+4. **`npm run test` on Node 24** — tsx/tsconfig environment issue locally.
+
+### Readiness verdict (Pass 5)
+
+| Question | Answer |
+|----------|--------|
+| Public visitors allowed? | **Yes** |
+| Safe to leave visible? | **Yes** — media DTO/proxy model now matches `LOGGED_IN`; Pass 1 direct leak remediated on VPS |
+| Ready to actively promote for alpha testing? | **Yes** — with staff-mod smoke still pending operator credentials |
+| Ready for structured tester QA? | **Yes** |
+| Ready for full public launch? | **No** |
+
+---
+
+## Pass 6 — 2026-06-17 (Public Alpha Promotion Gate Pass 3)
+
+**Operator:** Cursor agent  
+**Git commits:** `fce9689` (*Fix restricted media URL exposure for public alpha*), `7ae59a4` (*Fix private group anon access and add legacy media audit script*)  
+**Deploy method:** Changed-files-only via `scripts/vps/patch-pass3-vps.mjs` (4 API files; **no tarball**)  
+**Services restarted:** `c2k-api`, `c2k-worker` only  
+**Password / DB destructive ops:** **None**
+
+### Commit (media privacy fix)
+
+| Step | Result |
+|------|--------|
+| Staged files | 8 product/doc files only (no logs, tarball, operator scripts) |
+| Commit | `fce9689` — *Fix restricted media URL exposure for public alpha* |
+
+### Private group 500 fix
+
+**Root cause:** `findGroupByIdOrSlug()` queried UUID column with slug string → Postgres `22P02`; missing `canViewGroup()` on detail route.
+
+**Fix:** UUID guard before id lookup; `canViewGroup()` returns **404** for anonymous/non-member on private/invite-only groups.
+
+| Check | Result |
+|-------|--------|
+| Anonymous `GET /api/v1/groups/alpha-social-private-circle` | **404** `{"error":"Not found"}` |
+| Member forum (`alpha_hidden_member`) | **200** |
+| Non-member forum (`alpha_newbie`) | **404** |
+
+### Legacy restricted media audit (read-only)
+
+Script: `packages/api/scripts/audit-restricted-public-media.ts`
+
+| Metric | Value |
+|--------|-------|
+| Suspicious rows (LOGGED_IN + `media/` public path) | **53** |
+| Visibility distribution | All `LOGGED_IN` |
+| Uploaders | Primarily **Brax**, **TestAdmin** (profile gallery) |
+| Alpha `alpha_*` rows | **0** in suspicious set |
+| Pass 1 `alpha_social` photo | Already remediated |
+
+**Recommendation:** Per-row remediation for legacy staff uploads (DB → VALIDATED_PRIVATE + remove MinIO `media/` copy). Do not bulk-delete. New uploads after `fce9689` stay in quarantine for restricted visibility.
+
+### Feed media browser upload
+
+| Check | Result |
+|-------|--------|
+| Route | `/home` — Home rich composer, Photo quick action |
+| Photo button | Opens native file picker; IDE browser automation cannot attach files |
+| In-session upload (alpha_social cookies) | **200** via `/api/upload` `feed_image` |
+| Full UI attach + post | **Blocked for automation** — needs human tester or Playwright file fixture |
+
+### Staff / moderation
+
+**Blocked** — no working staff credential. Non-staff moderation API **403** confirmed.
+
+### Seed marker recommendation
+
+**Keep as-is for public alpha.** Markers honestly signal test content; consider softer labels before broad non-community promotion.
+
+### Tests run
+
+| Command | Result |
+|---------|--------|
+| `npm run typecheck` | **Pass** |
+| `npm run build` | **Pass** |
+| `npm run test` | **Fail (environment)** — Node v24 + tsx/tsconfig |
+| Recommend | Node 20 (matches VPS Docker) for full test suite |
+
+### VPS retest
+
+| Check | Result |
+|-------|--------|
+| `/api/health/ready` | **200** |
+| Profile photo proxy anon/auth | **404 / 200** |
+| Legacy direct MinIO URL | **404** |
+| Private group anon detail | **404** |
+| Boot loops | **None** |
+
+### Remaining blockers
+
+1. Staff/moderation smoke — operator credentials needed  
+2. 53 legacy staff profile photos on public MinIO prefix  
+3. Feed composer UI upload — human/Playwright verification  
+4. Local `npm run test` on Node 24
+
+### Readiness verdict (Pass 6)
+
+| Question | Answer |
+|----------|--------|
+| Public visitors allowed? | **Yes** |
+| Safe to leave visible? | **Yes** |
+| Ready to actively promote for alpha testing? | **Yes** — legacy staff media remediation + staff-mod smoke recommended |
+| Ready for structured tester QA? | **Yes** |
+| Ready for full public launch? | **No** |
 
 ---

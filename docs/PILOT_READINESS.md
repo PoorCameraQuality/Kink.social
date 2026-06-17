@@ -18,10 +18,10 @@ Use this doc for operator sign-off and engineer verification before inviting a p
 | Mode | Status |
 |------|--------|
 | **Local Docker** | `docker compose -f docker-compose.dev.yml up -d` → migrate → `npm run dev`. Mail via **Mailpit**; pilot smokes against `http://127.0.0.1:3001` / `:5173`. |
-| **Production (VPS alpha)** | **Live** — **https://kink.social** (`/opt/c2k`, Docker Compose). Health/mail green; invite-only registration. See [`SERVER_CUTOVER_LOG.md`](./SERVER_CUTOVER_LOG.md) § Prod mounted. |
+| **Production (VPS alpha)** | **Live** — **https://kink.social** (`/opt/c2k`, Docker Compose). **Public-facing alpha** — open for visitors; not final launch. Health/mail green. Registration per env (`/api/auth/registration-policy`). See [`SERVER_CUTOVER_LOG.md`](./SERVER_CUTOVER_LOG.md) § Prod mounted. |
 | **K8s staging** | Manifests ready (`k8s/base/`) — not the current prod path. |
 
-**Engineering dry run** on `preview-c2k-weekend` remains the local gate. **First external pilot org** on prod is still open (row **F** below) — current prod is invite-only alpha with a small user set.
+**Engineering dry run** on `preview-c2k-weekend` remains the local gate. **First external pilot org** on prod is still open (row **F** below) — current prod is **public-facing alpha** with seeded fictional content and a small real user set.
 
 ---
 
