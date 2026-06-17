@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import EventMatchmakerPanel from '@/components/EventMatchmakerPanel'
 import EventDiscussionPanel from '@/components/events/EventDiscussionPanel'
 import EventRsvpPrivacyNote from '@/components/events/EventRsvpPrivacyNote'
+import EventDetailMobileFacts from '@/components/events/EventDetailMobileFacts'
 import EventSocialOrientation, { type EventTimingStatus } from '@/components/events/EventSocialOrientation'
 import EventSaveButton from '@/components/events/EventSaveButton'
 import AlphaTestBadge from '@/components/alpha/AlphaTestBadge'
@@ -729,7 +730,7 @@ export default function EventDetailClient() {
                 </div>
               )}
             </div>
-            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 hidden p-4 sm:p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent lg:block">
               <div className="flex flex-wrap gap-2 mb-2">
                 <AlphaTestBadge label={apiEvent?.alphaLabel} />
                 {isConventionSurface ?
@@ -818,6 +819,73 @@ export default function EventDetailClient() {
                 </div>
               )}
             </div>
+          </div>
+
+          <div className="mb-4 space-y-3 lg:hidden">
+            <h1 className="text-2xl font-bold text-dc-text">{event.title}</h1>
+            <EventDetailMobileFacts
+              whenLine={whenLine}
+              hostTzLine={hostTzLine}
+              countdownLabel={countdownLabel}
+              isVirtual={isVirtual}
+              hostUsername={hostUsername}
+              hostName={event.hostName}
+              rsvpCount={event.rsvpCount}
+              capacityMax={apiMode === 'ready' ? apiEvent?.capacityMax : null}
+              formatBadges={
+                <>
+                  <AlphaTestBadge label={apiEvent?.alphaLabel} />
+                  {isConventionSurface ?
+                    <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-dc-accent/25 text-dc-accent border border-dc-accent-border/30">
+                      Convention
+                    </span>
+                  : null}
+                  {!isConventionSurface && isVirtual ?
+                    <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-200 border border-sky-400/35">
+                      Virtual · {virtualStyleLabel(virtualStyle)}
+                    </span>
+                  : null}
+                  {!isConventionSurface && !isVirtual && apiMode === 'ready' ?
+                    <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-dc-elevated-muted text-dc-text-muted border border-dc-border">
+                      In person
+                    </span>
+                  : null}
+                </>
+              }
+              locationNode={
+                isVirtual ?
+                  <span>Online event</span>
+                : apiMode === 'ready' && apiEvent ?
+                  apiEvent.location?.trim() ?
+                    apiEvent.location.trim()
+                  : apiEvent.publicLocationSummary?.trim() ?
+                    <>
+                      <span className="text-dc-text">{apiEvent.publicLocationSummary.trim()}</span>
+                      {apiEvent.locationRedacted ?
+                        <span className="mt-1 block text-xs text-dc-muted">
+                          Street-level details unlock per host settings when you RSVP.
+                        </span>
+                      : null}
+                    </>
+                  : apiEvent.locationRedacted ?
+                    'Location details unlock per host settings when you RSVP.'
+                  : event.location
+                : event.location
+              }
+            />
+            {rsvpClosed ?
+              <p className="rounded-xl border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-sm text-amber-100">
+                RSVPs are closed for this event.
+              </p>
+            : null}
+            {apiMode === 'ready' && apiEvent && !rsvpLocked ?
+              <EventRsvpPrivacyNote
+                compact
+                attendeeListVisibility={apiEvent.attendeeListVisibility}
+                viewerIsHost={viewerIsHost}
+                viewerIsGoing={rsvpKind === 'going'}
+              />
+            : null}
           </div>
 
           <div className="mb-6 space-y-2">
@@ -1812,9 +1880,11 @@ export default function EventDetailClient() {
       </div>
 
       <MobileActionBar
-        className="lg:hidden"
+        className="lg:hidden border-t border-dc-border/90"
         status={
-          rsvpKind === 'going' ?
+          rsvpClosed ? 'RSVPs closed'
+          : rsvpLocked ? 'Sign in to save your spot'
+          : rsvpKind === 'going' ?
             `${event.rsvpCount} going · You're going`
           : rsvpKind === 'maybe' ?
             `${event.rsvpCount} going · ${RSVP_LABEL_INTERESTED}`

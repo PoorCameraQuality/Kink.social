@@ -895,3 +895,20 @@ Changed-files-only SFTP upload + **web container rebuild only** via `scripts/vps
 **Proceed to Events Mobile UX Pass 1** — shell contract is live and verified on production.
 
 ---
+
+## 2026-06-17 — Events Mobile UX Pass 1 (production)
+
+**Branch:** `events-mobile-ux-pass1`  
+**Deploy:** Changed-files-only via `scripts/vps/patch-events-mobile-ux-pass1-vps.mjs` — 8 web source files, **web container rebuild only** (no tarball, no API/worker, no DB).  
+**Verify bundle:** `Desktop/kink-social-events-mobile-ux-verify-2026-06-17-1634.zip` (18 PNGs, `https://kink.social`).
+
+| Check | Verdict |
+|-------|---------|
+| Mobile events top — first card visible | **Pass** (390px; 360px shows card top with tighter header) |
+| Fast filters + Filters sheet | **Pass** |
+| Event cards scannable at 360px | **Pass** (minor chip label clip on last fast-filter pill) |
+| Event detail mobile hierarchy | **Pass** — title, facts block, compact privacy note, RSVP bar |
+| RSVP/status bar vs bottom nav | **Pass** |
+| Desktop 1280 regression | **Pass** — three-column discover layout preserved |
+
+---
