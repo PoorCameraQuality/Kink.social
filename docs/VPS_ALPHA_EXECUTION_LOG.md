@@ -533,3 +533,99 @@ Saved under Cursor screenshots temp path on operator workstation.
 | Ready for full public launch? | **No** |
 
 ---
+
+## Pass 6 — 2026-06-17 (Public Alpha Promotion Gate Pass 3)
+
+**Operator:** Cursor agent  
+**Git commits:** `fce9689` (*Fix restricted media URL exposure for public alpha*), `7ae59a4` (*Fix private group anon access and add legacy media audit script*)  
+**Deploy method:** Changed-files-only via `scripts/vps/patch-pass3-vps.mjs` (4 API files; **no tarball**)  
+**Services restarted:** `c2k-api`, `c2k-worker` only  
+**Password / DB destructive ops:** **None**
+
+### Commit (media privacy fix)
+
+| Step | Result |
+|------|--------|
+| Staged files | 8 product/doc files only (no logs, tarball, operator scripts) |
+| Commit | `fce9689` — *Fix restricted media URL exposure for public alpha* |
+
+### Private group 500 fix
+
+**Root cause:** `findGroupByIdOrSlug()` queried UUID column with slug string → Postgres `22P02`; missing `canViewGroup()` on detail route.
+
+**Fix:** UUID guard before id lookup; `canViewGroup()` returns **404** for anonymous/non-member on private/invite-only groups.
+
+| Check | Result |
+|-------|--------|
+| Anonymous `GET /api/v1/groups/alpha-social-private-circle` | **404** `{"error":"Not found"}` |
+| Member forum (`alpha_hidden_member`) | **200** |
+| Non-member forum (`alpha_newbie`) | **404** |
+
+### Legacy restricted media audit (read-only)
+
+Script: `packages/api/scripts/audit-restricted-public-media.ts`
+
+| Metric | Value |
+|--------|-------|
+| Suspicious rows (LOGGED_IN + `media/` public path) | **53** |
+| Visibility distribution | All `LOGGED_IN` |
+| Uploaders | Primarily **Brax**, **TestAdmin** (profile gallery) |
+| Alpha `alpha_*` rows | **0** in suspicious set |
+| Pass 1 `alpha_social` photo | Already remediated |
+
+**Recommendation:** Per-row remediation for legacy staff uploads (DB → VALIDATED_PRIVATE + remove MinIO `media/` copy). Do not bulk-delete. New uploads after `fce9689` stay in quarantine for restricted visibility.
+
+### Feed media browser upload
+
+| Check | Result |
+|-------|--------|
+| Route | `/home` — Home rich composer, Photo quick action |
+| Photo button | Opens native file picker; IDE browser automation cannot attach files |
+| In-session upload (alpha_social cookies) | **200** via `/api/upload` `feed_image` |
+| Full UI attach + post | **Blocked for automation** — needs human tester or Playwright file fixture |
+
+### Staff / moderation
+
+**Blocked** — no working staff credential. Non-staff moderation API **403** confirmed.
+
+### Seed marker recommendation
+
+**Keep as-is for public alpha.** Markers honestly signal test content; consider softer labels before broad non-community promotion.
+
+### Tests run
+
+| Command | Result |
+|---------|--------|
+| `npm run typecheck` | **Pass** |
+| `npm run build` | **Pass** |
+| `npm run test` | **Fail (environment)** — Node v24 + tsx/tsconfig |
+| Recommend | Node 20 (matches VPS Docker) for full test suite |
+
+### VPS retest
+
+| Check | Result |
+|-------|--------|
+| `/api/health/ready` | **200** |
+| Profile photo proxy anon/auth | **404 / 200** |
+| Legacy direct MinIO URL | **404** |
+| Private group anon detail | **404** |
+| Boot loops | **None** |
+
+### Remaining blockers
+
+1. Staff/moderation smoke — operator credentials needed  
+2. 53 legacy staff profile photos on public MinIO prefix  
+3. Feed composer UI upload — human/Playwright verification  
+4. Local `npm run test` on Node 24
+
+### Readiness verdict (Pass 6)
+
+| Question | Answer |
+|----------|--------|
+| Public visitors allowed? | **Yes** |
+| Safe to leave visible? | **Yes** |
+| Ready to actively promote for alpha testing? | **Yes** — legacy staff media remediation + staff-mod smoke recommended |
+| Ready for structured tester QA? | **Yes** |
+| Ready for full public launch? | **No** |
+
+---
