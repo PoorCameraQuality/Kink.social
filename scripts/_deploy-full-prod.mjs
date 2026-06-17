@@ -7,6 +7,7 @@ import { execSync } from 'node:child_process'
 import { createReadStream, existsSync, unlinkSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { deployTarExcludeFlag } from './lib/deploy-tar-excludes.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
@@ -72,9 +73,9 @@ function sftpUpload(conn, local, remotePath) {
 }
 
 async function main() {
-  console.log('Creating deploy tarball...')
+  console.log('Creating deploy tarball (see .deployignore; prefer scripts/vps/patch-*-vps.mjs)...')
   execSync(
-    `tar -czf "${TARBALL}" --exclude=node_modules --exclude=.git --exclude=e2e/test-results --exclude=playwright-report --exclude=.deploy-c2k-full.tgz --exclude=visual-audit-output --exclude=docker/mailserver/data --exclude=docker/mailserver/state --exclude=docker/mailserver/logs --exclude=docker/mailserver/config --exclude=packages/api/dist --exclude=*.log -C "${root}" .`,
+    `tar -czf "${TARBALL}" ${deployTarExcludeFlag()} -C "${root}" .`,
     { stdio: 'inherit', shell: true },
   )
 

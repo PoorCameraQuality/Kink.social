@@ -6,6 +6,7 @@ import { Client } from 'ssh2';
 import { execSync } from 'node:child_process';
 import { createReadStream, existsSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
+import { deployTarExcludeFlag } from '../lib/deploy-tar-excludes.mjs';
 
 const HOST = process.env.SSH_HOST ?? '2.25.196.84';
 const USER = process.env.SSH_USER ?? 'root';
@@ -51,9 +52,9 @@ function sshUpload(conn, localPath, remotePath) {
   });
 }
 
-console.log('Creating deploy tarball (excludes node_modules, .git)...');
+console.log('Creating deploy tarball (see .deployignore; bootstrap only — prefer patch-*-vps.mjs)...');
 execSync(
-  `tar -czf "${TARBALL}" --exclude=node_modules --exclude=.git --exclude=e2e/test-results --exclude=playwright-report --exclude=.deploy-c2k.tgz --exclude=visual-audit-output --exclude=docker/mailserver/data --exclude=docker/mailserver/state --exclude=docker/mailserver/logs --exclude=docker/mailserver/config -C "${REPO}" .`,
+  `tar -czf "${TARBALL}" ${deployTarExcludeFlag()} -C "${REPO}" .`,
   { stdio: 'inherit', shell: true },
 );
 

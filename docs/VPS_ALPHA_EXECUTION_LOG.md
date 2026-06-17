@@ -797,3 +797,30 @@ Activation Pass 1 web already deployed via `patch-activation-pass1-vps.mjs` (Pas
 See `docs/PUBLIC_ALPHA_PROMOTION.md` for operator checklist and announcement draft.
 
 ---
+
+## Pass 10 — Deploy Slimming and Repo Hygiene Audit Pass 1 (2026-06-17)
+
+**Goal:** Reduce deploy tarball bloat, improve ignore rules, document repo map — **no product/runtime changes, no deploy**.
+
+### Deploy bloat findings
+
+| Source | ~Size | Mitigation |
+|--------|-------|------------|
+| `docs/audits/` (local generated) | **~500 MB** | Added to `.deployignore` + `.gitignore` |
+| `.deploy-c2k-full.tgz` | **~681 MB** | gitignored; excluded from future tarballs |
+| `_deploy-*.tar.gz` at repo root | **~120 MB** | gitignored |
+| `node_modules` | **~305 MB** | already excluded |
+
+### Repo hygiene changes
+
+- Added [`.deployignore`](../.deployignore) and wired `_deploy-full-prod.mjs` + `push-and-bootstrap.mjs`
+- Expanded `.gitignore` / `.dockerignore`
+- Added [`docs/REPO_MAP.md`](../REPO_MAP.md), [`docs/CODE_CLEANUP_INVENTORY.md`](../CODE_CLEANUP_INVENTORY.md)
+- Updated root `README.md` for kink.social public alpha
+- Removed tracked generated files: `build-web.log`, `*.tsbuildinfo`
+
+### Deploy scope
+
+**None** — hygiene/docs/ignore only.
+
+---
