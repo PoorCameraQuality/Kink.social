@@ -912,3 +912,35 @@ Changed-files-only SFTP upload + **web container rebuild only** via `scripts/vps
 | Desktop 1280 regression | **Pass** — three-column discover layout preserved |
 
 ---
+
+## 2026-06-17 — Premium Surface System Pass 1 (production deploy + live verify)
+
+**Branch:** `premium-surface-system-pass1`  
+**Commit deployed:** `22db5e9` — *Add premium shared surface system*  
+**Deploy:** Changed-files-only via `scripts/vps/patch-premium-surface-pass1-vps.mjs` — **21 web source files**, **web container rebuild only** (no tarball, no API/worker, no DB, no `.env` mutation).
+
+**Post-deploy smoke:**
+- `GET /` → 200
+- `GET /events` → 200
+- CSS bundle `assets/index-Dg9z43Gs.css` — `dc-premium-btn` present (`PREMIUM_CSS_OK`)
+
+**Live verify bundle:** `Desktop/kink-social-premium-surface-live-verify-2026-06-17-1712.zip` (21 PNGs, signed-in `alpha_social`).
+
+| Check | Verdict |
+|-------|---------|
+| More cohesive across routes | **Pass** |
+| Cards more premium (depth/borders) | **Pass** — subtle, not glossy |
+| CTAs clearer | **Pass** |
+| Badges/chips calmer | **Pass** — `dc-chip` on Events fast filters |
+| Forms easier to read | **Partial** — login/landing inputs not yet on `dc-premium-input` |
+| Sheets smoother | **Pass** — backdrop + sheet enter |
+| Mobile more cramped | **Pass** — no added padding layers |
+| Desktop regression | **Pass** |
+| Contrast readable | **Pass** |
+| Motion respectful | **Pass** |
+| Events layout intact | **Pass** |
+| Surfaces too heavy/glossy | **Pass** — no route flagged |
+
+**Go/no-go:** **Proceed to Premium Surface Pass 2** (start with login/register/settings input wiring).
+
+---

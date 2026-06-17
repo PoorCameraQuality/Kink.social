@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Premium Surface System Pass 1 verification — https://kink.social
- * Output: Desktop/kink-social-premium-surface-pass1-YYYY-MM-DD-HHMM.zip
+ * Output: Desktop/kink-social-premium-surface-live-verify-YYYY-MM-DD-HHMM.zip
+ *   (set KINK_SOCIAL_AUDIT_LIVE=1 or pass --live to use live-verify prefix)
  */
 import {
   mkdirSync,
@@ -120,7 +121,9 @@ async function capture(page, outRoot, ctx, baseURL, spec) {
 
 async function main() {
   const { baseURL, user, pass } = creds()
-  const outRoot = join(homedir(), 'Desktop', `kink-social-premium-surface-pass1-${stamp()}`)
+  const live = process.env.KINK_SOCIAL_AUDIT_LIVE === '1' || process.argv.includes('--live')
+  const prefix = live ? 'kink-social-premium-surface-live-verify' : 'kink-social-premium-surface-pass1'
+  const outRoot = join(homedir(), 'Desktop', `${prefix}-${stamp()}`)
   mkdirSync(outRoot, { recursive: true })
 
   const signedOutMobile = [
