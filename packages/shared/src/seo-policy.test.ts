@@ -13,6 +13,9 @@ import {
   isEckePublishEligible,
   isKinkSocialPublicLaunchEnabled,
   sanitizeEckePublicText,
+  sanitizeEckeEducationPublicText,
+  educationEckePayloadContainsLeakedPrivateUrls,
+  sanitizeEckeArticleSlug,
 } from './seo-policy'
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -68,6 +71,27 @@ describe('seo-policy', () => {
     )
     assert.equal(eckePayloadContainsPrivateAppUrls({ website: 'https://kink.social/orgs/x' }), true)
     assert.equal(eckePayloadContainsPrivateAppUrls({ website: `${ECKE_URL}/events/foo` }), false)
+  })
+
+  it('education sanitizer keeps brand mentions and strips private app URLs only', () => {
+    assert.equal(
+      sanitizeEckeEducationPublicText('Kink.Social alpha at https://kink.social/messages/inbox'),
+      'Kink.Social alpha at',
+    )
+    assert.equal(sanitizeEckeArticleSlug('kink.social-goes-live'), 'kink-social-goes-live')
+    const payload = {
+      title: 'Kink.Social launch',
+      bodyHtml: '<p>Visit kink.social today</p>',
+      authorProfileUrl: 'https://kink.social/profile/demo',
+    }
+    assert.equal(educationEckePayloadContainsLeakedPrivateUrls(payload), false)
+    assert.equal(
+      educationEckePayloadContainsLeakedPrivateUrls({
+        ...payload,
+        bodyHtml: '<p>https://kink.social/settings/account</p>',
+      }),
+      true,
+    )
   })
 })
 

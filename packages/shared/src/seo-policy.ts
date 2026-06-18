@@ -188,44 +188,65 @@ const KINK_SOCIAL_URL_RE = /https?:\/\/(?:www\.)?kink\.social[^\s"'<>]*/gi
 
 const KINK_SOCIAL_HOST_RE = /\bkink\.social\b/i
 
-
+/** Member-only or internal kink.social paths — must not appear on ECKE public pages. */
+const KINK_SOCIAL_PRIVATE_URL_RE =
+  /https?:\/\/(?:www\.)?kink\.social(?:\/api\b|\/messages\b|\/dm\b|\/inbox\b|\/settings\b|\/profile\/edit\b|\/education\/write\b|\/organizer\b)[^\s"'<>]*/gi
 
 /** Strip private-app URLs from text destined for ECKE public pages. */
-
 export function sanitizeEckePublicText(text: string | null | undefined): string | null {
-
   if (text == null) return null
 
   const cleaned = text.replace(KINK_SOCIAL_URL_RE, '').replace(KINK_SOCIAL_HOST_RE, '').trim()
 
   return cleaned || null
-
 }
 
+const KINK_SOCIAL_ANY_URL_RE = /https?:\/\/(?:www\.)?kink\.social\b[^\s"'<>]*/gi
+const KINK_SOCIAL_IMG_TAG_RE =
+  /<img\b[^>]*\ssrc\s*=\s*["']https?:\/\/(?:www\.)?kink\.social\b[^"']*["'][^>]*\/?>/gi
 
+/**
+ * Education body HTML for ECKE: keep brand mentions, drop all kink.social URLs and proxy images.
+ * Inline/hero media on kink.social requires auth; ECKE must not embed those links.
+ */
+export function sanitizeEckeEducationBodyHtml(html: string | null | undefined): string | null {
+  if (html == null) return null
+  const cleaned = html
+    .replace(KINK_SOCIAL_IMG_TAG_RE, '')
+    .replace(KINK_SOCIAL_PRIVATE_URL_RE, '')
+    .replace(KINK_SOCIAL_ANY_URL_RE, '')
+    .trim()
+  return cleaned || null
+}
+
+/**
+ * Education articles may mention kink.social by name and link to public member pages.
+ * Only strip URLs that point at private app surfaces.
+ */
+export function sanitizeEckeEducationPublicText(text: string | null | undefined): string | null {
+  if (text == null) return null
+  const cleaned = text.replace(KINK_SOCIAL_PRIVATE_URL_RE, '').trim()
+  return cleaned || null
+}
 
 /** True when serialized ECKE payload still references the private app domain. */
 export function eckePayloadContainsPrivateAppUrls(payload: unknown): boolean {
   return KINK_SOCIAL_HOST_RE.test(JSON.stringify(payload))
 }
 
-/** Education ingest may include intentional kink.social attribution profile links. */
+/** Education ingest may include brand mentions and public kink.social profile links. */
 export const ECKE_EDUCATION_ATTRIBUTION_URL_KEYS = ['authorProfileUrl', 'presenterProfileUrl'] as const
 
-/** Like eckePayloadContainsPrivateAppUrls but allows attribution profile URLs on education payloads. */
+/** True when education payload contains member-only kink.social URLs (not brand mentions). */
 export function educationEckePayloadContainsLeakedPrivateUrls(payload: Record<string, unknown>): boolean {
-  const copy = { ...payload }
-  for (const key of ECKE_EDUCATION_ATTRIBUTION_URL_KEYS) {
-    delete copy[key]
-  }
-  return eckePayloadContainsPrivateAppUrls(copy)
+  return KINK_SOCIAL_PRIVATE_URL_RE.test(JSON.stringify(payload))
 }
 
-/** Slug safe for ECKE public URLs — strips kink.social references and normalizes. */
+/** Slug safe for ECKE public URLs — normalize without stripping the kink.social brand name. */
 export function sanitizeEckeArticleSlug(slug: string): string {
   const lowered = slug.toLowerCase().trim()
-  const withoutHost = lowered.replace(KINK_SOCIAL_URL_RE, '').replace(KINK_SOCIAL_HOST_RE, '')
-  const normalized = withoutHost
+  const withoutUrls = lowered.replace(KINK_SOCIAL_URL_RE, '')
+  const normalized = withoutUrls
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 120)
