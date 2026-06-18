@@ -201,6 +201,24 @@ export function sanitizeEckePublicText(text: string | null | undefined): string 
   return cleaned || null
 }
 
+const KINK_SOCIAL_ANY_URL_RE = /https?:\/\/(?:www\.)?kink\.social\b[^\s"'<>]*/gi
+const KINK_SOCIAL_IMG_TAG_RE =
+  /<img\b[^>]*\ssrc\s*=\s*["']https?:\/\/(?:www\.)?kink\.social\b[^"']*["'][^>]*\/?>/gi
+
+/**
+ * Education body HTML for ECKE: keep brand mentions, drop all kink.social URLs and proxy images.
+ * Inline/hero media on kink.social requires auth; ECKE must not embed those links.
+ */
+export function sanitizeEckeEducationBodyHtml(html: string | null | undefined): string | null {
+  if (html == null) return null
+  const cleaned = html
+    .replace(KINK_SOCIAL_IMG_TAG_RE, '')
+    .replace(KINK_SOCIAL_PRIVATE_URL_RE, '')
+    .replace(KINK_SOCIAL_ANY_URL_RE, '')
+    .trim()
+  return cleaned || null
+}
+
 /**
  * Education articles may mention kink.social by name and link to public member pages.
  * Only strip URLs that point at private app surfaces.

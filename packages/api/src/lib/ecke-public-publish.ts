@@ -7,6 +7,7 @@ import {
   KINK_SOCIAL_SOURCE_SYSTEM,
   sanitizeEckeArticleSlug,
   sanitizeEckeEducationPublicText,
+  sanitizeEckeEducationBodyHtml,
   sanitizeEckeHeroImageUrl,
   type EckeEducationArticlePayload,
   type KinkSocialPublicIngestEnvelope,
@@ -113,7 +114,7 @@ export function redactEducationArticleForEcke(
 
   const title = sanitizeEckeEducationPublicText(rawTitle) ?? rawTitle
   const excerpt = (sanitizeEckeEducationPublicText(rawExcerpt) ?? rawExcerpt).slice(0, 2000)
-  const bodyHtml = sanitizeEckeEducationPublicText(rawBody) ?? rawBody
+  const bodyHtml = sanitizeEckeEducationBodyHtml(rawBody) ?? rawBody
 
   const authorDisplayName =
     author.displayName?.trim() || author.username?.trim() || `${APP_NAME} Educator`

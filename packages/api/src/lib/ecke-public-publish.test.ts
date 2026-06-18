@@ -128,7 +128,8 @@ describe('education article redaction and envelope', () => {
     const payload = redactEducationArticleForEcke(
       baseArticle({
         title: 'Kink.Social comes online in alpha',
-        bodyHtml: '<p>Join https://kink.social/messages/secret but visit kink.social for more.</p>',
+        bodyHtml:
+          '<p>Join https://kink.social/messages/secret but visit kink.social for more.</p><img src="https://kink.social/api/v1/media/assets/x/content" alt="hero">',
         excerpt: 'kink.social alpha launch',
         slug: 'kink-social-goes-live',
       }),
@@ -137,7 +138,9 @@ describe('education article redaction and envelope', () => {
     assert.match(payload.title, /Kink\.Social/i)
     assert.match(payload.excerpt, /kink\.social/i)
     assert.doesNotMatch(payload.bodyHtml, /kink\.social\/messages/)
+    assert.doesNotMatch(payload.bodyHtml, /kink\.social\/api/)
     assert.match(payload.bodyHtml, /kink\.social/)
+    assert.doesNotMatch(payload.bodyHtml, /<img\b/)
     assert.equal(payload.slug, 'kink-social-goes-live')
   })
 
@@ -181,11 +184,31 @@ describe('loadEckeIngestApiConfig', () => {
 
   it('loads ingest API config when enabled', () => {
     process.env.ECKE_PUBLISH_ENABLED = 'true'
+    process.env.ECKE_PUBLISH_ALLOW_NON_PRODUCTION = 'true'
     process.env.ECKE_PUBLISH_ENDPOINT = 'https://ecke.example/api/kink-social/ingest'
     process.env.ECKE_PUBLISH_SECRET = 'ingest-secret'
     const cfg = loadEckeIngestApiConfig()
     assert.ok(cfg)
     assert.equal(cfg!.unpublishEndpoint, 'https://ecke.example/api/kink-social/unpublish')
+  })
+
+  it('rejects Vercel preview endpoints unless explicitly overridden', () => {
+    process.env.ECKE_PUBLISH_ENABLED = 'true'
+    delete process.env.ECKE_PUBLISH_ALLOW_NON_PRODUCTION
+    process.env.ECKE_PUBLISH_ENDPOINT =
+      'https://eastcoastkinkevents-abc123-poorcameraqualitys-projects.vercel.app/api/kink-social/ingest'
+    process.env.ECKE_PUBLISH_SECRET = 'ingest-secret'
+    assert.equal(loadEckeIngestApiConfig(), null)
+  })
+
+  it('accepts production ECKE hostnames', () => {
+    process.env.ECKE_PUBLISH_ENABLED = 'true'
+    delete process.env.ECKE_PUBLISH_ALLOW_NON_PRODUCTION
+    process.env.ECKE_PUBLISH_ENDPOINT = 'https://www.eastcoastkinkevents.com/api/kink-social/ingest'
+    process.env.ECKE_PUBLISH_SECRET = 'ingest-secret'
+    const cfg = loadEckeIngestApiConfig()
+    assert.ok(cfg)
+    assert.equal(cfg!.publicBaseUrl, 'https://www.eastcoastkinkevents.com')
   })
 })
 

@@ -27,6 +27,27 @@ export type EckeIngestApiConfig = {
   publicBaseUrl: string
 }
 
+const ECKE_PRODUCTION_HOSTS = new Set(['www.eastcoastkinkevents.com', 'eastcoastkinkevents.com'])
+
+/** kink.social → ECKE bridge must target production ECKE only (not per-commit Vercel previews). */
+export function isProductionEckePublishUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase()
+    return ECKE_PRODUCTION_HOSTS.has(host)
+  } catch {
+    return false
+  }
+}
+
+function eckePublishNonProductionAllowed(): boolean {
+  return process.env.ECKE_PUBLISH_ALLOW_NON_PRODUCTION === 'true'
+}
+
+function isAllowedEckePublishUrl(url: string): boolean {
+  if (eckePublishNonProductionAllowed()) return true
+  return isProductionEckePublishUrl(url)
+}
+
 export type EckeIngestApiSuccess = {
   ok: true
   eckeSlug: string
@@ -57,6 +78,13 @@ export function loadEckeIngestApiConfig(): EckeIngestApiConfig | null {
   const unpublishEndpoint =
     process.env.ECKE_UNPUBLISH_ENDPOINT?.trim() ||
     publishEndpoint.replace(/\/ingest\/?$/, '/unpublish')
+
+  if (!isAllowedEckePublishUrl(publishEndpoint) || !isAllowedEckePublishUrl(unpublishEndpoint)) {
+    return null
+  }
+  if (!isAllowedEckePublishUrl(publicBaseUrl)) {
+    return null
+  }
 
   return {
     publishEndpoint,
