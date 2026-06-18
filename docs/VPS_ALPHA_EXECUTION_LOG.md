@@ -944,3 +944,55 @@ Changed-files-only SFTP upload + **web container rebuild only** via `scripts/vps
 **Go/no-go:** **Proceed to Premium Surface Pass 2** (start with login/register/settings input wiring).
 
 ---
+
+## 2026-06-17 — Premium Surface System Pass 2 (production deploy + live verify)
+
+**Branch:** `premium-surface-system-pass2`  
+**Commit deployed:** `84cb6cf` — *Polish premium forms and templates*  
+**Deploy:** Changed-files-only via `scripts/vps/patch-premium-surface-pass2-vps.mjs` — **13 web source files**, **web container rebuild only** (no tarball, no API/worker, no DB, no `.env` mutation).
+
+**Files deployed:**
+- `packages/web/src/components/LoginCard.tsx`
+- `packages/web/src/components/landing/public-auth.css`
+- `packages/web/src/lib/settingsFormClasses.ts`
+- `packages/web/src/app/settings/SettingsPrivacySections.tsx`
+- `packages/web/src/components/templates/SettingsTemplate.tsx`
+- `packages/web/src/components/templates/DirectoryTemplate.tsx`
+- `packages/web/src/components/templates/DetailTemplate.tsx`
+- `packages/web/src/components/events/EventFiltersPanel.tsx`
+- `packages/web/src/components/cards/OrgCard.tsx`
+- `packages/web/src/components/cards/PresenterCard.tsx`
+- `packages/web/src/components/cards/VendorCard.tsx`
+- `packages/web/src/components/cards/EducationCard.tsx`
+- `packages/web/src/components/cards/LocalPostCard.tsx`
+
+**Post-deploy smoke:**
+- `GET /` → 200
+- `GET /login` → 200
+- `GET /register` → 200
+- `GET /events` → 200
+- `GET /people` → 200
+- CSS bundle `assets/index-DThNNm4t.css` — `dc-premium-input` + `dc-premium-btn` present (`PREMIUM_INPUT_CSS_OK`, `PREMIUM_BTN_CSS_OK`)
+- Signed-in: `/settings/privacy`, `/events`, `/people` load (live verify login ok)
+
+**Live verify bundle:** `Desktop/kink-social-premium-surface-pass2-live-2026-06-17-2045.zip` (32 PNGs, `https://kink.social`).
+
+| Check | Verdict |
+|-------|---------|
+| Public auth forms match premium system | **Pass** — landing login/register use `dc-premium-input`; gold focus ring on focused field |
+| Login/register inputs improved vs Pass 1 | **Pass** — rounded premium inputs, clearer focus |
+| Policy / 18+ checkboxes clear | **Pass** — 44px hit areas preserved on register tab |
+| Settings forms match premium system | **Pass** — privacy selects on `settingsSelectClass` / premium input stack |
+| DirectoryTemplate / DetailTemplate consistent | **Pass** — People directory + event detail surfaces align with Pass 1 rhythm |
+| Cards cohesive (Events, People, Groups, Home, Profile) | **Pass** — Org/Presenter/Vendor/Education card surfaces; Events card hierarchy unchanged |
+| Buttons / chips consistent | **Pass** — Events fast filters + filter sheet; directory filter trigger |
+| Mobile more cramped | **Pass** — no added padding layers |
+| Desktop regression | **Pass** — 1280 rails and event detail layout preserved |
+| Events layout intact | **Pass** — filter panel inputs only; mobile hierarchy unchanged |
+| Education architecture untouched | **Pass** — `EducationCard` surface-only |
+| Contrast readable | **Pass** |
+| Motion restrained | **Pass** |
+
+**Go/no-go:** **Proceed to Premium Surface Pass 3** (directory filter inputs, secondary discovery cards, scope-tab chips) when ready — no regressions to fix first.
+
+---

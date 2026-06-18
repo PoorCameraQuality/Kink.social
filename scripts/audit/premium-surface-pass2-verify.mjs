@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-/** Premium Surface Pass 2 verification — default http://127.0.0.1:4173 after `npm run build -w web && npm run preview -w web` */
+/**
+ * Premium Surface Pass 2 verification.
+ * Live: KINK_SOCIAL_AUDIT_URL=https://kink.social (default when --live or KINK_SOCIAL_AUDIT_LIVE=1)
+ * Local: npm run build -w web && npm run preview -w web → http://127.0.0.1:4173
+ * Output: Desktop/kink-social-premium-surface-pass2-live-YYYY-MM-DD-HHMM.zip (live)
+ */
 import {
   mkdirSync,
   writeFileSync,
@@ -40,11 +45,21 @@ function creds() {
       pass: map.KINK_SOCIAL_AUDIT_PASS ?? '',
     }
   }
+  const live = process.argv.includes('--live') || process.env.KINK_SOCIAL_AUDIT_LIVE === '1'
+  const defaultUrl = live ? 'https://kink.social' : 'http://127.0.0.1:4173'
   return {
-    baseURL: (process.env.KINK_SOCIAL_AUDIT_URL ?? 'http://127.0.0.1:4173').replace(/\/$/, ''),
+    baseURL: (process.env.KINK_SOCIAL_AUDIT_URL ?? defaultUrl).replace(/\/$/, ''),
     user: process.env.KINK_SOCIAL_AUDIT_USER ?? '',
     pass: process.env.KINK_SOCIAL_AUDIT_PASS ?? process.env.ALPHA_SOCIAL_SEED_PASSWORD ?? '',
   }
+}
+
+function bundlePrefix() {
+  const live =
+    process.argv.includes('--live') ||
+    process.env.KINK_SOCIAL_AUDIT_LIVE === '1' ||
+    (process.env.KINK_SOCIAL_AUDIT_URL ?? '').includes('kink.social')
+  return live ? 'kink-social-premium-surface-pass2-live' : 'kink-social-premium-surface-pass2'
 }
 
 const manifest = []
@@ -112,7 +127,7 @@ async function capture(page, outRoot, ctx, baseURL, spec) {
 
 async function main() {
   const { baseURL, user, pass } = creds()
-  const outRoot = join(homedir(), 'Desktop', `kink-social-premium-surface-pass2-${stamp()}`)
+  const outRoot = join(homedir(), 'Desktop', `${bundlePrefix()}-${stamp()}`)
   mkdirSync(outRoot, { recursive: true })
 
   const signedOutMobile = [
@@ -209,6 +224,19 @@ async function main() {
     { path: '/profile', state: 'profile-top', file: '01-top.png' },
     { path: '/messaging', state: 'messaging-top', file: '01-top.png' },
     { path: '/settings/privacy', state: 'settings-privacy-top', file: '01-top.png' },
+    { path: '/people', state: 'directory-template', file: '02-directory-template.png' },
+    {
+      path: '/events',
+      state: 'detail-template',
+      file: '03-detail-template.png',
+      action: async (p) => {
+        const link = p.locator('a[href^="/events/"]').first()
+        if (await link.count()) {
+          await link.click()
+          await wait(p)
+        }
+      },
+    },
   ]
 
   const browser = await chromium.launch({ headless: true })
