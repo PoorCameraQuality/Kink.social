@@ -124,16 +124,21 @@ describe('education article redaction and envelope', () => {
     assert.equal('bodyJson' in payload, false)
   })
 
-  it('sanitizes kink.social URLs from body and excerpt', () => {
+  it('sanitizes private kink.social URLs from body but keeps brand mentions', () => {
     const payload = redactEducationArticleForEcke(
       baseArticle({
-        bodyHtml: '<p>Join https://kink.social/messages/secret</p>',
-        excerpt: 'See kink.social for more',
+        title: 'Kink.Social comes online in alpha',
+        bodyHtml: '<p>Join https://kink.social/messages/secret but visit kink.social for more.</p>',
+        excerpt: 'kink.social alpha launch',
+        slug: 'kink-social-goes-live',
       }),
       author,
     )
-    assert.doesNotMatch(payload.bodyHtml, /kink\.social/i)
-    assert.doesNotMatch(payload.excerpt, /kink\.social/i)
+    assert.match(payload.title, /Kink\.Social/i)
+    assert.match(payload.excerpt, /kink\.social/i)
+    assert.doesNotMatch(payload.bodyHtml, /kink\.social\/messages/)
+    assert.match(payload.bodyHtml, /kink\.social/)
+    assert.equal(payload.slug, 'kink-social-goes-live')
   })
 
   it('allows author profile attribution URLs when public web base is kink.social', () => {
@@ -157,7 +162,7 @@ describe('education article redaction and envelope', () => {
       }),
       author,
     )
-    assert.doesNotMatch(payload.slug, /kink\.social/)
+    assert.equal(payload.slug, 'kink-social-goes-live-for-alpha')
     assert.equal(payload.heroImageUrl, null)
   })
 

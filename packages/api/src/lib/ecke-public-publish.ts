@@ -6,8 +6,8 @@ import {
   isEckePublishEligible,
   KINK_SOCIAL_SOURCE_SYSTEM,
   sanitizeEckeArticleSlug,
+  sanitizeEckeEducationPublicText,
   sanitizeEckeHeroImageUrl,
-  sanitizeEckePublicText,
   type EckeEducationArticlePayload,
   type KinkSocialPublicIngestEnvelope,
   type KinkSocialUnpublishEnvelope,
@@ -111,9 +111,9 @@ export function redactEducationArticleForEcke(
   const rawExcerpt = (article.excerpt ?? article.title).trim()
   const rawBody = article.bodyHtml
 
-  const title = sanitizeEckePublicText(rawTitle) ?? rawTitle
-  const excerpt = (sanitizeEckePublicText(rawExcerpt) ?? rawExcerpt).slice(0, 2000)
-  const bodyHtml = sanitizeEckePublicText(rawBody) ?? rawBody
+  const title = sanitizeEckeEducationPublicText(rawTitle) ?? rawTitle
+  const excerpt = (sanitizeEckeEducationPublicText(rawExcerpt) ?? rawExcerpt).slice(0, 2000)
+  const bodyHtml = sanitizeEckeEducationPublicText(rawBody) ?? rawBody
 
   const authorDisplayName =
     author.displayName?.trim() || author.username?.trim() || `${APP_NAME} Educator`
@@ -142,9 +142,7 @@ export function redactEducationArticleForEcke(
   }
 
   if (educationEckePayloadContainsLeakedPrivateUrls(payload as Record<string, unknown>)) {
-    throw new Error(
-      'Article still contains kink.social references in title, excerpt, body, or slug after redaction',
-    )
+    throw new Error('Article contains private kink.social URLs (messages, settings, API, etc.)')
   }
 
   return payload

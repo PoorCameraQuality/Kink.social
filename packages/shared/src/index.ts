@@ -24,6 +24,7 @@ export {
   isEckePublishEligible,
   isKinkSocialPublicLaunchEnabled,
   sanitizeEckeArticleSlug,
+  sanitizeEckeEducationPublicText,
   sanitizeEckeHeroImageUrl,
   sanitizeEckePublicText,
   type EckePublishEligibilityInput,

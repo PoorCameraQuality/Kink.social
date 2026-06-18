@@ -137,7 +137,11 @@ export async function publishEducationArticleEnvelopeToEcke(
     return { ok: false, targetKind: 'ecke_article', error: 'Only education_article uses ingest API in Pass 3B' }
   }
   if (educationEckePayloadContainsLeakedPrivateUrls(envelope.payload as Record<string, unknown>)) {
-    return { ok: false, targetKind: 'ecke_article', error: 'ECKE payload must not contain kink.social URLs in article content' }
+    return {
+      ok: false,
+      targetKind: 'ecke_article',
+      error: 'ECKE payload must not contain private kink.social URLs',
+    }
   }
 
   const result = await postEckeIngestEnvelope(cfg, cfg.publishEndpoint, envelope)
