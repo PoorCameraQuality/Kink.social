@@ -25,6 +25,16 @@ export {
   sanitizeEckePublicText,
   type EckePublishEligibilityInput,
 } from './seo-policy.js'
+export {
+  buildKinkSocialIdempotencyKey,
+  ECKE_SOURCE_TYPE_BY_ENTITY,
+  KINK_SOCIAL_SOURCE_SYSTEM,
+  type EckeEducationArticlePayload,
+  type EckePublicEntityType,
+  type KinkSocialIngestResponse,
+  type KinkSocialPublicIngestEnvelope,
+  type KinkSocialUnpublishEnvelope,
+} from './ecke-public-ingest-envelope.js'
 export { buildCanonicalUrl, copyCanonicalLink, formatMemberSinceMonthYear } from './canonical-link.js'
 export { isPublicPath } from './public-paths.js'
 export { safeInternalPath } from './safe-redirect.js'
