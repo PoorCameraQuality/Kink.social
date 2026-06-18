@@ -84,7 +84,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-dc-border bg-dc-elevated/95 shadow-[var(--dc-shadow-soft)] backdrop-blur-md safe-area-pb"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-dc-border bg-dc-elevated/95 shadow-[var(--dc-shadow-soft)] backdrop-blur-md safe-area-pb"
       role="navigation"
       aria-label="Bottom navigation"
     >

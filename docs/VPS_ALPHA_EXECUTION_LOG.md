@@ -824,3 +824,74 @@ See `docs/PUBLIC_ALPHA_PROMOTION.md` for operator checklist and announcement dra
 **None** — hygiene/docs/ignore only.
 
 ---
+
+## Pass 11 — Mobile Shell Production Deploy and Verification Pass 1 (2026-06-17)
+
+**Goal:** Ship Mobile Shell Pass 1 (fixed-layer contract) to production via changed-files-only web deploy; verify live signed-in mobile screenshots.
+
+**Branch:** `mobile-shell-fixed-layer-contract-pass1`  
+**Commit deployed:** `4fbc49b` — Fix mobile shell fixed-layer spacing and menus  
+**PR:** https://github.com/PoorCameraQuality/Kink.social/pull/7  
+**CI:** https://github.com/PoorCameraQuality/Kink.social/actions/runs/27716312993 — `check` **success**; `check-db` long-runner (DB integration smokes in progress at deploy time)
+
+### Deploy method
+
+Changed-files-only SFTP upload + **web container rebuild only** via `scripts/vps/patch-mobile-shell-pass1-vps.mjs` (no tarball, no API/worker restart, no `.env` mutation, no DB operations).
+
+### Files deployed (13 web source files)
+
+- `packages/web/src/app/globals.css`
+- `packages/web/src/lib/mobile-chrome.ts`
+- `packages/web/src/hooks/useMaxLg.ts`
+- `packages/web/src/layouts/RootLayout.tsx`
+- `packages/web/src/components/BottomNav.tsx`
+- `packages/web/src/components/shell/CreateFab.tsx`
+- `packages/web/src/components/shell/CreateSheet.tsx`
+- `packages/web/src/components/shell/MobileActionBar.tsx`
+- `packages/web/src/components/Header.tsx`
+- `packages/web/src/app/settings/SettingsLayout.tsx`
+- `packages/web/src/app/settings/SettingsTabNav.tsx`
+- `packages/web/src/app/settings/privacy/page.tsx`
+- `packages/web/src/app/events/[id]/EventDetailClient.tsx`
+
+### Web rebuild result
+
+- Docker build web: **success**
+- Prod CSS asset: `index-DwanucWj.css` (new hash vs pre-deploy)
+- Post-deploy smoke: `landing=200`
+- New tokens live in bundle (`c2k-fab-bottom`, `c2k-main-mobile-pb-action`, etc.)
+
+### Live verification bundle
+
+- **Path:** `Desktop/kink-social-mobile-shell-live-verify-2026-06-17-1607.zip`
+- **Screenshots:** 46 PNGs
+- **Script:** `scripts/audit/mobile-shell-verify.mjs` against `https://kink.social`
+- **Auth:** separate signed-out / signed-in browser contexts; temp storage state excluded from zip
+
+### Verification verdict
+
+| Check | Verdict |
+|-------|---------|
+| Bottom nav covers content | **Pass** — card actions and settings controls clear above nav |
+| FAB covers card actions | **Mostly pass** — FAB may still touch rightmost feed action icon on dense rows when scrolled; not blocking |
+| Event sticky RSVP bar vs bottom nav | **Pass** — bar stacks above nav with no collision |
+| Profile edit save bar vs bottom nav | **Pass** — bottom nav suppressed; save bar at safe-area bottom |
+| 768px nav clipping | **Pass** — mobile shell through lg; bottom nav at 768, no clipped Organizations in header |
+| Account menu mobile sheet | **Pass** |
+| Create menu distinct sheet | **Pass** |
+| `/settings/privacy` top viewport | **Pass** — Privacy heading + Following & discovery visible |
+| Signed-out screenshots | **Pass** — landing/login/register/support show unauthenticated UI |
+| Desktop 1280 regression | **Pass** — full top nav, no bottom nav/FAB |
+
+**Follow-up fixes:** None required after live verification.
+
+### Remaining issues
+
+- Minor FAB overlap possible on rightmost feed card action icons at certain scroll positions (Shell Pass 2 micro-tune if desired).
+- Events page layout polish intentionally deferred.
+
+### Next recommended pass
+
+**Proceed to Events Mobile UX Pass 1** — shell contract is live and verified on production.
+
+---

@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { cn } from '@/lib/cn'
 
 export type SettingsTabId =
   | 'account'
@@ -29,18 +30,24 @@ const TABS: { id: SettingsTabId; label: string; path: string }[] = [
 
 export default function SettingsTabNav() {
   return (
-    <nav aria-label="Settings sections" className="mb-8 flex flex-col sm:flex-row gap-6">
-      <ul className="sm:w-44 shrink-0 space-y-1">
+    <nav aria-label="Settings sections" className="lg:mb-0">
+      <ul
+        className={cn(
+          'flex gap-1 overflow-x-auto pb-1 c2k-no-scrollbar',
+          'lg:w-44 lg:shrink-0 lg:flex-col lg:space-y-1 lg:overflow-visible lg:pb-0',
+        )}
+      >
         {TABS.map((tab) => (
-          <li key={tab.id}>
+          <li key={tab.id} className="shrink-0 lg:shrink">
             <NavLink
               to={tab.path}
               className={({ isActive }) =>
-                `flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                cn(
+                  'flex min-h-11 items-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                   isActive ?
                     'bg-dc-elevated-muted text-dc-text'
-                  : 'text-dc-muted hover:text-dc-text hover:bg-dc-elevated/60'
-                }`
+                  : 'text-dc-muted hover:bg-dc-elevated/60 hover:text-dc-text',
+                )
               }
             >
               {tab.label}

@@ -455,7 +455,7 @@ export default function Header() {
                         ? `/people?q=${encodeURIComponent(searchQuery.trim())}`
                         : '/people'
                     }
-                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-dc-text-muted hover:bg-dc-elevated-muted hover:text-dc-text md:hidden"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-dc-text-muted hover:bg-dc-elevated-muted hover:text-dc-text lg:hidden"
                     aria-label="Search people"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -464,7 +464,7 @@ export default function Header() {
                   </Link>
                 : null}
 
-                <div className="relative hidden md:block" ref={createRef}>
+                <div className="relative hidden lg:block" ref={createRef}>
                   <button
                     type="button"
                     onClick={() => setCreateOpen((o) => !o)}
@@ -516,13 +516,13 @@ export default function Header() {
                         onMarkRead={markNotifRead}
                         onMarkAllRead={markAllNotifsRead}
                         onClose={() => setNotifOpen(false)}
-                        className="absolute right-0 top-full z-[110] mt-2 hidden w-[22rem] md:block"
+                        className="absolute right-0 top-full z-[110] mt-2 hidden w-[22rem] lg:block"
                       />
                       {mobileOverlaysMounted ?
                         createPortal(
                           <div
                             ref={notifMobileRef}
-                            className="fixed inset-0 z-[90] flex flex-col justify-end md:hidden"
+                            className="fixed inset-0 z-[90] flex flex-col justify-end lg:hidden"
                             role="presentation"
                           >
                             <button
@@ -548,7 +548,7 @@ export default function Header() {
                   )}
                 </div>
 
-                <div className="relative hidden md:block" ref={msgRef}>
+                <div className="relative hidden lg:block" ref={msgRef}>
                   <button
                     type="button"
                     onClick={toggleMsgPanel}
@@ -635,7 +635,7 @@ export default function Header() {
                       )}
                     </div>
                     <svg
-                      className="h-4 w-4 text-dc-muted md:hidden"
+                      className="h-4 w-4 text-dc-muted lg:hidden"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -647,7 +647,7 @@ export default function Header() {
                   {isProfileOpen && (
                     <>
                       <div
-                        className="absolute right-0 top-full z-[110] mt-2 hidden w-72 max-h-[min(80vh,520px)] overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)] md:block"
+                        className="absolute right-0 top-full z-[110] mt-2 hidden w-72 max-h-[min(80vh,520px)] overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)] lg:block"
                         role="dialog"
                         aria-modal="true"
                         aria-label="Account menu"
@@ -658,7 +658,7 @@ export default function Header() {
                         createPortal(
                           <div
                             ref={profileMobileRef}
-                            className="fixed inset-0 z-[90] flex flex-col justify-end md:hidden"
+                            className="fixed inset-0 z-[90] flex flex-col justify-end lg:hidden"
                             role="presentation"
                           >
                             <button
@@ -668,7 +668,7 @@ export default function Header() {
                               onClick={() => setIsProfileOpen(false)}
                             />
                             <div
-                              className="relative z-[1] max-h-[min(88dvh,640px)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)]"
+                              className="relative z-[1] max-h-[var(--c2k-mobile-sheet-max-height)] overflow-y-auto rounded-t-2xl border border-b-0 border-dc-border bg-dc-elevated-solid py-2 pb-[calc(var(--c2k-bottom-nav-total-h)+0.75rem)] shadow-[var(--dc-shadow-panel)]"
                               role="dialog"
                               aria-modal="true"
                               aria-label="Account menu"
@@ -704,7 +704,7 @@ export default function Header() {
             </div>
             {showAppHomeMainNav ?
               <nav
-                className="dc-header-subnav hidden w-full items-center justify-center gap-0.5 overflow-x-auto border-t border-dc-border-subtle/80 pb-1 pt-1 md:flex"
+                className="dc-header-subnav hidden w-full items-center justify-center gap-0.5 overflow-x-auto border-t border-dc-border-subtle/80 pb-1 pt-1 lg:flex"
                 aria-label="Main navigation"
               >
                 {siteConfig.appHomeMainNav.map((link) => {

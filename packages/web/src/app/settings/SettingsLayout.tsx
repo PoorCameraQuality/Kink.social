@@ -5,7 +5,7 @@ import { buildLoginHref } from '@/lib/auth-links'
 import { useAuth } from '@/contexts/AuthContext'
 import { TabContentTransition } from '@/components/dancecard/ui/TabContentTransition'
 import { SettingsPageSkeleton } from '@/components/ui/skeleton'
-import SettingsTabNav from './SettingsTabNav'
+import SettingsTabNav, { TABS } from './SettingsTabNav'
 import { SettingsProvider, useSettingsContext } from './SettingsContext'
 import { shellWideClass } from '@/lib/shell-contract'
 import { cn } from '@/lib/cn'
@@ -88,19 +88,31 @@ function SettingsLayoutInner() {
     )
   }
 
+  const isSettingsRoot = location.pathname === '/settings' || location.pathname === '/settings/'
+  const activeTab = TABS.find((tab) => location.pathname === tab.path || location.pathname.startsWith(`${tab.path}/`))
+
   return (
     <div className={settingsShellClass}>
       <div className="mx-auto w-full max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-dc-text">Settings</h1>
-        <p className="text-sm text-dc-muted mt-1 max-w-prose">
-          Manage your account, privacy, notifications, and community roles.
-        </p>
+      <div className="mb-4 lg:mb-6">
+        {isSettingsRoot ?
+          <>
+            <h1 className="text-2xl font-bold text-dc-text">Settings</h1>
+            <p className="text-sm text-dc-muted mt-1 max-w-prose">
+              Manage your account, privacy, notifications, and community roles.
+            </p>
+          </>
+        : <>
+            <p className="text-xs font-semibold uppercase tracking-wide text-dc-muted">Settings</p>
+            <h1 className="text-xl font-bold text-dc-text lg:text-2xl">{activeTab?.label ?? 'Settings'}</h1>
+          </>}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-6">
-        <SettingsTabNav />
-        <div className="flex-1 min-w-0 pb-12">
+      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+        <div className="order-2 lg:order-1">
+          <SettingsTabNav />
+        </div>
+        <div className="order-1 flex-1 min-w-0 pb-12 lg:order-2">
           <TabContentTransition tabKey={location.pathname}>
             <Outlet />
           </TabContentTransition>
