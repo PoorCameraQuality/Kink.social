@@ -2,9 +2,11 @@ import {
   APP_NAME,
   buildCanonicalUrl,
   buildKinkSocialIdempotencyKey,
-  eckePayloadContainsPrivateAppUrls,
+  educationEckePayloadContainsLeakedPrivateUrls,
   isEckePublishEligible,
   KINK_SOCIAL_SOURCE_SYSTEM,
+  sanitizeEckeArticleSlug,
+  sanitizeEckeHeroImageUrl,
   sanitizeEckePublicText,
   type EckeEducationArticlePayload,
   type KinkSocialPublicIngestEnvelope,
@@ -118,7 +120,7 @@ export function redactEducationArticleForEcke(
 
   const payload: EckeEducationArticlePayload = {
     title,
-    slug: article.slug.toLowerCase(),
+    slug: sanitizeEckeArticleSlug(article.slug),
     excerpt: excerpt || title.slice(0, 500),
     bodyHtml,
     authorDisplayName,
@@ -134,13 +136,15 @@ export function redactEducationArticleForEcke(
     readingMinutes: article.readingMinutes,
     publishedAt: (article.publishedAt ?? article.updatedAt).toISOString(),
     updatedAt: article.updatedAt.toISOString(),
-    heroImageUrl: article.heroImageUrl,
+    heroImageUrl: sanitizeEckeHeroImageUrl(article.heroImageUrl),
     seoTitle: title,
     metaDescription: excerpt.slice(0, 500) || null,
   }
 
-  if (eckePayloadContainsPrivateAppUrls(payload)) {
-    throw new Error('Redacted education payload still contains kink.social references')
+  if (educationEckePayloadContainsLeakedPrivateUrls(payload as Record<string, unknown>)) {
+    throw new Error(
+      'Article still contains kink.social references in title, excerpt, body, or slug after redaction',
+    )
   }
 
   return payload
@@ -180,7 +184,7 @@ export function buildEckePublicEnvelope(
     publicSafe: true,
     idempotencyKey: buildKinkSocialIdempotencyKey('education_article', article.id),
     canonicalKinkSocialUrl: buildEducationArticleCanonicalUrl(article.slug),
-    preferredSlug: article.slug.toLowerCase(),
+    preferredSlug: sanitizeEckeArticleSlug(article.slug),
     allowSlugSuffix: false,
     payload,
   }

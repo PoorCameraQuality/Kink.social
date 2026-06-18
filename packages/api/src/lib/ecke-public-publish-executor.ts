@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm'
+import type { EckeEducationArticlePayload, KinkSocialPublicIngestEnvelope } from '@c2k/shared'
 import { db, schema } from '../db/index.js'
 import {
   buildEckePublicEnvelope,
@@ -109,7 +110,16 @@ export async function executeEckePublishEntity(
   }
 
   const author = await loadEducationArticleAuthorContext(article)
-  const envelope = buildEckePublicEnvelope(entityType, article, author)
+  let envelope: KinkSocialPublicIngestEnvelope<EckeEducationArticlePayload>
+  try {
+    envelope = buildEckePublicEnvelope(entityType, article, author)
+  } catch (err) {
+    return {
+      ok: false,
+      targetKind: 'ecke_article',
+      error: err instanceof Error ? err.message : 'Could not build ECKE publish envelope',
+    }
+  }
   const contentHash = hashEckePayload(envelope.payload)
 
   const result = await publishEducationArticleEnvelopeToEcke(ingestCfg, envelope)

@@ -20,8 +20,11 @@ export {
   buildKinkSocialRobotsTxt,
   buildKinkSocialSitemapXml,
   eckePayloadContainsPrivateAppUrls,
+  educationEckePayloadContainsLeakedPrivateUrls,
   isEckePublishEligible,
   isKinkSocialPublicLaunchEnabled,
+  sanitizeEckeArticleSlug,
+  sanitizeEckeHeroImageUrl,
   sanitizeEckePublicText,
   type EckePublishEligibilityInput,
 } from './seo-policy.js'

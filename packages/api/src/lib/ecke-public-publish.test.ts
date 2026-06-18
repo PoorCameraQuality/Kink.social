@@ -136,6 +136,31 @@ describe('education article redaction and envelope', () => {
     assert.doesNotMatch(payload.excerpt, /kink\.social/i)
   })
 
+  it('allows author profile attribution URLs when public web base is kink.social', () => {
+    const prev = process.env.C2K_PUBLIC_WEB_URL
+    process.env.C2K_PUBLIC_WEB_URL = 'https://kink.social'
+    try {
+      const payload = redactEducationArticleForEcke(baseArticle(), author)
+      assert.match(payload.authorProfileUrl ?? '', /^https:\/\/kink\.social\/profile\//)
+      assert.doesNotMatch(JSON.stringify(payload), /kink\.social\/messages/)
+    } finally {
+      if (prev === undefined) delete process.env.C2K_PUBLIC_WEB_URL
+      else process.env.C2K_PUBLIC_WEB_URL = prev
+    }
+  })
+
+  it('strips kink.social from slug and drops proxy hero images', () => {
+    const payload = redactEducationArticleForEcke(
+      baseArticle({
+        slug: 'kink.social-goes-live-for-alpha',
+        heroImageUrl: 'https://kink.social/api/v1/media/assets/abc/content',
+      }),
+      author,
+    )
+    assert.doesNotMatch(payload.slug, /kink\.social/)
+    assert.equal(payload.heroImageUrl, null)
+  })
+
   it('unpublish envelope is valid', () => {
     const envelope = buildEducationArticleUnpublishEnvelope(ARTICLE_ID, 'opt_out')
     assert.equal(envelope.action, 'unpublish')

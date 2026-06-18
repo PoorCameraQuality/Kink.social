@@ -1,4 +1,4 @@
-import { eckePayloadContainsPrivateAppUrls } from '@c2k/shared'
+import { eckePayloadContainsPrivateAppUrls, educationEckePayloadContainsLeakedPrivateUrls } from '@c2k/shared'
 import type { KinkSocialIngestResponse, KinkSocialPublicIngestEnvelope, KinkSocialUnpublishEnvelope } from '@c2k/shared'
 import type { EckeDancecardEventPayload, EckeListingPayload } from './ecke-publish-payload.js'
 import type { EckeArticleRow, EckeDungeonRow, EckeEventRow, EckeVendorRow } from './ecke-directory-sync.js'
@@ -136,8 +136,8 @@ export async function publishEducationArticleEnvelopeToEcke(
   if (envelope.entityType !== 'education_article') {
     return { ok: false, targetKind: 'ecke_article', error: 'Only education_article uses ingest API in Pass 3B' }
   }
-  if (eckePayloadContainsPrivateAppUrls(envelope.payload)) {
-    return { ok: false, targetKind: 'ecke_article', error: 'ECKE payload must not contain kink.social URLs' }
+  if (educationEckePayloadContainsLeakedPrivateUrls(envelope.payload as Record<string, unknown>)) {
+    return { ok: false, targetKind: 'ecke_article', error: 'ECKE payload must not contain kink.social URLs in article content' }
   }
 
   const result = await postEckeIngestEnvelope(cfg, cfg.publishEndpoint, envelope)

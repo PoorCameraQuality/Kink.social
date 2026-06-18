@@ -205,10 +205,38 @@ export function sanitizeEckePublicText(text: string | null | undefined): string 
 
 
 /** True when serialized ECKE payload still references the private app domain. */
-
 export function eckePayloadContainsPrivateAppUrls(payload: unknown): boolean {
-
   return KINK_SOCIAL_HOST_RE.test(JSON.stringify(payload))
+}
 
+/** Education ingest may include intentional kink.social attribution profile links. */
+export const ECKE_EDUCATION_ATTRIBUTION_URL_KEYS = ['authorProfileUrl', 'presenterProfileUrl'] as const
+
+/** Like eckePayloadContainsPrivateAppUrls but allows attribution profile URLs on education payloads. */
+export function educationEckePayloadContainsLeakedPrivateUrls(payload: Record<string, unknown>): boolean {
+  const copy = { ...payload }
+  for (const key of ECKE_EDUCATION_ATTRIBUTION_URL_KEYS) {
+    delete copy[key]
+  }
+  return eckePayloadContainsPrivateAppUrls(copy)
+}
+
+/** Slug safe for ECKE public URLs — strips kink.social references and normalizes. */
+export function sanitizeEckeArticleSlug(slug: string): string {
+  const lowered = slug.toLowerCase().trim()
+  const withoutHost = lowered.replace(KINK_SOCIAL_URL_RE, '').replace(KINK_SOCIAL_HOST_RE, '')
+  const normalized = withoutHost
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 120)
+  return normalized || 'article'
+}
+
+/** Hero images must be public CDN URLs; drop kink.social media proxy links. */
+export function sanitizeEckeHeroImageUrl(url: string | null | undefined): string | null {
+  const trimmed = url?.trim()
+  if (!trimmed) return null
+  if (KINK_SOCIAL_HOST_RE.test(trimmed)) return null
+  return trimmed
 }
 
