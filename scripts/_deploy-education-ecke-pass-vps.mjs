@@ -29,6 +29,7 @@ const files = [
   'packages/api/src/lib/ecke-publish-client.ts',
   'packages/web/package.json',
   'packages/web/tailwind.config.js',
+  'packages/web/src/globals.css',
   'packages/web/src/app/education/[slug]/page.tsx',
 ]
 

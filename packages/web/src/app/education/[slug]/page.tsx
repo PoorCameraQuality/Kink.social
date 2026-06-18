@@ -80,7 +80,7 @@ export default function EducationArticlePage() {
         </div>
       : article ?
         <>
-          <article>
+          <article className="min-w-0 max-w-full overflow-x-hidden">
             <header className="mb-6">
               <div className="mb-3 flex flex-wrap gap-2">
                 {article.categories?.map((c) => (
@@ -152,19 +152,19 @@ export default function EducationArticlePage() {
             </div>
 
             {article.heroImageUrl ?
-              <div className="mb-8 overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated-muted">
+              <div className="mb-8 max-w-full overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated-muted">
                 <img
                   src={article.heroImageUrl}
                   alt=""
-                  className="max-h-[min(420px,50vh)] w-full object-cover"
+                  className="mx-auto max-h-[min(420px,50vh)] max-w-full w-full object-contain"
                   decoding="async"
                 />
               </div>
             : null}
 
-            <div className="mb-10 rounded-2xl border border-dc-border bg-dc-elevated/95 p-5 shadow-[var(--dc-shadow-soft)] sm:p-8">
+            <div className="mb-10 min-w-0 max-w-full overflow-hidden rounded-2xl border border-dc-border bg-dc-elevated/95 p-5 shadow-[var(--dc-shadow-soft)] sm:p-8">
               <div
-                className="prose prose-invert max-w-none prose-headings:text-dc-text prose-p:text-dc-text-muted prose-li:text-dc-text-muted prose-a:text-dc-accent prose-strong:text-dc-text prose-img:max-w-full prose-img:h-auto prose-img:max-h-[min(420px,50vh)] prose-img:rounded-xl prose-img:object-contain"
+                className="education-article-prose prose prose-invert max-w-none prose-headings:text-dc-text prose-p:text-dc-text-muted prose-li:text-dc-text-muted prose-a:text-dc-accent prose-strong:text-dc-text"
                 dangerouslySetInnerHTML={{ __html: bodyHtmlSafe }}
               />
             </div>
