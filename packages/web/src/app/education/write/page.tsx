@@ -10,6 +10,7 @@ import TextInput from '@/components/ui/TextInput'
 import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
 import type { ApiEducationArticle, EducationArticleVisibility } from '@/lib/education-article-types'
+import { uploadEducationImage } from '@/lib/education-image-upload'
 import { toggleArrayItem } from '@/lib/utils/toggleArrayItem'
 
 export const EDUCATION_WRITE_CATEGORIES = [
@@ -168,17 +169,13 @@ export default function EducationWritePage() {
       setHeroUploading(true)
       setBanner(null)
       try {
-        const fd = new FormData()
-        fd.append('file', file)
-        const r = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
-        const data = (await r.json().catch(() => ({}))) as { url?: string; error?: string }
-        if (!r.ok) {
-          setBanner({ tone: 'error', text: data.error ?? 'Hero image upload failed' })
-          return
-        }
-        if (data.url) setHeroImageUrl(data.url)
-      } catch {
-        setBanner({ tone: 'error', text: 'Network error during hero image upload.' })
+        const url = await uploadEducationImage(file, 'hero')
+        setHeroImageUrl(url)
+      } catch (err) {
+        setBanner({
+          tone: 'error',
+          text: err instanceof Error ? err.message : 'Hero image upload failed',
+        })
       } finally {
         setHeroUploading(false)
       }

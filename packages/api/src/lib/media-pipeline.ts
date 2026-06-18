@@ -214,7 +214,7 @@ export async function promoteQuarantineToScopeBrandingUrl(params: {
   userId: string
   quarantineKey: string
   scopePath: string
-  assetName: 'banner' | 'logo' | 'share'
+  assetName: 'banner' | 'logo' | 'share' | 'hero' | 'inline'
 }): Promise<string> {
   const expectedPrefix = `quarantine/${params.userId}/`
   if (!params.quarantineKey.startsWith(expectedPrefix)) {

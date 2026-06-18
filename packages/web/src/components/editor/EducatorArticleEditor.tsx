@@ -10,6 +10,7 @@ import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 
 import Button from '@/components/ui/Button'
+import { uploadEducationImage } from '@/lib/education-image-upload'
 import Card from '@/components/ui/Card'
 
 /** Same hostname/path rules as API `sanitizeEducationHtml`. */
@@ -184,12 +185,11 @@ const EducatorArticleEditor = forwardRef<EducatorArticleEditorHandle, Props>(fun
       if (!file) return
       setUploading(true)
       try {
-        const fd = new FormData()
-        fd.append('file', file)
-        const r = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
-        const data = (await r.json().catch(() => ({}))) as { url?: string; error?: string }
-        if (r.ok && data.url) {
-          editor.chain().focus().setImage({ src: data.url }).run()
+        const url = await uploadEducationImage(file, 'inline')
+        editor.chain().focus().setImage({ src: url }).run()
+      } catch (err) {
+        if (typeof window !== 'undefined') {
+          window.alert(err instanceof Error ? err.message : 'Image upload failed')
         }
       } finally {
         setUploading(false)
