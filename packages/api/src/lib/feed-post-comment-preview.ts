@@ -29,6 +29,22 @@ export function shapeCommentPreview(row: CommentPickRow): FeedPostCommentPreview
   }
 }
 
+/** Drop comments whose authors are in the viewer block pair. */
+export function filterCommentsForViewer<T extends { authorId: string }>(
+  rows: T[],
+  hiddenAuthorIds: Set<string>,
+): T[] {
+  if (hiddenAuthorIds.size === 0) return rows
+  return rows.filter((row) => !hiddenAuthorIds.has(row.authorId))
+}
+
+export function countVisibleComments<T extends { authorId: string }>(
+  rows: T[],
+  hiddenAuthorIds: Set<string>,
+): number {
+  return filterCommentsForViewer(rows, hiddenAuthorIds).length
+}
+
 /** Latest allowed comment per post; skips blocked authors and already-filled posts. */
 export function pickLatestVisibleCommentPreviews(
   rows: CommentPickRow[],

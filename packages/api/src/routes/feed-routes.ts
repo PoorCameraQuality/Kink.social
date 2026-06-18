@@ -605,8 +605,8 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     if (!(await assertFeedPostAccessible(viewerId, postId, reply))) return
     try {
       const limit = Math.min(100, Math.max(1, parseInt(String((req.query as { limit?: string }).limit ?? '50'), 10) || 50))
-      const items = await listFeedPostComments(postId, limit)
-      const commentCount = await loadFeedPostCommentCount(postId)
+      const items = await listFeedPostComments(postId, viewerId, limit)
+      const commentCount = await loadFeedPostCommentCount(postId, viewerId)
       return reply.send({ items, commentCount })
     } catch (e) {
       if (isMissingDbRelationError(e)) {
@@ -630,7 +630,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     try {
       const comment = await createFeedPostComment(postId, user.userId, parsed.data.body)
       if (!comment) return reply.status(400).send({ error: 'Invalid comment' })
-      const commentCount = await loadFeedPostCommentCount(postId)
+      const commentCount = await loadFeedPostCommentCount(postId, user.userId)
       return reply.send({ comment, commentCount })
     } catch (e) {
       if (isMissingDbRelationError(e)) {
@@ -649,7 +649,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     if (!(await assertFeedPostAccessible(user.userId, postId, reply))) return
     const ok = await deleteFeedPostComment(commentId, user.userId)
     if (!ok) return reply.status(404).send({ error: 'Not found' })
-    const commentCount = await loadFeedPostCommentCount(postId)
+    const commentCount = await loadFeedPostCommentCount(postId, user.userId)
     return reply.send({ ok: true, commentCount })
   })
 
