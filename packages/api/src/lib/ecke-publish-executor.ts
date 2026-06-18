@@ -1,101 +1,65 @@
-import { APP_NAME, isEckePublishEligible } from '@c2k/shared'
 import { and, eq } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import {
-  buildEckeArticleRow,
+  executeEckePublishEntity,
+  executeEckeUnpublishEducationArticle,
+} from './ecke-public-publish-executor.js'
+import {
   buildEckeEventRowFromListing,
   buildEckeVendorRow,
 } from './ecke-directory-sync.js'
 import {
+  loadEckeIngestApiConfig,
   loadEckePublishClientConfig,
-  publishArticleRowToEcke,
   publishEventRowToEcke,
   publishVendorRowToEcke,
   type EckePublishResult,
 } from './ecke-publish-client.js'
 import { buildConventionListingPayload, hashEckePayload } from './ecke-publish-payload.js'
+import { isEckePublishEligible } from '@c2k/shared'
 
 export type EckePublishJobName = 'publish-article' | 'publish-vendor' | 'publish-convention-event'
 
 export async function executeEckePublishArticle(articleId: string, userId?: string): Promise<EckePublishResult> {
-  const cfg = loadEckePublishClientConfig()
-  if (!cfg) {
-    return { ok: false, targetKind: 'ecke_article', error: 'Publish bridge not configured' }
+  const ingestCfg = loadEckeIngestApiConfig()
+  if (!ingestCfg) {
+    return {
+      ok: false,
+      targetKind: 'ecke_article',
+      error:
+        'ECKE ingest API not configured (set ECKE_PUBLISH_ENABLED, ECKE_PUBLISH_ENDPOINT, ECKE_PUBLISH_SECRET)',
+    }
   }
 
-  const [article] = await db
-    .select({
-      id: schema.educationArticles.id,
-      slug: schema.educationArticles.slug,
-      title: schema.educationArticles.title,
-      excerpt: schema.educationArticles.excerpt,
-      bodyHtml: schema.educationArticles.bodyHtml,
-      categories: schema.educationArticles.categories,
-      heroImageUrl: schema.educationArticles.heroImageUrl,
-      readingMinutes: schema.educationArticles.readingMinutes,
-      publishedAt: schema.educationArticles.publishedAt,
-      publicationStatus: schema.educationArticles.publicationStatus,
-      eckePublish: schema.educationArticles.eckePublish,
-      authorUserId: schema.educationArticles.authorUserId,
-    })
-    .from(schema.educationArticles)
-    .where(eq(schema.educationArticles.id, articleId))
-    .limit(1)
-
-  if (!article) {
-    return { ok: false, targetKind: 'ecke_article', error: 'Article not found' }
-  }
-  if (
-    !isEckePublishEligible({
-      publishToEcke: article.eckePublish,
-      visibility: 'PUBLIC',
-      publicationStatus: article.publicationStatus,
-    })
-  ) {
-    return { ok: false, targetKind: 'ecke_article', error: 'Article not eligible for ECKE publish' }
+  const outcome = await executeEckePublishEntity('education_article', articleId, ingestCfg, userId)
+  if (!outcome.contentHash) {
+    return outcome
   }
 
-  const [author] = await db
-    .select({ displayName: schema.profiles.displayName, username: schema.users.username })
-    .from(schema.users)
-    .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
-    .where(eq(schema.users.id, article.authorUserId))
-    .limit(1)
-
-  const row = buildEckeArticleRow({
-    id: article.id,
-    slug: article.slug,
-    title: article.title,
-    excerpt: article.excerpt,
-    bodyHtml: article.bodyHtml,
-    authorDisplayName: author?.displayName || author?.username || `${APP_NAME} Educator`,
-    categories: article.categories,
-    heroImageUrl: article.heroImageUrl,
-    readingMinutes: article.readingMinutes,
-    publishedAt: article.publishedAt,
-    publicationStatus: article.publicationStatus,
-  })
-
-  const contentHash = hashEckePayload(row)
+  const externalSlug = outcome.externalSlug ?? articleId
   await upsertEntityTarget({
     scopeType: 'education_article',
-    educationArticleId: article.id,
+    educationArticleId: articleId,
     targetKind: 'ecke_article',
-    externalSlug: row.slug,
-    contentHash,
+    externalSlug,
+    contentHash: outcome.contentHash,
     userId,
   })
 
-  const result = await publishArticleRowToEcke(cfg, row)
   await markEntityOutcome({
-    educationArticleId: article.id,
+    educationArticleId: articleId,
     targetKind: 'ecke_article',
-    contentHash,
+    contentHash: outcome.contentHash,
+    externalSlug: outcome.ok ? externalSlug : undefined,
+    eckePublicUrl: outcome.ok ? outcome.eckePublicUrl : undefined,
     userId,
-    result,
+    result: outcome,
   })
-  return result
+
+  return outcome
 }
+
+export { executeEckeUnpublishEducationArticle }
 
 export async function executeEckePublishVendor(vendorProfileId: string, userId?: string): Promise<EckePublishResult> {
   const cfg = loadEckePublishClientConfig()
@@ -110,7 +74,7 @@ export async function executeEckePublishVendor(vendorProfileId: string, userId?:
     .limit(1)
 
   if (!vendor) {
-    return { ok: false, targetKind: 'ecke_vendor', error: 'Vendor profile not found' }
+    return { ok: false, targetKind: 'ecke_vendor', error: 'Vendor not found' }
   }
   if (
     !isEckePublishEligible({
@@ -323,6 +287,8 @@ async function markEntityOutcome(input: {
   conventionId?: string
   targetKind: 'ecke_article' | 'ecke_vendor' | 'ecke_event'
   contentHash: string
+  externalSlug?: string
+  eckePublicUrl?: string
   userId?: string
   result: EckePublishResult
 }) {
@@ -354,6 +320,7 @@ async function markEntityOutcome(input: {
         lastAttemptAt: now,
         lastError: null,
         publishedByUserId: input.userId ?? null,
+        externalSlug: input.externalSlug ?? undefined,
         updatedAt: now,
       })
       .where(where)
@@ -369,4 +336,56 @@ async function markEntityOutcome(input: {
       updatedAt: now,
     })
     .where(where)
+}
+
+export async function markEducationArticleEckeUnpublished(
+  articleId: string,
+  userId?: string,
+): Promise<void> {
+  const now = new Date()
+  await db
+    .update(schema.eckePublishTargets)
+    .set({
+      status: 'stale',
+      lastAttemptAt: now,
+      lastError: null,
+      updatedAt: now,
+    })
+    .where(
+      and(
+        eq(schema.eckePublishTargets.educationArticleId, articleId),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_article'),
+      ),
+    )
+}
+
+export async function executeEckeUnpublishEducationArticleWithTargetUpdate(
+  articleId: string,
+  reason?: 'archived' | 'deleted' | 'opt_out' | 'ineligible' | 'visibility_change',
+  userId?: string,
+): Promise<EckePublishResult> {
+  const result = await executeEckeUnpublishEducationArticle(articleId, reason)
+  const now = new Date()
+
+  if (result.ok) {
+    await markEducationArticleEckeUnpublished(articleId, userId)
+    return result
+  }
+
+  await db
+    .update(schema.eckePublishTargets)
+    .set({
+      status: 'error',
+      lastAttemptAt: now,
+      lastError: result.error,
+      updatedAt: now,
+    })
+    .where(
+      and(
+        eq(schema.eckePublishTargets.educationArticleId, articleId),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_article'),
+      ),
+    )
+
+  return result
 }

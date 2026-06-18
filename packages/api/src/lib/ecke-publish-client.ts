@@ -1,4 +1,5 @@
-import { eckePayloadContainsPrivateAppUrls } from '@c2k/shared'
+import { eckePayloadContainsPrivateAppUrls, educationEckePayloadContainsLeakedPrivateUrls } from '@c2k/shared'
+import type { KinkSocialIngestResponse, KinkSocialPublicIngestEnvelope, KinkSocialUnpublishEnvelope } from '@c2k/shared'
 import type { EckeDancecardEventPayload, EckeListingPayload } from './ecke-publish-payload.js'
 import type { EckeArticleRow, EckeDungeonRow, EckeEventRow, EckeVendorRow } from './ecke-directory-sync.js'
 import {
@@ -18,6 +19,161 @@ export type EckePublishClientConfig = {
   listingWebhookSecret?: string
 }
 
+/** Option A — authenticated ECKE ingest API (education_article Pass 3B). */
+export type EckeIngestApiConfig = {
+  publishEndpoint: string
+  unpublishEndpoint: string
+  publishSecret: string
+  publicBaseUrl: string
+}
+
+export type EckeIngestApiSuccess = {
+  ok: true
+  eckeSlug: string
+  eckePublicUrl: string
+  eckeRecordId?: string
+}
+
+export type EckeIngestApiFailure = {
+  ok: false
+  error: string
+  httpStatus?: number
+  errorCode?: string
+}
+
+export type EckeIngestApiResult = EckeIngestApiSuccess | EckeIngestApiFailure
+
+export function loadEckeIngestApiConfig(): EckeIngestApiConfig | null {
+  if (process.env.ECKE_PUBLISH_ENABLED !== 'true') return null
+
+  const publishEndpoint = process.env.ECKE_PUBLISH_ENDPOINT?.trim()
+  const publishSecret = process.env.ECKE_PUBLISH_SECRET?.trim()
+  if (!publishEndpoint || !publishSecret) return null
+
+  const publicBaseUrl = (
+    process.env.ECKE_PUBLIC_BASE_URL?.trim() || 'https://www.eastcoastkinkevents.com'
+  ).replace(/\/$/, '')
+
+  const unpublishEndpoint =
+    process.env.ECKE_UNPUBLISH_ENDPOINT?.trim() ||
+    publishEndpoint.replace(/\/ingest\/?$/, '/unpublish')
+
+  return {
+    publishEndpoint,
+    unpublishEndpoint,
+    publishSecret,
+    publicBaseUrl,
+  }
+}
+
+async function postEckeIngestEnvelope(
+  cfg: EckeIngestApiConfig,
+  endpoint: string,
+  body: KinkSocialPublicIngestEnvelope | KinkSocialUnpublishEnvelope,
+): Promise<EckeIngestApiResult> {
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${cfg.publishSecret}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+
+    let parsed: KinkSocialIngestResponse | null = null
+    try {
+      parsed = (await res.json()) as KinkSocialIngestResponse
+    } catch {
+      parsed = null
+    }
+
+    if (!res.ok) {
+      const errorCode = parsed?.errorCode
+      const errorMessage =
+        parsed?.errorMessage ||
+        `ECKE ingest HTTP ${res.status}${errorCode ? ` (${errorCode})` : ''}`
+      return {
+        ok: false,
+        error: errorMessage,
+        httpStatus: res.status,
+        errorCode,
+      }
+    }
+
+    if (!parsed || (parsed.status !== 'published' && parsed.status !== 'unpublished')) {
+      return {
+        ok: false,
+        error: parsed?.errorMessage || 'ECKE ingest returned an unexpected response',
+        httpStatus: res.status,
+        errorCode: parsed?.errorCode,
+      }
+    }
+
+    const eckeSlug = parsed.eckeSlug ?? ''
+    const eckePublicUrl =
+      parsed.eckePublicUrl ||
+      (eckeSlug ? `${cfg.publicBaseUrl}/education/${eckeSlug}` : cfg.publicBaseUrl)
+
+    return {
+      ok: true,
+      eckeSlug,
+      eckePublicUrl,
+      eckeRecordId: parsed.eckeRecordId,
+    }
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : 'Unknown ECKE ingest error',
+    }
+  }
+}
+
+export async function publishEducationArticleEnvelopeToEcke(
+  cfg: EckeIngestApiConfig,
+  envelope: KinkSocialPublicIngestEnvelope,
+): Promise<EckePublishResult> {
+  if (envelope.entityType !== 'education_article') {
+    return { ok: false, targetKind: 'ecke_article', error: 'Only education_article uses ingest API in Pass 3B' }
+  }
+  if (educationEckePayloadContainsLeakedPrivateUrls(envelope.payload as Record<string, unknown>)) {
+    return { ok: false, targetKind: 'ecke_article', error: 'ECKE payload must not contain kink.social URLs in article content' }
+  }
+
+  const result = await postEckeIngestEnvelope(cfg, cfg.publishEndpoint, envelope)
+  if (!result.ok) {
+    return { ok: false, targetKind: 'ecke_article', error: result.error }
+  }
+
+  return {
+    ok: true,
+    targetKind: 'ecke_article',
+    detail: result.eckePublicUrl,
+    eckeSlug: result.eckeSlug,
+    eckePublicUrl: result.eckePublicUrl,
+  }
+}
+
+export async function unpublishEducationArticleEnvelopeToEcke(
+  cfg: EckeIngestApiConfig,
+  envelope: KinkSocialUnpublishEnvelope,
+): Promise<EckePublishResult> {
+  if (envelope.entityType !== 'education_article') {
+    return { ok: false, targetKind: 'ecke_article', error: 'Only education_article uses ingest API in Pass 3B' }
+  }
+
+  const result = await postEckeIngestEnvelope(cfg, cfg.unpublishEndpoint, envelope)
+  if (!result.ok) {
+    return { ok: false, targetKind: 'ecke_article', error: result.error }
+  }
+
+  return {
+    ok: true,
+    targetKind: 'ecke_article',
+    detail: result.eckePublicUrl || 'unpublished',
+  }
+}
+
 export type EckePublishResult =
   | {
       ok: true
@@ -29,6 +185,8 @@ export type EckePublishResult =
         | 'ecke_article'
         | 'ecke_dungeon'
       detail?: string
+      eckeSlug?: string
+      eckePublicUrl?: string
     }
   | {
       ok: false
@@ -275,6 +433,7 @@ export async function publishVendorRowToEcke(cfg: EckePublishClientConfig, row: 
 }
 
 export async function publishArticleRowToEcke(cfg: EckePublishClientConfig, row: EckeArticleRow): Promise<EckePublishResult> {
+  /** @deprecated education_article uses Option A ingest API (Pass 3B). Legacy direct Supabase REST only. */
   return upsertEckeRow(cfg, 'articles', row as unknown as Record<string, unknown>, 'ecke_article')
 }
 

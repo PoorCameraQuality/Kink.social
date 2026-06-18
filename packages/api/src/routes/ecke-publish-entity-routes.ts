@@ -4,7 +4,7 @@ import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { db, schema } from '../db/index.js'
 import { executeEckePublishArticle, executeEckePublishVendor } from '../lib/ecke-publish-executor.js'
-import { loadEckePublishClientConfig } from '../lib/ecke-publish-client.js'
+import { loadEckeIngestApiConfig, loadEckePublishClientConfig } from '../lib/ecke-publish-client.js'
 import { requestEckeArticlePublish, requestEckeVendorPublish } from '../lib/ecke-publish-queue.js'
 
 function useDatabase(): boolean {
@@ -63,6 +63,10 @@ function serializeEckeTarget(target: (typeof schema.eckePublishTargets.$inferSel
   }
 }
 
+function isEducationArticleEckeBridgeConnected(): boolean {
+  return loadEckeIngestApiConfig() !== null
+}
+
 export function registerEckePublishEntityRoutes(app: FastifyInstance) {
   app.get('/api/v1/me/education-articles/:id/ecke-publish', async (req, reply) => {
     if (!requireDb(reply)) return
@@ -72,7 +76,7 @@ export function registerEckePublishEntityRoutes(app: FastifyInstance) {
     const loaded = await loadArticleTarget(id, user.userId)
     if (!loaded) return reply.status(404).send({ error: 'Article not found' })
     return reply.send({
-      bridgeConnected: loadEckePublishClientConfig() !== null,
+      bridgeConnected: isEducationArticleEckeBridgeConnected(),
       target: serializeEckeTarget(loaded.target ?? undefined),
       targets: loaded.target ? [serializeEckeTarget(loaded.target)!] : [],
     })
@@ -85,7 +89,7 @@ export function registerEckePublishEntityRoutes(app: FastifyInstance) {
     const { id } = req.params as { id: string }
     const loaded = await loadArticleTarget(id, user.userId)
     if (!loaded) return reply.status(404).send({ error: 'Article not found' })
-    if (!loadEckePublishClientConfig()) {
+    if (!isEducationArticleEckeBridgeConnected()) {
       return reply.status(503).send({ error: 'Publish bridge not configured on this server' })
     }
     await requestEckeArticlePublish(id, user.userId)
@@ -155,7 +159,7 @@ export async function maybeEnqueueEckeArticlePublish(
   article: { id: string; eckePublish: boolean; publicationStatus: string },
   userId: string,
 ): Promise<void> {
-  if (article.eckePublish && article.publicationStatus === 'PUBLISHED' && loadEckePublishClientConfig()) {
+  if (article.eckePublish && article.publicationStatus === 'PUBLISHED' && isEducationArticleEckeBridgeConnected()) {
     await requestEckeArticlePublish(article.id, userId)
   }
 }

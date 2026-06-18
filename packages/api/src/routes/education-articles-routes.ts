@@ -1,8 +1,18 @@
 import { and, desc, eq, ilike, inArray, lt, or, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { z } from 'zod'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { db, schema } from '../db/index.js'
+import {
+  alphaUploadDisabledResponse,
+  isAlphaUploadDisabled,
+  type AlphaUploadCategory,
+} from '../lib/alpha-upload-policy.js'
+import {
+  MediaUploadValidationError,
+  promoteQuarantineToScopeBrandingUrl,
+} from '../lib/media-pipeline.js'
 import {
   educationArticleWriteBodySchema,
   slugifyEducationTitle,
@@ -395,6 +405,45 @@ export async function registerEducationArticleRoutes(app: FastifyInstance) {
     const author = await loadAuthor(user.userId)
     await maybeEnqueueEckeArticlePublish(row, user.userId)
     return reply.send({ article: shapeArticleRow(row, author) })
+  })
+
+  const educationImageAttachBody = z.object({
+    quarantineKey: z.string().min(1).max(2048),
+    variant: z.enum(['hero', 'inline']),
+  })
+
+  const educationImageAlphaCategory: Record<'hero' | 'inline', AlphaUploadCategory> = {
+    hero: 'education_hero',
+    inline: 'education_inline',
+  }
+
+  app.post('/api/v1/me/education-articles/image/attach', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const parsed = educationImageAttachBody.safeParse(req.body)
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    const alphaCategory = educationImageAlphaCategory[parsed.data.variant]
+    if (isAlphaUploadDisabled(alphaCategory)) {
+      return alphaUploadDisabledResponse(reply, alphaCategory)
+    }
+    let publicUrl: string
+    try {
+      publicUrl = await promoteQuarantineToScopeBrandingUrl({
+        userId: user.userId,
+        quarantineKey: parsed.data.quarantineKey,
+        scopePath: `education/${user.userId}`,
+        assetName: parsed.data.variant,
+      })
+    } catch (err) {
+      if (err instanceof MediaUploadValidationError) {
+        return reply.status(400).send({ error: err.message })
+      }
+      const e = err as { message?: string }
+      req.log?.error({ err }, 'education image attach failed')
+      return reply.status(502).send({ error: e.message ?? 'Could not attach education image' })
+    }
+    return reply.send({ url: publicUrl })
   })
 
   app.delete('/api/v1/me/education-articles/:id', async (req, reply) => {
