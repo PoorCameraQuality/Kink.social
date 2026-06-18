@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import TagLink from '@/components/TagLink'
+import { cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 
 export type EducationCardProps = {
   article: {
@@ -22,10 +23,10 @@ export default function EducationCard({ article }: EducationCardProps) {
   const href = slug ? `/education/${slug}` : id ? `/education/${id}` : '#'
 
   return (
-    <div className="relative bg-dc-elevated/95 rounded-2xl border border-dc-border p-4 shadow-[var(--dc-shadow-soft)] hover:border-dc-accent-border/40 transition-colors">
+    <div className={`relative p-4 ${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass}`}>
       <button
         type="button"
-        className="absolute right-3 top-3 z-10 p-2 rounded-lg text-dc-muted hover:text-dc-text hover:bg-dc-elevated-muted transition-colors"
+        className="dc-premium-btn absolute right-3 top-3 z-10 rounded-lg p-2 text-dc-muted hover:bg-dc-elevated-muted hover:text-dc-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dc-focus-ring)]"
         aria-label="Bookmark"
         onClick={(e) => e.stopPropagation()}
       >

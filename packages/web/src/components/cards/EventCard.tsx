@@ -4,7 +4,6 @@ import AlphaTestBadge from '@/components/alpha/AlphaTestBadge'
 import type { AlphaContentLabel } from '@c2k/shared'
 import EventSaveButton from '@/components/events/EventSaveButton'
 import Card from '@/components/ui/Card'
-import PlaceholderAvatar from '@/components/PlaceholderAvatar'
 import MediaSurfaceFallback from '@/components/ui/MediaSurfaceFallback'
 import { filterPublicEventTags, formatEventLocationForDisplay, resolveEventHeroUrl } from '@/lib/events-page-utils'
 
@@ -36,7 +35,6 @@ export default function EventCard({ event }: EventCardProps) {
     rsvpCount,
     capacityLimit,
     mutualGoingCount = 0,
-    connectionRsvpPreview = [],
     tags,
     eventFormat,
     isFeatured,
@@ -44,10 +42,7 @@ export default function EventCard({ event }: EventCardProps) {
   } = event
   const isVirtual = eventFormat === 'virtual'
   const heroSrc = resolveEventHeroUrl(event)
-  const fillPct = capacityLimit && capacityLimit > 0 ? Math.min(100, Math.round((rsvpCount / capacityLimit) * 100)) : Math.min(100, Math.round((rsvpCount / 100) * 100))
   const attendanceLabel = capacityLimit && capacityLimit > 0 ? `${rsvpCount}/${capacityLimit} going` : `${rsvpCount} going`
-  const previewAvatars = connectionRsvpPreview.slice(0, 3)
-  const mutualOverflow = Math.max(0, mutualGoingCount - previewAvatars.length)
   const displayLocation = formatEventLocationForDisplay(location, isVirtual)
   const displayTags = filterPublicEventTags(tags)
 
@@ -125,7 +120,7 @@ export default function EventCard({ event }: EventCardProps) {
         </p>
         {displayTags.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {displayTags.slice(0, 3).map((t) => (
+            {displayTags.slice(0, 2).map((t) => (
               <TagLink key={t} tag={t} />
             ))}
           </div>
@@ -134,54 +129,9 @@ export default function EventCard({ event }: EventCardProps) {
           <span className="inline-flex items-center rounded-md border border-dc-border bg-dc-elevated-solid px-2 py-0.5 text-xs font-medium text-dc-text">
             {attendanceLabel}
           </span>
-          {mutualGoingCount > 0 ? (
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-dc-accent-border/30 bg-dc-accent/10 px-2 py-0.5 text-xs text-dc-accent-hover">
-              {previewAvatars.length > 0 ? (
-                <span className="flex items-center -space-x-1.5" aria-hidden>
-                  {previewAvatars.map((person, i) => (
-                    <Link
-                      key={person.username}
-                      to={`/profile/${encodeURIComponent(person.username)}`}
-                      style={{ zIndex: i + 1 }}
-                      title={person.username}
-                      aria-label={`${person.username}, connection going`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="relative inline-flex rounded-full ring-2 ring-[var(--dc-surface-card)]"
-                    >
-                      {person.avatarUrl ?
-                        <img
-                          src={person.avatarUrl}
-                          alt=""
-                          width={20}
-                          height={20}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-5 w-5 rounded-full object-cover"
-                        />
-                      : <PlaceholderAvatar size="sm" className="!h-5 !w-5 !min-h-5 !min-w-5 !rounded-full [&>svg]:!h-2.5 [&>svg]:!w-2.5" />}
-                    </Link>
-                  ))}
-                  {mutualOverflow > 0 ?
-                    <span className="relative z-[4] flex h-5 min-w-5 items-center justify-center rounded-full bg-dc-elevated-solid px-0.5 text-[10px] font-semibold tabular-nums ring-2 ring-[var(--dc-surface-card)]">
-                      +{mutualOverflow}
-                    </span>
-                  : null}
-                </span>
-              ) : null}
-              <span>
-                {mutualGoingCount} mutual{mutualGoingCount === 1 ? '' : 's'} going
-              </span>
-            </span>
-          ) : null}
-        </div>
-        <div className="mt-2 flex items-center gap-2">
-          <div className="flex-1 h-1.5 bg-dc-elevated-solid rounded-full overflow-hidden">
-            <div
-              className="h-full bg-dc-accent rounded-full"
-              style={{ width: `${fillPct}%` }}
-            />
-          </div>
-          <span className="text-xs text-dc-muted">{fillPct}%</span>
+          {mutualGoingCount > 0 ?
+            <span className="text-xs text-dc-accent">{mutualGoingCount} mutual going</span>
+          : null}
         </div>
       </Link>
     </Card>

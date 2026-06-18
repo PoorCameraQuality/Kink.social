@@ -93,6 +93,9 @@ export type MockNotification = {
   createdAtIso?: string
   href?: string
   read: boolean
+  /** Actor handle when notification involves another member. */
+  actorUsername?: string
+  actorAvatarUrl?: string | null
 }
 
 export type MockEvent = {

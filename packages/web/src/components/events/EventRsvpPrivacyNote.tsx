@@ -9,6 +9,7 @@ type Props = {
   viewerIsHost?: boolean
   viewerIsGoing?: boolean
   className?: string
+  compact?: boolean
 }
 
 export default function EventRsvpPrivacyNote({
@@ -16,11 +17,23 @@ export default function EventRsvpPrivacyNote({
   viewerIsHost = false,
   viewerIsGoing = false,
   className = '',
+  compact = false,
 }: Props) {
   const listSummary = attendeeListVisibilitySummary(attendeeListVisibility, {
     viewerIsHost,
     viewerIsGoing,
   })
+
+  if (compact) {
+    return (
+      <p className={`text-xs leading-relaxed text-dc-muted ${className}`}>
+        <span className="font-medium text-dc-text">{EVENT_RSVP_PRIVACY_TITLE}:</span> {EVENT_RSVP_PRIVACY_BODY}
+        {listSummary ?
+          <> Attendee list: {listSummary}.</>
+        : null}
+      </p>
+    )
+  }
 
   return (
     <div

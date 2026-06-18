@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext'
 import { safeInternalPath, validatePublicUsername } from '@c2k/shared'
 import { buildOnboardingHref, resolvePostAuthPath } from '@/lib/onboarding'
 import FormField from '@/components/ui/FormField'
+import { premiumInputClass } from '@/lib/card-surface'
+import { cn } from '@/lib/cn'
 import { SIGNUP_REASSURANCE } from '@/components/landing/landing-content'
 import { LANDING_CTA_JOIN } from '@/lib/alpha-activation-copy'
 
@@ -83,8 +85,8 @@ function PasswordInput({
 }) {
   const [visible, setVisible] = useState(false)
   const inputClass = landing ?
-    'auth-input pr-11'
-  : 'min-h-11 w-full rounded-xl border border-dc-border bg-dc-surface-muted py-3 pl-10 pr-11 text-dc-text placeholder-dc-muted outline-none transition-colors focus:border-dc-accent focus:ring-1 focus:ring-dc-accent'
+    cn(premiumInputClass, 'auth-input auth-input--landing')
+  : premiumInputClass
 
   return (
     <FormField id={id} label={label} hint={hint}>
@@ -107,7 +109,7 @@ function PasswordInput({
           autoComplete={autoComplete}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={landing ? inputClass : `${inputClass} pl-10`}
+          className={cn(inputClass, landing ? 'pr-11' : 'pl-10 pr-11')}
         />
         <button
           type="button"
@@ -284,10 +286,9 @@ export default function LoginCard({
       'auth-card mx-auto w-full max-w-none'
     : 'mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-dc-accent-border/25 bg-dc-elevated-solid shadow-[0_8px_40px_rgba(0,0,0,0.45),0_0_0_1px_rgba(212,175,55,0.12)]'
 
-  const textInputClass =
-    landing ?
-      'auth-input'
-    : 'min-h-11 w-full rounded-xl border border-dc-border bg-dc-surface-muted px-4 py-3 text-dc-text placeholder-dc-muted outline-none transition-colors focus:border-dc-accent focus:ring-1 focus:ring-dc-accent'
+  const textInputClass = landing ?
+    cn(premiumInputClass, 'auth-input auth-input--landing')
+  : premiumInputClass
 
   return (
     <div className={shellClass}>

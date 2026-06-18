@@ -7,6 +7,7 @@ import FeedTapControl from '@/components/feed/FeedTapControl'
 import ReportAction from '@/components/moderation/ReportAction'
 import { FEED_ACTION_LABELS, type FeedReactionId } from '@c2k/shared'
 import type { FeedReactionCounts } from '@/hooks/useFeedPostReactions'
+import { formatFeedCommentActionLabel } from '@/lib/feed-comment-label'
 import { cn } from '@/lib/cn'
 
 type ReportProps = {
@@ -88,10 +89,7 @@ export default function FeedPostActionBar({
             title="View and add comments"
           >
             <IconDiscuss className="h-4 w-4 shrink-0" />
-            <span className="feed-action-bar__label">{FEED_ACTION_LABELS.discuss}</span>
-            {commentCount > 0 ?
-              <span className="feed-action-bar__count">{commentCount}</span>
-            : null}
+            <span className="feed-action-bar__label">{formatFeedCommentActionLabel(commentCount)}</span>
           </FeedTapControl>
         : (
           <FeedTapControl

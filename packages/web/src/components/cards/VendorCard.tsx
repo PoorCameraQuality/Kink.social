@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 
 import VendorProductFallback from '@/components/vendors/VendorProductFallback'
 import { cn } from '@/lib/cn'
+import { cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 import { formatMoney } from '@/lib/vendor-shop-display'
 import {
   formatVendorRating,
@@ -104,7 +105,9 @@ export default function VendorCard({ vendor, compact = false }: VendorCardProps)
   return (
     <article
       className={cn(
-        'flex min-w-0 flex-col overflow-hidden rounded-2xl border border-dc-border bg-dc-surface-card shadow-[var(--dc-shadow-soft)] transition-colors hover:border-dc-accent/40',
+        cardSurfaceSolidClass,
+        cardSurfaceInteractiveClass,
+        'flex min-w-0 flex-col overflow-hidden',
         compact && 'rounded-xl',
       )}
     >

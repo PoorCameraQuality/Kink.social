@@ -64,9 +64,9 @@ export default function Dialog({
   const panelClass =
     variant === 'sheet' ?
       layout === 'wizard' ?
-        `relative z-10 flex h-[100dvh] w-full max-w-none flex-col overflow-hidden rounded-none border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-panel)] sm:h-auto sm:max-h-[min(88vh,40rem)] sm:rounded-2xl ${maxWidthClass}`
-      : `relative z-10 w-full max-w-lg rounded-t-2xl border border-dc-border bg-dc-elevated-solid shadow-[var(--dc-shadow-panel)] sm:rounded-2xl ${maxWidthClass}`
-    : `relative z-10 w-full ${maxWidthClass} rounded-2xl border border-dc-border bg-dc-elevated-solid p-5 shadow-[var(--dc-shadow-panel)]`
+        `dc-premium-sheet dc-sheet-enter relative z-10 flex h-[100dvh] w-full max-w-none flex-col overflow-hidden rounded-none border sm:h-auto sm:max-h-[min(88vh,40rem)] sm:rounded-2xl ${maxWidthClass}`
+      : `dc-premium-sheet dc-sheet-enter relative z-10 w-full max-w-lg rounded-t-2xl sm:rounded-2xl ${maxWidthClass}`
+    : `dc-dialog-enter relative z-10 w-full ${maxWidthClass} rounded-2xl border border-dc-border bg-dc-elevated-solid p-5 shadow-[var(--dc-shadow-panel)]`
 
   const alignClass =
     variant === 'sheet' ?
@@ -79,7 +79,7 @@ export default function Dialog({
     <div className={`fixed inset-0 z-dc-modal flex ${alignClass}`} role="presentation">
       <button
         type="button"
-        className="absolute inset-0 bg-dc-text/40 backdrop-blur-[2px]"
+        className="dc-premium-backdrop absolute inset-0"
         aria-label="Close dialog"
         onClick={onClose}
       />

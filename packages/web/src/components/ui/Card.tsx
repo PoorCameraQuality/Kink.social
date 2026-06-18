@@ -1,7 +1,9 @@
 import {
   cardSurfaceInteractiveClass,
   cardSurfacePanelClass,
+  cardSurfaceSolidClass,
 } from '@/lib/card-surface'
+import { cn } from '@/lib/cn'
 
 /**
  * Shared card container — canonical elevated panel surface (matches dancecard Panel).
@@ -18,9 +20,15 @@ export default function Card({
   interactive?: boolean
 }) {
   const paddingClass = padding === 'sm' ? 'p-3' : padding === 'md' ? 'p-4' : padding === 'lg' ? 'p-6' : ''
+  const surfaceClass = interactive ? cardSurfaceSolidClass : cardSurfacePanelClass
   return (
     <div
-      className={`${cardSurfacePanelClass} ${interactive ? cardSurfaceInteractiveClass : ''} ${paddingClass} ${className}`.trim()}
+      className={cn(
+        surfaceClass,
+        interactive && cardSurfaceInteractiveClass,
+        paddingClass,
+        className,
+      )}
     >
       {children}
     </div>

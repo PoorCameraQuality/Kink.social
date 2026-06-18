@@ -42,7 +42,7 @@ export default function EventSocialOrientation({
 
   return (
     <section
-      className="mb-6 rounded-2xl border border-dc-border bg-dc-elevated/50 p-4 sm:p-5 shadow-[var(--dc-shadow-soft)]"
+      className="mb-6 hidden rounded-2xl border border-dc-border bg-dc-elevated/50 p-4 sm:p-5 shadow-[var(--dc-shadow-soft)] lg:block"
       aria-label="About this event"
     >
       <p className="text-xs font-semibold uppercase tracking-wide text-dc-muted">Event hub</p>

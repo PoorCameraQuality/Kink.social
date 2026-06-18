@@ -1,6 +1,8 @@
 import type { ElementType, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
+import { cn } from '@/lib/cn'
 import { cardSurfaceSolidClass } from '@/lib/card-surface'
 
 export type EmptyStateAction = {
@@ -45,10 +47,13 @@ function resolveVariant(inline: boolean, variant?: EmptyStateVariant): EmptyStat
   return inline ? 'inline' : 'card'
 }
 
-function actionButtonClass(primary?: boolean) {
-  return primary ?
-      'inline-flex min-h-11 items-center justify-center rounded-xl bg-dc-accent px-4 text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover active:scale-[0.98] transition-transform'
-    : 'inline-flex min-h-11 items-center justify-center rounded-xl border border-dc-border px-4 text-sm font-semibold text-dc-text-muted hover:border-dc-accent-border hover:text-dc-text active:scale-[0.98] transition-transform'
+function linkActionClass(primary?: boolean) {
+  return cn(
+    'dc-premium-btn inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-semibold no-underline motion-reduce:active:scale-100',
+    primary ?
+      'border border-dc-accent-border bg-dc-accent text-dc-accent-foreground hover:bg-dc-accent-hover'
+    : 'border border-dc-border-strong/80 bg-transparent text-dc-text-muted hover:border-[color-mix(in_srgb,var(--dc-accent)_22%,var(--dc-border-strong))] hover:bg-dc-elevated-muted hover:text-dc-text',
+  )
 }
 
 export default function EmptyState({
@@ -117,38 +122,34 @@ export default function EmptyState({
         {actionRow ?
           actions.map((action) =>
             action.href ?
-              <Link key={action.label} to={action.href} className={actionButtonClass(action.primary)}>
+              <Link key={action.label} to={action.href} className={linkActionClass(action.primary)}>
                 {action.label}
               </Link>
-            : <button key={action.label} type="button" onClick={action.onClick} className={actionButtonClass(action.primary)}>
+            : <Button key={action.label} type="button" variant={action.primary ? 'primary' : 'secondary'} onClick={action.onClick}>
                 {action.label}
-              </button>,
+              </Button>,
           )
         : null}
         {!actionRow && actionLabel && onAction ?
-          <button type="button" onClick={onAction} className={actionButtonClass(true)}>
+          <Button type="button" variant="primary" onClick={onAction}>
             {actionLabel}
-          </button>
+          </Button>
         : null}
         {!actionRow && ctaLabel && ctaHref ?
           <Link
             to={ctaHref}
-            className={
-              actionLabel ?
-                actionButtonClass(false)
-              : actionButtonClass(true)
-            }
+            className={linkActionClass(!actionLabel)}
           >
             {ctaLabel}
           </Link>
         : null}
         {!actionRow && secondaryCtaLabel && secondaryOnAction ?
-          <button type="button" onClick={secondaryOnAction} className={actionButtonClass(false)}>
+          <Button type="button" variant="secondary" onClick={secondaryOnAction}>
             {secondaryCtaLabel}
-          </button>
+          </Button>
         : null}
         {!actionRow && secondaryCtaLabel && secondaryCtaHref && !secondaryOnAction ?
-          <Link to={secondaryCtaHref} className={actionButtonClass(false)}>
+          <Link to={secondaryCtaHref} className={linkActionClass(false)}>
             {secondaryCtaLabel}
           </Link>
         : null}

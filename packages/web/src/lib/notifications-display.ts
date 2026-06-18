@@ -56,7 +56,36 @@ export function notificationDayHeading(dayKeyLocal: string): string {
   return d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
 }
 
+function notificationActorFromPayload(
+  type: string,
+  payload: Record<string, unknown>,
+): Pick<MockNotification, 'actorUsername' | 'actorAvatarUrl'> {
+  void type
+  const usernameKeys = ['senderUsername', 'requesterUsername', 'accepterUsername', 'partnerUsername'] as const
+  for (const key of usernameKeys) {
+    const value = payload[key]
+    if (typeof value === 'string' && value.trim()) {
+      const avatarKey =
+        key === 'senderUsername' ? 'senderAvatarUrl'
+        : key === 'requesterUsername' ? 'requesterAvatarUrl'
+        : key === 'accepterUsername' ? 'accepterAvatarUrl'
+        : 'partnerAvatarUrl'
+      const avatarRaw = payload[avatarKey]
+      return {
+        actorUsername: value.trim(),
+        actorAvatarUrl: typeof avatarRaw === 'string' ? avatarRaw : null,
+      }
+    }
+  }
+  return {}
+}
+
 export function mapApiToDisplay(row: ApiNotificationRow): MockNotification {
+  const actor = notificationActorFromPayload(row.type, row.payload ?? {})
+  return { ...mapApiToDisplayRow(row), ...actor }
+}
+
+function mapApiToDisplayRow(row: ApiNotificationRow): MockNotification {
   const payload = row.payload ?? {}
   const createdAtIso = row.createdAt
   if (row.type === 'connection_request') {

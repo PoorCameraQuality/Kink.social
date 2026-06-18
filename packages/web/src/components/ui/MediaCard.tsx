@@ -12,7 +12,7 @@ type Props = {
 
 export default function MediaCard({ to, media, children, className, mediaClassName }: Props) {
   return (
-    <Card className={cn('overflow-hidden transition-colors hover:border-dc-accent-border/40', className)}>
+    <Card interactive className={cn('overflow-hidden', className)}>
       <Link to={to} className={cn('relative block bg-dc-surface-muted', mediaClassName)}>
         {media}
       </Link>

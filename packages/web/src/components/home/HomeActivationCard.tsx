@@ -7,6 +7,7 @@ import {
   HOME_ACTIVATION_TITLE,
 } from '@/lib/alpha-activation-copy'
 import type { HomeActivationItem } from '@/lib/home-activation'
+import { cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 
 type Props = {
   items: HomeActivationItem[]
@@ -19,7 +20,7 @@ export default function HomeActivationCard({ items, className = '' }: Props) {
 
   return (
     <section
-      className={`rounded-2xl border border-dc-border bg-dc-elevated-solid/90 p-5 shadow-[var(--dc-shadow-soft)] ${className}`.trim()}
+      className={`${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass} p-5 ${className}`.trim()}
       aria-labelledby="home-activation-heading"
     >
       <p className="text-[11px] font-semibold uppercase tracking-wide text-dc-accent">Getting started</p>

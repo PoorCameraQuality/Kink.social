@@ -1,5 +1,7 @@
 import GeoFilterControl from '@/components/browse/GeoFilterControl'
 import { EVENT_CATEGORY_VALUES } from '@c2k/shared'
+import { premiumInputClass } from '@/lib/card-surface'
+import { settingsCheckboxClass } from '@/lib/settingsFormClasses'
 
 export type EventFilterState = {
   eventFormatFilter: 'all' | 'in-person' | 'virtual'
@@ -55,7 +57,7 @@ export default function EventFiltersPanel({ idPrefix, f, categoryCounts, showHea
           type="date"
           value={f.dateRange.start}
           onChange={(e) => f.setDateRange((p) => ({ ...p, start: e.target.value }))}
-          className="mb-2 w-full min-h-11 rounded-xl border border-dc-border bg-[var(--dc-input)] px-3 py-2 text-sm text-dc-text"
+          className={`mb-2 ${premiumInputClass} text-sm`}
         />
         <label htmlFor={dateEndId} className="sr-only">
           End date
@@ -65,7 +67,7 @@ export default function EventFiltersPanel({ idPrefix, f, categoryCounts, showHea
           type="date"
           value={f.dateRange.end}
           onChange={(e) => f.setDateRange((p) => ({ ...p, end: e.target.value }))}
-          className="w-full min-h-11 rounded-xl border border-dc-border bg-[var(--dc-input)] px-3 py-2 text-sm text-dc-text"
+          className={`${premiumInputClass} text-sm`}
         />
       </div>
       <fieldset>
@@ -84,7 +86,7 @@ export default function EventFiltersPanel({ idPrefix, f, categoryCounts, showHea
                 name={`${idPrefix}-format`}
                 checked={f.eventFormatFilter === value}
                 onChange={() => f.setEventFormatFilter(value)}
-                className="h-5 w-5 shrink-0 border-dc-border text-dc-accent focus:ring-dc-accent"
+                className={`${settingsCheckboxClass} h-5 w-5 text-dc-accent`}
               />
               {label}
             </label>
@@ -104,7 +106,7 @@ export default function EventFiltersPanel({ idPrefix, f, categoryCounts, showHea
                     type="checkbox"
                     checked={checked}
                     onChange={() => f.toggleCategory(cat)}
-                    className="h-5 w-5 shrink-0 rounded border-dc-border text-dc-accent focus:ring-dc-accent"
+                    className={`${settingsCheckboxClass} h-5 w-5`}
                   />
                   <span className="flex-1 text-dc-text-muted">{cat}</span>
                   <span className="text-xs tabular-nums text-dc-muted">{count}</span>

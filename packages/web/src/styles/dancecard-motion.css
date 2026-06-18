@@ -65,7 +65,7 @@
     color-mix(in srgb, var(--dc-surface-muted) 88%, transparent) 100%
   );
   background-size: 200% 100%;
-  animation: dc-skeleton-shimmer 1.25s ease-in-out infinite;
+  animation: dc-skeleton-shimmer 1.6s ease-in-out infinite;
 }
 
 @keyframes media-upload-indeterminate {

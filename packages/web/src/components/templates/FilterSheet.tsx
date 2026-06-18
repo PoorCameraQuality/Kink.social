@@ -73,7 +73,7 @@ export default function FilterSheet({
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-lg text-dc-muted hover:bg-dc-elevated-muted hover:text-dc-text"
+          className="dc-premium-btn inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl text-dc-muted hover:bg-dc-elevated-muted hover:text-dc-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dc-focus-ring)]"
           aria-label="Close filters"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

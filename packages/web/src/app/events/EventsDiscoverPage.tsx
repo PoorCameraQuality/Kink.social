@@ -1,7 +1,7 @@
 import { useId, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import EventCard from '@/components/cards/EventCard'
-import EventsCategoryChips from '@/components/events/EventsCategoryChips'
+import EventsMobileFastFilters from '@/components/events/EventsMobileFastFilters'
 import EventsFeaturedStrip from '@/components/events/EventsFeaturedStrip'
 import EventsDiscoverLeftRail from '@/components/events/EventsDiscoverLeftRail'
 import EventsPagination from '@/components/events/EventsPagination'
@@ -323,7 +323,54 @@ export default function EventsDiscoverPage() {
   const pageSubtitle =
     pastView ?
       'Browse events that have already happened.'
-    : 'Find munches, classes, conventions, and play parties. Compare by date, location, format, and category before you RSVP.'
+    : 'Find munches, classes, and parties near you.'
+  const pageSubtitleLong =
+    'Compare by date, location, format, and category before you RSVP.'
+
+  const resetFastFilters = () => {
+    setScopeTab('all')
+    setEventFormatFilter('all')
+    setPage(1)
+  }
+
+  const eventListBody =
+    apiEvents.status === 'loading' ?
+      <EventSkeleton count={4} />
+    : apiEvents.status === 'error' ?
+      <EmptyState
+        inline
+        title="Could not load events"
+        message="Check your connection and try again."
+        actionLabel="Retry"
+        onAction={apiEvents.reload}
+      />
+    : filteredEvents.length === 0 ?
+      <EmptyState
+        inline
+        className="rounded-2xl border border-dc-border bg-dc-elevated-solid"
+        icon={
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        }
+        title="No events match"
+        message={hasActiveFilters ? 'Try resetting filters or widening your search.' : 'Nothing listed yet. Check back soon or browse all events.'}
+        actionLabel={hasActiveFilters ? 'Reset filters' : undefined}
+        onAction={hasActiveFilters ? clearFilters : undefined}
+        ctaLabel={hasActiveFilters ? undefined : 'Browse all events'}
+        ctaHref={hasActiveFilters ? undefined : '/events'}
+      />
+    : viewMode === 'list' ?
+      <div className="space-y-3">
+        {pageEvents.map((event) => (
+          <EventsListRow key={String(event.id)} event={event} />
+        ))}
+      </div>
+    : <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        {pageEvents.map((event) => (
+          <EventCard key={String(event.id)} event={event} />
+        ))}
+      </div>
 
   const resultSummary =
     apiEvents.status === 'ready' && filteredEvents.length > 0 ?
@@ -352,7 +399,7 @@ export default function EventsDiscoverPage() {
           title={pageTitle}
           description={pageSubtitle}
           sticky={false}
-          className="mb-4 lg:mb-6"
+          className="mb-2 lg:mb-6"
         />
       }
       desktopSidebar={
@@ -364,8 +411,8 @@ export default function EventsDiscoverPage() {
       }
       desktopAside={<EventsRightRail allEvents={eventSource} suggested={filteredEvents} />}
       toolbar={
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="relative min-w-0 flex-1">
+        <div className="flex flex-col gap-2">
+          <div className="relative min-w-0">
             <label htmlFor={searchId} className="sr-only">
               Search events
             </label>
@@ -387,12 +434,25 @@ export default function EventsDiscoverPage() {
                 setSearchQuery(e.target.value)
                 setPage(1)
               }}
-              className="w-full min-h-10 rounded-xl border border-dc-border bg-[var(--dc-input)] py-2 pl-10 pr-4 text-sm text-dc-text placeholder-dc-muted focus:border-dc-accent focus:outline-none focus:ring-1 focus:ring-dc-accent sm:min-h-11 sm:py-2.5"
+              className="w-full min-h-11 rounded-xl border border-dc-border bg-[var(--dc-input)] py-2.5 pl-10 pr-4 text-sm text-dc-text placeholder-dc-muted focus:border-dc-accent focus:outline-none focus:ring-1 focus:ring-dc-accent"
             />
           </div>
           <div className="flex items-center gap-2">
             <DirectoryFilterButton activeFilterCount={appliedFilterCount} onClick={openFilterSheet} />
-            <div className="inline-flex rounded-xl border border-dc-border bg-dc-elevated-solid p-1 hidden md:inline-flex" role="group" aria-label="View mode">
+            <label className="sr-only" htmlFor="events-sort">
+              Sort events
+            </label>
+            <select
+              id="events-sort"
+              value={sortMode}
+              onChange={(e) => setSortMode(e.target.value as SortMode)}
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 text-sm text-dc-text"
+            >
+              <option value="upcoming">Sort: Upcoming</option>
+              <option value="relevance">Sort: Popular</option>
+              <option value="new">Sort: Newest</option>
+            </select>
+            <div className="hidden items-center rounded-xl border border-dc-border bg-dc-elevated-solid p-1 md:inline-flex" role="group" aria-label="View mode">
               <button
                 type="button"
                 aria-pressed={viewMode === 'grid'}
@@ -410,84 +470,60 @@ export default function EventsDiscoverPage() {
                 List
               </button>
             </div>
-            <label className="sr-only" htmlFor="events-sort">
-              Sort events
-            </label>
-            <select
-              id="events-sort"
-              value={sortMode}
-              onChange={(e) => setSortMode(e.target.value as SortMode)}
-              className="min-h-10 max-w-[9.5rem] rounded-xl border border-dc-border bg-dc-elevated-solid px-2 text-xs text-dc-text sm:min-h-11 sm:max-w-none sm:px-3 sm:text-sm"
-            >
-              <option value="upcoming">Sort by: Upcoming</option>
-              <option value="relevance">Sort by: Popular</option>
-              <option value="new">Sort by: Newest</option>
-            </select>
           </div>
         </div>
       }
-      resultSummary={resultSummary}
-    >
-      <EventsCategoryChips
-        selectedCategories={selectedCategories}
-        categoryCounts={categoryCounts}
-        totalCount={eventSource.length}
-        onToggleCategory={toggleCategory}
-        onClearCategories={() => {
-          setSelectedCategories([])
-          setPage(1)
-        }}
-      />
-
-      <EventsScopeTabs
-        active={scopeTab}
-        onChange={(t) => {
-          setScopeTab(t)
-          setPage(1)
-        }}
-        totalCount={filteredEvents.length}
-      />
-
-      {!pastView && filteredEvents.length > 1 ? <EventsFeaturedStrip events={filteredEvents} /> : null}
-
-      {apiEvents.status === 'loading' ?
-        <EventSkeleton count={4} />
-      : apiEvents.status === 'error' ?
-        <EmptyState
-          inline
-          title="Could not load events"
-          message="Check your connection and try again."
-          actionLabel="Retry"
-          onAction={apiEvents.reload}
-        />
-      : filteredEvents.length === 0 ?
-        <EmptyState
-          inline
-          className="rounded-2xl border border-dc-border bg-dc-elevated-solid"
-          icon={
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          }
-          title="No events match"
-          message={hasActiveFilters ? 'Try resetting filters or widening your search.' : 'Nothing listed yet. Check back soon or browse all events.'}
-          actionLabel={hasActiveFilters ? 'Reset filters' : undefined}
-          onAction={hasActiveFilters ? clearFilters : undefined}
-          ctaLabel={hasActiveFilters ? undefined : 'Browse all events'}
-          ctaHref={hasActiveFilters ? undefined : '/events'}
-        />
-      : viewMode === 'list' ?
-        <div className="space-y-3">
-          {pageEvents.map((event) => (
-            <EventsListRow key={String(event.id)} event={event} />
-          ))}
-        </div>
-      : <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {pageEvents.map((event) => (
-            <EventCard key={String(event.id)} event={event} />
-          ))}
-        </div>
+      resultSummary={
+        resultSummary ?
+          <>
+            <p className="mb-2 text-xs text-dc-muted sm:hidden">
+              {filteredEvents.length} {pastView ? 'past events' : 'events'}
+              {appliedFilterCount > 0 ? ` · ${appliedFilterCount} filter${appliedFilterCount === 1 ? '' : 's'}` : ''}
+            </p>
+            <div className="mb-4 hidden sm:block">{resultSummary}</div>
+          </>
+        : null
       }
+    >
+      <p className="mb-3 hidden max-w-prose text-sm text-dc-muted lg:block">{pageSubtitleLong}</p>
+
+      <EventsMobileFastFilters
+        scopeTab={scopeTab}
+        eventFormatFilter={eventFormatFilter}
+        isAuthenticated={isAuthenticated}
+        onScopeChange={(tab) => {
+          setScopeTab(tab)
+          setPage(1)
+        }}
+        onFormatChange={(format) => {
+          setEventFormatFilter(format)
+          setPage(1)
+        }}
+        onReset={resetFastFilters}
+      />
+
+      <div className="hidden lg:block">
+        <EventsScopeTabs
+          active={scopeTab}
+          onChange={(t) => {
+            setScopeTab(t)
+            setPage(1)
+          }}
+          totalCount={filteredEvents.length}
+        />
+      </div>
+
+      <div className="hidden lg:block">
+        {!pastView && filteredEvents.length > 1 ? <EventsFeaturedStrip events={filteredEvents} /> : null}
+      </div>
+
+      {eventListBody}
+
+      {!pastView && filteredEvents.length > 1 ?
+        <div className="mt-6 lg:hidden">
+          <EventsFeaturedStrip events={filteredEvents} />
+        </div>
+      : null}
 
       {filteredEvents.length > 0 ?
         <EventsPagination variant="full" page={page} totalPages={totalPages} onPageChange={setPage} className="mt-8" />

@@ -48,18 +48,18 @@
 
 .dc-card-polish {
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.15s ease,
-    background-color 0.2s ease;
+    border-color var(--dc-premium-duration, 180ms) var(--dc-premium-ease, ease),
+    box-shadow var(--dc-premium-duration, 180ms) var(--dc-premium-ease, ease),
+    transform 120ms var(--dc-premium-ease, ease),
+    background-color var(--dc-premium-duration, 180ms) var(--dc-premium-ease, ease);
 }
 
 /* Tablet/handoff hover — desktop lg+ override in desktop-surfaces.css */
 @media (max-width: 1023px) {
   @media (hover: hover) and (pointer: fine) {
     .dc-card-polish:hover {
-      border-color: color-mix(in srgb, var(--dc-accent) 22%, var(--dc-border));
-      box-shadow: var(--dc-shadow-panel, 0 8px 32px rgba(0, 0, 0, 0.35));
+      border-color: var(--dc-border-card-hover, color-mix(in srgb, var(--dc-accent) 22%, var(--dc-border)));
+      box-shadow: var(--dc-shadow-hover, var(--dc-shadow-panel, 0 8px 32px rgba(0, 0, 0, 0.35)));
     }
   }
 }

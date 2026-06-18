@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import Badge from '@/components/ui/Badge'
 import { cn } from '@/lib/cn'
+import { cardSurfaceInteractiveClass, cardSurfaceSolidClass } from '@/lib/card-surface'
 import {
   formatOrgRating,
   orgReputationTier,
@@ -51,7 +52,9 @@ export default function OrgCard({ org }: { org: OrgCardModel }) {
     <Link
       to={`/orgs/${encodeURIComponent(org.slug)}`}
       className={cn(
-        'flex h-full flex-col rounded-2xl border bg-dc-elevated/95 p-5 transition-colors hover:border-dc-accent/35',
+        'flex h-full flex-col p-5',
+        cardSurfaceSolidClass,
+        cardSurfaceInteractiveClass,
         tierBorderClasses[tier],
       )}
     >

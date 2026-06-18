@@ -7,7 +7,7 @@ import {
 import { and, count, eq, inArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { emitActivity } from './feed-activities.js'
-import { loadFeedPostCommentCounts } from './feed-post-comments.js'
+import { loadFeedPostCommentCountsForViewer, loadFeedPostCommentPreviewsForViewer, type FeedPostCommentPreview } from './feed-post-comments.js'
 import {
   loadConnectionLikerPreviewByPostIds,
   type ConnectionLikerPreviewItem,
@@ -19,6 +19,7 @@ export type PostLikeMeta = {
   reactionCounts: Record<FeedReactionId, number>
   viewerReaction: FeedReactionId | null
   commentCount: number
+  commentPreview: FeedPostCommentPreview | null
   connectionLikerPreview: ConnectionLikerPreviewItem[]
 }
 
@@ -117,6 +118,7 @@ function emptyLikeMeta(): PostLikeMeta {
     reactionCounts: emptyCountsRecord(),
     viewerReaction: null,
     commentCount: 0,
+    commentPreview: null,
     connectionLikerPreview: [],
   }
 }
@@ -129,10 +131,11 @@ export async function enrichPostsWithLikeMeta(
   if (postIds.length === 0) return new Map()
 
   try {
-    const [reactionCounts, viewerReactions, commentCounts, connectionPreview] = await Promise.all([
+    const [reactionCounts, viewerReactions, commentCounts, commentPreviews, connectionPreview] = await Promise.all([
       loadPostReactionCounts(postIds),
       viewerId ? loadViewerReactions(viewerId, postIds) : Promise.resolve(new Map<string, FeedReactionId>()),
-      loadFeedPostCommentCounts(postIds),
+      loadFeedPostCommentCountsForViewer(viewerId, postIds),
+      loadFeedPostCommentPreviewsForViewer(viewerId, postIds),
       options?.includeConnectionPreview && viewerId ?
         loadConnectionLikerPreviewByPostIds(viewerId, postIds)
       : Promise.resolve(new Map<string, ConnectionLikerPreviewItem[]>()),
@@ -148,6 +151,7 @@ export async function enrichPostsWithLikeMeta(
         likeCount: totalFeedReactionCount(counts),
         likedByViewer: viewerReaction !== null,
         commentCount: commentCounts.get(postId) ?? 0,
+        commentPreview: commentPreviews.get(postId) ?? null,
         connectionLikerPreview: connectionPreview.get(postId) ?? [],
       })
     }
@@ -212,16 +216,16 @@ export async function setPostReaction(
     })
   }
 
-  const commentCount = (await loadFeedPostCommentCounts([postId])).get(postId) ?? 0
+  const commentCount = (await loadFeedPostCommentCountsForViewer(userId, [postId])).get(postId) ?? 0
   const state = await loadPostReactionState(postId, userId)
-  return { ...state, commentCount, connectionLikerPreview: [] }
+  return { ...state, commentCount, commentPreview: null, connectionLikerPreview: [] }
 }
 
 export async function clearPostReaction(userId: string, postId: string): Promise<PostLikeMeta> {
   await db
     .delete(schema.postLikes)
     .where(and(eq(schema.postLikes.userId, userId), eq(schema.postLikes.postId, postId)))
-  const commentCount = (await loadFeedPostCommentCounts([postId])).get(postId) ?? 0
+  const commentCount = (await loadFeedPostCommentCountsForViewer(userId, [postId])).get(postId) ?? 0
   const state = await loadPostReactionState(postId, userId)
-  return { ...state, commentCount, connectionLikerPreview: [] }
+  return { ...state, commentCount, commentPreview: null, connectionLikerPreview: [] }
 }

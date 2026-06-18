@@ -1,5 +1,21 @@
-import { and, count, eq, inArray } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, notInArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
+import { loadBlockedPairUserIds } from './blocks.js'
+import {
+  pickLatestVisibleCommentPreviews,
+  COMMENT_BODY_PREVIEW_MAX,
+} from './feed-post-comment-preview.js'
+
+export type FeedPostCommentPreview = {
+  id: string
+  authorDisplayName: string
+  authorUsername: string
+  authorAvatarUrl: string | null
+  bodyPreview: string
+  createdAt: string
+}
+
+export { COMMENT_BODY_PREVIEW_MAX }
 
 export type FeedPostCommentRow = {
   id: string
@@ -17,16 +33,29 @@ function isMissingDbRelationError(e: unknown): boolean {
 }
 
 export async function loadFeedPostCommentCounts(postIds: string[]): Promise<Map<string, number>> {
+  return loadFeedPostCommentCountsForViewer(null, postIds)
+}
+
+export async function loadFeedPostCommentCountsForViewer(
+  viewerId: string | null,
+  postIds: string[],
+): Promise<Map<string, number>> {
   const result = new Map<string, number>()
   if (postIds.length === 0) return result
   try {
+    const hiddenAuthorIds =
+      viewerId ? await loadBlockedPairUserIds(viewerId) : new Set<string>()
+    const whereParts = [inArray(schema.feedPostComments.postId, postIds)]
+    if (hiddenAuthorIds.size > 0) {
+      whereParts.push(notInArray(schema.feedPostComments.authorId, [...hiddenAuthorIds]))
+    }
     const rows = await db
       .select({
         postId: schema.feedPostComments.postId,
         commentCount: count(),
       })
       .from(schema.feedPostComments)
-      .where(inArray(schema.feedPostComments.postId, postIds))
+      .where(and(...whereParts))
       .groupBy(schema.feedPostComments.postId)
     for (const row of rows) {
       result.set(row.postId, Number(row.commentCount))
@@ -37,21 +66,70 @@ export async function loadFeedPostCommentCounts(postIds: string[]): Promise<Map<
   return result
 }
 
-export async function loadFeedPostCommentCount(postId: string): Promise<number> {
+export async function loadFeedPostCommentPreviewsForViewer(
+  viewerId: string | null,
+  postIds: string[],
+): Promise<Map<string, FeedPostCommentPreview>> {
+  const result = new Map<string, FeedPostCommentPreview>()
+  if (postIds.length === 0) return result
   try {
-    const [row] = await db
-      .select({ commentCount: count() })
+    const hiddenAuthorIds =
+      viewerId ? await loadBlockedPairUserIds(viewerId) : new Set<string>()
+    const scanLimit = Math.min(500, Math.max(postIds.length * 5, postIds.length))
+    const rows = await db
+      .select({
+        id: schema.feedPostComments.id,
+        postId: schema.feedPostComments.postId,
+        authorId: schema.feedPostComments.authorId,
+        body: schema.feedPostComments.body,
+        createdAt: schema.feedPostComments.createdAt,
+        authorUsername: schema.users.username,
+        authorAvatarUrl: schema.profiles.avatarUrl,
+      })
       .from(schema.feedPostComments)
-      .where(eq(schema.feedPostComments.postId, postId))
-    return Number(row?.commentCount ?? 0)
+      .innerJoin(schema.users, eq(schema.feedPostComments.authorId, schema.users.id))
+      .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
+      .where(inArray(schema.feedPostComments.postId, postIds))
+      .orderBy(desc(schema.feedPostComments.createdAt))
+      .limit(scanLimit)
+
+    return pickLatestVisibleCommentPreviews(
+      rows.map((row) => ({
+        id: row.id,
+        postId: row.postId,
+        authorId: row.authorId,
+        authorUsername: row.authorUsername,
+        authorAvatarUrl: row.authorAvatarUrl ?? null,
+        body: row.body,
+        createdAt: row.createdAt.toISOString(),
+      })),
+      hiddenAuthorIds,
+    )
   } catch (e) {
-    if (isMissingDbRelationError(e)) return 0
-    throw e
+    if (!isMissingDbRelationError(e)) throw e
   }
+  return result
 }
 
-export async function listFeedPostComments(postId: string, limit = 50): Promise<FeedPostCommentRow[]> {
+export async function loadFeedPostCommentCount(
+  postId: string,
+  viewerId: string | null = null,
+): Promise<number> {
+  return (await loadFeedPostCommentCountsForViewer(viewerId, [postId])).get(postId) ?? 0
+}
+
+export async function listFeedPostComments(
+  postId: string,
+  viewerId: string | null,
+  limit = 50,
+): Promise<FeedPostCommentRow[]> {
   const capped = Math.min(100, Math.max(1, limit))
+  const hiddenAuthorIds =
+    viewerId ? await loadBlockedPairUserIds(viewerId) : new Set<string>()
+  const whereParts = [eq(schema.feedPostComments.postId, postId)]
+  if (hiddenAuthorIds.size > 0) {
+    whereParts.push(notInArray(schema.feedPostComments.authorId, [...hiddenAuthorIds]))
+  }
   const rows = await db
     .select({
       id: schema.feedPostComments.id,
@@ -65,7 +143,7 @@ export async function listFeedPostComments(postId: string, limit = 50): Promise<
     .from(schema.feedPostComments)
     .innerJoin(schema.users, eq(schema.feedPostComments.authorId, schema.users.id))
     .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
-    .where(eq(schema.feedPostComments.postId, postId))
+    .where(and(...whereParts))
     .orderBy(schema.feedPostComments.createdAt)
     .limit(capped)
   return rows.map((row) => ({

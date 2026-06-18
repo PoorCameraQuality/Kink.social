@@ -15,7 +15,7 @@ import StatusBanner from '@/components/ui/StatusBanner'
 import SettingsMessagingPresets from '@/components/settings/SettingsMessagingPresets'
 import { SETTINGS_INBOX_EXPLAINER } from '@/lib/messaging-copy'
 import { DancecardPanelSkeleton } from '@/components/ui/skeleton'
-import { settingsCheckboxClass, settingsSelectClass } from '@/lib/settingsFormClasses'
+import { settingsCheckboxClass, settingsHintClass, settingsLabelClass, settingsSelectClass } from '@/lib/settingsFormClasses'
 
 const FIELD_VISIBILITY_OPTIONS: { value: ProfileFieldVisibilityLevel; label: string }[] = [
   { value: 'public', label: 'Everyone on Kink Social' },
@@ -36,8 +36,8 @@ function FieldVisibilitySelect({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-dc-text-muted">{label}</label>
-      {hint ? <div className="mb-1 text-xs text-dc-muted">{hint}</div> : null}
+      <label className={settingsLabelClass}>{label}</label>
+      {hint ? <div className={settingsHintClass}>{hint}</div> : null}
       <select className={settingsSelectClass} value={value} onChange={(e) => onChange(e.target.value as ProfileFieldVisibilityLevel)}>
         {FIELD_VISIBILITY_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -64,8 +64,8 @@ function PrivacySelect({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-dc-text-muted">{label}</label>
-      {hint ? <p className="mb-2 text-xs text-dc-muted">{hint}</p> : null}
+      <label className={settingsLabelClass}>{label}</label>
+      {hint ? <p className={settingsHintClass}>{hint}</p> : null}
       <select className={settingsSelectClass} value={value} onChange={(e) => onChange(e.target.value)}>
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

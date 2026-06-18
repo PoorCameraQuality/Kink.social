@@ -354,6 +354,7 @@ export async function getFollowingFeed(params: {
           reactionCounts: meta.reactionCounts,
           viewerReaction: meta.viewerReaction,
           commentCount: meta.commentCount,
+          commentPreview: meta.commentPreview,
           connectionLikerPreview: meta.connectionLikerPreview,
         },
       }
