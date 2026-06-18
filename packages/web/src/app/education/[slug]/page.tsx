@@ -164,7 +164,7 @@ export default function EducationArticlePage() {
 
             <div className="mb-10 rounded-2xl border border-dc-border bg-dc-elevated/95 p-5 shadow-[var(--dc-shadow-soft)] sm:p-8">
               <div
-                className="prose prose-invert max-w-none prose-headings:text-dc-text prose-p:text-dc-text-muted prose-li:text-dc-text-muted prose-a:text-dc-accent prose-strong:text-dc-text"
+                className="prose prose-invert max-w-none prose-headings:text-dc-text prose-p:text-dc-text-muted prose-li:text-dc-text-muted prose-a:text-dc-accent prose-strong:text-dc-text prose-img:max-w-full prose-img:h-auto prose-img:max-h-[min(420px,50vh)] prose-img:rounded-xl prose-img:object-contain"
                 dangerouslySetInnerHTML={{ __html: bodyHtmlSafe }}
               />
             </div>
