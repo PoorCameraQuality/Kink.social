@@ -3737,6 +3737,7 @@ export const eckePublishScopeEnum = pgEnum('ecke_publish_scope', [
   'organization',
   'convention',
   'group',
+  'event',
   'education_article',
   'vendor_profile',
   'event',

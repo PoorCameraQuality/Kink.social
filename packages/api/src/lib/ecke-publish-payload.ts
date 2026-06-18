@@ -1,4 +1,4 @@
-import { APP_URL } from '@c2k/shared'
+import { APP_URL, sanitizeEckeArticleSlug, sanitizeEckeHeroImageUrl } from '@c2k/shared'
 import { createHash } from 'node:crypto'
 import type { ConventionPublicSettings } from '../db/schema.js'
 import { parseVolunteerShiftTitle } from './ecke-dancecard-staff-sync.js'
@@ -274,6 +274,79 @@ export function buildDancecardEventPayload(input: {
   }
 
   return payload
+}
+
+export function resolveStandaloneEventEckeSlug(
+  title: string,
+  eventId: string,
+  priorSlug?: string | null,
+): string {
+  const kept = priorSlug?.trim().toLowerCase()
+  if (kept) return kept.slice(0, 120)
+  const base = sanitizeEckeArticleSlug(title)
+  const suffix = eventId.replace(/-/g, '').slice(0, 8)
+  return `${base}-c2k-${suffix}`.slice(0, 120)
+}
+
+export function isStandaloneEventEckeEligible(input: {
+  visibility: string
+  isConventionAnchor?: boolean
+}): { eligible: boolean; reason?: string } {
+  if (input.isConventionAnchor) {
+    return { eligible: false, reason: 'Convention anchor events publish via convention ECKE routes' }
+  }
+  if (input.visibility !== 'public') {
+    return { eligible: false, reason: 'Only public events can publish to ECKE' }
+  }
+  return { eligible: true }
+}
+
+export function resolveStandaloneEventPublicLocation(input: {
+  location?: string | null
+  publicLocationSummary?: string | null
+  locationVisibility: 'public' | 'rsvp' | 'approved'
+}): string | null {
+  if (input.locationVisibility === 'public') {
+    return input.publicLocationSummary?.trim() || input.location?.trim() || null
+  }
+  return input.publicLocationSummary?.trim() || null
+}
+
+export function buildStandaloneEventListingPayload(input: {
+  eventId: string
+  title: string
+  description?: string | null
+  startsAt: Date
+  endsAt?: Date | null
+  location?: string | null
+  publicLocationSummary?: string | null
+  locationVisibility: 'public' | 'rsvp' | 'approved'
+  imageUrl?: string | null
+  orgSlug?: string | null
+  orgDisplayName?: string | null
+  hostDisplayName?: string | null
+  visibility: string
+  eckeSlug?: string | null
+}): EckeListingPayload {
+  const eligibility = isStandaloneEventEckeEligible({ visibility: input.visibility })
+  const slug = resolveStandaloneEventEckeSlug(input.title, input.eventId, input.eckeSlug)
+  const endsAt = input.endsAt ?? input.startsAt
+  const location = resolveStandaloneEventPublicLocation(input)
+  const organizer = input.orgDisplayName?.trim() || input.hostDisplayName?.trim() || null
+
+  return {
+    slug,
+    title: input.title.trim(),
+    description: input.description?.trim() || null,
+    startsAt: input.startsAt.toISOString(),
+    endsAt: endsAt.toISOString(),
+    location,
+    imageUrl: sanitizeEckeHeroImageUrl(input.imageUrl) ?? null,
+    orgSlug: input.orgSlug ?? null,
+    orgDisplayName: organizer,
+    visibility: eligibility.eligible ? 'public' : 'hidden',
+    memberActionUrl: `${APP_URL}/events/${encodeURIComponent(input.eventId)}`,
+  }
 }
 
 export function derivePublishStatus(

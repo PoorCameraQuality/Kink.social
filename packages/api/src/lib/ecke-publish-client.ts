@@ -460,6 +460,23 @@ export async function publishEventRowToEcke(cfg: EckePublishClientConfig, row: E
   return upsertEckeRow(cfg, 'events', row as unknown as Record<string, unknown>, 'ecke_event')
 }
 
+export async function unpublishEventRowToEcke(cfg: EckePublishClientConfig, slug: string): Promise<EckePublishResult> {
+  return upsertEckeRow(
+    cfg,
+    'events',
+    { slug, status: 'draft' },
+    'ecke_event',
+  )
+}
+
+export function resolveEckePublicBaseUrl(): string {
+  return (process.env.ECKE_PUBLIC_BASE_URL?.trim() || 'https://www.eastcoastkinkevents.com').replace(/\/$/, '')
+}
+
+export function resolveEckePublicEventUrl(slug: string): string {
+  return `${resolveEckePublicBaseUrl()}/events/${encodeURIComponent(slug)}`
+}
+
 export async function publishVendorRowToEcke(cfg: EckePublishClientConfig, row: EckeVendorRow): Promise<EckePublishResult> {
   return upsertEckeRow(cfg, 'vendors', row as unknown as Record<string, unknown>, 'ecke_vendor')
 }
