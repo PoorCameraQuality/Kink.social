@@ -5,10 +5,15 @@ import type { MockProfilePhoto } from '@/data/mock-data'
 import { getMockPersonByUsername, getMockEndorsementsForUser } from '@/data/mock-data'
 import { useAuth, useViewerUsername } from '@/contexts/AuthContext'
 import { type ProfileIsoPayload } from '@/components/profile/ProfileIsoView'
-import ProfileStoryView, { buildProfileStoryLayoutArgs } from '@/components/profile/story/ProfileStoryView'
-import ProfileStorySidebar from '@/components/profile/story/ProfileStorySidebar'
-import ProfileCoverHeader from '@/components/profile/layout/ProfileCoverHeader'
-import ProfilePageShell from '@/components/profile/layout/ProfilePageShell'
+import ProfileLayout from '@/components/profile/layout/ProfileLayout'
+import ProfileHero from '@/components/profile/layout/ProfileHero'
+import ProfileGalleryStrip from '@/components/profile/layout/ProfileGalleryStrip'
+import ProfileAboutBlock from '@/components/profile/story/ProfileAboutBlock'
+import ProfileInterestsCard from '@/components/profile/story/ProfileInterestsCard'
+import ProfileLookingForCard from '@/components/profile/story/ProfileLookingForCard'
+import ProfileUpcomingEventsCard from '@/components/profile/story/ProfileUpcomingEventsCard'
+import ProfileOrganizationsCard from '@/components/profile/story/ProfileOrganizationsCard'
+import ProfileCommunitySnapshotCard from '@/components/profile/story/ProfileCommunitySnapshotCard'
 import ProfileMediaTabPanel from '@/components/profile/layout/ProfileMediaTabPanel'
 import ProfileViewerActions from '@/components/profile/ProfileViewerActions'
 import ProfilePhotoGallery, { type ProfileGalleryPhoto } from '@/components/profile/ProfilePhotoGallery'
@@ -22,7 +27,7 @@ import ProfileCommunityTab from '@/components/profile/tabs/ProfileCommunityTab'
 import ProfileReviewsTab from '@/components/profile/tabs/ProfileReviewsTab'
 import ProfileIsoTab from '@/components/profile/tabs/ProfileIsoTab'
 import ProfileConnectionsTab from '@/components/profile/tabs/ProfileConnectionsTab'
-import ProfileSocialRail from '@/components/profile/social/ProfileSocialRail'
+import ProfileNetworkCard from '@/components/profile/social/ProfileNetworkCard'
 import type {
   ProfileConnectionsSummary,
   ProfileFollowsSummary,
@@ -568,18 +573,6 @@ export default function ProfileUsernamePage() {
   const followsSummary = publicProfile?.followsSummary
   const mutualConnections = publicProfile?.mutualConnections
 
-  const socialSidebar = (
-    <ProfileSocialRail
-      username={username}
-      viewerIsOwner={viewerIsSelf}
-      isAuthenticated={isAuthenticated && !isFallback}
-      connections={connectionsSummary}
-      follows={followsSummary}
-      mutualConnections={mutualConnections}
-      onSelectTab={selectTab}
-    />
-  )
-
   const tabVisibility = useMemo(
     () => ({
       viewerIsOwner: viewerIsSelf,
@@ -697,142 +690,107 @@ export default function ProfileUsernamePage() {
     />
   )
 
-  return (
+  const profileSelfNotice =
+    viewerIsSelf ?
+      <p
+        className="mb-6 rounded-2xl bg-dc-accent/[0.06] px-4 py-3.5 text-sm leading-relaxed text-dc-text-muted ring-1 ring-inset ring-dc-accent/15"
+        role="status"
+      >
+        You are viewing your <strong className="text-dc-text">public profile</strong>. What others see on Kink Social.
+      </p>
+    : null
+
+  const profileHero = (
+    <ProfileHero
+      displayName={profile.displayName}
+      username={profile.username}
+      ageLabel={'ageLabel' in profile ? profile.ageLabel : undefined}
+      pronouns={'pronouns' in profile ? profile.pronouns : undefined}
+      genders={'genders' in profile ? profile.genders : undefined}
+      sexualOrientations={'sexualOrientations' in profile ? profile.sexualOrientations : undefined}
+      romanticOrientations={'romanticOrientations' in profile ? profile.romanticOrientations : undefined}
+      location={profile.location}
+      roles={profile.roles}
+      photoUrl={primaryPhotoUrl ?? undefined}
+      photoCaption={primaryPhotoCaption ?? undefined}
+      photoDisplaySettings={primaryPhotoDisplaySettings ?? undefined}
+      photoCount={displayPhotos.length}
+      onOpenGallery={viewerIsSelf || displayPhotos.length > 0 ? openPhotoGallery : undefined}
+      actions={profileHeroActions}
+    />
+  )
+
+  const profileGallery = (
+    <ProfileGalleryStrip
+      photos={displayPhotos}
+      viewer={mediaViewer}
+      totalCount={displayPhotos.length}
+      onViewAll={openPhotoGallery}
+      viewerIsOwner={viewerIsSelf}
+    />
+  )
+
+  const profilePrimary = (
     <>
-      <ProfilePageShell
-      alerts={
-        viewerIsSelf ?
-          <p
-            className="mb-6 rounded-2xl bg-dc-accent/[0.06] px-4 py-3.5 text-sm leading-relaxed text-dc-text-muted ring-1 ring-inset ring-dc-accent/15"
-            role="status"
-          >
-            You are viewing your <strong className="text-dc-text">public profile</strong>. What others see on Kink Social.
-          </p>
-        : null
-      }
-      cover={
-        <ProfileCoverHeader
-          className="hidden lg:block"
-          {...buildProfileStoryLayoutArgs({
-            displayName: profile.displayName,
-            username: profile.username,
-            bio: profile.bio || null,
-            location: profile.location,
-            ageLabel: 'ageLabel' in profile ? profile.ageLabel : undefined,
-            pronouns: 'pronouns' in profile ? profile.pronouns : undefined,
-            genders: 'genders' in profile ? profile.genders : undefined,
-            sexualOrientations: 'sexualOrientations' in profile ? profile.sexualOrientations : undefined,
-            romanticOrientations: 'romanticOrientations' in profile ? profile.romanticOrientations : undefined,
-            roles: profile.roles,
-            lookingFor: publicProfile?.profile?.lookingFor ?? [],
-            kinks: serverKinks,
-            lifestyleActivity: 'lifestyleActivity' in profile ? profile.lifestyleActivity : undefined,
-            memberSince: publicProfile?.user.memberSince,
-            photoUrl: primaryPhotoUrl ?? undefined,
-            photoCaption: primaryPhotoCaption ?? undefined,
-            photoDisplaySettings: primaryPhotoDisplaySettings ?? undefined,
-            photoCount: displayPhotos.length,
-            onOpenGallery: viewerIsSelf || displayPhotos.length > 0 ? openPhotoGallery : undefined,
-            ecosystem,
-            references: displayReferences,
-            referencesCount: displayReferences.length,
-            eventsAttended: 0,
-            educationContributions: journalPublished.length,
-            viewerIsOwner: viewerIsSelf,
-            pronounTags: publicProfile?.profile?.pronounTags ?? undefined,
-            relationshipsCount: viewerIsSelf ? publicRelationships.length : undefined,
-            canOfferReference: !viewerIsSelf && isAuthenticated && !viewerHasPendingOrAccepted,
-            onAddReference: () => selectTab('Community', 'feedback'),
-            heroActions: profileHeroActions,
-          }).cover}
-        />
-      }
-      mobileStory={
-        <ProfileStoryView
-          displayName={profile.displayName}
-          username={profile.username}
-          bio={profile.bio || null}
-          location={profile.location}
-          ageLabel={'ageLabel' in profile ? profile.ageLabel : undefined}
-          pronouns={'pronouns' in profile ? profile.pronouns : undefined}
-          genders={'genders' in profile ? profile.genders : undefined}
-          sexualOrientations={'sexualOrientations' in profile ? profile.sexualOrientations : undefined}
-          romanticOrientations={'romanticOrientations' in profile ? profile.romanticOrientations : undefined}
-          roles={profile.roles}
-          lookingFor={publicProfile?.profile?.lookingFor ?? []}
-          kinks={serverKinks}
-          lifestyleActivity={'lifestyleActivity' in profile ? profile.lifestyleActivity : undefined}
-          memberSince={publicProfile?.user.memberSince}
-          photoUrl={primaryPhotoUrl ?? undefined}
-          photoCaption={primaryPhotoCaption ?? undefined}
-          photoDisplaySettings={primaryPhotoDisplaySettings ?? undefined}
-          photoCount={displayPhotos.length}
-          onOpenGallery={viewerIsSelf || displayPhotos.length > 0 ? openPhotoGallery : undefined}
-          ecosystem={ecosystem}
-          references={displayReferences}
-          referencesCount={displayReferences.length}
-          eventsAttended={0}
-          educationContributions={journalPublished.length}
+      <ProfileAboutBlock bio={profile.bio || null} viewerIsOwner={viewerIsSelf} />
+      <ProfileInterestsCard kinks={serverKinks} viewerIsOwner={viewerIsSelf} />
+      <ProfileLookingForCard
+        lookingFor={publicProfile?.profile?.lookingFor ?? []}
+        viewerIsOwner={viewerIsSelf}
+      />
+    </>
+  )
+
+  const profileSecondary = (
+    <>
+      <ProfileNetworkCard
+        username={username}
+        viewerIsOwner={viewerIsSelf}
+        connections={connectionsSummary}
+        follows={followsSummary}
+        mutualConnections={mutualConnections}
+        onViewConnections={
+          !viewerIsSelf && connectionsSummary?.listVisible ?
+            () => selectTab('Community', 'connections')
+          : undefined
+        }
+      />
+      <ProfileUpcomingEventsCard ecosystem={ecosystem} username={username} viewerIsOwner={viewerIsSelf} />
+      <ProfileOrganizationsCard ecosystem={ecosystem} username={username} />
+      <ProfileCommunitySnapshotCard
+        ecosystem={ecosystem}
+        memberSince={publicProfile?.user.memberSince}
+        roles={profile.roles}
+        lifestyleActivity={'lifestyleActivity' in profile ? profile.lifestyleActivity : undefined}
+        eventsAttended={0}
+      />
+    </>
+  )
+
+  const profileMore = (
+    <>
+      {showProfilePosts ?
+        <ProfileRecentPostsSection
           viewerIsOwner={viewerIsSelf}
-          pronounTags={publicProfile?.profile?.pronounTags ?? undefined}
-          relationshipsCount={viewerIsSelf ? publicRelationships.length : undefined}
-          canOfferReference={!viewerIsSelf && isAuthenticated && !viewerHasPendingOrAccepted}
-          onAddReference={() => selectTab('Community', 'feedback')}
-          heroActions={profileHeroActions}
+          viewerUsername={viewerUsername}
+          profileUsername={username}
+          items={profileFeedPosts.items}
+          status={profileFeedPosts.status}
+          error={profileFeedPosts.error}
+          onRetry={() => void profileFeedPosts.reload()}
+          graphStatus={viewerIsSelf ? null : graphStatus}
+          canMessage={!viewerIsSelf && (graphStatus?.canMessage === true)}
+          onFollow={viewerIsSelf ? undefined : () => void toggleFollow()}
+          onConnect={viewerIsSelf ? undefined : () => void sendConnectionRequest()}
         />
-      }
-      desktopSidebar={
-        <ProfileStorySidebar
-          {...buildProfileStoryLayoutArgs({
-            displayName: profile.displayName,
-            username: profile.username,
-            bio: profile.bio || null,
-            location: profile.location,
-            roles: profile.roles,
-            lookingFor: publicProfile?.profile?.lookingFor ?? [],
-            kinks: serverKinks,
-            lifestyleActivity: 'lifestyleActivity' in profile ? profile.lifestyleActivity : undefined,
-            memberSince: publicProfile?.user.memberSince,
-            photoUrl: primaryPhotoUrl ?? undefined,
-            ecosystem,
-            references: displayReferences,
-            referencesCount: displayReferences.length,
-            eventsAttended: 0,
-            educationContributions: journalPublished.length,
-            viewerIsOwner: viewerIsSelf,
-            pronounTags: publicProfile?.profile?.pronounTags ?? undefined,
-            relationshipsCount: viewerIsSelf ? publicRelationships.length : undefined,
-            canOfferReference: !viewerIsSelf && isAuthenticated && !viewerHasPendingOrAccepted,
-            onAddReference: () => selectTab('Community', 'feedback'),
-            heroActions: profileHeroActions,
-          }).sidebar}
-        />
-      }
-      networkRail={socialSidebar}
-      main={
-        <>
-          {showProfilePosts ?
-            <ProfileRecentPostsSection
-              viewerIsOwner={viewerIsSelf}
-              viewerUsername={viewerUsername}
-              profileUsername={username}
-              items={profileFeedPosts.items}
-              status={profileFeedPosts.status}
-              error={profileFeedPosts.error}
-              onRetry={() => void profileFeedPosts.reload()}
-              graphStatus={viewerIsSelf ? null : graphStatus}
-              canMessage={!viewerIsSelf && (graphStatus?.canMessage === true)}
-              onFollow={viewerIsSelf ? undefined : () => void toggleFollow()}
-              onConnect={viewerIsSelf ? undefined : () => void sendConnectionRequest()}
-            />
-          : null}
-        <ProfileExtendedSection
-          viewerIsOwner={viewerIsSelf}
-          visibleTabs={visibleTabs}
-          activeTab={activeTab}
-          onSelect={selectTab}
-          tabCounts={profileTabCounts}
-        >
+      : null}
+      <ProfileExtendedSection
+        viewerIsOwner={viewerIsSelf}
+        visibleTabs={visibleTabs}
+        activeTab={activeTab}
+        onSelect={selectTab}
+        tabCounts={profileTabCounts}
+      >
             {activeTab === 'Community' && (
               <ProfileCommunityTab
                 activeSection={communitySection}
@@ -931,31 +889,42 @@ export default function ProfileUsernamePage() {
               />
             )}
         </ProfileExtendedSection>
-        </>
-      }
-      footer={
-        publicProfile?.user && username !== viewerUsername ?
-          <p className="text-xs text-dc-muted">
-            <button
-              type="button"
-              onClick={() =>
-                setReportOpen({
-                  targetType: 'profile',
-                  targetId: publicProfile.user.id,
-                  label: `@${username}`,
-                })
-              }
-              className="text-dc-accent hover:underline"
-            >
-              Report profile
-            </button>
-            <span className="mx-2">·</span>
-            <Link to="/support" className="text-dc-accent hover:underline">
-              Support center
-            </Link>
-          </p>
-        : null
-      }
+    </>
+  )
+
+  const profileFooter =
+    publicProfile?.user && username !== viewerUsername ?
+      <p className="text-xs text-dc-muted">
+        <button
+          type="button"
+          onClick={() =>
+            setReportOpen({
+              targetType: 'profile',
+              targetId: publicProfile.user.id,
+              label: `@${username}`,
+            })
+          }
+          className="text-dc-accent hover:underline"
+        >
+          Report profile
+        </button>
+        <span className="mx-2">·</span>
+        <Link to="/support" className="text-dc-accent hover:underline">
+          Support center
+        </Link>
+      </p>
+    : null
+
+  return (
+    <>
+      <ProfileLayout
+        alerts={profileSelfNotice}
+        hero={profileHero}
+        gallery={profileGallery}
+        primary={profilePrimary}
+        secondary={profileSecondary}
+        more={profileMore}
+        footer={profileFooter}
       />
       <TsReportModal open={reportOpen} onClose={() => setReportOpen(null)} />
       <TsReportModal open={photoReportOpen} onClose={() => setPhotoReportOpen(null)} />

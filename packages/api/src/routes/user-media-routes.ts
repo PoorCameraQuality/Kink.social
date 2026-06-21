@@ -31,6 +31,7 @@ import {
 } from '../lib/media-social-service.js'
 import { getMediaAssetById, MediaAttestationValidationError } from '../lib/media-asset-service.js'
 import { ensureProfileForUserId } from '../lib/ensure-profile.js'
+import { getPersonalPhotoQuota, PersonalPhotoQuotaError } from '../lib/personal-photo-quota.js'
 
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
@@ -127,6 +128,14 @@ async function resolveUserIdByUsername(username: string): Promise<string | null>
 }
 
 export async function registerUserMediaRoutes(app: FastifyInstance) {
+  app.get('/api/v1/me/personal-photo-quota', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const auth = requireUser(req, reply)
+    if (!auth) return
+    const quota = await getPersonalPhotoQuota(auth.userId)
+    return reply.send({ quota })
+  })
+
   app.post(
     '/api/v1/me/media/uploads',
     async (req, reply) => {
@@ -155,6 +164,9 @@ export async function registerUserMediaRoutes(app: FastifyInstance) {
         })
         return reply.status(201).send(result)
       } catch (e) {
+        if (e instanceof PersonalPhotoQuotaError) {
+          return reply.status(403).send({ error: e.message, code: e.code, quota: e.quota })
+        }
         if (e instanceof MediaAttestationValidationError) {
           return reply.status(400).send({ error: e.message })
         }

@@ -8,7 +8,8 @@ import { MediaUploadProgressOverlay } from '@/components/media/MediaUploadProgre
 import { useProfilePhotos } from '@/hooks/useProfilePhotos'
 import type { MockProfilePhoto } from '@/data/mock-data'
 import { mediaDisplayUrl } from '@/lib/media-display-url'
-import { PROFILE_PHOTO_GUIDELINES, PROFILE_PHOTO_PENDING_REVIEW_DETAIL, PROFILE_PHOTO_PENDING_REVIEW_SHORT } from '@c2k/shared'
+import { PROFILE_PHOTO_GUIDELINES, PROFILE_PHOTO_PENDING_REVIEW_DETAIL, PROFILE_PHOTO_PENDING_REVIEW_SHORT, PERSONAL_PHOTO_LIMIT_REACHED_MESSAGE } from '@c2k/shared'
+import PersonalPhotoQuotaNotice from '@/components/media/PersonalPhotoQuotaNotice'
 
 type ProfilePhotoManagerProps = {
   apiBacked?: boolean
@@ -34,6 +35,7 @@ export default function ProfilePhotoManager({
     uploadStage,
     pendingUploadPreview,
     error,
+    quota,
     reload,
     addPhotoOpen,
     setAddPhotoOpen,
@@ -76,6 +78,8 @@ export default function ProfilePhotoManager({
     onPhotosChanged?.()
   }
 
+  const atPhotoLimit = Boolean(apiBacked && quota?.atLimit)
+
   return (
     <>
       <div className={embedded ? 'min-w-0 space-y-4' : 'rounded-2xl border border-dc-border bg-dc-elevated/95 p-4 shadow-[var(--dc-shadow-soft)] sm:p-6'}>
@@ -90,8 +94,10 @@ export default function ProfilePhotoManager({
             {!addPhotoOpen ? (
               <button
                 type="button"
+                disabled={atPhotoLimit}
+                title={atPhotoLimit ? PERSONAL_PHOTO_LIMIT_REACHED_MESSAGE : undefined}
                 onClick={() => setAddPhotoOpen(true)}
-                className="shrink-0 rounded-lg bg-dc-accent px-3 py-1.5 text-sm font-medium text-dc-accent-foreground hover:bg-dc-accent-hover"
+                className="shrink-0 rounded-lg bg-dc-accent px-3 py-1.5 text-sm font-medium text-dc-accent-foreground hover:bg-dc-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Add photo
               </button>
@@ -102,13 +108,17 @@ export default function ProfilePhotoManager({
             <p className="min-w-0 text-xs text-dc-text-muted">Primary photo is the first image in your gallery.</p>
             <button
               type="button"
+              disabled={atPhotoLimit}
+              title={atPhotoLimit ? PERSONAL_PHOTO_LIMIT_REACHED_MESSAGE : undefined}
               onClick={() => setAddPhotoOpen(true)}
-              className="shrink-0 rounded-lg bg-dc-accent px-3 py-1.5 text-xs font-medium text-dc-accent-foreground hover:bg-dc-accent-hover sm:text-sm"
+              className="shrink-0 rounded-lg bg-dc-accent px-3 py-1.5 text-xs font-medium text-dc-accent-foreground hover:bg-dc-accent-hover disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
             >
               Add photo
             </button>
           </div>
         : null}
+
+        {apiBacked ? <PersonalPhotoQuotaNotice quota={quota} className="mb-3" /> : null}
 
         {error ? <LoadErrorBanner className="mb-4" message={error} onRetry={() => void reload()} /> : null}
 

@@ -13,6 +13,7 @@ import {
   type MediaVisibility,
 
 } from '@c2k/shared'
+import type { PersonalPhotoQuota } from '@c2k/shared'
 
 import type { PhotoUploadResult } from '@/components/PhotoUpload'
 
@@ -183,6 +184,8 @@ export interface UseProfilePhotosReturn {
 
   error: string | null
 
+  quota: PersonalPhotoQuota | null
+
   reload: () => void
 
   addPhotoOpen: boolean
@@ -240,6 +243,8 @@ export function useProfilePhotos(options: UseProfilePhotosOptions = {}): UseProf
 
   const [error, setError] = useState<string | null>(null)
 
+  const [quota, setQuota] = useState<PersonalPhotoQuota | null>(null)
+
   const [addPhotoOpen, setAddPhotoOpen] = useState(false)
 
   const [attestationTarget, setAttestationTarget] = useState<MediaAttestationTarget | null>(null)
@@ -282,9 +287,10 @@ export function useProfilePhotos(options: UseProfilePhotosOptions = {}): UseProf
 
       }
 
-      const data = (await r.json()) as { photos?: ApiProfilePhoto[] }
+      const data = (await r.json()) as { photos?: ApiProfilePhoto[]; quota?: PersonalPhotoQuota }
 
       setPhotos((data.photos ?? []).map(mapApiPhoto))
+      setQuota(data.quota ?? null)
 
     } catch {
 
@@ -636,6 +642,8 @@ export function useProfilePhotos(options: UseProfilePhotosOptions = {}): UseProf
     pendingUploadPreview,
 
     error,
+
+    quota,
 
     reload: loadApiPhotos,
 

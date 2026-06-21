@@ -27,6 +27,12 @@ import {
   autoPublishProfileGalleryPhoto,
   rejectProfileGalleryMediaAsset,
 } from '../lib/profile-photo-policy.js'
+import {
+  assertPersonalPhotoQuotaForAsset,
+  assertPersonalPhotoQuotaRoom,
+  getPersonalPhotoQuota,
+  PersonalPhotoQuotaError,
+} from '../lib/personal-photo-quota.js'
 import { mediaContentProxyPath, resolveMediaClientUrl } from '../lib/media-pipeline.js'
 import { isBrowserReachablePublicUrl } from '../lib/s3-upload.js'
 
@@ -275,8 +281,9 @@ export async function registerProfilePhotosRoutes(app: FastifyInstance) {
     const prof = await resolveOwnProfile(userId)
 
     const photos = await loadProfilePhotos(prof.id)
+    const quota = await getPersonalPhotoQuota(userId)
 
-    return reply.send({ photos })
+    return reply.send({ photos, quota })
 
   })
 
@@ -314,7 +321,18 @@ export async function registerProfilePhotosRoutes(app: FastifyInstance) {
 
     const sortOrder = parsed.data.sortOrder ?? existing.length
 
-
+    try {
+      if (parsed.data.mediaAssetId) {
+        await assertPersonalPhotoQuotaForAsset(userId, parsed.data.mediaAssetId)
+      } else {
+        await assertPersonalPhotoQuotaRoom(userId, 1)
+      }
+    } catch (err) {
+      if (err instanceof PersonalPhotoQuotaError) {
+        return reply.status(403).send({ error: err.message, code: err.code, quota: err.quota })
+      }
+      throw err
+    }
 
     let mediaAssetId = parsed.data.mediaAssetId ?? null
 

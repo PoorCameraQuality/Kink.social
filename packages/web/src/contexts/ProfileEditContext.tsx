@@ -415,7 +415,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
     setDisplayName((p.displayName as string) ?? '')
     setBio((p.bio as string) ?? '')
     setGenders((p.genders as string[]) ?? (p.gender ? [String(p.gender)] : []))
-    setSexualOrientations((p.sexualOrientations as string[]) ?? [])
+    setSexualOrientations(savedSexualOrientationsFromProfile(p))
     setRomanticOrientations((p.romanticOrientations as string[]) ?? [])
     setPronounTags(parsePronounTags((p.pronounTags as string[]) ?? p.pronouns))
     setRoles((p.roles as string[]) ?? [])
@@ -806,6 +806,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
 
     setSaving(true)
     let profileSaved = !hasUnsavedProfileChanges
+    let profileSyncedFromResponse = false
     let kinksSaved = !hasUnsavedKinkChanges
     try {
       if (hasUnsavedProfileChanges) {
@@ -851,6 +852,46 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
           profileSaved = false
         } else {
           profileSaved = true
+          const data = (await r.json().catch(() => ({}))) as {
+            profile?: Record<string, unknown>
+          }
+          const saved = data.profile
+          if (saved) {
+            const serverSexual = savedSexualOrientationsFromProfile(saved)
+            const serverRomantic = (saved.romanticOrientations as string[] | undefined) ?? []
+            const serverGenders = savedGendersFromProfile(saved)
+            const serverPronouns = parsePronounTags(
+              (saved.pronounTags as string[] | undefined) ?? (saved.pronouns as string | undefined),
+            )
+            const serverRoles = (saved.roles as string[] | undefined) ?? []
+            setSexualOrientations(serverSexual)
+            setRomanticOrientations(serverRomantic)
+            setGenders(serverGenders)
+            setPronounTags(serverPronouns)
+            setRoles(serverRoles)
+            profileMe.applyProfilePatch({
+              displayName: (saved.displayName as string | null) ?? null,
+              bio: (saved.bio as string | null) ?? null,
+              genders: serverGenders,
+              gender: serverGenders[0] ?? null,
+              sexualOrientations: serverSexual,
+              romanticOrientations: serverRomantic,
+              sexuality: (saved.sexuality as string | null) ?? null,
+              pronounTags: serverPronouns,
+              pronouns: (saved.pronouns as string | null) ?? null,
+              roles: serverRoles,
+              birthDate: (saved.birthDate as string | null) ?? null,
+              lifestyleActivity: (saved.lifestyleActivity as string | null) ?? null,
+              lookingFor: (saved.lookingFor as string[] | undefined) ?? [],
+              homeZip: (saved.homeZip as string | null) ?? null,
+              location: (saved.location as string | null) ?? null,
+              placeId: (saved.placeId as string | null) ?? null,
+              stateId: (saved.stateId as string | null) ?? null,
+              customLocation: (saved.customLocation as string | null) ?? null,
+            })
+            profileSyncedFromResponse = true
+            window.dispatchEvent(new Event('c2k:profile-saved'))
+          }
         }
       }
 
@@ -883,7 +924,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
         setSaveNotice('Profile saved.')
       }
 
-      if (profileSaved) {
+      if (profileSaved && !profileSyncedFromResponse) {
         const zipDigits = homeZip.replace(/\D/g, '').slice(0, 5)
         const draftPlaceId = draftPlaceIdFromSelect(placeSelect)
         profileMe.applyProfilePatch({
@@ -905,6 +946,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
           customLocation:
             placeSelect === PLACE_CUSTOM ? customLocation.trim() || null : null,
         })
+        window.dispatchEvent(new Event('c2k:profile-saved'))
       }
       setTimeout(() => setSaveNotice(null), 5000)
     } catch (err) {

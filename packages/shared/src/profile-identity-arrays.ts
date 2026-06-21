@@ -45,5 +45,5 @@ export function formatPronounDisplay(tags: string[] | null | undefined): string 
   return capArray(tags, 3).join(' · ').slice(0, 64)
 }
 
-export const PROFILE_ORIENTATION_MAX = 5 as const
+export const PROFILE_ORIENTATION_MAX = 10 as const
 export const PROFILE_PRONOUN_MAX = 3 as const

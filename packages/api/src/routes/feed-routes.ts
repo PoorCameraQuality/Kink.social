@@ -34,6 +34,11 @@ import { withAlphaLabel, withAlphaLabels } from '../lib/alpha-seed-labels.js'
 import { filterRowsForGlobalFeed, viewerCanAccessFeedPost, viewerCanAccessFeedPostById } from '../lib/feed-post-access.js'
 import { filterPostsMediaAttachmentsForViewer, filterQuotedPostsMediaForViewer } from '../lib/feed-media-attachments.js'
 import { listAuthorFeedPostsForProfile, resolveUserIdByUsername } from '../lib/profile-feed-posts.js'
+import {
+  mapFeedComposerMediaError,
+  linkFeedPostToStagedMediaAttachments,
+  prepareFeedComposerImageAttachment,
+} from '../lib/feed-composer-media.js'
 
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
@@ -419,6 +424,18 @@ export async function registerFeedRoutes(app: FastifyInstance) {
       })
       .returning()
     if (!row) return reply.status(500).send({ error: 'Insert failed' })
+    try {
+      await linkFeedPostToStagedMediaAttachments({
+        userId: user.userId,
+        feedPostId: row.id,
+        attachments,
+        now,
+      })
+    } catch (err) {
+      await db.delete(schema.feedPosts).where(eq(schema.feedPosts.id, row.id))
+      const mapped = mapFeedComposerMediaError(err)
+      return reply.status(mapped.status).send(mapped.body)
+    }
     emitActivity({
       actorId: user.userId,
       verb: 'post',
@@ -666,6 +683,39 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     const viewerId = getViewerUserId(resolveViewerFromRequest(req).payload)
     const items = await loadJournalArticlesForUser(author.id, viewerId, limit)
     return reply.send({ items })
+  })
+
+  const feedComposerImageBody = z.object({
+    quarantineKey: z.string().min(1).max(2048),
+    sha256Hash: z.string().max(128).optional(),
+    mimeType: z.string().max(128),
+    sizeBytes: z.number().int().min(0),
+    originalFilename: z.string().max(512).optional(),
+    imageWidth: z.number().int().optional(),
+    imageHeight: z.number().int().optional(),
+  })
+
+  app.post('/api/v1/feed/composer/image', { ...rateLimitRoute('upload') }, async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const parsed = feedComposerImageBody.safeParse(req.body)
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    try {
+      const result = await prepareFeedComposerImageAttachment({
+        userId: user.userId,
+        quarantineKey: parsed.data.quarantineKey,
+        mimeType: parsed.data.mimeType,
+        sizeBytes: parsed.data.sizeBytes,
+        originalFilename: parsed.data.originalFilename,
+        imageWidth: parsed.data.imageWidth,
+        imageHeight: parsed.data.imageHeight,
+      })
+      return reply.status(201).send(result)
+    } catch (err) {
+      const mapped = mapFeedComposerMediaError(err)
+      return reply.status(mapped.status).send(mapped.body)
+    }
   })
 
   app.get('/api/v1/mentions/suggest', async (req, reply) => {

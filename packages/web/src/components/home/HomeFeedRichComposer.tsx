@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 
 import type { JSONContent } from '@tiptap/core'
@@ -35,7 +35,12 @@ import StatusBanner from '@/components/ui/StatusBanner'
 
 
 import type { FeedAttachment, FeedMention } from '@/lib/feed-types'
+import { uploadFeedComposerImage } from '@/lib/feed-image-upload'
+import { mediaDisplayUrl } from '@/lib/media-display-url'
 import { uploadMediaFile } from '@/lib/upload-media'
+import PersonalPhotoQuotaNotice from '@/components/media/PersonalPhotoQuotaNotice'
+import { usePersonalPhotoQuota } from '@/hooks/usePersonalPhotoQuota'
+import { PERSONAL_PHOTO_LIMIT_REACHED_MESSAGE } from '@c2k/shared'
 
 function feedAttachmentKey(a: FeedAttachment): string {
   if (a.type === 'media') return `${a.type}:${a.mediaItemId}`
@@ -107,6 +112,9 @@ export default function HomeFeedRichComposer({
   const [uploadingAudio, setUploadingAudio] = useState(false)
 
   const [extraAttachments, setExtraAttachments] = useState<FeedAttachment[]>([])
+  const extraAttachmentsRef = useRef(extraAttachments)
+  extraAttachmentsRef.current = extraAttachments
+  const { quota, reload: reloadPhotoQuota } = usePersonalPhotoQuota(true)
 
   const composing = focused || hasDraft
   useFeedComposerEngagement(!shellMode && composing)
@@ -121,7 +129,7 @@ export default function HomeFeedRichComposer({
 
       Link.configure({ openOnClick: false, autolink: true }),
 
-      Image.configure({ inline: true }),
+      Image.configure({ inline: true, allowBase64: false }),
 
       Mention.configure({
 
@@ -273,8 +281,7 @@ export default function HomeFeedRichComposer({
 
     onUpdate: ({ editor: ed }) => {
       const text = ed.getText().trim()
-      const hasImg = ed.getHTML().includes('<img')
-      setHasDraft(Boolean(text || hasImg))
+      setHasDraft(Boolean(text || extraAttachmentsRef.current.length > 0))
     },
 
     editorProps: {
@@ -321,11 +328,29 @@ export default function HomeFeedRichComposer({
 
     input.accept = 'image/*'
 
+    input.multiple = true
+
     input.onchange = async () => {
 
-      const file = input.files?.[0]
+      const files = [...(input.files ?? [])]
 
-      if (!file) return
+      if (files.length === 0) return
+
+      if (quota?.atLimit) {
+        setPostError(PERSONAL_PHOTO_LIMIT_REACHED_MESSAGE)
+        return
+      }
+
+      const remaining = Math.max(0, Math.min(20 - extraAttachmentsRef.current.length, quota?.remaining ?? 20))
+      if (remaining === 0) {
+        setPostError('You can attach up to 20 photos per post.')
+        return
+      }
+      const batch = files.slice(0, remaining)
+      const trimmedNotice =
+        batch.length < files.length
+          ? `Only ${remaining} more photo${remaining === 1 ? '' : 's'} can be added to this post.`
+          : null
 
       setUploading(true)
 
@@ -333,20 +358,33 @@ export default function HomeFeedRichComposer({
 
       try {
 
-        const result = await uploadMediaFile(file, 'feed_image')
+        const prepared: FeedAttachment[] = []
+        let pendingMessage: string | undefined
 
-        if (result.url) {
-
-          editor.chain().focus().setImage({ src: result.url }).run()
-
-          return
-
+        for (const file of batch) {
+          const result = await uploadFeedComposerImage(file)
+          if (!result.ok) {
+            setPostError(result.error)
+            if (prepared.length > 0) {
+              setExtraAttachments((prev) => [...prev, ...prepared])
+              setHasDraft(true)
+            }
+            return
+          }
+          prepared.push(result.attachment)
+          if (result.pendingReview && result.message) {
+            pendingMessage = result.message
+          }
         }
 
-        setPostError(
-          'Feed images are held for review during alpha and cannot be embedded inline yet. Use Profile Edit for your avatar.',
-
-        )
+        setExtraAttachments((prev) => [...prev, ...prepared])
+        setHasDraft(true)
+        void reloadPhotoQuota()
+        if (pendingMessage) {
+          setPostError(pendingMessage)
+        } else if (trimmedNotice) {
+          setPostError(trimmedNotice)
+        }
 
       } catch (err) {
 
@@ -362,7 +400,7 @@ export default function HomeFeedRichComposer({
 
     input.click()
 
-  }, [editor])
+  }, [editor, quota?.atLimit, quota?.remaining, reloadPhotoQuota])
 
 
 
@@ -417,10 +455,14 @@ export default function HomeFeedRichComposer({
 
 
   const removeExtraAttachment = useCallback((idx: number) => {
-
-    setExtraAttachments((prev) => prev.filter((_, i) => i !== idx))
-
-  }, [])
+    setExtraAttachments((prev) => {
+      const next = prev.filter((_, i) => i !== idx)
+      if (editor) {
+        setHasDraft(Boolean(editor.getText().trim() || next.length > 0))
+      }
+      return next
+    })
+  }, [editor])
 
 
 
@@ -430,9 +472,7 @@ export default function HomeFeedRichComposer({
 
     const text = editor.getText().trim()
 
-    const hasImg = editor.getHTML().includes('<img')
-
-    if (!text && !hasImg && extraAttachments.length === 0) {
+    if (!text && extraAttachments.length === 0) {
 
       setPostError('Write something, add media, or attach audio.')
 
@@ -560,7 +600,7 @@ export default function HomeFeedRichComposer({
 
       {extraAttachments.length > 0 ? (
 
-        <ul className="flex flex-wrap gap-2 text-[11px] text-dc-muted">
+        <ul className="flex flex-wrap gap-2">
 
           {extraAttachments.map((a, i) => (
 
@@ -568,11 +608,19 @@ export default function HomeFeedRichComposer({
 
               key={`${feedAttachmentKey(a)}-${i}`}
 
-              className="inline-flex items-center gap-1 rounded-md border border-dc-border bg-dc-elevated-muted px-2 py-1"
+              className="relative inline-flex items-center gap-2 rounded-md border border-dc-border bg-dc-elevated-muted p-1"
 
             >
 
-              {a.type === 'audio' ? 'Audio clip' : 'Media'}
+              {a.type === 'media' && a.mediaKind === 'image' && a.previewUrl ?
+                <img
+                  src={mediaDisplayUrl(a.previewUrl)}
+                  alt=""
+                  className="h-16 w-16 rounded object-cover"
+                />
+              : a.type === 'audio' ?
+                <span className="px-2 text-[11px] text-dc-muted">Audio clip</span>
+              : <span className="px-2 text-[11px] text-dc-muted">Photo</span>}
 
               <Button
 
@@ -666,7 +714,9 @@ export default function HomeFeedRichComposer({
 
             onClick={runUpload}
 
-            disabled={uploading}
+            disabled={uploading || Boolean(quota?.atLimit)}
+
+            title={quota?.atLimit ? PERSONAL_PHOTO_LIMIT_REACHED_MESSAGE : undefined}
 
             className="gap-1"
 
@@ -756,6 +806,8 @@ export default function HomeFeedRichComposer({
           .
         </p>
       : null}
+
+      <PersonalPhotoQuotaNotice quota={quota} showCount={!compact} />
 
       {postError ?
 

@@ -1,4 +1,4 @@
-/** Grouped sexuality labels for profile edit (stored in `profiles.sexuality`, max 128 chars). */
+/** Grouped sexuality labels for profile edit (stored in orientation arrays + legacy `profiles.sexuality`). */
 
 export const PROFILE_SEXUALITY_OTHER = 'Other (describe below)' as const
 
@@ -15,6 +15,8 @@ export const PROFILE_SEXUAL_ORIENTATION_GROUPS: ReadonlyArray<{
       'Unsure',
       'Queer',
       'Fluid',
+      'Allosexual',
+      'Pomosexual',
     ],
   },
   {
@@ -40,7 +42,13 @@ export const PROFILE_SEXUAL_ORIENTATION_GROUPS: ReadonlyArray<{
       'Heteroflexible',
       'Bi-curious',
       'Pan-curious',
+      'Straight curious',
+      'Gay curious',
+      'Lesbian curious',
       'Multisexual',
+      'Panflux',
+      'Homoflux',
+      'Heteroflux',
     ],
   },
   {
@@ -58,12 +66,13 @@ export const PROFILE_SEXUAL_ORIENTATION_GROUPS: ReadonlyArray<{
       'Reciprosexual',
       'Apothisexual',
       'Autosexual',
+      'Caedsexual',
+      'Akoisexual',
     ],
   },
   {
     label: 'Attraction patterns',
     options: [
-      'Androsexual',
       'Gynesexual',
       'Skoliosexual',
       'Sapiosexual',
@@ -72,6 +81,11 @@ export const PROFILE_SEXUAL_ORIENTATION_GROUPS: ReadonlyArray<{
       'Ceterosexual',
       'Finsexual',
       'Minsexual',
+      'Toric',
+      'Trixic',
+      'Enbiesexual',
+      'Neptunic',
+      'Marsian',
     ],
   },
   {
@@ -102,11 +116,20 @@ export const PROFILE_ROMANTIC_ORIENTATION_GROUPS: ReadonlyArray<{
       'Quoiromantic',
       'Idemromantic',
       'Recipromantic',
+      'Aplatonic',
+      'Caedromantic',
     ],
   },
   {
-    label: 'Monoromantic',
-    options: ['Heteroromantic', 'Homoromantic', 'Monoromantic'],
+    label: 'Allo & monoromantic',
+    options: [
+      'Alloromantic',
+      'Heteroromantic',
+      'Homoromantic',
+      'Gayromantic',
+      'Lesbiromantic',
+      'Monoromantic',
+    ],
   },
   {
     label: 'Multisexual romantic',
@@ -117,6 +140,7 @@ export const PROFILE_ROMANTIC_ORIENTATION_GROUPS: ReadonlyArray<{
       'Omniromantic',
       'Homoflexible romantic',
       'Heteroflexible romantic',
+      'Biromantic curious',
     ],
   },
   {
@@ -137,6 +161,11 @@ export const PROFILE_ROMANTIC_ORIENTATION_GROUPS: ReadonlyArray<{
       'Skolioromantic',
       'Sapiromantic',
       'Novoromantic',
+      'Toricromantic',
+      'Trixicromantic',
+      'Enbieromantic',
+      'Neptunic romantic',
+      'Marsian romantic',
     ],
   },
   {
