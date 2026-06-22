@@ -83,17 +83,17 @@ export default function ProfileOwnerActions({
         </span>
         {hasPresenter ?
           <Link
-            to="/presenters/onboarding"
+            to={viewerUsername ? `/presenters/${encodeURIComponent(viewerUsername)}` : '/presenters/onboarding'}
             className="text-sm text-dc-accent hover:underline min-h-10 inline-flex items-center"
           >
-            Presenter tools
+            Your presenter profile
           </Link>
         : (
           <Link
             to="/presenters/onboarding"
             className="text-sm text-dc-accent hover:underline min-h-10 inline-flex items-center"
           >
-            Join presenter directory
+            Set up presenter profile
           </Link>
         )}
         <span className="text-dc-muted" aria-hidden>

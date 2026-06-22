@@ -106,6 +106,53 @@ export type OnboardingResumeState = {
   portfolioSatisfied?: boolean
 }
 
+/** Short labels for the wizard stepper rail / progress, keyed by step id. */
+export const PRESENTER_STEP_LABELS: Record<string, string> = {
+  chooseTrack: 'Track',
+  hybridFocusPick: 'Focus areas',
+  welcome: 'Welcome',
+  basics: 'Basics',
+  visibility: 'Visibility',
+  teachingStyle: 'Teaching style',
+  catalog: 'Class catalog',
+  organizerMaterials: 'Organizer materials',
+  skillsMentorship: 'Skills & mentorship',
+  linksGallery: 'Links & gallery',
+  topicsFormats: 'Topics & formats',
+  sessionCatalog: 'Session catalog',
+  logistics: 'Logistics',
+  linksMedia: 'Links & media',
+  writingFocus: 'Writing focus',
+  publicationsLinks: 'Publications & links',
+  optionalTalks: 'Talks',
+  media: 'Media',
+  portfolioGallery: 'Portfolio',
+  services: 'Services',
+  consentPrivacyDelivery: 'Consent & delivery',
+  links: 'Links',
+  educatorModule: 'Teaching',
+  speakerModule: 'Speaking',
+  authorModule: 'Writing',
+  photoModule: 'Photography',
+  review: 'Review',
+  done: 'Done',
+}
+
+/** Steps that are skippable — surfaced as "Optional" hints in the stepper. */
+export const PRESENTER_OPTIONAL_STEPS: ReadonlySet<string> = new Set([
+  'catalog',
+  'organizerMaterials',
+  'skillsMentorship',
+  'linksGallery',
+  'sessionCatalog',
+  'logistics',
+  'linksMedia',
+  'optionalTalks',
+  'media',
+  'services',
+  'links',
+])
+
 export function stepsForTrack(track: PresenterOnboardingTrack | null, hybridFocuses: ProfileFocus[] = []): string[] {
   if (!track) return ['chooseTrack']
   if (track === 'educator') return [...EDUCATOR_STEPS]
