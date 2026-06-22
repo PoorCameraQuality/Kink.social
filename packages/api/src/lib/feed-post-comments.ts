@@ -1,9 +1,11 @@
 import { and, count, desc, eq, inArray, notInArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { loadBlockedPairUserIds } from './blocks.js'
+import { emitActivity } from './feed-activities.js'
 import {
   pickLatestVisibleCommentPreviews,
   COMMENT_BODY_PREVIEW_MAX,
+  truncateCommentBodyPreview,
 } from './feed-post-comment-preview.js'
 
 export type FeedPostCommentPreview = {
@@ -193,6 +195,60 @@ export async function createFeedPostComment(
     body: row.body,
     createdAt: row.createdAt.toISOString(),
   }
+}
+
+function previewUrlsFromAttachments(attachments: unknown): string[] {
+  const previewUrls: string[] = []
+  if (!Array.isArray(attachments)) return previewUrls
+  for (const entry of attachments) {
+    if (!entry || typeof entry !== 'object') continue
+    const url = (entry as { url?: string }).url
+    const type = (entry as { type?: string }).type
+    if (typeof url === 'string' && url.trim() && (type === 'image' || type === 'video' || !type)) {
+      previewUrls.push(url.trim())
+    }
+    if (previewUrls.length >= 4) break
+  }
+  return previewUrls
+}
+
+/** Surface comment activity to followers (compact Following row). */
+export async function emitFeedPostCommentActivity(
+  actorId: string,
+  postId: string,
+  commentBody: string,
+): Promise<void> {
+  const [post] = await db
+    .select({
+      title: schema.feedPosts.title,
+      body: schema.feedPosts.body,
+      attachments: schema.feedPosts.attachments,
+      authorUsername: schema.users.username,
+    })
+    .from(schema.feedPosts)
+    .innerJoin(schema.users, eq(schema.feedPosts.authorId, schema.users.id))
+    .where(eq(schema.feedPosts.id, postId))
+    .limit(1)
+  if (!post) return
+
+  const title =
+    typeof post.title === 'string' && post.title.trim() ?
+      post.title.trim()
+    : truncateCommentBodyPreview(post.body, 80) || null
+
+  emitActivity({
+    actorId,
+    verb: 'post_comment',
+    objectType: 'feed_post',
+    objectId: postId,
+    metadata: {
+      excerpt: truncateCommentBodyPreview(commentBody),
+      postAuthorUsername: post.authorUsername,
+      title,
+      previewUrls: previewUrlsFromAttachments(post.attachments),
+      count: 1,
+    },
+  })
 }
 
 export async function deleteFeedPostComment(commentId: string, authorId: string): Promise<boolean> {

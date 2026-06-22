@@ -24,6 +24,9 @@ export type FeedActivityVerb =
   | 'vendor_shop_live'
   | 'loved'
   | 'reacted'
+  | 'post_love'
+  | 'post_comment'
+  | 'commented'
   | 'followed'
 
 export type FeedActivityObjectType =

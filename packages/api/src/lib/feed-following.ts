@@ -79,6 +79,9 @@ function deepLinkForActivity(verb: string, objectType: string, objectId: string,
   ) {
     return `/feed/posts/${objectId}`
   }
+  if ((verb === 'commented' || verb === 'post_comment') && objectType === 'feed_post') {
+    return `/feed/posts/${objectId}`
+  }
   if (verb === 'followed' && objectType === 'user') {
     const username = metadata.targetUsername
     if (typeof username === 'string' && username.trim()) {

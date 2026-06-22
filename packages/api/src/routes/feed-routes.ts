@@ -12,6 +12,7 @@ import { enrichPostsWithLikeMeta, setPostReaction, clearPostReaction } from '../
 import {
   createFeedPostComment,
   deleteFeedPostComment,
+  emitFeedPostCommentActivity,
   listFeedPostComments,
   loadFeedPostCommentCount,
   type FeedPostCommentPreview,
@@ -647,6 +648,7 @@ export async function registerFeedRoutes(app: FastifyInstance) {
     try {
       const comment = await createFeedPostComment(postId, user.userId, parsed.data.body)
       if (!comment) return reply.status(400).send({ error: 'Invalid comment' })
+      await emitFeedPostCommentActivity(user.userId, postId, parsed.data.body)
       const commentCount = await loadFeedPostCommentCount(postId, user.userId)
       return reply.send({ comment, commentCount })
     } catch (e) {
