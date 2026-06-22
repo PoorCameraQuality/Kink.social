@@ -69,7 +69,7 @@ export function ExhibitorsOrganizerPanel({ eventSlug, readOnly }: { eventSlug: s
           Directory
         </button>
       </div>
-      {err ? <p className="text-sm text-red-700">{err}</p> : null}
+      {err ? <p className="text-sm text-dc-danger">{err}</p> : null}
       {tab === 'directory' && !readOnly ?
         <div className="flex gap-2">
           <input
@@ -94,7 +94,7 @@ export function ExhibitorsOrganizerPanel({ eventSlug, readOnly }: { eventSlug: s
               <span className="font-medium text-dc-text">{r.name}</span>
               {r.booth ? <span className="ml-2 text-xs text-dc-muted">Booth {r.booth}</span> : null}
               {r.application_status ?
-                <span className="ml-2 text-xs text-amber-700">{r.application_status}</span>
+                <span className="ml-2 text-xs text-dc-warning">{r.application_status}</span>
               : null}
             </span>
             <span className="flex items-center gap-2">

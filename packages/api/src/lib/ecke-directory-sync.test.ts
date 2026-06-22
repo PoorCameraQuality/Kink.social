@@ -69,7 +69,22 @@ describe('ecke-directory-sync', () => {
     assert.doesNotMatch(row.short_description, /kink\.social/i)
   })
 
-  it('buildEckeEventRowFromListing maps memberActionUrl to website for ECKE CTA', () => {
+  it('buildEckeEventRowFromListing maps organizer website/venue/highlights onto the events row', () => {
+    const listing: EckeListingPayload = {
+      slug: 'test-con',
+      title: 'Test Con',
+      visibility: 'public',
+      website: 'https://example.com/fest',
+      venue: 'Hyatt Regency Baltimore',
+      features: ['100+ classes', 'Dungeon open late', 'Vendor hall'],
+    }
+    const row = buildEckeEventRowFromListing(listing, '11111111-1111-1111-1111-111111111111', 'convention')
+    assert.equal(row.website, 'https://example.com/fest')
+    assert.equal(row.venue, 'Hyatt Regency Baltimore')
+    assert.deepEqual(JSON.parse(row.features as string), ['100+ classes', 'Dungeon open late', 'Vendor hall'])
+  })
+
+  it('buildEckeEventRowFromListing leaves website empty and features null when not provided', () => {
     const listing: EckeListingPayload = {
       slug: 'test-con',
       title: 'Test Con',
@@ -77,6 +92,8 @@ describe('ecke-directory-sync', () => {
       memberActionUrl: 'https://kink.social/conventions/my-con/register',
     }
     const row = buildEckeEventRowFromListing(listing, '11111111-1111-1111-1111-111111111111', 'convention')
-    assert.equal(row.website, 'https://kink.social/conventions/my-con/register')
+    assert.equal(row.website, '')
+    assert.equal(row.features ?? null, null)
+    assert.equal(row.venue ?? null, null)
   })
 })

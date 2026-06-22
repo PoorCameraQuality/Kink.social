@@ -50,7 +50,7 @@ export function KitchenMealPanel({ eventSlug, readOnly }: { eventSlug: string; r
   return (
     <Panel className="space-y-4 p-4">
       <h3 className="font-serif text-lg text-dc-text">Kitchen. Meal signups</h3>
-      {err ? <p className="text-sm text-red-700">{err}</p> : null}
+      {err ? <p className="text-sm text-dc-danger">{err}</p> : null}
       {!readOnly ? (
         <div className="flex flex-wrap gap-2">
           <input

@@ -53,7 +53,7 @@ export function IcalBusyPreviewPanel({ eventSlug }: { eventSlug: string }) {
       >
         {busy ? 'Parsing…' : 'Preview busy blocks'}
       </button>
-      {err ? <p className="mt-2 text-sm text-red-700">{err}</p> : null}
+      {err ? <p className="mt-2 text-sm text-dc-danger">{err}</p> : null}
       {blocks.length ? (
         <div className="mt-3 max-h-48 overflow-y-auto">
           <p className="text-xs text-dc-muted">{blocks.length} block(s)</p>

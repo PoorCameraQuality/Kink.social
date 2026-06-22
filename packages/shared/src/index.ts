@@ -26,6 +26,7 @@ export {
   sanitizeEckeArticleSlug,
   sanitizeEckeEducationPublicText,
   sanitizeEckeEducationBodyHtml,
+  sanitizeEckeExternalUrl,
   sanitizeEckeHeroImageUrl,
   sanitizeEckePublicText,
   type EckePublishEligibilityInput,

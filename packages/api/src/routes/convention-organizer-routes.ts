@@ -53,7 +53,8 @@ import {
   VETTING_STATUS_VALUES,
 } from '../lib/convention-registrant-fields.js'
 import type { CommandRequirement } from '@c2k/shared'
-import { APP_NAME, commandPermissionIncludes } from '@c2k/shared'
+import { APP_NAME, commandPermissionIncludes, NOTIFICATION_TYPES } from '@c2k/shared'
+import { createNotification } from '../lib/create-notification.js'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -3447,6 +3448,31 @@ export async function registerConventionOrganizerRoutes(app: FastifyInstance) {
       })
       .where(eq(schema.conventionVettingApplications.id, applicationId))
       .returning()
+
+    // After commit: notify the applicant when a decision is made.
+    if (
+      existing.applicantUserId &&
+      nextStatus !== existing.status &&
+      (nextStatus === 'approved' || nextStatus === 'denied')
+    ) {
+      try {
+        await createNotification(
+          existing.applicantUserId,
+          nextStatus === 'approved'
+            ? NOTIFICATION_TYPES.conventionApplicationApproved
+            : NOTIFICATION_TYPES.conventionApplicationRejected,
+          {
+            conventionId: ctx.conv.id,
+            conventionSlug: ctx.conv.slug,
+            applicationId,
+            roleTitle: existing.roleApplied ?? null,
+          },
+        )
+      } catch (err) {
+        req.log.error({ err }, 'failed to notify applicant of vetting decision')
+      }
+    }
+
     return reply.send({ application: row })
   })
 

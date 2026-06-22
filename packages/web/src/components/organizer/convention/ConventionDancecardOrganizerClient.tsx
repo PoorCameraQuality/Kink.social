@@ -5,6 +5,7 @@ import { ExportsHubPanel } from '@/components/dancecard/organizer/ExportsHubPane
 import { EventSettingsPanel } from '@/components/dancecard/organizer/EventSettingsPanel'
 import { MessagingPanel } from '@/components/dancecard/organizer/MessagingPanel'
 import { PeopleHubPanel } from '@/components/dancecard/organizer/PeopleHubPanel'
+import { ApplicationsHubPanel } from '@/components/dancecard/organizer/applications/ApplicationsHubPanel'
 import { invalidateOrganizerDancecardCache, organizerDancecardFetch } from '@/components/dancecard/organizer/organizerApi'
 import type { ProgramSlotRow } from '@/lib/dancecard/organizerProgramSlotDto'
 import type { OrganizerStaffShiftDto } from '@/lib/dancecard/organizerStaffShiftDto'
@@ -257,8 +258,20 @@ function ConventionDancecardOrganizerBody({
     switchTab(tab, { slotId: null })
   }, [initialSlotId, slots, switchTab, tab])
 
+  // Applications consolidation: the standalone vetting tab and the People ->
+  // Applications sub-tab now live on the dedicated Applications control surface.
   useEffect(() => {
-    if (tab !== 'people' && LEGACY_PEOPLE_TABS.includes(tab)) {
+    if (tab === 'vetting') {
+      switchTab('applications')
+      return
+    }
+    if (tab === 'people' && searchParams.get(PEOPLE_SUB_TAB_PARAM) === 'applications') {
+      switchTab('applications')
+    }
+  }, [searchParams, switchTab, tab])
+
+  useEffect(() => {
+    if (tab !== 'people' && tab !== 'vetting' && LEGACY_PEOPLE_TABS.includes(tab)) {
       const sub = legacyTabToPeopleSubTab(tab)
       if (!sub) return
       const params = new URLSearchParams(searchParams)
@@ -411,6 +424,15 @@ function ConventionDancecardOrganizerBody({
                       onRefreshStaff={refreshStaff}
                       hasEventWindow={hasEventWindow}
                       peopleHubTemplate={bootstrapEvent?.peopleHubTemplate ?? 'full'}
+                    />
+                  ) : null}
+                  {tab === 'applications' ? (
+                    <ApplicationsHubPanel
+                      eventSlug={slug}
+                      permissions={permissions}
+                      readOnly={readOnly}
+                      timezone={timezone}
+                      onProgramRefresh={refreshProgram}
                     />
                   ) : null}
                   {tab === 'settings' ? (

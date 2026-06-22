@@ -232,7 +232,7 @@ export function MessagingPanel({ eventSlug, readOnly }: { eventSlug: string; rea
         </p>
       </div>
 
-      {needsMigration ? <p className="text-xs text-amber-800">{supportCopy.messagingNotReady}</p> : null}
+      {needsMigration ? <p className="text-xs text-dc-warning">{supportCopy.messagingNotReady}</p> : null}
       {err ? <p className="rounded-lg border border-dc-danger-border bg-dc-danger-muted px-3 py-2 text-sm text-dc-danger">{err}</p> : null}
 
       {step === 'compose' ? (

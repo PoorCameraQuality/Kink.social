@@ -183,11 +183,11 @@ function CalendarFeedsBlock({ slug }: { slug: string }) {
         the Program tab.
       </p>
       {needsMigration ? (
-        <p className="mt-2 text-xs text-amber-800">
+        <p className="mt-2 text-xs text-dc-warning">
           Calendar links are not enabled on this server yet. Ask your host to apply the latest Dancecard update.
         </p>
       ) : null}
-      {err ? <p className="mt-2 text-xs text-red-700">{err}</p> : null}
+      {err ? <p className="mt-2 text-xs text-dc-danger">{err}</p> : null}
       {lastUrl ? (
         <div className="mt-3 rounded-lg border border-dc-accent-border bg-dc-accent-muted p-2 text-xs text-dc-accent-foreground">
           <p className="font-semibold">New subscribe URL (copy now. Won&apos;t be shown again):</p>
@@ -234,13 +234,13 @@ function CalendarFeedsBlock({ slug }: { slug: string }) {
             <span>
               <span className="font-mono text-dc-text">{t.scope}</span>
               {t.label ? <span className="text-dc-muted"> · {t.label}</span> : null}
-              {t.revokedAt ? <span className="text-red-700"> (revoked)</span> : <span className="text-emerald-700"> (active)</span>}
+              {t.revokedAt ? <span className="text-dc-danger"> (revoked)</span> : <span className="text-dc-success"> (active)</span>}
             </span>
             {!t.revokedAt ? (
               <button
                 type="button"
                 disabled={busy}
-                className="text-red-700 hover:underline disabled:opacity-40"
+                className="text-dc-danger hover:underline disabled:opacity-40"
                 onClick={() => setRevokeId(t.id)}
               >
                 Revoke

@@ -94,9 +94,9 @@ export function ShiftSwapsPanel({
 
   if (needsMigration) {
     return (
-      <div className="rounded-xl border border-amber-200/25 bg-amber-100 px-4 py-5 text-sm text-amber-900">
+      <div className="rounded-xl border border-dc-warning/30 bg-dc-warning-muted px-4 py-5 text-sm text-dc-warning">
         <p className="font-medium">Shift trades are not enabled yet</p>
-        <p className="mt-2 text-amber-900/80">
+        <p className="mt-2 text-dc-warning/80">
           Shift swaps are not set up for this event yet. Contact your platform administrator, then refresh this page.
         </p>
       </div>
@@ -126,7 +126,7 @@ export function ShiftSwapsPanel({
           ))}
         </div>
       ) : null}
-      {err ? <p className="text-red-700">{err}</p> : null}
+      {err ? <p className="text-dc-danger">{err}</p> : null}
       {!swaps.length ? (
         <PeopleEmptyState title="No trade requests yet">
           When volunteers request shift swaps, they will appear here for approval.
@@ -165,7 +165,7 @@ export function ShiftSwapsPanel({
                     <button
                       type="button"
                       disabled={busy === s.id}
-                      className="rounded-full border border-rose-400/40 px-3 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-40"
+                      className="rounded-full border border-dc-danger/40 px-3 py-1 text-xs text-dc-danger hover:bg-dc-danger-muted disabled:opacity-40"
                       onClick={() => void decide(s.id, 'rejected')}
                     >
                       Decline

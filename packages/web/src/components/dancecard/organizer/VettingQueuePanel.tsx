@@ -125,9 +125,9 @@ export function VettingQueuePanel({
 
   if (needsMigration) {
     return (
-      <div className="rounded-xl border border-amber-200/25 bg-amber-100 px-4 py-5 text-sm text-amber-900">
+      <div className="rounded-xl border border-dc-warning/30 bg-dc-warning-muted px-4 py-5 text-sm text-dc-warning">
         <p className="font-medium">Trusted roles and applications are not enabled yet</p>
-        <p className="mt-2 text-amber-900/80">
+        <p className="mt-2 text-dc-warning/80">
           {supportCopy.vettingNotReady} Refresh this page after setup is complete.
         </p>
       </div>
@@ -180,13 +180,13 @@ export function VettingQueuePanel({
                 ? `${visibleApps.length} application${visibleApps.length === 1 ? '' : 's'}`
                 : 'No applications yet'}
               {pendingCount > 0 ? (
-                <span className="ml-2 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-900">
+                <span className="ml-2 rounded-full bg-dc-warning-muted px-2 py-0.5 text-xs text-dc-warning">
                   {pendingCount} need review
                 </span>
               ) : null}
             </p>
           </div>
-          {err ? <p className="mb-2 text-red-700">{err}</p> : null}
+          {err ? <p className="mb-2 text-dc-danger">{err}</p> : null}
           {!visibleApps.length ? (
             <div className="rounded-xl border border-dashed border-dc-border bg-dc-elevated-muted px-4 py-8 text-center">
               <p className="font-medium text-dc-muted">No applications in the queue</p>

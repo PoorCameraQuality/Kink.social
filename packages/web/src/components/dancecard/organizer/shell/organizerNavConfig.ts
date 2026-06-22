@@ -4,6 +4,8 @@ export type OrganizerTab =
 
   | 'program'
 
+  | 'applications'
+
   | 'staff'
 
   | 'swaps'
@@ -174,6 +176,29 @@ export const ORGANIZER_SIDEBAR_SECTIONS: OrganizerSidebarSection[] = [
         label: 'Import',
 
         description: 'Bring in a schedule from CSV or a spreadsheet.',
+
+      },
+
+    ],
+
+  },
+
+  {
+
+    id: 'applications',
+
+    label: 'Applications',
+
+    items: [
+
+      {
+
+        key: 'applications',
+
+        label: 'Applications',
+
+        description:
+          'One control surface for presenter, educator, photographer, performer, volunteer, staff, and vendor applications. Open or close each window and review submissions.',
 
       },
 

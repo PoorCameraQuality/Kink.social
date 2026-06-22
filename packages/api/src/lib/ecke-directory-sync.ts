@@ -14,6 +14,9 @@ export type EckeEventRow = {
   category: string
   logo: string
   website: string
+  venue?: string | null
+  /** Stored as JSON-encoded string[] in the events.features text column; ECKE parses it back to a list. */
+  features?: string | null
   organizer_name: string | null
   status: 'published' | 'draft'
   c2k_source_type: string
@@ -111,7 +114,9 @@ function buildEckeEventRowCore(input: {
     long_description: sanitizeEckePublicText(listing.description) ?? '',
     category,
     logo,
-    website: '',
+    website: listing.website ?? '',
+    venue: listing.venue ?? null,
+    features: listing.features?.length ? JSON.stringify(listing.features) : null,
     organizer_name: listing.orgDisplayName || null,
     status: hidden ? 'draft' : 'published',
     c2k_source_type: sourceType,

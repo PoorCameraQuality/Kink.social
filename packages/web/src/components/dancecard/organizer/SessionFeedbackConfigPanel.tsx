@@ -70,9 +70,9 @@ export function SessionFeedbackConfigPanel({
         Attendees can rate sessions after they end. Enable the module under Event modules, then turn on collection here.
       </p>
       {needsMigration ? (
-        <p className="mt-3 text-sm text-amber-800">{supportCopy.sessionFeedbackNotReady}</p>
+        <p className="mt-3 text-sm text-dc-warning">{supportCopy.sessionFeedbackNotReady}</p>
       ) : null}
-      {err ? <p className="mt-3 text-sm text-red-700">{err}</p> : null}
+      {err ? <p className="mt-3 text-sm text-dc-danger">{err}</p> : null}
       <label className="mt-4 flex items-center gap-2 text-sm text-dc-text">
         <input
           type="checkbox"

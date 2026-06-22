@@ -327,9 +327,9 @@ export function TrustedRolesPanel({
 
   if (needsMigration) {
     return (
-      <div className="rounded-xl border border-amber-200/25 bg-amber-100 px-4 py-5 text-sm text-amber-900">
+      <div className="rounded-xl border border-dc-warning/30 bg-dc-warning-muted px-4 py-5 text-sm text-dc-warning">
         <p className="font-medium">Trusted roles are not set up yet</p>
-        <p className="mt-2 text-amber-900/80">{supportCopy.trustedRolesNotReady} Refresh this page after setup is complete.</p>
+        <p className="mt-2 text-dc-warning/80">{supportCopy.trustedRolesNotReady} Refresh this page after setup is complete.</p>
       </div>
     )
   }
@@ -357,7 +357,7 @@ export function TrustedRolesPanel({
       </div>
 
       {err ? (
-        <div className="rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-sm text-red-800">{err}</div>
+        <div className="rounded-xl border border-dc-danger/30 bg-dc-danger-muted px-4 py-3 text-sm text-dc-danger">{err}</div>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,220px)_1fr]">
@@ -382,7 +382,7 @@ export function TrustedRolesPanel({
                   <p className="text-[10px] text-dc-muted">
                     {r.status === 'published' ? 'Published' : 'Draft'} · /apply/{r.applySlug}
                     {selectedId === r.id && roleApps.length > 0 ?
-                      <span className="ml-1 rounded-full bg-amber-500/20 px-1.5 text-amber-900">
+                      <span className="ml-1 rounded-full bg-dc-warning-muted px-1.5 text-dc-warning">
                         {roleApps.filter((a) => a.status === 'pending' || a.status === 'review').length} open
                       </span>
                     : null}
@@ -637,8 +637,7 @@ export function TrustedRolesPanel({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-dc-muted">Applications for this role</h3>
                 <Link
-                  to={organizerTabHref(workspaceBase, 'people', {
-                    peopleTab: 'applications',
+                  to={organizerTabHref(workspaceBase, 'applications', {
                     vettingRoleId: selectedId ?? undefined,
                   })}
                   className="text-xs font-medium text-dc-accent hover:underline"
@@ -646,7 +645,7 @@ export function TrustedRolesPanel({
                   Review in queue →
                 </Link>
               </div>
-              {roleAppsErr ? <p className="text-xs text-red-700">{roleAppsErr}</p> : null}
+              {roleAppsErr ? <p className="text-xs text-dc-danger">{roleAppsErr}</p> : null}
               {!roleApps.length && !roleAppsErr ?
                 <p className="text-xs text-dc-muted">No applications yet for this role.</p>
               : (
@@ -667,8 +666,7 @@ export function TrustedRolesPanel({
                         </p>
                       : null}
                       <Link
-                        to={organizerTabHref(workspaceBase, 'people', {
-                          peopleTab: 'applications',
+                        to={organizerTabHref(workspaceBase, 'applications', {
                           vettingRoleId: selectedId ?? undefined,
                           applicationId: app.id,
                         })}

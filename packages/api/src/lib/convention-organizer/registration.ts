@@ -223,16 +223,33 @@ export const TrustedRoleQuestionBody = z.object({
   visibilityRulesJson: z.record(z.string(), z.unknown()).optional(),
 })
 
+export const TRUSTED_ROLE_KIND_VALUES = [
+  'staff',
+  'volunteer',
+  'presenter',
+  'photographer',
+  'educator',
+  'performer',
+  'custom',
+] as const
+
+const trustedRoleWindowDate = z
+  .union([z.string(), z.null()])
+  .optional()
+  .transform((v) => (v == null || v === '' ? null : new Date(v)))
+
 export const TrustedRoleBody = z.object({
   name: z.string().min(1).max(255).optional(),
   slug: z.string().min(1).max(64).optional(),
   applySlug: z.string().min(1).max(64).optional(),
   description: z.string().max(5000).nullable().optional(),
   status: z.enum(TRUSTED_ROLE_STATUS_VALUES).optional(),
-  roleKind: z.enum(['staff', 'volunteer', 'custom']).optional(),
+  roleKind: z.enum(TRUSTED_ROLE_KIND_VALUES).optional(),
   introText: z.string().max(50000).optional(),
   confirmationText: z.string().max(10000).optional(),
   sortOrder: z.number().int().optional(),
+  applyOpensAt: trustedRoleWindowDate,
+  applyClosesAt: trustedRoleWindowDate,
   questions: z.array(TrustedRoleQuestionBody).optional(),
 })
 
@@ -279,10 +296,37 @@ export function mapTrustedRole(
     introText: row.introText,
     confirmationText: row.confirmationText,
     sortOrder: row.sortOrder,
+    applyOpensAt: row.applyOpensAt ? new Date(row.applyOpensAt).toISOString() : null,
+    applyClosesAt: row.applyClosesAt ? new Date(row.applyClosesAt).toISOString() : null,
+    applyOpen: isTrustedRoleApplyOpen(row),
     questions,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   }
+}
+
+/**
+ * True when a trusted role is currently accepting public applications:
+ * published, and within its optional open/close window.
+ */
+export function isTrustedRoleApplyOpen(
+  role: {
+    status: string
+    applyOpensAt?: Date | null
+    applyClosesAt?: Date | null
+  },
+  now: Date = new Date(),
+): boolean {
+  if (role.status !== 'published') return false
+  if (role.applyOpensAt) {
+    const opens = new Date(role.applyOpensAt)
+    if (Number.isFinite(opens.getTime()) && now < opens) return false
+  }
+  if (role.applyClosesAt) {
+    const closes = new Date(role.applyClosesAt)
+    if (Number.isFinite(closes.getTime()) && now > closes) return false
+  }
+  return true
 }
 
 /* --- Public registrant submission --- */

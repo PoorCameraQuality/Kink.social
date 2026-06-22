@@ -1,4 +1,10 @@
-import { APP_URL, sanitizeEckeArticleSlug, sanitizeEckeHeroImageUrl } from '@c2k/shared'
+import {
+  APP_URL,
+  sanitizeEckeArticleSlug,
+  sanitizeEckeExternalUrl,
+  sanitizeEckeHeroImageUrl,
+  sanitizeEckePublicText,
+} from '@c2k/shared'
 import { createHash } from 'node:crypto'
 import type { ConventionPublicSettings } from '../db/schema.js'
 import { parseVolunteerShiftTitle } from './ecke-dancecard-staff-sync.js'
@@ -16,6 +22,12 @@ export type EckeListingPayload = {
   visibility: 'public' | 'hidden'
   /** C2K member action URL (registration, etc.) — surfaced as ECKE event `website` CTA. */
   memberActionUrl?: string | null
+  /** Organizer-authored "what to expect" highlights for the public ECKE event page. */
+  features?: string[] | null
+  /** Named venue for the public ECKE event page (e.g. "Hyatt Regency"). */
+  venue?: string | null
+  /** Official external website (powers the ECKE "Visit official site" CTA). */
+  website?: string | null
 }
 
 export type EckeDancecardSlotPayload = {
@@ -161,6 +173,14 @@ export function buildConventionListingPayload(input: {
   const endsAt = input.anchor?.endsAt ?? input.endsAt
   const location = input.anchor?.publicLocationSummary?.trim() || input.anchor?.location?.trim() || null
 
+  const extras = input.settings?.eckeListing
+  const features = (extras?.highlights ?? [])
+    .map((h) => sanitizeEckePublicText(h)?.trim() ?? '')
+    .filter(Boolean)
+    .slice(0, 12)
+  const venue = sanitizeEckePublicText(extras?.venueName)?.trim() || null
+  const website = sanitizeEckeExternalUrl(extras?.websiteUrl)
+
   return {
     slug,
     title,
@@ -173,6 +193,9 @@ export function buildConventionListingPayload(input: {
     orgDisplayName: input.orgDisplayName ?? null,
     visibility: anchorHidden ? 'hidden' : 'public',
     memberActionUrl: `${APP_URL}/conventions/${encodeURIComponent(input.conventionSlug)}/register`,
+    features: features.length ? features : null,
+    venue,
+    website,
   }
 }
 

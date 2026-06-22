@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import OrganizerPublishConfirmDialog from '@/components/organizer/ui/OrganizerPublishConfirmDialog'
+import ConventionListingDetailsEditor from '@/components/organizer/ConventionListingDetailsEditor'
 import { patchConventionOrganizerSettings } from '@/lib/organizer/conventionProgramApi'
+import {
+  eckePublishHadListingWebhookSkip,
+  getEckePublishFailureMessage,
+} from '@/lib/ecke-publish-utils'
 
 type PublishTarget = {
   targetKind:
@@ -171,6 +176,7 @@ export default function EckePublishStub({
           settings: { publicProgramListing: true, dancecardPublishStatus: 'published' },
         })
       }
+      let publishTargets: Array<PublishTarget & { ok?: boolean; error?: string }> | undefined
       if (withEcke) {
         if (!data?.bridgeConnected) {
           setPreviewMessage(
@@ -194,12 +200,13 @@ export default function EckePublishStub({
           setPreviewMessageKind('error')
           return
         }
-        const failed = j.targets?.find((t) => t.ok === false)
-        if (failed?.error) {
-          setPreviewMessage(failed.error)
+        const publishFailure = getEckePublishFailureMessage(j.targets)
+        if (publishFailure) {
+          setPreviewMessage(publishFailure)
           setPreviewMessageKind('error')
           return
         }
+        publishTargets = j.targets
         setData({
           scope: j.scope,
           bridgeConnected: j.bridgeConnected,
@@ -208,7 +215,9 @@ export default function EckePublishStub({
       }
       setPreviewMessage(
         withEcke ?
-          `${scopeLabel} is now public${scopeType === 'convention' ? '' : ' on Kink Social'} and listed on East Coast Kink Events.`
+          eckePublishHadListingWebhookSkip(publishTargets) ?
+            `${scopeLabel} is live on East Coast Kink Events (event + Dancecard). The legacy directory listing webhook is not configured on this server.`
+          : `${scopeLabel} is now public${scopeType === 'convention' ? '' : ' on Kink Social'} and listed on East Coast Kink Events.`
         : `${scopeLabel} is now listed for the public to see.`,
       )
       setPreviewMessageKind('success')
@@ -244,6 +253,10 @@ export default function EckePublishStub({
           </p>
         </div>
       )}
+
+      {scopeType === 'convention' && scopeSlug ?
+        <ConventionListingDetailsEditor slug={scopeSlug} />
+      : null}
 
       {loadError ?
         <div

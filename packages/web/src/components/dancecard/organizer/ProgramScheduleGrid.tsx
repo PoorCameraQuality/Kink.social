@@ -127,7 +127,7 @@ function RoomLocationField({
           </option>
         ))}
       </select>
-      {locationsLoadErr ? <p className="mt-1 text-sm text-red-700">{locationsLoadErr}</p> : null}
+      {locationsLoadErr ? <p className="mt-1 text-sm text-dc-danger">{locationsLoadErr}</p> : null}
       {!locationsLoadErr && options.length === 0 ? (
         <p className="mt-1 text-xs text-dc-muted">
           No rooms yet. Add them on the{' '}
@@ -799,7 +799,7 @@ export function ProgramScheduleGrid({
           void confirmActionRef.current?.()
         }}
       />
-      {err ? <p className="text-sm text-red-700">{err}</p> : null}
+      {err ? <p className="text-sm text-dc-danger">{err}</p> : null}
 
       <div className="flex flex-wrap items-end gap-1.5 rounded-xl border border-dc-border bg-dc-elevated-muted p-2.5">
         <label className="text-xs text-dc-muted">
@@ -1123,7 +1123,7 @@ export function ProgramScheduleGrid({
                 />
               </label>
             </div>
-            {err ? <p className="mt-3 text-sm text-red-700">{err}</p> : null}
+            {err ? <p className="mt-3 text-sm text-dc-danger">{err}</p> : null}
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
@@ -1177,7 +1177,7 @@ export function ProgramScheduleGrid({
                 />
               </label>
             </div>
-            {err ? <p className="mt-3 text-sm text-red-700">{err}</p> : null}
+            {err ? <p className="mt-3 text-sm text-dc-danger">{err}</p> : null}
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"

@@ -362,7 +362,7 @@ export function DmCoveragePanel({
   return (
     <div className="space-y-6 text-sm text-dc-muted">
       {dialog}
-      {err ? <p className="text-sm text-red-700">{err}</p> : null}
+      {err ? <p className="text-sm text-dc-danger">{err}</p> : null}
       <TrustedRoleWorkflowCallout eventSlug={eventSlug} variant="coverage" />
 
       {!embedded ? (
