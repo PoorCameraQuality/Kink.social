@@ -582,12 +582,19 @@
 
 .feed-stream .feed-media-strip__thumb {
   flex: 0 0 auto;
-  width: 4.5rem;
-  height: 4.5rem;
+  display: block;
+  width: 5rem;
+  height: 5rem;
   overflow: hidden;
   border-radius: 0.5rem;
   border: 1px solid var(--dc-border);
   background: var(--dc-elevated-muted);
+  text-decoration: none;
+  color: inherit;
+}
+
+.feed-stream a.feed-media-strip__thumb:hover {
+  border-color: var(--dc-accent);
 }
 
 .feed-stream .feed-media-strip__thumb img {
@@ -602,13 +609,23 @@
   align-items: center;
   justify-content: center;
   min-width: 3rem;
-  height: 4.5rem;
+  height: 5rem;
   padding: 0 0.5rem;
   border-radius: 0.5rem;
   border: 1px dashed var(--dc-border);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--dc-text-muted);
+}
+
+.feed-stream a.feed-media-strip__more {
+  text-decoration: none;
+  color: inherit;
+}
+
+.feed-stream a.feed-media-strip__more:hover {
+  border-color: var(--dc-accent);
+  color: var(--dc-accent);
 }
 
 .feed-stream .feed-activity-row--connection .feed-activity-row__head {

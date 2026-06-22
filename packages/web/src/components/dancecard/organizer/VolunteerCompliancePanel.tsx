@@ -50,7 +50,7 @@ export function VolunteerCompliancePanel({ eventSlug }: { eventSlug: string; emb
           Read only
         </span>
       </div>
-      {err ? <p className="text-sm text-red-700">{err}</p> : null}
+      {err ? <p className="text-sm text-dc-danger">{err}</p> : null}
       {rows.length > 0 ? (
         <div className="grid gap-2 sm:grid-cols-3">
           <div className="rounded-xl border border-dc-border bg-dc-elevated-muted px-3 py-2">

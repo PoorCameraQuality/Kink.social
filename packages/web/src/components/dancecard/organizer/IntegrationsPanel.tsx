@@ -316,7 +316,7 @@ export function IntegrationsPanel({
         </div>
       </div>
 
-      {err ? <p className="text-red-700 whitespace-pre-wrap">{err}</p> : null}
+      {err ? <p className="text-dc-danger whitespace-pre-wrap">{err}</p> : null}
 
       <section className="rounded-xl border border-dc-border bg-dc-elevated-muted p-4">
         <h2 className="text-lg font-semibold text-dc-text">Optional features for this event</h2>
@@ -430,7 +430,7 @@ export function IntegrationsPanel({
           </button>
         </div>
         {lastMintedKey ? (
-          <p className="mt-3 rounded-lg bg-amber-100 p-2 text-xs text-amber-900">
+          <p className="mt-3 rounded-lg border border-dc-warning/30 bg-dc-warning-muted p-2 text-xs text-dc-warning">
             Copy now (shown once): <code className="break-all">{lastMintedKey}</code>
           </p>
         ) : null}
@@ -473,7 +473,7 @@ export function IntegrationsPanel({
           </button>
         </div>
         {lastHookSecret ? (
-          <p className="mt-3 rounded-lg bg-amber-100 p-2 text-xs text-amber-900">
+          <p className="mt-3 rounded-lg border border-dc-warning/30 bg-dc-warning-muted p-2 text-xs text-dc-warning">
             Signing secret (once): <code className="break-all">{lastHookSecret}</code>
           </p>
         ) : null}
@@ -498,7 +498,7 @@ export function IntegrationsPanel({
           other sites from reusing your link.
         </p>
         {embedNeedsMigration ? (
-          <p className="mt-2 text-xs text-amber-800">
+          <p className="mt-2 text-xs text-dc-warning">
             {supportCopy.embedTokensNotReady}
           </p>
         ) : null}
@@ -545,7 +545,7 @@ export function IntegrationsPanel({
           />
         </label>
         {lastEmbedToken ? (
-          <p className="mt-3 rounded-lg bg-amber-100 p-2 text-xs text-amber-900">
+          <p className="mt-3 rounded-lg border border-dc-warning/30 bg-dc-warning-muted p-2 text-xs text-dc-warning">
             Embed token (once): <code className="break-all">{lastEmbedToken}</code>
             <span className="mt-1 block text-dc-muted">
               Example:{' '}
@@ -604,7 +604,7 @@ export function IntegrationsPanel({
           Mint / rotate inbound secret
         </button>
         {lastMintedInbound ? (
-          <p className="mt-3 rounded-lg bg-amber-100 p-2 text-xs text-amber-900">
+          <p className="mt-3 rounded-lg border border-dc-warning/30 bg-dc-warning-muted p-2 text-xs text-dc-warning">
             Bearer token (once): <code className="break-all">{lastMintedInbound}</code>
           </p>
         ) : null}

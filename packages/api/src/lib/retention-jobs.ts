@@ -9,6 +9,11 @@ const PASSWORD_RESET_PURGE_AFTER_MS = Number(
 )
 const QUARANTINE_STALE_MS = Number(process.env.QUARANTINE_STALE_MS ?? 7 * 24 * 60 * 60 * 1000)
 
+/** Feed composer photos are committed to the gallery on upload; purge ones never posted. */
+const FEED_COMPOSER_DRAFT_TTL_MS = Number(
+  process.env.FEED_COMPOSER_DRAFT_TTL_MS ?? 24 * 60 * 60 * 1000,
+)
+
 export type RetentionJobResult = {
   passwordResetTokensDeleted: number
   registrationIpNulled: number
@@ -16,6 +21,7 @@ export type RetentionJobResult = {
   quarantineRowsUpdated: number
   rejectedMediaPurged: number
   deletedMediaPurged: number
+  abandonedFeedDraftsPurged: number
   notificationsDeleted: number
   staleSessionsDeleted: number
   skippedLegalHold: number
@@ -198,11 +204,77 @@ export async function purgeRejectedAndDeletedMedia(): Promise<{ rejected: number
   return { rejected, deleted: deletedCount }
 }
 
+/**
+ * Soft-delete feed composer photos that were staged into the gallery but never attached to a
+ * feed post within the TTL. Identified by `feed_upload` source surface + null
+ * `originalFeedPostId`. Soft-deleting the item removes it from the gallery and frees the user's
+ * personal photo quota immediately; the asset is flagged REMOVED so S3 cleanup runs via the
+ * existing rejected/removed media purge.
+ */
+export async function purgeAbandonedFeedComposerDrafts(): Promise<number> {
+  const cutoff = new Date(Date.now() - FEED_COMPOSER_DRAFT_TTL_MS)
+  const rows = await db
+    .select({
+      id: schema.mediaItems.id,
+      mediaAssetId: schema.mediaItems.mediaAssetId,
+      ownerUserId: schema.mediaItems.ownerUserId,
+    })
+    .from(schema.mediaItems)
+    .where(
+      and(
+        eq(schema.mediaItems.sourceSurface, 'feed_upload'),
+        isNull(schema.mediaItems.originalFeedPostId),
+        isNull(schema.mediaItems.deletedAt),
+        lt(schema.mediaItems.createdAt, cutoff),
+      ),
+    )
+    .limit(200)
+
+  if (rows.length === 0) return 0
+
+  const now = new Date()
+  let purged = 0
+  for (const row of rows) {
+    if (await isUnderLegalHold('media', row.mediaAssetId)) continue
+    if (await isUnderLegalHold('user', row.ownerUserId)) continue
+
+    await db
+      .update(schema.mediaItems)
+      .set({ deletedAt: now, updatedAt: now, showInFeed: false })
+      .where(eq(schema.mediaItems.id, row.id))
+
+    // Drop the orphan media post wrapper if it was never linked to a feed post.
+    const postLinks = await db
+      .select({ mediaPostId: schema.mediaPostItems.mediaPostId })
+      .from(schema.mediaPostItems)
+      .where(eq(schema.mediaPostItems.mediaItemId, row.id))
+    const postIds = postLinks.map((p) => p.mediaPostId)
+    if (postIds.length) {
+      await db
+        .update(schema.mediaPosts)
+        .set({ deletedAt: now, updatedAt: now, showInFeed: false })
+        .where(and(inArray(schema.mediaPosts.id, postIds), isNull(schema.mediaPosts.feedPostId)))
+    }
+
+    // Feed composer creates one dedicated asset per item, so flagging it REMOVED is safe and
+    // lets the existing S3 purge reclaim storage.
+    await db
+      .update(schema.mediaAssets)
+      .set({ uploadStatus: 'REMOVED', updatedAt: now })
+      .where(eq(schema.mediaAssets.id, row.mediaAssetId))
+
+    purged += 1
+  }
+
+  return purged
+}
+
 export async function runRetentionJobs(): Promise<RetentionJobResult> {
   const passwordResetTokensDeleted = await purgeExpiredPasswordResetTokens()
   const ipResult = await nullStaleRegistrationIpPrefixes()
   const quarantine = await purgeStaleQuarantineMedia()
   const media = await purgeRejectedAndDeletedMedia()
+  const abandonedFeedDraftsPurged = await purgeAbandonedFeedComposerDrafts()
   const notificationsDeleted = await purgeOldNotifications()
   const staleSessionsDeleted = await purgeStaleSessions()
   return {
@@ -212,6 +284,7 @@ export async function runRetentionJobs(): Promise<RetentionJobResult> {
     quarantineRowsUpdated: quarantine.rowsUpdated,
     rejectedMediaPurged: media.rejected,
     deletedMediaPurged: media.deleted,
+    abandonedFeedDraftsPurged,
     notificationsDeleted,
     staleSessionsDeleted,
     skippedLegalHold: ipResult.skippedLegalHold,

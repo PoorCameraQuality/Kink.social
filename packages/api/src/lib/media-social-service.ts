@@ -31,6 +31,10 @@ import { emitActivity } from './feed-activities.js'
 import { canViewerSeeMedia } from './media-visibility.js'
 import { viewerCanAccessScopedMediaItem } from './media-scoped-visibility.js'
 import { ensureUserSettingsRow } from './user-settings-row.js'
+import {
+  assertPersonalPhotoQuotaRoom,
+  PersonalPhotoQuotaError,
+} from './personal-photo-quota.js'
 
 async function loadUserPrivacySettings(userId: string) {
   const row = await ensureUserSettingsRow(userId)
@@ -221,6 +225,11 @@ export async function createMediaUpload(input: CreateMediaUploadInput) {
     throw new MediaSocialError('Private media cannot be posted to feed')
   }
 
+  const newImageCount = input.items.filter((item) => item.mediaKind === 'image' && !item.mediaAssetId).length
+  if (newImageCount > 0) {
+    await assertPersonalPhotoQuotaRoom(input.userId, newImageCount)
+  }
+
   const profileId = await resolveOwnerProfileId(input.userId)
   await ensureDefaultAlbumsForUser(input.userId)
 
@@ -266,7 +275,11 @@ export async function createMediaUpload(input: CreateMediaUploadInput) {
         input.attestation.uploaderConfirmedNoAiDeepfakeWithoutConsent,
     })
 
-    if (sourceSurface === 'profile_photo' || sourceSurface === 'profile_gallery') {
+    if (
+      sourceSurface === 'profile_photo' ||
+      sourceSurface === 'profile_gallery' ||
+      sourceSurface === 'feed_upload'
+    ) {
       await autoPublishProfileGalleryPhoto({ mediaAssetId, userId: input.userId })
     }
 

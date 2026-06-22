@@ -67,6 +67,7 @@ export function organizerRoutes(orgSlug: string, convSlug: string): RouteSpec[] 
     { path: `${base}?tab=tools`, name: 'org-tab-tools', auth: 'session', skipIfNoDb: true },
     { path: `${conv}?tab=dashboard`, name: 'conv-dashboard', auth: 'session', skipIfNoDb: true },
     { path: `${conv}?tab=program`, name: 'conv-program', auth: 'session', skipIfNoDb: true },
+    { path: `${conv}?tab=applications`, name: 'conv-applications', auth: 'session', skipIfNoDb: true },
     { path: `${conv}?tab=venues`, name: 'conv-venues', auth: 'session', skipIfNoDb: true },
     { path: `${conv}?tab=import`, name: 'conv-import', auth: 'session', skipIfNoDb: true },
     { path: `${conv}?tab=people&peopleTab=signups`, name: 'conv-people-signups', auth: 'session', skipIfNoDb: true },

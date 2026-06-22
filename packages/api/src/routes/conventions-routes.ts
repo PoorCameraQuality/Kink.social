@@ -234,6 +234,13 @@ const conventionSettingsSchema = z
       .max(64)
       .regex(/^[a-z0-9][a-z0-9-]*$/)
       .optional(),
+    eckeListing: z
+      .object({
+        highlights: z.array(z.string().min(1).max(120)).max(12).optional(),
+        venueName: z.union([z.string().max(160), z.literal('')]).optional(),
+        websiteUrl: z.union([z.string().url().max(2000), z.literal('')]).optional(),
+      })
+      .optional(),
     dancecardSlug: z
       .string()
       .min(1)
@@ -257,6 +264,12 @@ function normalizeConventionSettingsPatch(
   const out: Partial<ConventionPublicSettings> = { ...patch }
   if (patch.cocUrl === '') out.cocUrl = undefined
   if (patch.dancecardHost === '') out.dancecardHost = undefined
+  if (patch.eckeListing !== undefined) {
+    const highlights = (patch.eckeListing.highlights ?? []).map((s) => s.trim()).filter(Boolean)
+    const venueName = patch.eckeListing.venueName?.trim() || null
+    const websiteUrl = patch.eckeListing.websiteUrl?.trim() || null
+    out.eckeListing = { highlights, venueName, websiteUrl }
+  }
   return out
 }
 

@@ -2732,6 +2732,18 @@ export type ConventionPublicSettings = {
   programStaffAttendeeRoles?: string[]
   /** Public ECKE listing slug when different from convention slug. */
   eckeListingSlug?: string
+  /**
+   * Organizer-authored marketing extras pushed into the public ECKE `events` row so the
+   * eastcoastkinkevents.com page is rich out of the box (highlights list, venue, official site).
+   */
+  eckeListing?: {
+    /** "What to expect" bullet highlights, rendered as a list on the ECKE event page. */
+    highlights?: string[]
+    /** Named venue (e.g. "Hyatt Regency Baltimore"). */
+    venueName?: string | null
+    /** Official external website for the convention (powers the "Visit official site" CTA). */
+    websiteUrl?: string | null
+  }
   /** When set, program ops run on ECKE Dancecard; see docs in EastCoast-master dancecard-c2k-integration.md */
   dancecardSlug?: string
   dancecardHost?: string
@@ -3737,6 +3749,7 @@ export const eckePublishScopeEnum = pgEnum('ecke_publish_scope', [
   'organization',
   'convention',
   'group',
+  'event',
   'education_article',
   'vendor_profile',
   'event',

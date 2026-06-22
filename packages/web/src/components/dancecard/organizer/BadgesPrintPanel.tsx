@@ -148,7 +148,7 @@ export function BadgesPrintPanel({
 
   return (
     <div className="space-y-5">
-      {err ? <p className="text-sm text-red-700">{err}</p> : null}
+      {err ? <p className="text-sm text-dc-danger">{err}</p> : null}
       {logoMsg ? <p className="text-sm text-dc-accent">{logoMsg}</p> : null}
 
       {data && !loading ? (

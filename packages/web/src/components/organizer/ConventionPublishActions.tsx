@@ -4,6 +4,8 @@ import OrganizerPublishConfirmDialog from '@/components/organizer/ui/OrganizerPu
 
 import { patchConventionOrganizerSettings } from '@/lib/organizer/conventionProgramApi'
 
+import { getEckePublishFailureMessage } from '@/lib/ecke-publish-utils'
+
 import { canEckePublishConvention, canPublishConventionProgram } from '@/lib/organizer/org-tools-utils'
 
 
@@ -118,13 +120,15 @@ export default function ConventionPublishActions({
 
       const r = await fetch(`${eckeBase}/${action}`, { method: 'POST', credentials: 'include' })
 
-      const j = (await r.json()) as { error?: string; targets?: { ok?: boolean; error?: string }[] }
+      const j = (await r.json()) as {
+        error?: string
+        targets?: { ok?: boolean; error?: string; targetKind?: string }[]
+      }
 
       if (!r.ok) throw new Error(j.error ?? `${action} failed`)
 
-      const failed = j.targets?.find((t) => t.ok === false)
-
-      if (failed) throw new Error(failed.error ?? 'One or more targets failed')
+      const publishFailure = getEckePublishFailureMessage(j.targets)
+      if (publishFailure) throw new Error(publishFailure)
 
     },
 

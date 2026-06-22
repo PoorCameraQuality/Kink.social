@@ -959,6 +959,9 @@ export const conventionTrustedRoles = pgTable(
     confirmationText: text('confirmation_text').notNull().default(''),
     questions: jsonb('questions').notNull().default(sql`'[]'::jsonb`),
     roleKind: varchar('role_kind', { length: 32 }).notNull().default('custom'),
+    /** Per-role application window. `status` is the master on/off; these dates gate within published. */
+    applyOpensAt: timestamp('apply_opens_at', { withTimezone: true, mode: 'date' }),
+    applyClosesAt: timestamp('apply_closes_at', { withTimezone: true, mode: 'date' }),
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

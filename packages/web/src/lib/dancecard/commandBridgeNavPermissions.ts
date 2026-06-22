@@ -16,6 +16,7 @@ import type { SetupTaskId } from '@/lib/dancecard/setupTasks'
 export const TAB_PERMISSIONS: Record<OrganizerTab, CommandRequirement> = {
   dashboard: 'any',
   program: 'scheduler',
+  applications: ['registration', 'scheduler'],
   venues: 'scheduler',
   import: 'scheduler',
   people: 'any',

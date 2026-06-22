@@ -376,11 +376,11 @@ NEXT_PUBLIC_C2K_PUBLIC_URL      # CTA join links
 
 ## 13. Staging and production rollout
 
-1. Apply ECKE migrations on **staging** Supabase only (`c2k_ingest_external_ids` + per-entity columns).
-2. Deploy ECKE ingest API to **preview** Vercel; point kink.social staging worker at preview endpoint.
-3. Pilot one public education article end-to-end.
-4. Phase 2+ entities only after phase test checklist green.
-5. Production: operator enables `ECKE_PUBLISH_ENABLED` on kink.social API **and** worker after ECKE prod migration + API deploy.
+1. Apply ECKE migrations on Supabase (`c2k_ingest_external_ids` + per-entity columns).
+2. Deploy ECKE ingest API to **production** Vercel (`www.eastcoastkinkevents.com`). Do **not** point kink.social at per-commit Vercel preview URLs — previews are deployment artifacts, not a stable bridge target.
+3. Pair `ECKE_PUBLISH_SECRET` (kink.social API/worker) with `KINK_SOCIAL_INGEST_SECRET` (ECKE production).
+4. Pilot one public education article end-to-end.
+5. Phase 2+ entities only after phase test checklist green.
 6. Never enable service-role Option B and Option A simultaneously for the same entity type.
 
 ---

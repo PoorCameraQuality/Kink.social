@@ -580,11 +580,15 @@ function CompactActivityFeedCard({ item }: Props) {
       href={copyPath ?? undefined}
       linkLabel={copyPath ? linkLabel : undefined}
     >
-      {discussionExcerpt && (item.verb === 'replied_discussion' || item.verb === 'created_discussion') ?
+      {discussionExcerpt &&
+      (item.verb === 'replied_discussion' ||
+        item.verb === 'created_discussion' ||
+        item.verb === 'post_comment' ||
+        item.verb === 'commented') ?
         <p className="feed-activity-row__excerpt">{discussionExcerpt}</p>
       : null}
       {previewUrls.length > 0 ?
-        <FeedMediaStrip items={previewUrls.map((url) => ({ url }))} />
+        <FeedMediaStrip items={previewUrls.map((url) => ({ url }))} href={copyPath ?? undefined} />
       : targetName && copyPath ?
         <Link to={copyPath} className="feed-activity-row__target">
           <span className="feed-activity-row__target-avatar flex items-center justify-center text-xs font-semibold uppercase text-dc-accent">

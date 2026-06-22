@@ -2,9 +2,11 @@ import { Queue } from 'bullmq'
 import {
   executeEckePublishArticle,
   executeEckePublishConventionEvent,
+  executeEckePublishStandaloneEvent,
   executeEckePublishVendor,
   type EckePublishJobName,
 } from './ecke-publish-executor.js'
+import type { EckePublishResult } from './ecke-publish-client.js'
 
 export const ECKE_PUBLISH_QUEUE_NAME = 'c2k-ecke-publish'
 
@@ -56,24 +58,38 @@ export async function requestEckeConventionEventPublish(conventionId: string, us
   )
 }
 
+export async function requestEckeStandaloneEventPublish(eventId: string, userId?: string): Promise<void> {
+  await enqueueOrInline('publish-standalone-event', { eventId, userId }, `ecke-standalone-event:${eventId}`)
+}
+
 export async function runEckePublishJob(
   jobName: EckePublishJobName,
   data: Record<string, string | undefined>,
-): Promise<void> {
+): Promise<EckePublishResult> {
+  let result: EckePublishResult
   switch (jobName) {
     case 'publish-article':
       if (!data.articleId) throw new Error('publish-article missing articleId')
-      await executeEckePublishArticle(data.articleId, data.userId)
-      return
+      result = await executeEckePublishArticle(data.articleId, data.userId)
+      break
     case 'publish-vendor':
       if (!data.vendorProfileId) throw new Error('publish-vendor missing vendorProfileId')
-      await executeEckePublishVendor(data.vendorProfileId, data.userId)
-      return
+      result = await executeEckePublishVendor(data.vendorProfileId, data.userId)
+      break
     case 'publish-convention-event':
       if (!data.conventionId) throw new Error('publish-convention-event missing conventionId')
-      await executeEckePublishConventionEvent(data.conventionId, data.userId)
-      return
+      result = await executeEckePublishConventionEvent(data.conventionId, data.userId)
+      break
+    case 'publish-standalone-event':
+      if (!data.eventId) throw new Error('publish-standalone-event missing eventId')
+      result = await executeEckePublishStandaloneEvent(data.eventId, data.userId)
+      break
     default:
-      console.warn('[ecke-publish] unknown job', jobName)
+      throw new Error(`[ecke-publish] unknown job ${String(jobName)}`)
   }
+
+  if (!result.ok) {
+    throw new Error(result.error || `${jobName} failed`)
+  }
+  return result
 }

@@ -19,14 +19,30 @@ import {
   publishDancecardEventToEcke,
   publishDungeonRowToEcke,
   publishListingToEcke,
+  resolveEckePublicEventUrl,
   type EckePublishResult,
 } from '../lib/ecke-publish-client.js'
 import {
   buildEckeDungeonRowFromOrg,
   buildEckeEventRowFromListing,
+  buildEckeEventRowFromStandaloneEvent,
   isOrgDungeonListing,
 } from '../lib/ecke-directory-sync.js'
-import { requestEckeConventionEventPublish } from '../lib/ecke-publish-queue.js'
+import {
+  requestEckeConventionEventPublish,
+  requestEckeStandaloneEventPublish,
+} from '../lib/ecke-publish-queue.js'
+import {
+  executeEckePublishConventionEvent,
+  executeEckePublishStandaloneEvent,
+  executeEckeUnpublishConventionEvent,
+  executeEckeUnpublishStandaloneEvent,
+} from '../lib/ecke-publish-executor.js'
+import {
+  buildStandaloneEventListingPayload,
+  isStandaloneEventEckeEligible,
+  resolveStandaloneEventEckeSlug,
+} from '../lib/ecke-publish-payload.js'
 import { resolveConventionCommandAccess } from '../lib/convention-command-access.js'
 import { filterSlotsForPublicProgram } from '../lib/convention-program-policy.js'
 
@@ -311,10 +327,11 @@ async function requireGroupModerator(groupId: string, userId: string, reply: Fas
 }
 
 async function upsertTargetRow(input: {
-  scopeType: 'organization' | 'convention' | 'group'
+  scopeType: 'organization' | 'convention' | 'group' | 'event'
   organizationId?: string | null
   conventionId?: string | null
   groupId?: string | null
+  eventId?: string | null
   targetKind: 'ecke_listing' | 'dancecard_event' | 'ecke_event' | 'ecke_dungeon'
   externalSlug: string
   contentHash: string
@@ -340,6 +357,17 @@ async function upsertTargetRow(input: {
         .where(
           and(
             eq(schema.eckePublishTargets.conventionId, input.conventionId!),
+            eq(schema.eckePublishTargets.targetKind, input.targetKind),
+          ),
+        )
+        .limit(1)
+    : input.scopeType === 'event' ?
+      await db
+        .select({ id: schema.eckePublishTargets.id, publishedContentHash: schema.eckePublishTargets.publishedContentHash, lastPublishedAt: schema.eckePublishTargets.lastPublishedAt })
+        .from(schema.eckePublishTargets)
+        .where(
+          and(
+            eq(schema.eckePublishTargets.eventId, input.eventId!),
             eq(schema.eckePublishTargets.targetKind, input.targetKind),
           ),
         )
@@ -377,6 +405,7 @@ async function upsertTargetRow(input: {
     organizationId: input.organizationId ?? null,
     conventionId: input.conventionId ?? null,
     groupId: input.groupId ?? null,
+    eventId: input.eventId ?? null,
     targetKind: input.targetKind,
     externalSlug: input.externalSlug,
     contentHash: input.contentHash,
@@ -388,10 +417,11 @@ async function upsertTargetRow(input: {
 }
 
 async function markPublishOutcome(input: {
-  scopeType: 'organization' | 'convention' | 'group'
+  scopeType: 'organization' | 'convention' | 'group' | 'event'
   organizationId?: string | null
   conventionId?: string | null
   groupId?: string | null
+  eventId?: string | null
   targetKind: 'ecke_listing' | 'dancecard_event' | 'ecke_event' | 'ecke_dungeon'
   contentHash: string
   userId: string
@@ -409,6 +439,8 @@ async function markPublishOutcome(input: {
         eq(schema.eckePublishTargets.conventionId, input.conventionId!),
         eq(schema.eckePublishTargets.targetKind, input.targetKind),
       )
+    : input.scopeType === 'event' ?
+      and(eq(schema.eckePublishTargets.eventId, input.eventId!), eq(schema.eckePublishTargets.targetKind, input.targetKind))
     : and(
         eq(schema.eckePublishTargets.groupId, input.groupId!),
         eq(schema.eckePublishTargets.targetKind, input.targetKind),
@@ -540,6 +572,8 @@ async function publishConventionTargets(
         contentHash: string
         ok: boolean
         error?: string
+        publicUrl?: string
+        message?: string
         slotCount?: number
         staffShiftCount?: number
       }>
@@ -558,6 +592,8 @@ async function publishConventionTargets(
     contentHash: string
     ok: boolean
     error?: string
+    publicUrl?: string
+    message?: string
     slotCount?: number
     staffShiftCount?: number
   }> = []
@@ -611,14 +647,42 @@ async function publishConventionTargets(
     contentHash: eventHash,
     userId,
   })
-  void requestEckeConventionEventPublish(conv.id, userId)
-  results.push({
-    targetKind: 'ecke_event',
-    externalSlug: eventRow.slug,
-    status: 'draft',
-    contentHash: eventHash,
-    ok: true,
-  })
+
+  const inline = process.env.C2K_ECKE_PUBLISH_INLINE === 'true'
+  if (inline) {
+    const eventResult = await executeEckePublishConventionEvent(conv.id, userId)
+    results.push({
+      targetKind: 'ecke_event',
+      externalSlug: eventRow.slug,
+      status: eventResult.ok ? 'published' : 'error',
+      contentHash: eventHash,
+      ok: eventResult.ok,
+      error: eventResult.ok ? undefined : eventResult.error,
+      publicUrl: eventResult.ok ? resolveEckePublicEventUrl(eventRow.slug) : undefined,
+      message: eventResult.ok ? 'Published to ECKE events' : eventResult.error,
+    })
+  } else {
+    try {
+      await requestEckeConventionEventPublish(conv.id, userId)
+      results.push({
+        targetKind: 'ecke_event',
+        externalSlug: eventRow.slug,
+        status: 'queued',
+        contentHash: eventHash,
+        ok: true,
+        message: 'Queued for ECKE events publish',
+      })
+    } catch (err) {
+      results.push({
+        targetKind: 'ecke_event',
+        externalSlug: eventRow.slug,
+        status: 'error',
+        contentHash: eventHash,
+        ok: false,
+        error: err instanceof Error ? err.message : 'Failed to queue ECKE event publish',
+      })
+    }
+  }
 
   if (isDancecardPublishEnabled(conv.settings)) {
     const dancecardPayload = buildDancecardEventPayload({
@@ -670,7 +734,7 @@ async function publishConventionTargets(
   return { ok: true as const, results }
 }
 
-async function loadTargetRows(scopeType: 'organization' | 'convention' | 'group', scopeId: string) {
+async function loadTargetRows(scopeType: 'organization' | 'convention' | 'group' | 'event', scopeId: string) {
   if (scopeType === 'organization') {
     return db
       .select()
@@ -683,10 +747,272 @@ async function loadTargetRows(scopeType: 'organization' | 'convention' | 'group'
       .from(schema.eckePublishTargets)
       .where(eq(schema.eckePublishTargets.conventionId, scopeId))
   }
+  if (scopeType === 'event') {
+    return db
+      .select()
+      .from(schema.eckePublishTargets)
+      .where(eq(schema.eckePublishTargets.eventId, scopeId))
+  }
   return db
     .select()
     .from(schema.eckePublishTargets)
     .where(eq(schema.eckePublishTargets.groupId, scopeId))
+}
+
+type StandaloneEventContext = {
+  ev: {
+    id: string
+    hostId: string
+    title: string
+    description: string | null
+    startsAt: Date
+    endsAt: Date | null
+    location: string | null
+    publicLocationSummary: string | null
+    locationVisibility: 'public' | 'rsvp' | 'approved'
+    imageUrl: string | null
+    visibility: string
+    organizationId: string | null
+    category: string | null
+    tags: string[] | null
+  }
+  org: { slug: string; displayName: string } | null
+  hostDisplayName: string | null
+  isConventionAnchor: boolean
+  priorEckeSlug: string | null
+}
+
+async function resolveStandaloneEventContext(eventIdOrSlug: string): Promise<StandaloneEventContext | null> {
+  const trimmed = eventIdOrSlug.trim()
+  const isUuid = /^[0-9a-f-]{36}$/i.test(trimmed)
+
+  let eventId = isUuid ? trimmed : null
+  if (!eventId) {
+    const [target] = await db
+      .select({ eventId: schema.eckePublishTargets.eventId })
+      .from(schema.eckePublishTargets)
+      .where(
+        and(
+          eq(schema.eckePublishTargets.scopeType, 'event'),
+          eq(schema.eckePublishTargets.externalSlug, trimmed.toLowerCase()),
+          eq(schema.eckePublishTargets.targetKind, 'ecke_event'),
+        ),
+      )
+      .limit(1)
+    eventId = target?.eventId ?? null
+  }
+  if (!eventId) return null
+
+  const [ev] = await db
+    .select({
+      id: schema.events.id,
+      hostId: schema.events.hostId,
+      title: schema.events.title,
+      description: schema.events.description,
+      startsAt: schema.events.startsAt,
+      endsAt: schema.events.endsAt,
+      location: schema.events.location,
+      publicLocationSummary: schema.events.publicLocationSummary,
+      locationVisibility: schema.events.locationVisibility,
+      imageUrl: schema.events.imageUrl,
+      visibility: schema.events.visibility,
+      organizationId: schema.events.organizationId,
+      category: schema.events.category,
+      tags: schema.events.tags,
+    })
+    .from(schema.events)
+    .where(eq(schema.events.id, eventId))
+    .limit(1)
+  if (!ev) return null
+
+  const [anchorConv] = await db
+    .select({ id: schema.conventions.id })
+    .from(schema.conventions)
+    .where(eq(schema.conventions.anchorEventId, ev.id))
+    .limit(1)
+
+  let org: { slug: string; displayName: string } | null = null
+  if (ev.organizationId) {
+    const [o] = await db
+      .select({ slug: schema.organizations.slug, displayName: schema.organizations.displayName })
+      .from(schema.organizations)
+      .where(eq(schema.organizations.id, ev.organizationId))
+      .limit(1)
+    org = o ?? null
+  }
+
+  const [hostProfile] = await db
+    .select({ displayName: schema.profiles.displayName, username: schema.users.username })
+    .from(schema.users)
+    .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
+    .where(eq(schema.users.id, ev.hostId))
+    .limit(1)
+
+  const [priorTarget] = await db
+    .select({ externalSlug: schema.eckePublishTargets.externalSlug })
+    .from(schema.eckePublishTargets)
+    .where(and(eq(schema.eckePublishTargets.eventId, ev.id), eq(schema.eckePublishTargets.targetKind, 'ecke_event')))
+    .limit(1)
+
+  return {
+    ev,
+    org,
+    hostDisplayName: hostProfile?.displayName?.trim() || hostProfile?.username || null,
+    isConventionAnchor: Boolean(anchorConv),
+    priorEckeSlug: priorTarget?.externalSlug ?? null,
+  }
+}
+
+async function requireEventPublisher(eventIdOrSlug: string, userId: string, reply: FastifyReply) {
+  const ctx = await resolveStandaloneEventContext(eventIdOrSlug)
+  if (!ctx) {
+    reply.status(404).send({ error: 'Event not found' })
+    return null
+  }
+
+  if (ctx.ev.hostId === userId) return ctx
+
+  if (ctx.ev.organizationId) {
+    const [orgRow] = await db
+      .select({ role: schema.organizationMembers.role })
+      .from(schema.organizationMembers)
+      .where(
+        and(
+          eq(schema.organizationMembers.organizationId, ctx.ev.organizationId),
+          eq(schema.organizationMembers.userId, userId),
+        ),
+      )
+      .limit(1)
+    if (orgRow && (ORG_ROLE_RANK[orgRow.role] ?? 0) >= ORG_ROLE_RANK.MODERATOR) {
+      return ctx
+    }
+  }
+
+  reply.status(403).send({ error: 'Event host or org moderator access required' })
+  return null
+}
+
+function buildStandaloneEventPreview(ctx: StandaloneEventContext): {
+  listingPayload: EckeListingPayload
+  listingHash: string
+  eventRow: ReturnType<typeof buildEckeEventRowFromStandaloneEvent>
+  eventHash: string
+} {
+  const listingPayload = buildStandaloneEventListingPayload({
+    eventId: ctx.ev.id,
+    title: ctx.ev.title,
+    description: ctx.ev.description,
+    startsAt: ctx.ev.startsAt,
+    endsAt: ctx.ev.endsAt,
+    location: ctx.ev.location,
+    publicLocationSummary: ctx.ev.publicLocationSummary,
+    locationVisibility: ctx.ev.locationVisibility,
+    imageUrl: ctx.ev.imageUrl,
+    orgSlug: ctx.org?.slug ?? null,
+    orgDisplayName: ctx.org?.displayName ?? null,
+    hostDisplayName: ctx.hostDisplayName,
+    visibility: ctx.ev.visibility,
+    eckeSlug: ctx.priorEckeSlug ?? resolveStandaloneEventEckeSlug(ctx.ev.title, ctx.ev.id),
+  })
+  const listingHash = hashEckePayload(listingPayload)
+  const eventRow = buildEckeEventRowFromStandaloneEvent(listingPayload, ctx.ev.id, {
+    category: ctx.ev.category,
+    tags: ctx.ev.tags,
+  })
+  const eventHash = hashEckePayload(eventRow)
+  return { listingPayload, listingHash, eventRow, eventHash }
+}
+
+async function publishStandaloneEventTarget(
+  ctx: StandaloneEventContext,
+  userId: string,
+): Promise<
+  | { ok: false; error: string }
+  | {
+      ok: true
+      result: {
+        targetKind: 'ecke_event'
+        externalSlug: string
+        status: string
+        contentHash: string
+        ok: boolean
+        error?: string
+        publicUrl?: string
+        message?: string
+      }
+    }
+> {
+  const cfg = loadEckePublishClientConfig()
+  if (!cfg) {
+    return { ok: false as const, error: 'Publish bridge not configured (ECKE_PUBLISH_ENABLED + Supabase creds)' }
+  }
+
+  const eligibility = isStandaloneEventEckeEligible({
+    visibility: ctx.ev.visibility,
+    isConventionAnchor: ctx.isConventionAnchor,
+  })
+  if (!eligibility.eligible) {
+    return { ok: false as const, error: eligibility.reason ?? 'Event not eligible for ECKE publish' }
+  }
+
+  const { listingPayload, eventRow, eventHash } = buildStandaloneEventPreview(ctx)
+  if (listingPayload.visibility === 'hidden') {
+    return { ok: false as const, error: 'Event listing is not public' }
+  }
+
+  await upsertTargetRow({
+    scopeType: 'event',
+    eventId: ctx.ev.id,
+    targetKind: 'ecke_event',
+    externalSlug: eventRow.slug,
+    contentHash: eventHash,
+    userId,
+  })
+
+  const inline = process.env.C2K_ECKE_PUBLISH_INLINE === 'true'
+  if (inline) {
+    const eventResult = await executeEckePublishStandaloneEvent(ctx.ev.id, userId)
+    return {
+      ok: true,
+      result: {
+        targetKind: 'ecke_event',
+        externalSlug: eventRow.slug,
+        status: eventResult.ok ? 'published' : 'error',
+        contentHash: eventHash,
+        ok: eventResult.ok,
+        error: eventResult.ok ? undefined : eventResult.error,
+        publicUrl: eventResult.ok ? resolveEckePublicEventUrl(eventRow.slug) : undefined,
+        message: eventResult.ok ? 'Published to ECKE events' : eventResult.error,
+      },
+    }
+  }
+
+  try {
+    await requestEckeStandaloneEventPublish(ctx.ev.id, userId)
+    return {
+      ok: true,
+      result: {
+        targetKind: 'ecke_event',
+        externalSlug: eventRow.slug,
+        status: 'queued',
+        contentHash: eventHash,
+        ok: true,
+        message: 'Queued for ECKE events publish',
+      },
+    }
+  } catch (err) {
+    return {
+      ok: true,
+      result: {
+        targetKind: 'ecke_event',
+        externalSlug: eventRow.slug,
+        status: 'error',
+        contentHash: eventHash,
+        ok: false,
+        error: err instanceof Error ? err.message : 'Failed to queue ECKE event publish',
+      },
+    }
+  }
 }
 
 function targetResponse(
@@ -902,6 +1228,24 @@ export async function registerEckePublishRoutes(app: FastifyInstance) {
       payload: listingPayload,
     })
 
+    const eventRow = buildEckeEventRowFromListing(listingPayload, conv.id, 'convention')
+    const eventHash = hashEckePayload(eventRow)
+    const eventStatus = await upsertTargetRow({
+      scopeType: 'convention',
+      conventionId: conv.id,
+      targetKind: 'ecke_event',
+      externalSlug: eventRow.slug,
+      contentHash: eventHash,
+      userId: user.userId,
+    })
+    targets.push({
+      targetKind: 'ecke_event',
+      externalSlug: eventRow.slug,
+      status: eventStatus,
+      contentHash: eventHash,
+      payload: listingPayload,
+    })
+
     if (isDancecardPublishEnabled(conv.settings)) {
       const dancecardPayload = buildDancecardEventPayload({
         conventionSlug: conv.slug,
@@ -1017,6 +1361,166 @@ export async function registerEckePublishRoutes(app: FastifyInstance) {
       scope: { type: 'convention', slug: resolved.conv.slug, name: resolved.conv.name },
       bridgeConnected: true,
       targets: outcome.results,
+    })
+  })
+
+  app.post('/api/v1/organizer/ecke-publish/conventions/:slug/unpublish', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { slug } = req.params as { slug: string }
+
+    const resolved = await requireConventionModerator(slug, user.userId, reply)
+    if (!resolved) return
+
+    if (!isBridgeConnected()) {
+      return reply.status(503).send({ error: 'ECKE publish bridge is not configured' })
+    }
+
+    const result = await executeEckeUnpublishConventionEvent(resolved.conv.id, user.userId)
+    const rows = await loadTargetRows('convention', resolved.conv.id)
+    const target = rows.find((r) => r.targetKind === 'ecke_event')
+
+    return reply.send({
+      scope: { type: 'convention', slug: resolved.conv.slug, name: resolved.conv.name },
+      bridgeConnected: true,
+      targets: [
+        {
+          targetKind: 'ecke_event',
+          externalSlug: target?.externalSlug ?? '',
+          status: result.ok ? 'stale' : 'error',
+          ok: result.ok,
+          error: result.ok ? undefined : result.error,
+          message: result.ok ? 'Unpublished from ECKE events' : result.error,
+        },
+      ],
+    })
+  })
+
+  app.get('/api/v1/organizer/ecke-publish/events/:eventIdOrSlug', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { eventIdOrSlug } = req.params as { eventIdOrSlug: string }
+
+    const ctx = await requireEventPublisher(eventIdOrSlug, user.userId, reply)
+    if (!ctx) return
+
+    const { listingPayload, eventRow, eventHash } = buildStandaloneEventPreview(ctx)
+    const preview: EckePublishTargetPreview = {
+      targetKind: 'ecke_event',
+      externalSlug: eventRow.slug,
+      payload: listingPayload,
+      contentHash: eventHash,
+    }
+
+    const rows = await loadTargetRows('event', ctx.ev.id)
+    const eventRowTarget = rows.find((r) => r.targetKind === 'ecke_event')
+    const eligibility = isStandaloneEventEckeEligible({
+      visibility: ctx.ev.visibility,
+      isConventionAnchor: ctx.isConventionAnchor,
+    })
+
+    return reply.send({
+      scope: { type: 'event', id: ctx.ev.id, title: ctx.ev.title },
+      bridgeConnected: isBridgeConnected(),
+      eligible: eligibility.eligible,
+      ineligibleReason: eligibility.reason ?? null,
+      targets: [targetResponse(preview, eventRowTarget)],
+    })
+  })
+
+  app.post('/api/v1/organizer/ecke-publish/events/:eventIdOrSlug/preview', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { eventIdOrSlug } = req.params as { eventIdOrSlug: string }
+
+    const ctx = await requireEventPublisher(eventIdOrSlug, user.userId, reply)
+    if (!ctx) return
+
+    const eligibility = isStandaloneEventEckeEligible({
+      visibility: ctx.ev.visibility,
+      isConventionAnchor: ctx.isConventionAnchor,
+    })
+    if (!eligibility.eligible) {
+      return reply.status(403).send({ error: eligibility.reason ?? 'Event not eligible for ECKE publish' })
+    }
+
+    const { listingPayload, eventRow, eventHash } = buildStandaloneEventPreview(ctx)
+    const status = await upsertTargetRow({
+      scopeType: 'event',
+      eventId: ctx.ev.id,
+      targetKind: 'ecke_event',
+      externalSlug: eventRow.slug,
+      contentHash: eventHash,
+      userId: user.userId,
+    })
+
+    return reply.send({
+      scope: { type: 'event', id: ctx.ev.id, title: ctx.ev.title },
+      bridgeConnected: isBridgeConnected(),
+      targets: [
+        {
+          targetKind: 'ecke_event',
+          externalSlug: eventRow.slug,
+          status,
+          contentHash: eventHash,
+          payload: listingPayload,
+        },
+      ],
+    })
+  })
+
+  app.post('/api/v1/organizer/ecke-publish/events/:eventIdOrSlug/publish', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { eventIdOrSlug } = req.params as { eventIdOrSlug: string }
+
+    const ctx = await requireEventPublisher(eventIdOrSlug, user.userId, reply)
+    if (!ctx) return
+
+    const outcome = await publishStandaloneEventTarget(ctx, user.userId)
+    if (!outcome.ok) return reply.status(503).send({ error: outcome.error })
+
+    return reply.send({
+      scope: { type: 'event', id: ctx.ev.id, title: ctx.ev.title },
+      bridgeConnected: true,
+      targets: [outcome.result],
+    })
+  })
+
+  app.post('/api/v1/organizer/ecke-publish/events/:eventIdOrSlug/unpublish', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { eventIdOrSlug } = req.params as { eventIdOrSlug: string }
+
+    const ctx = await requireEventPublisher(eventIdOrSlug, user.userId, reply)
+    if (!ctx) return
+
+    if (!isBridgeConnected()) {
+      return reply.status(503).send({ error: 'ECKE publish bridge is not configured' })
+    }
+
+    const result = await executeEckeUnpublishStandaloneEvent(ctx.ev.id, user.userId)
+    const rows = await loadTargetRows('event', ctx.ev.id)
+    const target = rows.find((r) => r.targetKind === 'ecke_event')
+
+    return reply.send({
+      scope: { type: 'event', id: ctx.ev.id, title: ctx.ev.title },
+      bridgeConnected: true,
+      targets: [
+        {
+          targetKind: 'ecke_event',
+          externalSlug: target?.externalSlug ?? '',
+          status: result.ok ? 'stale' : 'error',
+          ok: result.ok,
+          error: result.ok ? undefined : result.error,
+          message: result.ok ? 'Unpublished from ECKE events' : result.error,
+        },
+      ],
     })
   })
 

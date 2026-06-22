@@ -261,3 +261,15 @@ export function sanitizeEckeHeroImageUrl(url: string | null | undefined): string
   return trimmed
 }
 
+/**
+ * Organizer-supplied external links (official site CTA) destined for public ECKE pages.
+ * Must be an absolute http(s) URL and never a kink.social app URL.
+ */
+export function sanitizeEckeExternalUrl(url: string | null | undefined): string | null {
+  const trimmed = url?.trim()
+  if (!trimmed) return null
+  if (!/^https?:\/\//i.test(trimmed)) return null
+  if (KINK_SOCIAL_HOST_RE.test(trimmed)) return null
+  return trimmed
+}
+

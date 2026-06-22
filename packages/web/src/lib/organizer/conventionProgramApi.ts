@@ -275,6 +275,12 @@ export async function deleteStaffShift(slug: string, shiftId: string): Promise<v
   await convFetch(slug, `/volunteer-shifts/${encodeURIComponent(shiftId)}`, { method: 'DELETE' })
 }
 
+export type ConventionEckeListingDetails = {
+  highlights?: string[]
+  venueName?: string | null
+  websiteUrl?: string | null
+}
+
 export type ConventionSettingsPatch = {
   dancecardPublishStatus?: 'draft' | 'published'
   registrationAccessCode?: string
@@ -283,6 +289,7 @@ export type ConventionSettingsPatch = {
   dancecardSlug?: string
   dancecardEnabled?: boolean
   venueRooms?: string[]
+  eckeListing?: ConventionEckeListingDetails
 }
 
 export async function patchConventionOrganizerSettings(

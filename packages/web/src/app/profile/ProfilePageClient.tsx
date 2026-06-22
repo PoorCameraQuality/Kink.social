@@ -10,16 +10,21 @@ import ProfileCommunityTab from '@/components/profile/tabs/ProfileCommunityTab'
 import ProfileReviewsTab from '@/components/profile/tabs/ProfileReviewsTab'
 import ProfileIsoTab from '@/components/profile/tabs/ProfileIsoTab'
 import ProfileConnectionsTab from '@/components/profile/tabs/ProfileConnectionsTab'
-import ProfileSocialRail from '@/components/profile/social/ProfileSocialRail'
+import ProfileNetworkCard from '@/components/profile/social/ProfileNetworkCard'
 import type {
   ProfileConnectionsSummary,
   ProfileFollowsSummary,
   ProfileMutualConnections,
 } from '@/lib/profile-social-types'
-import ProfileStoryView, { buildProfileStoryLayoutArgs } from '@/components/profile/story/ProfileStoryView'
-import ProfileStorySidebar from '@/components/profile/story/ProfileStorySidebar'
-import ProfileCoverHeader from '@/components/profile/layout/ProfileCoverHeader'
-import ProfilePageShell from '@/components/profile/layout/ProfilePageShell'
+import ProfileLayout from '@/components/profile/layout/ProfileLayout'
+import ProfileHero from '@/components/profile/layout/ProfileHero'
+import ProfileGalleryStrip from '@/components/profile/layout/ProfileGalleryStrip'
+import ProfileAboutBlock from '@/components/profile/story/ProfileAboutBlock'
+import ProfileInterestsCard from '@/components/profile/story/ProfileInterestsCard'
+import ProfileLookingForCard from '@/components/profile/story/ProfileLookingForCard'
+import ProfileUpcomingEventsCard from '@/components/profile/story/ProfileUpcomingEventsCard'
+import ProfileOrganizationsCard from '@/components/profile/story/ProfileOrganizationsCard'
+import ProfileCommunitySnapshotCard from '@/components/profile/story/ProfileCommunitySnapshotCard'
 import ProfileMediaTabPanel from '@/components/profile/layout/ProfileMediaTabPanel'
 import {
   DEFAULT_PUBLIC_PROFILE_TAB,
@@ -42,7 +47,7 @@ import { formatMyRsvpLabel, useApiMyRsvps } from '@/hooks/useApiMyRsvps'
 import { useApiProfileMe } from '@/hooks/useApiProfileMe'
 import { useApiMyProfileFeedPosts } from '@/hooks/useApiProfileFeedPosts'
 import { clearProfileEditLocalOverrides, PROFILE_EDIT_STORAGE_KEY } from '@/lib/profileEditLocalStorage'
-import { formatPronounDisplay, pickPrimaryProfilePhoto, visibleProfileIdentityFields } from '@c2k/shared'
+import { ADULT_CONTENT_PREFERENCES, formatPronounDisplay, pickPrimaryProfilePhoto, visibleProfileIdentityFields } from '@c2k/shared'
 
 function formatAttendedDate(iso: string): string {
   const d = new Date(iso)
@@ -227,14 +232,16 @@ export default function ProfilePageClient() {
     const onVisible = () => {
       if (document.visibilityState === 'visible') refresh()
     }
-    const onPrivacySaved = () => refresh()
+    const onProfileSaved = () => refresh()
     window.addEventListener('focus', refresh)
     document.addEventListener('visibilitychange', onVisible)
-    window.addEventListener('c2k:profile-privacy-saved', onPrivacySaved)
+    window.addEventListener('c2k:profile-privacy-saved', onProfileSaved)
+    window.addEventListener('c2k:profile-saved', onProfileSaved)
     return () => {
       window.removeEventListener('focus', refresh)
       document.removeEventListener('visibilitychange', onVisible)
-      window.removeEventListener('c2k:profile-privacy-saved', onPrivacySaved)
+      window.removeEventListener('c2k:profile-privacy-saved', onProfileSaved)
+      window.removeEventListener('c2k:profile-saved', onProfileSaved)
     }
   }, [loadRemoteProfile, profileMe.reload])
 
@@ -318,7 +325,7 @@ export default function ProfilePageClient() {
         location: prof.location ?? prof.customLocation ?? null,
         fieldVisibility: prof.fieldVisibility,
       },
-      { isOwner: true, isFriend: false, asPublicProfileView: true },
+      { isOwner: true, isFriend: false, asPublicProfileView: false },
     )
   }, [signedInLive, profileMe.data?.profile])
   const displayPronouns =
@@ -448,19 +455,6 @@ export default function ProfilePageClient() {
   const followsSummary = remote?.followsSummary
   const mutualConnections = remote?.mutualConnections
 
-  const socialSidebar =
-    viewerUsername && signedInLive ?
-      <ProfileSocialRail
-        username={viewerUsername}
-        viewerIsOwner
-        isAuthenticated={isAuthenticated && !isFallback}
-        connections={connectionsSummary}
-        follows={followsSummary}
-        mutualConnections={mutualConnections}
-        onSelectTab={selectTab}
-      />
-    : null
-
   const tabVisibility = useMemo(
     () => ({
       viewerIsOwner: true,
@@ -550,10 +544,8 @@ export default function ProfilePageClient() {
     heroActions: ownerHeroActions,
   }
 
-  const ownerLayout = profileApiLoading ? null : buildProfileStoryLayoutArgs(ownerStoryProps)
-
   return (
-    <ProfilePageShell
+    <ProfileLayout
       alerts={
         <>
           {signedInLive && profileApiFailed && !profileApiLoading ?
@@ -582,17 +574,68 @@ export default function ProfilePageClient() {
           : null}
         </>
       }
-      cover={ownerLayout ? <ProfileCoverHeader className="hidden lg:block" {...ownerLayout.cover} /> : null}
-      mobileStory={
+      hero={
         profileApiLoading ?
           <div className="rounded-2xl border border-dc-border p-8 text-center text-sm text-dc-muted" aria-busy="true">
             Loading your profile…
           </div>
-        : <ProfileStoryView {...ownerStoryProps} />
+        : <ProfileHero
+            displayName={ownerStoryProps.displayName}
+            username={ownerStoryProps.username}
+            ageLabel={ownerStoryProps.ageLabel}
+            pronouns={ownerStoryProps.pronouns}
+            genders={ownerStoryProps.genders}
+            sexualOrientations={ownerStoryProps.sexualOrientations}
+            romanticOrientations={ownerStoryProps.romanticOrientations}
+            location={ownerStoryProps.location}
+            roles={ownerStoryProps.roles}
+            photoUrl={ownerStoryProps.photoUrl}
+            photoCaption={ownerStoryProps.photoCaption}
+            photoDisplaySettings={ownerStoryProps.photoDisplaySettings}
+            photoCount={ownerStoryProps.photoCount}
+            onOpenGallery={ownerStoryProps.onOpenGallery}
+            actions={ownerStoryProps.heroActions}
+          />
       }
-      desktopSidebar={ownerLayout ? <ProfileStorySidebar {...ownerLayout.sidebar} /> : null}
-      networkRail={socialSidebar}
-      main={
+      gallery={
+        profileApiLoading ? undefined : (
+          <ProfileGalleryStrip
+            photos={profilePhotos}
+            viewer={{ authenticated: true, adultContentPref: ADULT_CONTENT_PREFERENCES.blur }}
+            totalCount={profilePhotos.length}
+            onViewAll={openPhotoGallery}
+            viewerIsOwner
+          />
+        )
+      }
+      primary={
+        <>
+          <ProfileAboutBlock bio={ownerStoryProps.bio} viewerIsOwner />
+          <ProfileInterestsCard kinks={ownerStoryProps.kinks} viewerIsOwner />
+          <ProfileLookingForCard lookingFor={ownerStoryProps.lookingFor} viewerIsOwner />
+        </>
+      }
+      secondary={
+        <>
+          <ProfileNetworkCard
+            username={ownerStoryProps.username}
+            viewerIsOwner
+            connections={connectionsSummary}
+            follows={followsSummary}
+            mutualConnections={mutualConnections}
+          />
+          <ProfileUpcomingEventsCard ecosystem={ecosystem} username={ownerStoryProps.username} viewerIsOwner />
+          <ProfileOrganizationsCard ecosystem={ecosystem} username={ownerStoryProps.username} />
+          <ProfileCommunitySnapshotCard
+            ecosystem={ecosystem}
+            memberSince={memberSince}
+            roles={ownerStoryProps.roles}
+            lifestyleActivity={displayLifestyleActivity}
+            eventsAttended={pastAttendedEvents.length}
+          />
+        </>
+      }
+      more={
         <>
           {signedInLive && displayUsername ?
             <ProfileRecentPostsSection
@@ -751,9 +794,9 @@ export default function ProfilePageClient() {
               />
             )}
         </ProfileExtendedSection>
+        {!profileApiLoading ? <ProfileMeHub /> : null}
         </>
       }
-      afterGrid={!profileApiLoading ? <ProfileMeHub /> : null}
     />
   )
 }

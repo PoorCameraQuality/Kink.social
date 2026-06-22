@@ -8,7 +8,7 @@
  * Identity: requires a logged-in C2K user (req.session.userId). Comp/access
  * codes are validated server-side; never round-tripped to the client.
  */
-import { and, asc, eq } from 'drizzle-orm'
+import { and, asc, eq, or } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
@@ -16,7 +16,10 @@ import { db } from '../db/index.js'
 import * as schema from '../db/schema.js'
 import { requestConventionPeopleDirectorySync } from '../lib/convention-people-sync-queue.js'
 import { syncAccessGrantOnRegistration } from '../lib/convention-participation.js'
+import { createNotification } from '../lib/create-notification.js'
+import { NOTIFICATION_TYPES } from '@c2k/shared'
 import {
+  isTrustedRoleApplyOpen,
   mapRegistrantFull,
   mapRegistrationCategory,
   mapRegistrationForm,
@@ -350,6 +353,11 @@ export function registerConventionPublicRoutes(app: FastifyInstance) {
           (r.applySlug ?? '').toLowerCase() === lower || (r.slug ?? '').toLowerCase() === lower,
       )
       if (!role || role.status !== 'published') return reply.status(404).send({ error: 'Not found' })
+      if (!isTrustedRoleApplyOpen(role)) {
+        return reply
+          .status(403)
+          .send({ error: 'Applications for this role are not open right now.', code: 'APPLY_WINDOW_CLOSED' })
+      }
 
       const [profile] = await db
         .select({
@@ -380,6 +388,36 @@ export function registerConventionPublicRoutes(app: FastifyInstance) {
           organizerNotes: parsed.data.notes ?? null,
         })
         .returning()
+
+      // After commit: notify organizers who manage registration that an application arrived.
+      try {
+        const organizers = await db
+          .select({ userId: schema.conventionCommandGrants.userId })
+          .from(schema.conventionCommandGrants)
+          .where(
+            and(
+              eq(schema.conventionCommandGrants.conventionId, conv.id),
+              or(
+                eq(schema.conventionCommandGrants.canRegistration, true),
+                eq(schema.conventionCommandGrants.canStaffOps, true),
+              ),
+            ),
+          )
+        await Promise.all(
+          organizers.map((o) =>
+            createNotification(o.userId, NOTIFICATION_TYPES.conventionApplicationSubmitted, {
+              conventionId: conv.id,
+              conventionSlug: conv.slug,
+              applicationId: row!.id,
+              roleTitle: role.title,
+              applicantName,
+            }),
+          ),
+        )
+      } catch (err) {
+        req.log.error({ err }, 'failed to notify organizers of trusted-role application')
+      }
+
       return reply.status(201).send({
         application: {
           id: row!.id,

@@ -28,10 +28,12 @@ type Props = {
   timezone: string
   readOnly: boolean
   onPromoted: () => Promise<void>
+  /** When true, render the full panel inline (no collapse, no empty-state hiding). */
+  embedded?: boolean
 }
 
-export function PresenterRequestsPanel({ conventionKey, timezone, readOnly, onPromoted }: Props) {
-  const [open, setOpen] = useState(false)
+export function PresenterRequestsPanel({ conventionKey, timezone, readOnly, onPromoted, embedded = false }: Props) {
+  const [open, setOpen] = useState(embedded)
   const [items, setItems] = useState<PresenterRequestRow[]>([])
   const [filter, setFilter] = useState<(typeof STATUS_FILTER)[number]>('PENDING')
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -74,11 +76,11 @@ export function PresenterRequestsPanel({ conventionKey, timezone, readOnly, onPr
 
   const pendingCount = items.filter((i) => i.status === 'PENDING').length
 
-  if (pendingCount === 0 && items.length === 0) {
+  if (!embedded && pendingCount === 0 && items.length === 0) {
     return null
   }
 
-  if (pendingCount > 0 && !open) {
+  if (!embedded && pendingCount > 0 && !open) {
     return (
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-500/30 bg-amber-950/20 px-3 py-2">
         <p className="text-sm text-amber-100">
@@ -173,21 +175,15 @@ export function PresenterRequestsPanel({ conventionKey, timezone, readOnly, onPr
     }
   }
 
-  return (
-    <details
-      className="rounded-xl border border-dc-border bg-dc-elevated-muted"
-      open={open}
-      onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
-    >
-      <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-dc-text">
-        Presenter requests
-        {pendingCount > 0 ? (
-          <span className="ml-2 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
-            {pendingCount} pending
-          </span>
-        ) : null}
-      </summary>
-      <div className="border-t border-dc-border px-4 py-4 space-y-4">
+  const pendingBadge =
+    pendingCount > 0 ? (
+      <span className="ml-2 rounded-full bg-dc-warning-muted px-2 py-0.5 text-xs text-dc-warning">
+        {pendingCount} pending
+      </span>
+    ) : null
+
+  const body = (
+      <div className="space-y-4">
         <p className="text-xs text-dc-muted">
           Review presenter applications, send offer letters with comp terms, then promote accepted classes into program slots (
           {timezone}).
@@ -210,7 +206,7 @@ export function PresenterRequestsPanel({ conventionKey, timezone, readOnly, onPr
           ))}
         </div>
 
-        {err ? <p className="text-xs text-red-700" role="alert">{err}</p> : null}
+        {err ? <p className="text-xs text-dc-danger" role="alert">{err}</p> : null}
 
         <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
           <ul className="max-h-64 space-y-2 overflow-y-auto">
@@ -353,6 +349,29 @@ export function PresenterRequestsPanel({ conventionKey, timezone, readOnly, onPr
           />
         : null}
       </div>
+  )
+
+  if (embedded) {
+    return (
+      <section className="rounded-xl border border-dc-border bg-dc-elevated-muted px-4 py-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-dc-text">Presenter requests{pendingBadge}</h3>
+        </div>
+        {body}
+      </section>
+    )
+  }
+
+  return (
+    <details
+      className="rounded-xl border border-dc-border bg-dc-elevated-muted"
+      open={open}
+      onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
+    >
+      <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-dc-text">
+        Presenter requests{pendingBadge}
+      </summary>
+      <div className="border-t border-dc-border px-4 pb-4 pt-4">{body}</div>
     </details>
   )
 }

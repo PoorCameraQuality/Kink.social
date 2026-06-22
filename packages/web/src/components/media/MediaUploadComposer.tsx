@@ -24,9 +24,12 @@ import {
   type MediaUploadStage,
 } from '@/components/media/MediaUploadProgress'
 import StatusBanner from '@/components/ui/StatusBanner'
+import PersonalPhotoQuotaNotice from '@/components/media/PersonalPhotoQuotaNotice'
+import { usePersonalPhotoQuota } from '@/hooks/usePersonalPhotoQuota'
 import { useApiMediaUpload } from '@/hooks/useApiMedia'
 import { cardSurfaceSolidClass } from '@/lib/card-surface'
 import { uploadMediaFile } from '@/lib/upload-media'
+import { PERSONAL_PHOTO_LIMIT_REACHED_MESSAGE } from '@c2k/shared'
 
 type UploadTab = 'picture' | 'video'
 
@@ -41,6 +44,7 @@ export default function MediaUploadComposer() {
 
   const initialTab = searchParams.get('tab') === 'video' ? 'video' : 'picture'
   const [tab, setTab] = useState<UploadTab>(initialTab)
+  const { quota, reload: reloadQuota } = usePersonalPhotoQuota(tab === 'picture')
 
   useEffect(() => {
     setTab(searchParams.get('tab') === 'video' ? 'video' : 'picture')
@@ -73,10 +77,14 @@ export default function MediaUploadComposer() {
         objectUrl: URL.createObjectURL(file),
         mediaKind: mediaKind as StagedMediaFile['mediaKind'],
       }))
-      setStaged((prev) => (tab === 'picture' ? [...prev, ...next].slice(0, 10) : next.slice(0, 1)))
+      setStaged((prev) => {
+        const maxItems = tab === 'picture' ? Math.min(10, quota?.remaining ?? 10) : 1
+        const merged = tab === 'picture' ? [...prev, ...next] : next.slice(0, 1)
+        return merged.slice(0, maxItems)
+      })
       setBanner(null)
     },
-    [mediaKind, tab],
+    [mediaKind, quota?.remaining, tab],
   )
 
   const removeStaged = (id: string) => {
@@ -99,6 +107,17 @@ export default function MediaUploadComposer() {
     setBanner(null)
     if (staged.length === 0) {
       setBanner({ tone: 'error', text: 'Add at least one file to upload.' })
+      return
+    }
+    if (tab === 'picture' && quota?.atLimit) {
+      setBanner({ tone: 'error', text: PERSONAL_PHOTO_LIMIT_REACHED_MESSAGE })
+      return
+    }
+    if (tab === 'picture' && quota && staged.length > quota.remaining) {
+      setBanner({
+        tone: 'error',
+        text: `You can only add ${quota.remaining} more photo${quota.remaining === 1 ? '' : 's'}.`,
+      })
       return
     }
     const attestation = buildUploadAttestation(contentRating, depictedPeople, attestVisibility, attestations)
@@ -142,6 +161,7 @@ export default function MediaUploadComposer() {
 
       const firstId = data.mediaItemIds?.[0] ?? data.items?.[0]?.id
       setBanner({ tone: 'success', text: 'Upload published.' })
+      void reloadQuota()
       staged.forEach((item) => URL.revokeObjectURL(item.objectUrl))
       setStaged([])
       if (firstId) {
@@ -154,10 +174,11 @@ export default function MediaUploadComposer() {
     }
   }
 
-  const disabled = busy || Boolean(uploadStage)
+  const disabled = busy || Boolean(uploadStage) || (tab === 'picture' && Boolean(quota?.atLimit))
 
   return (
     <div className={`${cardSurfaceSolidClass} p-5 sm:p-6`} data-testid="media-upload-composer">
+      {tab === 'picture' ? <PersonalPhotoQuotaNotice quota={quota} className="mb-4" /> : null}
       <div className="flex flex-wrap gap-2 border-b border-dc-border/70 pb-4">
         {(
           [

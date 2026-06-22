@@ -210,8 +210,8 @@ export function PersonDetailDrawer({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 text-sm text-dc-text">
-          {loadErr ? <p className="text-sm text-red-700">{loadErr}</p> : null}
-          {err ? <p className="text-sm text-red-700">{err}</p> : null}
+          {loadErr ? <p className="text-sm text-dc-danger">{loadErr}</p> : null}
+          {err ? <p className="text-sm text-dc-danger">{err}</p> : null}
 
           {tab === 'overview' ? (
             <div className="space-y-4">

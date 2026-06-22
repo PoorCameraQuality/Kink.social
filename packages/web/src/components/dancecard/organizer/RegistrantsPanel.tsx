@@ -737,7 +737,7 @@ export function RegistrantsPanel({
       {checkInSuccess ? (
         <InlineSuccessBanner message={checkInSuccess} onDismiss={() => setCheckInSuccess(null)} />
       ) : null}
-      {err ? <p className="text-sm text-red-700 whitespace-pre-wrap">{err}</p> : null}
+      {err ? <p className="text-sm text-dc-danger whitespace-pre-wrap">{err}</p> : null}
       <details className="text-xs text-dc-muted lg:hidden">
         <summary className="cursor-pointer font-medium text-dc-text">Check-in color key</summary>
         <p className="mt-2">
@@ -844,7 +844,7 @@ export function RegistrantsPanel({
         ) : null}
       </div>
       {loading ? <p className="text-sm text-dc-muted">Loading signups…</p> : null}
-      {loadFailed && err ? <p className="text-sm text-red-700">{err}</p> : null}
+      {loadFailed && err ? <p className="text-sm text-dc-danger">{err}</p> : null}
       {total > 0 ? (
         <p className="text-xs text-dc-muted">
           Showing {rows.length} of {total} signup{total === 1 ? '' : 's'}
@@ -1088,7 +1088,7 @@ export function RegistrantsPanel({
                 </div>
               ) : detailTab === 'tags' ? (
                 <div className="mt-3 space-y-2 text-sm">
-                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  <p className="rounded-lg border border-dc-warning/30 bg-dc-warning-muted px-3 py-2 text-xs text-dc-warning">
                     Registrant tags are not saved yet. Use Notes or category for now. Tag assignment ships in a
                     follow-up slice.
                   </p>

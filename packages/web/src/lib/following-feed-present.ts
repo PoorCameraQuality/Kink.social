@@ -45,7 +45,10 @@ export function isCompactFollowingActivity(verb: string, object?: Record<string,
     verb === 'group_thread_created' ||
     verb === 'loved' ||
     verb === 'reacted' ||
+    verb === 'post_love' ||
     verb === 'followed' ||
+    verb === 'commented' ||
+    verb === 'post_comment' ||
     verb === 'replied_discussion' ||
     verb === 'created_discussion' ||
     verb === 'added_vendor_product'
@@ -81,6 +84,12 @@ export function followingFeedDeepLinkLabel(verb: string): string {
       return 'View profile'
     case 'presenter_assigned':
       return 'View program'
+    case 'loved':
+    case 'reacted':
+    case 'post_love':
+    case 'commented':
+    case 'post_comment':
+      return 'View post'
     default:
       return 'View details'
   }
@@ -190,15 +199,27 @@ export function followingActivityVerbPhrase(verb: string, object?: Record<string
       }
       return title ? `is going to ${title}` : "RSVP'd to an event"
     case 'loved':
-    case 'reacted': {
+    case 'reacted':
+    case 'post_love': {
       const count = typeof object?.count === 'number' ? object.count : 1
       const mediaKind = typeof object?.mediaKind === 'string' ? object.mediaKind : 'picture'
       const targetUser =
         typeof object?.targetUsername === 'string' && object.targetUsername.trim() ?
           object.targetUsername.trim()
+        : typeof object?.postAuthorUsername === 'string' && object.postAuthorUsername.trim() ?
+          object.postAuthorUsername.trim()
         : null
       if (targetUser && count === 1) return `loved ${targetUser}'s ${mediaKind}`
       return `loved ${count} ${mediaKind}${count === 1 ? '' : 's'}`
+    }
+    case 'commented':
+    case 'post_comment': {
+      const postAuthor =
+        typeof object?.postAuthorUsername === 'string' && object.postAuthorUsername.trim() ?
+          object.postAuthorUsername.trim()
+        : null
+      if (postAuthor) return `commented on ${postAuthor}'s status update`
+      return 'commented on a status update'
     }
     case 'followed': {
       const count = typeof object?.count === 'number' ? object.count : 1

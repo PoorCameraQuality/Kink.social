@@ -430,6 +430,8 @@ export function registerRegistrationRoutes(reg: RouteRegistrar) {
           introText: data.introText ?? '',
           confirmationText: data.confirmationText ?? '',
           questions: [],
+          applyOpensAt: data.applyOpensAt ?? null,
+          applyClosesAt: data.applyClosesAt ?? null,
           sortOrder: data.sortOrder ?? 0,
         })
         .returning()
@@ -476,6 +478,8 @@ export function registerRegistrationRoutes(reg: RouteRegistrar) {
     if (data.introText !== undefined) patch.introText = data.introText
     if (data.confirmationText !== undefined) patch.confirmationText = data.confirmationText
     if (data.sortOrder !== undefined) patch.sortOrder = data.sortOrder
+    if (data.applyOpensAt !== undefined) patch.applyOpensAt = data.applyOpensAt
+    if (data.applyClosesAt !== undefined) patch.applyClosesAt = data.applyClosesAt
     const newSlug = trustedRoleApplySlug(data)
     if (newSlug) {
       patch.applySlug = newSlug

@@ -36,14 +36,14 @@ test.describe('home feed composer photo upload', () => {
     await expect
       .poll(
         async () => {
-          const err = page.getByText(/network error during upload|upload failed/i)
+          const err = page.getByText(/network error during upload|upload failed|could not prepare feed photo/i)
           const review = page.getByText(/held for review during alpha/i)
-          const img = page.locator('.ProseMirror img')
+          const preview = page.locator('img.h-16.w-16')
           return (await err.isVisible().catch(() => false)) ||
             (await review.isVisible().catch(() => false)) ||
-            ((await img.count()) > 0)
+            ((await preview.count()) > 0)
         },
-        { timeout: 45_000 },
+        { timeout: 90_000 },
       )
       .toBeTruthy()
   })

@@ -433,6 +433,12 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 ALTER TABLE convention_trusted_roles
   ADD COLUMN IF NOT EXISTS role_kind varchar(32) NOT NULL DEFAULT 'custom';
 
+-- Per-role application windows (open/close dates within a published role).
+ALTER TABLE convention_trusted_roles
+  ADD COLUMN IF NOT EXISTS apply_opens_at timestamptz;
+ALTER TABLE convention_trusted_roles
+  ADD COLUMN IF NOT EXISTS apply_closes_at timestamptz;
+
 ALTER TABLE convention_exhibitors
   ADD COLUMN IF NOT EXISTS vendor_profile_id uuid;
 ALTER TABLE convention_exhibitors

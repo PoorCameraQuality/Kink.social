@@ -1,4 +1,4 @@
-import { sanitizeEckePublicText } from '@c2k/shared'
+import { sanitizeEckeHeroImageUrl, sanitizeEckePublicText } from '@c2k/shared'
 import type { EckeListingPayload } from './ecke-publish-payload.js'
 
 export type EckeEventRow = {
@@ -14,10 +14,15 @@ export type EckeEventRow = {
   category: string
   logo: string
   website: string
+  venue?: string | null
+  /** Stored as JSON-encoded string[] in the events.features text column; ECKE parses it back to a list. */
+  features?: string | null
   organizer_name: string | null
   status: 'published' | 'draft'
   c2k_source_type: string
   c2k_source_id: string
+  source_attribution?: string | null
+  last_synced_at?: string | null
   tags?: string[]
   seo_title?: string | null
   meta_title?: string | null
@@ -81,15 +86,20 @@ function parseLocationParts(location: string | null | undefined): { city: string
   return { city: city || null, state }
 }
 
-export function buildEckeEventRowFromListing(
-  listing: EckeListingPayload,
-  sourceId: string,
-  sourceType = 'convention',
-): EckeEventRow {
+function buildEckeEventRowCore(input: {
+  listing: EckeListingPayload
+  sourceId: string
+  sourceType: string
+  category: string
+  tags: string[]
+  syncedAt?: Date | null
+}): EckeEventRow {
+  const { listing, sourceId, sourceType, category, tags, syncedAt } = input
   const start = listing.startsAt ? listing.startsAt.slice(0, 10) : new Date().toISOString().slice(0, 10)
   const end = listing.endsAt ? listing.endsAt.slice(0, 10) : start
   const { city, state } = parseLocationParts(listing.location)
   const hidden = listing.visibility === 'hidden'
+  const logo = sanitizeEckeHeroImageUrl(listing.imageUrl) ?? ''
 
   return {
     title: listing.title,
@@ -99,20 +109,55 @@ export function buildEckeEventRowFromListing(
     display_date: start,
     city: city || '',
     state: state || '',
-    short_description: sanitizeEckePublicText((listing.description || listing.title).slice(0, 500)) ?? listing.title.slice(0, 500),
+    short_description:
+      sanitizeEckePublicText((listing.description || listing.title).slice(0, 500)) ?? listing.title.slice(0, 500),
     long_description: sanitizeEckePublicText(listing.description) ?? '',
-    category: 'Convention',
-    logo: listing.imageUrl || '',
-    website: listing.memberActionUrl ?? '',
+    category,
+    logo,
+    website: listing.website ?? '',
+    venue: listing.venue ?? null,
+    features: listing.features?.length ? JSON.stringify(listing.features) : null,
     organizer_name: listing.orgDisplayName || null,
     status: hidden ? 'draft' : 'published',
     c2k_source_type: sourceType,
     c2k_source_id: sourceId,
-    tags: ['convention'],
+    source_attribution: 'Coast to Coast Kink organizer',
+    last_synced_at: (syncedAt ?? new Date()).toISOString(),
+    tags,
     seo_title: listing.title,
     meta_title: listing.title,
     meta_description: sanitizeEckePublicText(listing.description?.slice(0, 320)) ?? null,
   }
+}
+
+export function buildEckeEventRowFromListing(
+  listing: EckeListingPayload,
+  sourceId: string,
+  sourceType = 'convention',
+): EckeEventRow {
+  return buildEckeEventRowCore({
+    listing,
+    sourceId,
+    sourceType,
+    category: 'Convention',
+    tags: ['convention'],
+  })
+}
+
+export function buildEckeEventRowFromStandaloneEvent(
+  listing: EckeListingPayload,
+  eventId: string,
+  input?: { category?: string | null; tags?: string[] | null },
+): EckeEventRow {
+  const category = input?.category?.trim() || 'Event'
+  const tags = input?.tags?.length ? input.tags.map((t) => t.trim().toLowerCase()).filter(Boolean) : ['event']
+  return buildEckeEventRowCore({
+    listing,
+    sourceId: eventId,
+    sourceType: 'event',
+    category,
+    tags,
+  })
 }
 
 export function buildEckeVendorRow(input: {

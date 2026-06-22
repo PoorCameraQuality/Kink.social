@@ -6,6 +6,7 @@ import {
 } from './ecke-public-publish-executor.js'
 import {
   buildEckeEventRowFromListing,
+  buildEckeEventRowFromStandaloneEvent,
   buildEckeVendorRow,
 } from './ecke-directory-sync.js'
 import {
@@ -13,12 +14,24 @@ import {
   loadEckePublishClientConfig,
   publishEventRowToEcke,
   publishVendorRowToEcke,
+  resolveEckePublicEventUrl,
+  unpublishEventRowToEcke,
   type EckePublishResult,
 } from './ecke-publish-client.js'
-import { buildConventionListingPayload, hashEckePayload } from './ecke-publish-payload.js'
+import {
+  buildConventionListingPayload,
+  buildStandaloneEventListingPayload,
+  hashEckePayload,
+  isStandaloneEventEckeEligible,
+  resolveStandaloneEventEckeSlug,
+} from './ecke-publish-payload.js'
 import { isEckePublishEligible } from '@c2k/shared'
 
-export type EckePublishJobName = 'publish-article' | 'publish-vendor' | 'publish-convention-event'
+export type EckePublishJobName =
+  | 'publish-article'
+  | 'publish-vendor'
+  | 'publish-convention-event'
+  | 'publish-standalone-event'
 
 export async function executeEckePublishArticle(articleId: string, userId?: string): Promise<EckePublishResult> {
   const ingestCfg = loadEckeIngestApiConfig()
@@ -107,15 +120,7 @@ export async function executeEckePublishVendor(vendorProfileId: string, userId?:
   return result
 }
 
-export async function executeEckePublishConventionEvent(
-  conventionId: string,
-  userId?: string,
-): Promise<EckePublishResult> {
-  const cfg = loadEckePublishClientConfig()
-  if (!cfg) {
-    return { ok: false, targetKind: 'ecke_event', error: 'Publish bridge not configured' }
-  }
-
+async function loadConventionPublishContext(conventionId: string) {
   const [conv] = await db
     .select({
       id: schema.conventions.id,
@@ -132,9 +137,7 @@ export async function executeEckePublishConventionEvent(
     .where(eq(schema.conventions.id, conventionId))
     .limit(1)
 
-  if (!conv) {
-    return { ok: false, targetKind: 'ecke_event', error: 'Convention not found' }
-  }
+  if (!conv) return null
 
   let org: { slug: string; displayName: string } | null = null
   if (conv.organizationId) {
@@ -176,6 +179,24 @@ export async function executeEckePublishConventionEvent(
     }
   }
 
+  return { conv, org, anchor }
+}
+
+export async function executeEckePublishConventionEvent(
+  conventionId: string,
+  userId?: string,
+): Promise<EckePublishResult> {
+  const cfg = loadEckePublishClientConfig()
+  if (!cfg) {
+    return { ok: false, targetKind: 'ecke_event', error: 'Publish bridge not configured' }
+  }
+
+  const ctx = await loadConventionPublishContext(conventionId)
+  if (!ctx) {
+    return { ok: false, targetKind: 'ecke_event', error: 'Convention not found' }
+  }
+  const { conv, org, anchor } = ctx
+
   const listing = buildConventionListingPayload({
     conventionSlug: conv.slug,
     conventionName: conv.name,
@@ -208,17 +229,265 @@ export async function executeEckePublishConventionEvent(
     conventionId: conv.id,
     targetKind: 'ecke_event',
     contentHash,
+    externalSlug: result.ok ? row.slug : undefined,
+    eckePublicUrl: result.ok ? resolveEckePublicEventUrl(row.slug) : undefined,
     userId,
     result,
   })
   return result
 }
 
+export async function executeEckeUnpublishConventionEvent(
+  conventionId: string,
+  userId?: string,
+): Promise<EckePublishResult> {
+  const cfg = loadEckePublishClientConfig()
+  if (!cfg) {
+    return { ok: false, targetKind: 'ecke_event', error: 'Publish bridge not configured' }
+  }
+
+  const [target] = await db
+    .select({
+      externalSlug: schema.eckePublishTargets.externalSlug,
+      contentHash: schema.eckePublishTargets.contentHash,
+    })
+    .from(schema.eckePublishTargets)
+    .where(
+      and(
+        eq(schema.eckePublishTargets.conventionId, conventionId),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_event'),
+      ),
+    )
+    .limit(1)
+
+  if (!target?.externalSlug) {
+    return { ok: false, targetKind: 'ecke_event', error: 'No published ECKE event target for this convention' }
+  }
+
+  const result = await unpublishEventRowToEcke(cfg, target.externalSlug)
+  const now = new Date()
+  if (result.ok) {
+    await db
+      .update(schema.eckePublishTargets)
+      .set({
+        status: 'stale',
+        lastAttemptAt: now,
+        lastError: null,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(schema.eckePublishTargets.conventionId, conventionId),
+          eq(schema.eckePublishTargets.targetKind, 'ecke_event'),
+        ),
+      )
+    return result
+  }
+
+  await db
+    .update(schema.eckePublishTargets)
+    .set({
+      status: 'error',
+      lastAttemptAt: now,
+      lastError: result.error,
+      updatedAt: now,
+    })
+    .where(
+      and(
+        eq(schema.eckePublishTargets.conventionId, conventionId),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_event'),
+      ),
+    )
+  return result
+}
+
+async function loadStandaloneEventPublishContext(eventId: string) {
+  const [ev] = await db
+    .select({
+      id: schema.events.id,
+      hostId: schema.events.hostId,
+      title: schema.events.title,
+      description: schema.events.description,
+      startsAt: schema.events.startsAt,
+      endsAt: schema.events.endsAt,
+      location: schema.events.location,
+      publicLocationSummary: schema.events.publicLocationSummary,
+      locationVisibility: schema.events.locationVisibility,
+      imageUrl: schema.events.imageUrl,
+      visibility: schema.events.visibility,
+      organizationId: schema.events.organizationId,
+      category: schema.events.category,
+      tags: schema.events.tags,
+    })
+    .from(schema.events)
+    .where(eq(schema.events.id, eventId))
+    .limit(1)
+
+  if (!ev) return null
+
+  const [anchorConv] = await db
+    .select({ id: schema.conventions.id })
+    .from(schema.conventions)
+    .where(eq(schema.conventions.anchorEventId, eventId))
+    .limit(1)
+
+  let org: { slug: string; displayName: string } | null = null
+  if (ev.organizationId) {
+    const [o] = await db
+      .select({ slug: schema.organizations.slug, displayName: schema.organizations.displayName })
+      .from(schema.organizations)
+      .where(eq(schema.organizations.id, ev.organizationId))
+      .limit(1)
+    org = o ?? null
+  }
+
+  const [hostProfile] = await db
+    .select({ displayName: schema.profiles.displayName, username: schema.users.username })
+    .from(schema.users)
+    .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
+    .where(eq(schema.users.id, ev.hostId))
+    .limit(1)
+
+  const [priorTarget] = await db
+    .select({ externalSlug: schema.eckePublishTargets.externalSlug })
+    .from(schema.eckePublishTargets)
+    .where(
+      and(eq(schema.eckePublishTargets.eventId, eventId), eq(schema.eckePublishTargets.targetKind, 'ecke_event')),
+    )
+    .limit(1)
+
+  return {
+    ev,
+    org,
+    hostDisplayName: hostProfile?.displayName?.trim() || hostProfile?.username || null,
+    isConventionAnchor: Boolean(anchorConv),
+    priorEckeSlug: priorTarget?.externalSlug ?? null,
+  }
+}
+
+export async function executeEckePublishStandaloneEvent(
+  eventId: string,
+  userId?: string,
+): Promise<EckePublishResult> {
+  const cfg = loadEckePublishClientConfig()
+  if (!cfg) {
+    return { ok: false, targetKind: 'ecke_event', error: 'Publish bridge not configured' }
+  }
+
+  const ctx = await loadStandaloneEventPublishContext(eventId)
+  if (!ctx) {
+    return { ok: false, targetKind: 'ecke_event', error: 'Event not found' }
+  }
+  const { ev, org, hostDisplayName, isConventionAnchor, priorEckeSlug } = ctx
+
+  const eligibility = isStandaloneEventEckeEligible({
+    visibility: ev.visibility,
+    isConventionAnchor,
+  })
+  if (!eligibility.eligible) {
+    return { ok: false, targetKind: 'ecke_event', error: eligibility.reason ?? 'Event not eligible for ECKE publish' }
+  }
+
+  const listing = buildStandaloneEventListingPayload({
+    eventId: ev.id,
+    title: ev.title,
+    description: ev.description,
+    startsAt: ev.startsAt,
+    endsAt: ev.endsAt,
+    location: ev.location,
+    publicLocationSummary: ev.publicLocationSummary,
+    locationVisibility: ev.locationVisibility,
+    imageUrl: ev.imageUrl,
+    orgSlug: org?.slug ?? null,
+    orgDisplayName: org?.displayName ?? null,
+    hostDisplayName,
+    visibility: ev.visibility,
+    eckeSlug: priorEckeSlug ?? resolveStandaloneEventEckeSlug(ev.title, ev.id),
+  })
+
+  if (listing.visibility === 'hidden') {
+    return { ok: false, targetKind: 'ecke_event', error: 'Event listing is not public' }
+  }
+
+  const row = buildEckeEventRowFromStandaloneEvent(listing, ev.id, {
+    category: ev.category,
+    tags: ev.tags,
+  })
+  const contentHash = hashEckePayload(row)
+  await upsertEntityTarget({
+    scopeType: 'event',
+    eventId: ev.id,
+    targetKind: 'ecke_event',
+    externalSlug: row.slug,
+    contentHash,
+    userId,
+  })
+
+  const result = await publishEventRowToEcke(cfg, row)
+  await markEntityOutcome({
+    eventId: ev.id,
+    targetKind: 'ecke_event',
+    contentHash,
+    externalSlug: result.ok ? row.slug : undefined,
+    eckePublicUrl: result.ok ? resolveEckePublicEventUrl(row.slug) : undefined,
+    userId,
+    result,
+  })
+  return result
+}
+
+export async function executeEckeUnpublishStandaloneEvent(
+  eventId: string,
+  userId?: string,
+): Promise<EckePublishResult> {
+  const cfg = loadEckePublishClientConfig()
+  if (!cfg) {
+    return { ok: false, targetKind: 'ecke_event', error: 'Publish bridge not configured' }
+  }
+
+  const [target] = await db
+    .select({ externalSlug: schema.eckePublishTargets.externalSlug })
+    .from(schema.eckePublishTargets)
+    .where(and(eq(schema.eckePublishTargets.eventId, eventId), eq(schema.eckePublishTargets.targetKind, 'ecke_event')))
+    .limit(1)
+
+  if (!target?.externalSlug) {
+    return { ok: false, targetKind: 'ecke_event', error: 'No published ECKE event target for this event' }
+  }
+
+  const result = await unpublishEventRowToEcke(cfg, target.externalSlug)
+  const now = new Date()
+  if (result.ok) {
+    await db
+      .update(schema.eckePublishTargets)
+      .set({
+        status: 'stale',
+        lastAttemptAt: now,
+        lastError: null,
+        updatedAt: now,
+      })
+      .where(and(eq(schema.eckePublishTargets.eventId, eventId), eq(schema.eckePublishTargets.targetKind, 'ecke_event')))
+    return result
+  }
+
+  await db
+    .update(schema.eckePublishTargets)
+    .set({
+      status: 'error',
+      lastAttemptAt: now,
+      lastError: result.error,
+      updatedAt: now,
+    })
+    .where(and(eq(schema.eckePublishTargets.eventId, eventId), eq(schema.eckePublishTargets.targetKind, 'ecke_event')))
+  return result
+}
+
 async function upsertEntityTarget(input: {
-  scopeType: 'education_article' | 'vendor_profile' | 'convention'
+  scopeType: 'education_article' | 'vendor_profile' | 'convention' | 'event'
   educationArticleId?: string
   vendorProfileId?: string
   conventionId?: string
+  eventId?: string
   targetKind: 'ecke_article' | 'ecke_vendor' | 'ecke_event'
   externalSlug: string
   contentHash: string
@@ -236,13 +505,19 @@ async function upsertEntityTarget(input: {
         eq(schema.eckePublishTargets.vendorProfileId, input.vendorProfileId!),
         eq(schema.eckePublishTargets.targetKind, input.targetKind),
       )
+    : input.scopeType === 'event' ?
+      and(eq(schema.eckePublishTargets.eventId, input.eventId!), eq(schema.eckePublishTargets.targetKind, input.targetKind))
     : and(
         eq(schema.eckePublishTargets.conventionId, input.conventionId!),
         eq(schema.eckePublishTargets.targetKind, input.targetKind),
       )
 
   const [prev] = await db
-    .select({ id: schema.eckePublishTargets.id, publishedContentHash: schema.eckePublishTargets.publishedContentHash, lastPublishedAt: schema.eckePublishTargets.lastPublishedAt })
+    .select({
+      id: schema.eckePublishTargets.id,
+      publishedContentHash: schema.eckePublishTargets.publishedContentHash,
+      lastPublishedAt: schema.eckePublishTargets.lastPublishedAt,
+    })
     .from(schema.eckePublishTargets)
     .where(where)
     .limit(1)
@@ -273,6 +548,7 @@ async function upsertEntityTarget(input: {
     educationArticleId: input.educationArticleId ?? null,
     vendorProfileId: input.vendorProfileId ?? null,
     conventionId: input.conventionId ?? null,
+    eventId: input.eventId ?? null,
     targetKind: input.targetKind,
     externalSlug: input.externalSlug,
     contentHash: input.contentHash,
@@ -285,6 +561,7 @@ async function markEntityOutcome(input: {
   educationArticleId?: string
   vendorProfileId?: string
   conventionId?: string
+  eventId?: string
   targetKind: 'ecke_article' | 'ecke_vendor' | 'ecke_event'
   contentHash: string
   externalSlug?: string
@@ -304,6 +581,8 @@ async function markEntityOutcome(input: {
         eq(schema.eckePublishTargets.vendorProfileId, input.vendorProfileId),
         eq(schema.eckePublishTargets.targetKind, input.targetKind),
       )
+    : input.eventId ?
+      and(eq(schema.eckePublishTargets.eventId, input.eventId), eq(schema.eckePublishTargets.targetKind, input.targetKind))
     : and(
         eq(schema.eckePublishTargets.conventionId, input.conventionId!),
         eq(schema.eckePublishTargets.targetKind, input.targetKind),

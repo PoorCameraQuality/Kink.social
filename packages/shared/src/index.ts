@@ -26,6 +26,7 @@ export {
   sanitizeEckeArticleSlug,
   sanitizeEckeEducationPublicText,
   sanitizeEckeEducationBodyHtml,
+  sanitizeEckeExternalUrl,
   sanitizeEckeHeroImageUrl,
   sanitizeEckePublicText,
   type EckePublishEligibilityInput,
@@ -83,6 +84,7 @@ export * from './media-social.js'
 export * from './feed-attachments.js'
 export * from './profile-photo-policy.js'
 export * from './profile-photo-display.js'
+export * from './personal-photo-quota.js'
 export * from './connections-list-visibility.js'
 export * from './scanner-types.js'
 export * from './media-scanner-config.js'

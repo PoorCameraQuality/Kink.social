@@ -91,9 +91,9 @@ export function IsoModerationPanel({ eventSlug, readOnly }: { eventSlug: string;
         </button>
       </div>
       {needsMigration ? (
-        <p className="mb-3 text-sm text-amber-800">{supportCopy.isoModerationNotReady}</p>
+        <p className="mb-3 text-sm text-dc-warning">{supportCopy.isoModerationNotReady}</p>
       ) : null}
-      {err ? <p className="mb-3 text-sm text-red-700">{err}</p> : null}
+      {err ? <p className="mb-3 text-sm text-dc-danger">{err}</p> : null}
       {!posts.length && !err ? <p className="text-sm text-dc-muted">No ISO posts yet.</p> : null}
       <ul className="space-y-2">
         {posts.map((p) => (

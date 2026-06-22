@@ -41,3 +41,15 @@ describe('group_thread_created presentation', () => {
     assert.equal(link, '/groups/philly-rope?tab=Forums')
   })
 })
+
+describe('post comment activity presentation', () => {
+  it('renders compact comment rows with FetLife-style copy', () => {
+    assert.equal(isCompactFollowingActivity('post_comment', {}), true)
+    assert.equal(isCompactFollowingActivity('commented', {}), true)
+    assert.equal(
+      followingActivityVerbPhrase('post_comment', { postAuthorUsername: 'wildflours' }),
+      "commented on wildflours's status update",
+    )
+    assert.equal(followingFeedDeepLinkLabel('post_comment'), 'View post')
+  })
+})
