@@ -1,3 +1,5 @@
+import { PROFILE_SEXUALITY_OTHER, splitProfileSexuality } from './profile-identity-options.js'
+
 /** Trim, dedupe (case-insensitive), and cap array length. */
 export function capArray(values: string[] | null | undefined, max: number): string[] {
   const seen = new Set<string>()
@@ -47,3 +49,19 @@ export function formatPronounDisplay(tags: string[] | null | undefined): string 
 
 export const PROFILE_ORIENTATION_MAX = 10 as const
 export const PROFILE_PRONOUN_MAX = 3 as const
+
+/** Parse legacy `profiles.sexuality` varchar into orientation labels (comma-separated or single select). */
+export function parseLegacySexualityLabels(sexuality: string | null | undefined): string[] {
+  const t = (sexuality ?? '').trim()
+  if (!t) return []
+  if (t.includes(',')) {
+    return capArray(
+      t.split(',').map((s) => s.trim()),
+      PROFILE_ORIENTATION_MAX,
+    )
+  }
+  const { selectValue, customText } = splitProfileSexuality(t)
+  if (selectValue && selectValue !== PROFILE_SEXUALITY_OTHER) return [selectValue]
+  if (customText) return [customText]
+  return [t]
+}

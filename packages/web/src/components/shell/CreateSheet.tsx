@@ -7,7 +7,7 @@ export default function CreateSheet() {
 
   return (
     <div
-      className="dc-premium-backdrop fixed inset-0 z-[200] flex flex-col justify-end lg:hidden"
+      className="dc-premium-backdrop fixed inset-0 z-dc-modal flex flex-col justify-end lg:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Create"

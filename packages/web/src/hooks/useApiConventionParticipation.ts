@@ -21,6 +21,16 @@ export type ParticipationOffer = {
   sentAt: string | null
 }
 
+export type TrustedRolePathway = {
+  id: string
+  name: string
+  roleKind: string
+  applySlug: string
+  open: boolean
+  applyUrl: string
+  introHtml?: string | null
+}
+
 export type ParticipationOpportunities = {
   convention: { id: string; slug: string; name: string }
   pathways: {
@@ -29,6 +39,8 @@ export type ParticipationOpportunities = {
     staff: ParticipationPathway
     volunteer: ParticipationPathway
   }
+  /** Published trusted roles — mirrors organizer Applications windows on the public page. */
+  trustedRoles?: TrustedRolePathway[]
   myStatus: {
     presenterPending?: boolean
     pendingOffers?: number

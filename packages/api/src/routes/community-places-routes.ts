@@ -12,6 +12,8 @@ import { db, schema } from '../db/index.js'
 
 import { withAlphaLabels } from '../lib/alpha-seed-labels.js'
 
+import { loadEventsAtVenuePlace } from '../lib/venue-events.js'
+
 
 
 function useDatabase(): boolean {
@@ -239,6 +241,98 @@ export async function registerCommunityPlacesRoutes(app: FastifyInstance) {
     const items = rows.map(mapCommunityPlaceRow)
 
     return reply.send({ items: await withAlphaLabels('community_place', items) })
+
+  })
+
+
+
+  app.get('/api/v1/community-places/:slug', async (req, reply) => {
+
+    if (!requireDb(reply)) return
+
+    const { slug } = req.params as { slug: string }
+
+    const [row] = await db
+
+      .select({
+
+        place: schema.communityPlaces,
+
+        orgSlug: schema.organizations.slug,
+
+        orgDisplayName: schema.organizations.displayName,
+
+        orgLogoUrl: schema.organizations.logoUrl,
+
+        orgBio: schema.organizations.bio,
+
+        orgExternalSiteUrl: schema.organizations.externalSiteUrl,
+
+      })
+
+      .from(schema.communityPlaces)
+
+      .leftJoin(
+
+        schema.organizations,
+
+        eq(schema.communityPlaces.linkedOrganizationId, schema.organizations.id),
+
+      )
+
+      .where(
+
+        and(eq(schema.communityPlaces.slug, slug), eq(schema.communityPlaces.status, 'published')),
+
+      )
+
+      .limit(1)
+
+
+
+    if (!row) return reply.status(404).send({ error: 'Not found' })
+
+
+
+    const mapped = mapCommunityPlaceRow(row)
+
+    const upcomingEvents = await loadEventsAtVenuePlace(
+
+      row.place.id,
+
+      row.place.linkedOrganizationId,
+
+    )
+
+    const [labeledPlace] = await withAlphaLabels('community_place', [mapped])
+
+    return reply.send({
+
+      place: labeledPlace ?? mapped,
+
+      linkedOrganization:
+
+        row.orgSlug && row.orgDisplayName ?
+
+          {
+
+            slug: row.orgSlug,
+
+            displayName: row.orgDisplayName,
+
+            logoUrl: row.orgLogoUrl,
+
+            bio: row.orgBio,
+
+            externalSiteUrl: row.orgExternalSiteUrl,
+
+          }
+
+        : mapped.linkedOrganization,
+
+      upcomingEvents,
+
+    })
 
   })
 

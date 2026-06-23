@@ -11,6 +11,8 @@ type Props = {
   viewer: MediaViewerContext
   totalCount: number
   onViewAll?: () => void
+  /** Owner shortcut — opens Profile Studio for photo edits. */
+  managePhotosHref?: string
   viewerIsOwner?: boolean
   className?: string
 }
@@ -38,6 +40,7 @@ export default function ProfileGalleryStrip({
   viewer,
   totalCount,
   onViewAll,
+  managePhotosHref,
   viewerIsOwner = false,
   className,
 }: Props) {
@@ -52,7 +55,7 @@ export default function ProfileGalleryStrip({
           onClick={onViewAll ? (e) => { e.preventDefault(); onViewAll() } : undefined}
           className={cn(
             TILE_CLASS,
-            'flex flex-col items-center justify-center gap-1.5 border-dashed bg-dc-elevated/40 text-dc-text-muted transition hover:border-dc-accent-border hover:text-dc-text',
+            'flex flex-col items-center justify-center gap-1.5 border-dashed bg-dc-surface-muted text-dc-text-muted transition hover:border-dc-accent-border hover:text-dc-text',
           )}
         >
           <IconCamera className="h-5 w-5" />
@@ -63,6 +66,10 @@ export default function ProfileGalleryStrip({
   }
 
   const preview = withUrl.slice(0, PREVIEW_LIMIT)
+  const tileLinkClass = cn(
+    TILE_CLASS,
+    'group relative bg-dc-elevated-solid focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dc-accent',
+  )
 
   return (
     <div
@@ -73,17 +80,8 @@ export default function ProfileGalleryStrip({
     >
       {preview.map((photo) => {
         const blur = isBlurred(photo, viewer)
-        return (
-          <button
-            key={photo.id}
-            type="button"
-            onClick={onViewAll}
-            className={cn(
-              TILE_CLASS,
-              'group relative bg-dc-elevated-solid focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dc-accent',
-            )}
-            aria-label={blur ? 'Adult content — open gallery to view' : 'Open photo gallery'}
-          >
+        const tileBody = (
+          <>
             <ProfilePhotoImage
               src={photo.url!}
               alt={photo.caption ?? 'Profile photo'}
@@ -95,17 +93,56 @@ export default function ProfileGalleryStrip({
                 Adult content
               </span>
             : null}
+          </>
+        )
+
+        if (managePhotosHref) {
+          return (
+            <Link
+              key={photo.id}
+              to={managePhotosHref}
+              className={tileLinkClass}
+              aria-label={blur ? 'Adult content — manage photos in Profile Studio' : 'Manage profile photos'}
+            >
+              {tileBody}
+            </Link>
+          )
+        }
+
+        return (
+          <button
+            key={photo.id}
+            type="button"
+            onClick={onViewAll}
+            className={tileLinkClass}
+            aria-label={blur ? 'Adult content — open gallery to view' : 'Open photo gallery'}
+          >
+            {tileBody}
           </button>
         )
       })}
 
-      {onViewAll ?
+      {managePhotosHref ?
+        <Link
+          to={managePhotosHref}
+          className={cn(
+            TILE_CLASS,
+            'flex flex-col items-center justify-center gap-1.5 border-dashed bg-dc-surface-muted text-dc-text-muted transition hover:border-dc-accent-border hover:text-dc-text focus:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent',
+          )}
+          aria-label={`Manage profile photos${totalCount > 0 ? `, ${totalCount} total` : ''}`}
+        >
+          <IconCamera className="h-5 w-5" />
+          <span className="text-xs font-medium">
+            Manage photos{totalCount > preview.length ? ` (${totalCount})` : ''}
+          </span>
+        </Link>
+      : onViewAll ?
         <button
           type="button"
           onClick={onViewAll}
           className={cn(
             TILE_CLASS,
-            'flex flex-col items-center justify-center gap-1.5 border-dashed bg-dc-elevated/40 text-dc-text-muted transition hover:border-dc-accent-border hover:text-dc-text focus:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent',
+            'flex flex-col items-center justify-center gap-1.5 border-dashed bg-dc-surface-muted text-dc-text-muted transition hover:border-dc-accent-border hover:text-dc-text focus:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent',
           )}
           aria-label={`View all photos${totalCount > 0 ? `, ${totalCount} total` : ''}`}
         >

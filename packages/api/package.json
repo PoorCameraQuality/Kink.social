@@ -15,6 +15,7 @@
     "db:migrate-user-emails": "tsx scripts/migrate-user-emails.ts",
     "db:migrate-organizer-parity": "tsx scripts/migrate-organizer-parity.ts",
     "import:ecke-event": "tsx scripts/import-ecke-event.ts",
+    "import:ecke-dungeon": "tsx scripts/import-ecke-dungeon.ts",
     "build:places-data": "tsx scripts/build-places-data.ts",
     "db:seed": "tsx src/db/seed.ts",
     "db:seed-moderation-ts-fixtures": "tsx src/db/seed-moderation-ts-fixtures.ts",

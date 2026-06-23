@@ -28,7 +28,7 @@ import PersonalPhotoQuotaNotice from '@/components/media/PersonalPhotoQuotaNotic
 import { usePersonalPhotoQuota } from '@/hooks/usePersonalPhotoQuota'
 import { useApiMediaUpload } from '@/hooks/useApiMedia'
 import { cardSurfaceSolidClass } from '@/lib/card-surface'
-import { uploadMediaFile } from '@/lib/upload-media'
+import { uploadMediaFile, isStagedUploadResult } from '@/lib/upload-media'
 import { PERSONAL_PHOTO_LIMIT_REACHED_MESSAGE } from '@c2k/shared'
 
 type UploadTab = 'picture' | 'video'
@@ -131,8 +131,8 @@ export default function MediaUploadComposer() {
       const uploadedItems = []
       for (const item of staged) {
         const result = await uploadMediaFile(item.file, uploadPurpose)
-        if (result.status !== 'quarantined' || !result.quarantineKey) {
-          throw new Error('Upload requires the media attestation pipeline during alpha.')
+        if (!isStagedUploadResult(result.status) || !result.quarantineKey) {
+          throw new Error('Upload did not return a staged file key.')
         }
         uploadedItems.push({
           quarantineKey: result.quarantineKey,
@@ -146,7 +146,7 @@ export default function MediaUploadComposer() {
         })
       }
 
-      setUploadStage('saving')
+      setUploadStage('processing')
       const data = await upload({
         caption: caption.trim() || undefined,
         items: uploadedItems,
@@ -286,7 +286,7 @@ export default function MediaUploadComposer() {
             {disabled ?
               <>
                 <MediaUploadSpinner size="sm" />
-                {uploadStage === 'uploading' ? 'Uploading…' : 'Publishing…'}
+                {uploadStage === 'uploading' ? 'Uploading…' : 'Scanning…'}
               </>
             : 'Publish upload'}
           </button>

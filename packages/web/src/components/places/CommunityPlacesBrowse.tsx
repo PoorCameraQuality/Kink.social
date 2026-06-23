@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import CommunityPlacesMap from '@/components/places/CommunityPlacesMap'
 import EmptyState from '@/components/ui/EmptyState'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
 import { mediaDisplayUrl } from '@/lib/media-display-url'
@@ -23,6 +24,8 @@ type PlaceRow = {
   city: string | null
   region: string | null
   country: string | null
+  lat?: number | null
+  lng?: number | null
   linkedOrganization?: { slug: string; displayName: string } | null
 }
 
@@ -69,11 +72,7 @@ export function PlacesCategoryToolbar({
 }
 
 export function PlacesLocationNotice() {
-  return (
-    <p className="max-w-prose rounded-xl border border-dc-border bg-dc-elevated/60 px-4 py-3 text-sm text-dc-text-muted">
-      Location filters coming soon
-    </p>
-  )
+  return null
 }
 
 export function PlacesSuggestForm({ category }: { category: string }) {
@@ -181,12 +180,28 @@ export default function CommunityPlacesBrowse({
     if (controlledCategory === undefined) setInternalCategory(initialCategory)
   }, [initialCategory, controlledCategory])
 
+  const mapPlaces = useMemo(
+    () =>
+      items.map((p) => ({
+        id: p.id,
+        slug: p.slug,
+        name: p.name,
+        lat: p.lat ?? null,
+        lng: p.lng ?? null,
+        city: p.city,
+        region: p.region,
+      })),
+    [items],
+  )
+
   return (
     <div className="space-y-6">
       {!omitToolbar ?
         <>
           <PlacesCategoryToolbar category={category} onCategoryChange={setCategory} />
-          <PlacesLocationNotice />
+          {!loading && mapPlaces.some((p) => p.lat != null && p.lng != null) ?
+            <CommunityPlacesMap places={mapPlaces} className="h-80 w-full" />
+          : null}
         </>
       : null}
 
@@ -203,21 +218,31 @@ export default function CommunityPlacesBrowse({
               <li key={p.id} className="rounded-2xl border border-dc-border bg-dc-elevated/95 p-4">
                 <div className="flex items-start gap-3">
                   {logoSrc ?
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dc-border bg-dc-elevated-solid">
-                      <img
-                        src={logoSrc}
-                        alt=""
-                        className="h-full w-full object-contain"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
-                  : <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-dc-border bg-dc-elevated-solid text-xs font-semibold text-dc-muted">
+                    <Link to={`/places/${encodeURIComponent(p.slug)}`} className="shrink-0">
+                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-dc-border bg-dc-elevated-solid">
+                        <img
+                          src={logoSrc}
+                          alt=""
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    </Link>
+                  : <Link
+                      to={`/places/${encodeURIComponent(p.slug)}`}
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-dc-border bg-dc-elevated-solid text-xs font-semibold text-dc-muted"
+                    >
                       {placeInitials(p.name)}
-                    </div>
+                    </Link>
                   }
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-dc-text">{p.name}</h3>
+                    <Link
+                      to={`/places/${encodeURIComponent(p.slug)}`}
+                      className="font-semibold text-dc-text hover:text-dc-accent"
+                    >
+                      {p.name}
+                    </Link>
                     <p className="mt-1 text-xs capitalize text-dc-muted">{p.category.replace(/_/g, ' ')}</p>
                     {p.linkedOrganization ?
                       <Link

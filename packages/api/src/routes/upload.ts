@@ -88,7 +88,7 @@ export async function registerUploadRoutes(app: FastifyInstance) {
         width: processed.width,
         height: processed.height,
         exifStripped: processed.exifStripped,
-        status: 'quarantined',
+        status: 'staged',
         url: null,
         contentUrl: null,
       })

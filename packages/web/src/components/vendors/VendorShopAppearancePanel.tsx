@@ -72,6 +72,7 @@ export default function VendorShopAppearancePanel({
         setMsg(null)
         try {
           const fd = new FormData()
+          fd.append('purpose', 'vendor_branding')
           fd.append('file', file)
           const up = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
           const data = (await up.json().catch(() => ({}))) as { url?: string; error?: string }

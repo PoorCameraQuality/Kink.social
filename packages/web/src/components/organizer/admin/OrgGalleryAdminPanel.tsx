@@ -135,6 +135,7 @@ export default function OrgGalleryAdminPanel({
       setActionMsg(null)
       try {
         const fd = new FormData()
+        fd.append('purpose', 'org_gallery')
         fd.append('file', file)
         const up = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
         const data = (await up.json().catch(() => ({}))) as { url?: string; error?: string }

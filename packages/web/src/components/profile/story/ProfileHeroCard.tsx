@@ -140,7 +140,7 @@ export default function ProfileHeroCard({
           : null}
 
           {identityFacts.length > 0 ?
-            <dl className="mx-auto mt-4 grid max-w-md grid-cols-[minmax(5.5rem,auto)_1fr] gap-x-4 gap-y-2.5 rounded-xl bg-dc-surface-muted/25 px-4 py-3.5 ring-1 ring-inset ring-white/[0.05] sm:mx-0">
+            <dl className="mx-auto mt-4 grid max-w-md grid-cols-[minmax(5.5rem,auto)_1fr] gap-x-4 gap-y-2.5 rounded-xl border border-dc-border-subtle/55 bg-dc-surface-muted/70 px-4 py-3.5 sm:mx-0">
               {identityFacts.map((fact) => (
                 <IdentityFact key={fact.label} label={fact.label} value={fact.value} />
               ))}

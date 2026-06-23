@@ -154,9 +154,11 @@
 }
 
 .feed-stream .feed-stream-activity-card {
-  border-color: color-mix(in srgb, var(--dc-border) 45%, transparent) !important;
-  background: color-mix(in srgb, var(--dc-elevated-solid) 10%, transparent) !important;
-  box-shadow: none !important;
+  /* Readable card surface — distinct from the page, slightly lighter than a
+     direct post so the stream hierarchy still reads. (Was ~10% opacity = washed out.) */
+  border-color: color-mix(in srgb, var(--dc-border) 70%, transparent) !important;
+  background: color-mix(in srgb, var(--dc-elevated-solid) 90%, var(--dc-accent) 5%) !important;
+  box-shadow: var(--dc-shadow-soft) !important;
   backdrop-filter: none;
 }
 

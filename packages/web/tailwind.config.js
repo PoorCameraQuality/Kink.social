@@ -104,11 +104,22 @@ export default {
       minWidth: {
         touch: '2.75rem',
       },
+      /**
+       * Single app layering contract (UI Surface System).
+       * Use these named tokens — never raw z-[9999]. See docs/UI_SURFACE_SYSTEM.md.
+       * base content = 0 (default, no token needed).
+       */
       zIndex: {
-        'dc-chrome': '40',
-        'dc-toast': '80',
-        'dc-modal': '90',
-        'dc-confirm': '95',
+        'dc-sticky': '30', // sticky rails / in-column sticky chrome
+        'dc-chrome': '40', // header / top chrome
+        'dc-subnav': '45', // secondary nav, route-pending bar
+        'dc-dropdown': '100', // dropdowns, popovers, menus, three-dot menus
+        'dc-tooltip': '120', // tooltips
+        'dc-modal-backdrop': '200', // modal/dialog/sheet scrim
+        'dc-modal': '210', // modal / dialog / bottom sheet panel
+        'dc-confirm': '220', // confirm dialog layered over a modal
+        'dc-toast': '300', // toasts / transient status
+        'dc-critical': '400', // command palette / critical global overlay
       },
       borderRadius: {
         'c2k-card': '1rem',

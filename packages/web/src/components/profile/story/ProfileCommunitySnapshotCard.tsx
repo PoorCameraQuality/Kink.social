@@ -22,7 +22,7 @@ type SnapshotStatProps = {
 
 function SnapshotStat({ value, label, emptyHint }: SnapshotStatProps) {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-dc-surface-muted/20 px-3 py-3">
+    <div className="rounded-xl border border-dc-border-subtle/55 bg-dc-surface-muted/70 px-3 py-3">
       <p className="text-2xl font-bold tabular-nums tracking-tight text-dc-text">{value}</p>
       <p className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-dc-muted/80">{label}</p>
       {value === 0 && emptyHint ?

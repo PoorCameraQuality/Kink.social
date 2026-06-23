@@ -402,7 +402,7 @@ export default function Header() {
   : null
 
   return (
-    <header className="dc-header-chrome sticky top-0 z-[100] overflow-visible border-b border-dc-border-subtle bg-dc-elevated/95 shadow-[var(--dc-shadow-soft)] backdrop-blur-md safe-area-pt">
+    <header className="dc-header-chrome sticky top-0 z-dc-chrome overflow-visible border-b border-dc-border-subtle bg-dc-elevated/95 shadow-[var(--dc-shadow-soft)] backdrop-blur-md safe-area-pt">
       <div className={marketingHeader ? 'mx-auto max-w-7xl overflow-visible px-4 sm:px-6 lg:px-8' : shellHeaderClass}>
         {marketingHeader ?
           <>
@@ -479,7 +479,7 @@ export default function Header() {
                     <span className="hidden lg:inline">Create</span>
                   </button>
                   {createOpen && (
-                    <div className="absolute right-0 top-full z-[110] mt-2 max-h-[min(70vh,420px)] w-64 overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-1 shadow-[var(--dc-shadow-panel)]">
+                    <div className="absolute right-0 top-full z-dc-dropdown mt-2 max-h-[min(70vh,420px)] w-64 overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-1 shadow-[var(--dc-shadow-panel)]">
                       <CreateMenuDropdown onNavigate={() => setCreateOpen(false)} />
                     </div>
                   )}
@@ -516,13 +516,13 @@ export default function Header() {
                         onMarkRead={markNotifRead}
                         onMarkAllRead={markAllNotifsRead}
                         onClose={() => setNotifOpen(false)}
-                        className="absolute right-0 top-full z-[110] mt-2 hidden w-[22rem] lg:block"
+                        className="absolute right-0 top-full z-dc-dropdown mt-2 hidden w-[22rem] lg:block"
                       />
                       {mobileOverlaysMounted ?
                         createPortal(
                           <div
                             ref={notifMobileRef}
-                            className="fixed inset-0 z-[90] flex flex-col justify-end lg:hidden"
+                            className="fixed inset-0 z-dc-modal flex flex-col justify-end lg:hidden"
                             role="presentation"
                           >
                             <button
@@ -572,7 +572,7 @@ export default function Header() {
                     )}
                   </button>
                   {msgOpen && (
-                    <div className="absolute right-0 top-full z-[110] w-[min(100vw-2rem,22rem)] rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)]">
+                    <div className="absolute right-0 top-full z-dc-dropdown w-[min(100vw-2rem,22rem)] rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)]">
                       <p className="px-3 pb-2 text-xs font-semibold text-dc-muted uppercase tracking-wide">Messages</p>
                       <ul className="max-h-64 overflow-y-auto">
                         {msgItems.slice(0, 6).map((c) => (
@@ -647,7 +647,7 @@ export default function Header() {
                   {isProfileOpen && (
                     <>
                       <div
-                        className="absolute right-0 top-full z-[110] mt-2 hidden w-72 max-h-[min(80vh,520px)] overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)] lg:block"
+                        className="absolute right-0 top-full z-dc-dropdown mt-2 hidden w-72 max-h-[min(80vh,520px)] overflow-y-auto rounded-xl border border-dc-border bg-dc-elevated-solid py-2 shadow-[var(--dc-shadow-panel)] lg:block"
                         role="dialog"
                         aria-modal="true"
                         aria-label="Account menu"
@@ -658,7 +658,7 @@ export default function Header() {
                         createPortal(
                           <div
                             ref={profileMobileRef}
-                            className="fixed inset-0 z-[90] flex flex-col justify-end lg:hidden"
+                            className="fixed inset-0 z-dc-modal flex flex-col justify-end lg:hidden"
                             role="presentation"
                           >
                             <button

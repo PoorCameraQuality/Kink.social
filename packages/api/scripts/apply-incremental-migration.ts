@@ -1609,6 +1609,11 @@ CREATE TABLE IF NOT EXISTS organization_claim_tokens (
 );
 
 CREATE INDEX IF NOT EXISTS organization_claim_tokens_org_idx ON organization_claim_tokens (organization_id);
+
+ALTER TABLE events
+  ADD COLUMN IF NOT EXISTS venue_place_id uuid REFERENCES community_places (id) ON DELETE SET NULL;
+
+CREATE INDEX IF NOT EXISTS events_venue_place_id_idx ON events (venue_place_id);
 `
 
 async function main() {

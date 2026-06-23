@@ -28,6 +28,8 @@ import {
   buildEckeEventRowFromStandaloneEvent,
   isOrgDungeonListing,
 } from '../lib/ecke-directory-sync.js'
+import { parseOrgFeatureFlags } from '../lib/org-features.js'
+import { resolveVenueGeoFromFlags } from '../lib/org-venue-sync.js'
 import {
   requestEckeConventionEventPublish,
   requestEckeStandaloneEventPublish,
@@ -45,6 +47,55 @@ import {
 } from '../lib/ecke-publish-payload.js'
 import { resolveConventionCommandAccess } from '../lib/convention-command-access.js'
 import { filterSlotsForPublicProgram } from '../lib/convention-program-policy.js'
+
+function buildOrgDungeonRow(org: {
+  id: string
+  slug: string
+  displayName: string
+  bio: string | null
+  externalSiteUrl: string | null
+  visibility: string
+  featureFlags: unknown
+}) {
+  const geo = resolveVenueGeoFromFlags(parseOrgFeatureFlags(org.featureFlags))
+  return buildEckeDungeonRowFromOrg({
+    id: org.id,
+    slug: org.slug,
+    displayName: org.displayName,
+    bio: org.bio,
+    websiteUrl: org.externalSiteUrl,
+    visibility: org.visibility,
+    city: geo.city,
+    state: geo.state,
+  })
+}
+
+function orgDungeonTargetPreview(org: {
+  id: string
+  slug: string
+  displayName: string
+  bio: string | null
+  externalSiteUrl: string | null
+  visibility: string
+  featureFlags: unknown
+}): EckePublishTargetPreview | null {
+  if (!isOrgDungeonListing(org.featureFlags)) return null
+  const dungeonRow = buildOrgDungeonRow({
+    id: org.id,
+    slug: org.slug,
+    displayName: org.displayName,
+    bio: org.bio,
+    externalSiteUrl: org.externalSiteUrl ?? null,
+    visibility: org.visibility,
+    featureFlags: org.featureFlags,
+  })
+  return {
+    targetKind: 'ecke_dungeon',
+    externalSlug: dungeonRow.slug,
+    payload: dungeonRow,
+    contentHash: hashEckePayload(dungeonRow),
+  }
+}
 
 const ORG_ROLE_RANK: Record<string, number> = {
   MEMBER: 1,
@@ -526,13 +577,14 @@ async function publishOrgListing(
 
   let dungeonResult: EckePublishResult | undefined
   if (isOrgDungeonListing(org.featureFlags)) {
-    const dungeonRow = buildEckeDungeonRowFromOrg({
+    const dungeonRow = buildOrgDungeonRow({
       id: org.id,
       slug: org.slug,
       displayName: org.displayName,
       bio: org.bio,
-      websiteUrl: org.externalSiteUrl,
+      externalSiteUrl: org.externalSiteUrl ?? null,
       visibility: org.visibility,
+      featureFlags: org.featureFlags,
     })
     const dungeonHash = hashEckePayload(dungeonRow)
     await upsertTargetRow({
@@ -1062,11 +1114,16 @@ export async function registerEckePublishRoutes(app: FastifyInstance) {
 
     const rows = await loadTargetRows('organization', org.id)
     const listingRow = rows.find((r) => r.targetKind === 'ecke_listing')
+    const dungeonPreview = orgDungeonTargetPreview(org)
+    const dungeonRow = rows.find((r) => r.targetKind === 'ecke_dungeon')
+
+    const targets = [targetResponse(preview, listingRow)]
+    if (dungeonPreview) targets.push(targetResponse(dungeonPreview, dungeonRow))
 
     return reply.send({
       scope: { type: 'organization', slug: org.slug, name: org.displayName },
       bridgeConnected: isBridgeConnected(),
-      targets: [targetResponse(preview, listingRow)],
+      targets,
     })
   })
 
@@ -1090,18 +1147,45 @@ export async function registerEckePublishRoutes(app: FastifyInstance) {
       userId: user.userId,
     })
 
+    const targets: Array<{
+      targetKind: 'ecke_listing' | 'ecke_dungeon'
+      externalSlug: string
+      status: string
+      contentHash: string
+      payload: unknown
+    }> = [
+      {
+        targetKind: 'ecke_listing',
+        externalSlug: listingPayload.slug,
+        status,
+        contentHash: listingHash,
+        payload: listingPayload,
+      },
+    ]
+
+    const dungeonPreview = orgDungeonTargetPreview(org)
+    if (dungeonPreview) {
+      const dungeonStatus = await upsertTargetRow({
+        scopeType: 'organization',
+        organizationId: org.id,
+        targetKind: 'ecke_dungeon',
+        externalSlug: dungeonPreview.externalSlug,
+        contentHash: dungeonPreview.contentHash,
+        userId: user.userId,
+      })
+      targets.push({
+        targetKind: 'ecke_dungeon',
+        externalSlug: dungeonPreview.externalSlug,
+        status: dungeonStatus,
+        contentHash: dungeonPreview.contentHash,
+        payload: dungeonPreview.payload,
+      })
+    }
+
     return reply.send({
       scope: { type: 'organization', slug: org.slug, name: org.displayName },
       bridgeConnected: isBridgeConnected(),
-      targets: [
-        {
-          targetKind: 'ecke_listing',
-          externalSlug: listingPayload.slug,
-          status,
-          contentHash: listingHash,
-          payload: listingPayload,
-        },
-      ],
+      targets,
     })
   })
 

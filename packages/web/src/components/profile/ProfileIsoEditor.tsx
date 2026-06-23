@@ -15,6 +15,7 @@ const VIS_OPTIONS = [
 
 async function uploadIsoImageFile(file: File): Promise<string | null> {
   const fd = new FormData()
+  fd.append('purpose', 'profile_media')
   fd.append('file', file)
   const r = await fetch('/api/upload', { method: 'POST', body: fd, credentials: 'include' })
   if (!r.ok) return null
@@ -291,7 +292,7 @@ export default function ProfileIsoEditor() {
       {lightbox ?
         <button
           type="button"
-          className="fixed inset-0 z-[100] flex cursor-zoom-out items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-dc-modal flex cursor-zoom-out items-center justify-center bg-black/90 p-4"
           onClick={() => setLightbox(null)}
           aria-label="Close image"
         >

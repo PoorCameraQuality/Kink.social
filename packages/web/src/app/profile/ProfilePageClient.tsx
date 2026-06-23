@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import ProfilePhotoManager from '@/components/profile/ProfilePhotoManager'
 import { usePublicProfileTabFromUrl } from '@/hooks/usePublicProfileTabFromUrl'
-import { PROFILE_MEDIA_GALLERY_ID, scrollToProfileMediaGallery } from '@/lib/profile-gallery-nav'
+import { PROFILE_MEDIA_GALLERY_ID } from '@/lib/profile-gallery-nav'
 import ProfileExtendedSection from '@/components/profile/ProfileExtendedSection'
 import ProfileAttendedEventCard from '@/components/profile/ProfileAttendedEventCard'
 import ProfileWritingTab from '@/components/profile/tabs/ProfileWritingTab'
@@ -153,9 +153,8 @@ export default function ProfilePageClient() {
     [selectTab],
   )
   const openPhotoGallery = useCallback(() => {
-    selectTab('Media')
-    scrollToProfileMediaGallery()
-  }, [selectTab])
+    navigate('/profile/edit')
+  }, [navigate])
   const [storedProfile, setStoredProfile] = useState<ReturnType<typeof loadStoredProfile>>(null)
   const [remote, setRemote] = useState<RemoteProfileResponse | null>(null)
   const [remoteLoading, setRemoteLoading] = useState(false)
@@ -225,23 +224,26 @@ export default function ProfilePageClient() {
   }, [authStatus, loadRemoteProfile, loadEcosystem, pathname])
 
   useEffect(() => {
-    const refresh = () => {
+    const refreshRemoteProfile = () => {
+      void loadRemoteProfile()
+    }
+    const refreshAll = () => {
       void loadRemoteProfile()
       profileMe.reload()
     }
     const onVisible = () => {
-      if (document.visibilityState === 'visible') refresh()
+      if (document.visibilityState === 'visible') refreshAll()
     }
-    const onProfileSaved = () => refresh()
-    window.addEventListener('focus', refresh)
+    window.addEventListener('focus', refreshAll)
     document.addEventListener('visibilitychange', onVisible)
-    window.addEventListener('c2k:profile-privacy-saved', onProfileSaved)
-    window.addEventListener('c2k:profile-saved', onProfileSaved)
+    window.addEventListener('c2k:profile-privacy-saved', refreshAll)
+    // ProfileEditContext already applyProfilePatch after save — refetch causes stale UI flicker.
+    window.addEventListener('c2k:profile-saved', refreshRemoteProfile)
     return () => {
-      window.removeEventListener('focus', refresh)
+      window.removeEventListener('focus', refreshAll)
       document.removeEventListener('visibilitychange', onVisible)
-      window.removeEventListener('c2k:profile-privacy-saved', onProfileSaved)
-      window.removeEventListener('c2k:profile-saved', onProfileSaved)
+      window.removeEventListener('c2k:profile-privacy-saved', refreshAll)
+      window.removeEventListener('c2k:profile-saved', refreshRemoteProfile)
     }
   }, [loadRemoteProfile, profileMe.reload])
 
@@ -594,6 +596,7 @@ export default function ProfilePageClient() {
             photoDisplaySettings={ownerStoryProps.photoDisplaySettings}
             photoCount={ownerStoryProps.photoCount}
             onOpenGallery={ownerStoryProps.onOpenGallery}
+            managePhotosHref="/profile/edit"
             actions={ownerStoryProps.heroActions}
           />
       }
@@ -603,7 +606,7 @@ export default function ProfilePageClient() {
             photos={profilePhotos}
             viewer={{ authenticated: true, adultContentPref: ADULT_CONTENT_PREFERENCES.blur }}
             totalCount={profilePhotos.length}
-            onViewAll={openPhotoGallery}
+            managePhotosHref="/profile/edit"
             viewerIsOwner
           />
         )
@@ -613,6 +616,17 @@ export default function ProfilePageClient() {
           <ProfileAboutBlock bio={ownerStoryProps.bio} viewerIsOwner />
           <ProfileInterestsCard kinks={ownerStoryProps.kinks} viewerIsOwner />
           <ProfileLookingForCard lookingFor={ownerStoryProps.lookingFor} viewerIsOwner />
+          {signedInLive && displayUsername ?
+            <ProfileRecentPostsSection
+              viewerIsOwner
+              viewerUsername={viewerUsername}
+              profileUsername={displayUsername}
+              items={profileFeedPosts.items}
+              status={profileFeedPosts.status}
+              error={profileFeedPosts.error}
+              onRetry={() => void profileFeedPosts.reload()}
+            />
+          : null}
         </>
       }
       secondary={
@@ -637,17 +651,6 @@ export default function ProfilePageClient() {
       }
       more={
         <>
-          {signedInLive && displayUsername ?
-            <ProfileRecentPostsSection
-              viewerIsOwner
-              viewerUsername={viewerUsername}
-              profileUsername={displayUsername}
-              items={profileFeedPosts.items}
-              status={profileFeedPosts.status}
-              error={profileFeedPosts.error}
-              onRetry={() => void profileFeedPosts.reload()}
-            />
-          : null}
         <ProfileExtendedSection
           viewerIsOwner
           visibleTabs={visibleTabs}

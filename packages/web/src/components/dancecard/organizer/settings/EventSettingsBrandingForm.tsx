@@ -101,6 +101,7 @@ function ShareImageControl({ event, canEdit, saveOnBlur }: Props) {
     setUploading(true)
     try {
       const fd = new FormData()
+      fd.set('purpose', 'event_share_branding')
       fd.set('file', file)
       const up = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
       const j = (await up.json().catch(() => ({}))) as { url?: string; error?: string }

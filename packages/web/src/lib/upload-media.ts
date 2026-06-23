@@ -1,5 +1,6 @@
 export type UploadMediaResult = {
-  status: 'quarantined' | 'url'
+  /** File received and staged for scan — not a moderation hold. */
+  status: 'staged' | 'url'
   quarantineKey?: string
   url?: string
   sha256?: string
@@ -7,6 +8,10 @@ export type UploadMediaResult = {
   sizeBytes?: number
   width?: number
   height?: number
+}
+
+export function isStagedUploadResult(status: string | undefined): boolean {
+  return status === 'staged' || status === 'quarantined'
 }
 
 /** Upload a single image via `POST /api/upload` with explicit purpose. */
@@ -47,7 +52,7 @@ export async function uploadMediaFile(
     throw new Error('Upload did not return a quarantine key.')
   }
   return {
-    status: 'quarantined',
+    status: 'staged',
     quarantineKey,
     sha256: data.sha256,
     mimeType: data.mimeType,

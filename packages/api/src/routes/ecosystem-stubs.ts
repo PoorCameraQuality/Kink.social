@@ -1506,6 +1506,9 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         featured: schema.events.featured,
         featuredUntil: schema.events.featuredUntil,
         rsvpOpen: schema.events.rsvpOpen,
+        venuePlaceId: schema.events.venuePlaceId,
+        venuePlaceSlug: schema.communityPlaces.slug,
+        venuePlaceName: schema.communityPlaces.name,
         createdAt: schema.events.createdAt,
         hostUsername: schema.users.username,
         hostDisplayName: schema.profiles.displayName,
@@ -1516,6 +1519,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       .innerJoin(schema.users, eq(schema.events.hostId, schema.users.id))
       .innerJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
       .leftJoin(schema.organizations, eq(schema.events.organizationId, schema.organizations.id))
+      .leftJoin(schema.communityPlaces, eq(schema.events.venuePlaceId, schema.communityPlaces.id))
       .where(eq(schema.events.id, eventId))
       .limit(1)
     if (!row) return reply.status(404).send({ error: 'Not found' })
@@ -2450,6 +2454,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     featured: z.boolean().optional(),
     featuredUntil: z.string().datetime().optional().nullable(),
     rsvpOpen: z.boolean().optional(),
+    venuePlaceId: z.string().uuid().nullable().optional(),
   })
 
   app.patch('/api/v1/events/:eventId', async (req, reply) => {
@@ -2502,6 +2507,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       patch.featuredUntil = p.featuredUntil ? new Date(p.featuredUntil) : null
     }
     if (p.rsvpOpen !== undefined) patch.rsvpOpen = p.rsvpOpen
+    if (p.venuePlaceId !== undefined) patch.venuePlaceId = p.venuePlaceId
     if (clearVirtual) {
       patch.virtualSessionStyle = null
       patch.virtualAgenda = null

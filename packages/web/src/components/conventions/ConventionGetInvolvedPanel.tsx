@@ -14,6 +14,25 @@ function pathwayBadge(open: boolean, pending?: boolean) {
   return { label: 'Closed', className: 'bg-dc-elevated-muted text-dc-muted' }
 }
 
+const ROLE_BLURBS: Record<string, string> = {
+  staff: 'Join the event team with a structured application.',
+  volunteer: 'Help run the event with a flexible volunteer application.',
+  educator: 'Apply to teach a class or lead a session at this event.',
+  photographer: 'Apply to shoot photo or video coverage at this event.',
+  performer: 'Apply to perform at this event.',
+  presenter: 'Apply as a presenter at this event.',
+  custom: 'Apply for this role at this event.',
+}
+
+type PathwayCard = {
+  key: string
+  title: string
+  blurb: string
+  open: boolean
+  applyUrl: string | null
+  pending?: boolean
+}
+
 export default function ConventionGetInvolvedPanel({ conventionSlug, isAuthenticated }: Props) {
   const { data, loading, err } = useApiConventionParticipation(conventionSlug)
 
@@ -21,42 +40,37 @@ export default function ConventionGetInvolvedPanel({ conventionSlug, isAuthentic
   if (err) return null
 
   const pathways = data?.pathways
+  const trustedRoles = data?.trustedRoles ?? []
   if (!pathways) return null
 
-  const anyOpen =
-    pathways.present.open ||
-    pathways.vendor.open ||
-    pathways.staff.open ||
-    pathways.volunteer.open
-
   const my = data?.myStatus
-  const cards = [
+
+  const cards: PathwayCard[] = [
     {
       key: 'present',
       title: 'Apply to present',
       blurb: 'Submit classes from your presenter catalog for program review.',
-      pathway: pathways.present,
+      open: pathways.present.open,
+      applyUrl: pathways.present.applyUrl,
       pending: my?.presenterPending,
     },
     {
       key: 'vendor',
       title: 'Apply to vend',
       blurb: 'Request a vendor booth for this event.',
-      pathway: pathways.vendor,
+      open: pathways.vendor.open,
+      applyUrl: pathways.vendor.applyUrl,
     },
-    {
-      key: 'staff',
-      title: 'Apply as staff',
-      blurb: 'Join the event team with a structured application.',
-      pathway: pathways.staff,
-    },
-    {
-      key: 'volunteer',
-      title: 'Apply as volunteer',
-      blurb: 'Help run the event with a flexible volunteer application.',
-      pathway: pathways.volunteer,
-    },
+    ...trustedRoles.map((role) => ({
+      key: `role-${role.id}`,
+      title: role.name,
+      blurb: ROLE_BLURBS[role.roleKind] ?? ROLE_BLURBS.custom,
+      open: role.open,
+      applyUrl: role.applyUrl,
+    })),
   ]
+
+  const anyOpen = cards.some((c) => c.open)
 
   return (
     <section id="get-involved" className="scroll-mt-24 rounded-2xl border border-dc-border bg-dc-elevated/80 p-5">
@@ -65,11 +79,11 @@ export default function ConventionGetInvolvedPanel({ conventionSlug, isAuthentic
           <p className="text-[10px] font-semibold uppercase tracking-wide text-dc-accent">Get involved</p>
           <h2 className="mt-1 text-lg font-semibold text-dc-text">Participate in this event</h2>
           <p className="mt-1 max-w-xl text-sm text-dc-muted">
-            Present, vend, or join as staff or volunteer. Organizers review applications and send formal offer letters.
+            Present, vend, or apply for staff, volunteer, and other event roles. Organizers review applications and send
+            formal offer letters.
           </p>
           <p className="mt-2 max-w-xl text-xs text-dc-muted">
-            You do not need to register as an attendee to apply. Sign in with your presenter or vendor profile when
-            a path is open.
+            You do not need to register as an attendee to apply. Sign in with your member profile when a path is open.
           </p>
           {!anyOpen ?
             <p className="mt-2 text-xs text-dc-muted">No apply paths are open yet. Check back or sign in if you have a pending offer.</p>
@@ -87,8 +101,8 @@ export default function ConventionGetInvolvedPanel({ conventionSlug, isAuthentic
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {cards.map((c) => {
-          const badge = pathwayBadge(c.pathway.open, c.key === 'present' ? c.pending : undefined)
-          const canApply = c.pathway.open && c.pathway.applyUrl && isAuthenticated
+          const badge = pathwayBadge(c.open, c.pending)
+          const canApply = c.open && c.applyUrl && isAuthenticated
           return (
             <div
               key={c.key}
@@ -103,14 +117,14 @@ export default function ConventionGetInvolvedPanel({ conventionSlug, isAuthentic
               <p className="mt-1 text-xs text-dc-muted">{c.blurb}</p>
               {canApply ?
                 <Link
-                  to={c.pathway.applyUrl!}
+                  to={c.applyUrl!}
                   className="mt-3 inline-flex min-h-9 items-center rounded-lg bg-dc-accent px-3 text-xs font-medium text-dc-text hover:bg-dc-accent-hover"
                 >
                   Apply
                 </Link>
-              : c.pathway.open && c.pathway.applyUrl ?
+              : c.open && c.applyUrl ?
                 <Link
-                  to={`/login?returnTo=${encodeURIComponent(c.pathway.applyUrl)}`}
+                  to={`/login?returnTo=${encodeURIComponent(c.applyUrl)}`}
                   className="mt-3 inline-flex min-h-9 items-center rounded-lg border border-dc-accent-border/50 px-3 text-xs font-medium text-dc-accent hover:bg-dc-accent/10"
                 >
                   Sign in to apply
