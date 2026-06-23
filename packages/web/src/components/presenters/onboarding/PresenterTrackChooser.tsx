@@ -1,5 +1,10 @@
 import type { PresenterOnboardingTrack } from '@/lib/presenter-focus'
-import { PRESENTER_TRACK_LABELS } from '@/lib/presenter-focus'
+import {
+  LoadingButton,
+  WizardChoiceCard,
+  WizardChoiceGrid,
+  WizardStepHeader,
+} from '@/components/ui/primitives'
 
 const TRACK_CARDS: {
   track: PresenterOnboardingTrack
@@ -45,48 +50,28 @@ type Props = {
 
 export default function PresenterTrackChooser({ selected, onSelect, onContinue }: Props) {
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-dc-text">What kind of profile are you setting up?</h2>
-        <p className="mt-2 text-sm text-dc-text-muted">
-          Choose the profile type that best fits how you want organizers and community members to find you.
-        </p>
+    <div>
+      <WizardStepHeader
+        eyebrow="Profile type"
+        title="What kind of profile are you setting up?"
+        description="Choose the profile type that best fits how you want organizers and community members to find you."
+      />
+      <WizardChoiceGrid columns={1} label="Profile type">
+        {TRACK_CARDS.map((card) => (
+          <WizardChoiceCard
+            key={card.track}
+            title={card.title}
+            description={card.description}
+            selected={selected === card.track}
+            onSelect={() => onSelect(card.track)}
+          />
+        ))}
+      </WizardChoiceGrid>
+      <div className="mt-6">
+        <LoadingButton disabled={!selected} onClick={onContinue} className="w-full sm:w-auto sm:min-w-[10rem]">
+          Continue
+        </LoadingButton>
       </div>
-      <div className="grid gap-3" role="radiogroup" aria-label="Profile type">
-        {TRACK_CARDS.map((card) => {
-          const isSelected = selected === card.track
-          return (
-            <button
-              key={card.track}
-              type="button"
-              role="radio"
-              aria-checked={isSelected}
-              onClick={() => onSelect(card.track)}
-              className={`rounded-xl border p-4 text-left transition-colors ${
-                isSelected ?
-                  'border-dc-accent bg-dc-accent/10 ring-2 ring-dc-accent/30'
-                : 'border-dc-border bg-dc-elevated-solid hover:border-dc-accent/40'
-              }`}
-            >
-              <p className="font-medium text-dc-text">{card.title}</p>
-              <p className="mt-1 text-sm text-dc-text-muted">{card.description}</p>
-              {isSelected ?
-                <p className="mt-2 text-xs font-medium text-dc-accent" aria-live="polite">
-                  Selected · {PRESENTER_TRACK_LABELS[card.track]}
-                </p>
-              : null}
-            </button>
-          )
-        })}
-      </div>
-      <button
-        type="button"
-        disabled={!selected}
-        onClick={onContinue}
-        className="w-full min-h-11 rounded-xl bg-dc-accent px-4 py-3 font-medium text-dc-accent-foreground hover:bg-dc-accent-hover disabled:opacity-50"
-      >
-        Continue
-      </button>
     </div>
   )
 }

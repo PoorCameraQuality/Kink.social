@@ -63,7 +63,7 @@ Query param: `?tab=` (default **home**). Labels from `packages/web/src/lib/organ
 |-----|----------|
 | **home** | `OrganizerOrgHomePanel` — setup checklist, quick actions, upcoming programs |
 | **schedule** | Conventions + standalone events table; **Manage program** → nested convention route |
-| **people** | Member roster, filters, role guide; role changes when settings access |
+| **people** | Member roster, filters, role guide; **Transfer ownership** claim link (OWNER); role changes when settings access |
 | **communications** | `OrganizerOrgCommunicationsPanel` — forum categories + chat channels managers; links to public hub |
 | **moderation** | `OrganizerOrgModerationPanel` — report inbox, bans, audit timeline |
 | **settings** | Sections via `?settingsSection=`: **general**, **branding**, **features**, **content**, **publish** (`Settings*Tab` panels; publish uses ECKE preview/publish UI) |

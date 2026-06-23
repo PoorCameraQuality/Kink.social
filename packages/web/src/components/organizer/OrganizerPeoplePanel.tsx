@@ -31,6 +31,7 @@ export default function OrganizerPeoplePanel({
         orgVisibility={orgVisibility}
         canManageRoles={canManageRoles}
         viewerUserId={viewerUserId}
+        viewerRole={viewerRole}
       />
     )
   }

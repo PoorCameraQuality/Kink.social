@@ -3400,6 +3400,26 @@ export const conventionStaffInviteTokens = pgTable(
   (t) => [index('convention_staff_invite_tokens_convention_idx').on(t.conventionId)]
 )
 
+/** One-time org ownership transfer for ECKE bootstrap handoff. */
+export const organizationClaimTokens = pgTable(
+  'organization_claim_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    token: varchar('token', { length: 128 }).notNull().unique(),
+    createdByUserId: uuid('created_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    redeemedByUserId: uuid('redeemed_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+    redeemedAt: timestamp('redeemed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('organization_claim_tokens_org_idx').on(t.organizationId)]
+)
+
 export const scheduleSlotSignups = pgTable(
   'schedule_slot_signups',
   {

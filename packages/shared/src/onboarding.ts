@@ -1,6 +1,12 @@
 import type { FeedSettings } from './user-settings.js'
 
-export const ONBOARDING_STEP_COUNT = 7 as const
+export const ONBOARDING_STEP_COUNT = 6 as const
+
+/** Clamp a (possibly stale) saved step into the current valid range [1, ONBOARDING_STEP_COUNT]. */
+export function clampOnboardingStep(step: number | null | undefined): number {
+  if (typeof step !== 'number' || Number.isNaN(step)) return 1
+  return Math.min(Math.max(Math.round(step), 1), ONBOARDING_STEP_COUNT)
+}
 
 export const ONBOARDING_INTENT_OPTIONS = [
   { id: 'friends', label: 'Make friends' },
@@ -28,9 +34,7 @@ export function isOnboardingComplete(feed: OnboardingFeedFields | null | undefin
 }
 
 export function onboardingStepNumber(feed: OnboardingFeedFields | null | undefined): number {
-  const step = feed?.onboardingStep
-  if (typeof step === 'number' && step >= 1 && step <= ONBOARDING_STEP_COUNT) return step
-  return 1
+  return clampOnboardingStep(feed?.onboardingStep)
 }
 
 export function hasSafetyAcknowledgement(feed: OnboardingFeedFields | null | undefined): boolean {

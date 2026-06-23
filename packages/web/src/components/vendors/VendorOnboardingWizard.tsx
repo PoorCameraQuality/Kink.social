@@ -1,5 +1,5 @@
 import { VENDOR_CATEGORY_DESCRIPTIONS, normalizeVendorTags, type VendorCategory } from '@c2k/shared'
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import VendorExternalStorePanel from '@/components/VendorExternalStorePanel'
 import VendorIntegrationGuide from '@/components/vendors/VendorIntegrationGuide'
@@ -9,8 +9,19 @@ import { buildLoginHref } from '@/lib/auth-links'
 import { useApiVendorMe } from '@/hooks/useApiVendorMe'
 import type { ApiVendorRow } from '@/lib/api-vendor-mapper'
 import {
+  FormStatusMessage,
+  WizardChoiceCard,
+  WizardChoiceGrid,
+  WizardField,
+  WizardFooter,
+  WizardSelect,
+  WizardShell,
+  WizardStepHeader,
+  WizardTextarea,
+  type WizardStepMeta,
+} from '@/components/ui/primitives'
+import {
   initialOnboardingStep,
-  stepIndex,
   VENDOR_BASICS_CONTINUE_LABEL,
   VENDOR_BASICS_HEADING,
   VENDOR_BASICS_INTRO,
@@ -25,68 +36,25 @@ import {
   vendorIsPublished,
 } from '@/lib/vendor-onboarding'
 
-function StepProgress({ step }: { step: VendorOnboardingStep }) {
-  const idx = stepIndex(step)
-  const label = VENDOR_ONBOARDING_STEP_LABELS[step]
-  return (
-    <div className="mb-8 space-y-2">
-      <p className="text-xs font-medium uppercase tracking-wide text-dc-text-muted">
-        Step {idx + 1} of {VENDOR_ONBOARDING_STEPS.length} · {label}
-      </p>
-      <div
-        className="flex gap-1"
-        role="progressbar"
-        aria-valuenow={idx + 1}
-        aria-valuemin={1}
-        aria-valuemax={VENDOR_ONBOARDING_STEPS.length}
-        aria-label={`Vendor onboarding step ${idx + 1} of ${VENDOR_ONBOARDING_STEPS.length}: ${label}`}
-      >
-        {VENDOR_ONBOARDING_STEPS.map((s, i) => (
-          <div
-            key={s}
-            title={VENDOR_ONBOARDING_STEP_LABELS[s]}
-            className={`flex-1 h-1 rounded-full ${i <= idx ? 'bg-dc-accent' : 'bg-dc-elevated-solid'}`}
-          />
-        ))}
-      </div>
-    </div>
-  )
+const vicon = (path: string) => (
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d={path} />
+  </svg>
+)
+
+const STEP_ICONS: Record<VendorOnboardingStep, string> = {
+  welcome: 'M5 3v4M3 5h4m6-2l2.5 6.5L22 12l-6.5 2.5L13 21l-2.5-6.5L4 12l6.5-2.5L13 3z',
+  basics: 'M5 8h14M5 8a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1a2 2 0 01-2 2M5 8l1 11a2 2 0 002 2h8a2 2 0 002-2l1-11',
+  inventory: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+  appearance: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
+  publish: 'M5 13l4 4L19 7',
 }
 
-type NavProps = {
-  onBack?: () => void
-  onNext?: () => void
-  nextLabel?: string
-  nextDisabled?: boolean
-  secondaryAction?: React.ReactNode
-}
-
-function StepNav({ onBack, onNext, nextLabel = 'Continue', nextDisabled, secondaryAction }: NavProps) {
-  return (
-    <div className="flex flex-col sm:flex-row gap-2 pt-2">
-      {onBack ?
-        <button
-          type="button"
-          onClick={onBack}
-          className="w-full sm:flex-1 min-h-11 py-3 rounded-xl border border-dc-border text-dc-text-muted hover:text-dc-text font-medium"
-        >
-          Back
-        </button>
-      : null}
-      {secondaryAction}
-      {onNext ?
-        <button
-          type="button"
-          disabled={nextDisabled}
-          onClick={onNext}
-          className="w-full sm:flex-1 min-h-11 py-3 bg-dc-accent hover:bg-dc-accent-hover text-dc-accent-foreground font-medium rounded-xl disabled:opacity-50"
-        >
-          {nextLabel}
-        </button>
-      : null}
-    </div>
-  )
-}
+const STEPS: WizardStepMeta[] = VENDOR_ONBOARDING_STEPS.map((id) => ({
+  id,
+  label: VENDOR_ONBOARDING_STEP_LABELS[id],
+  icon: vicon(STEP_ICONS[id]),
+}))
 
 export default function VendorOnboardingWizard() {
   const { isAuthenticated } = useAuth()
@@ -132,8 +100,7 @@ export default function VendorOnboardingWizard() {
   const externalStoreType = activeVendor?.externalStoreType ?? (activeVendor?.usesEtsy ? 'etsy' : 'none')
   const etsyShopUrl = activeVendor?.etsyShopUrl ?? ''
   const wooPub = activeVendor?.externalStorePublic as { wooSiteUrl?: string } | undefined
-  const syncedAt =
-    activeVendor?.externalListingsSyncedAt ?? activeVendor?.etsyListingsSyncedAt ?? null
+  const syncedAt = activeVendor?.externalListingsSyncedAt ?? activeVendor?.etsyListingsSyncedAt ?? null
   const syncError = activeVendor?.externalSyncError ?? activeVendor?.etsySyncError ?? null
 
   const addTagsFromInput = () => {
@@ -169,10 +136,7 @@ export default function VendorOnboardingWizard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const j = (await r.json().catch(() => ({}))) as {
-        vendor?: ApiVendorRow
-        error?: string
-      }
+      const j = (await r.json().catch(() => ({}))) as { vendor?: ApiVendorRow; error?: string }
       if (r.status === 409 && j.vendor?.slug) {
         reload()
         setStep('inventory')
@@ -191,8 +155,11 @@ export default function VendorOnboardingWizard() {
     }
   }, [bio, category, displayName, makerStory, reload, shipsTo, slug, tags, website])
 
-  async function onBasicsSubmit(e: FormEvent) {
-    e.preventDefault()
+  const submitBasics = useCallback(async () => {
+    if (!displayName.trim()) {
+      setBasicsErr('Add a shop name to continue.')
+      return
+    }
     if (activeVendor) {
       setBasicsBusy(true)
       setBasicsErr(null)
@@ -226,7 +193,7 @@ export default function VendorOnboardingWizard() {
       return
     }
     await createShop()
-  }
+  }, [activeVendor, bio, category, createShop, displayName, makerStory, reload, shipsTo, tags, website])
 
   async function publishShop() {
     if (!activeVendor) return
@@ -238,10 +205,7 @@ export default function VendorOnboardingWizard() {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          displayName: activeVendor.displayName,
-          visibility: 'PUBLIC',
-        }),
+        body: JSON.stringify({ displayName: activeVendor.displayName, visibility: 'PUBLIC' }),
       })
       const j = (await r.json().catch(() => ({}))) as { error?: string }
       if (!r.ok) {
@@ -263,11 +227,13 @@ export default function VendorOnboardingWizard() {
   if (!isAuthenticated) {
     return (
       <div className="mx-auto max-w-lg px-4 py-12 text-center">
-        <h1 className="text-xl font-bold text-dc-text mb-2">Sign in to set up your shop</h1>
-        <p className="text-sm text-dc-text-muted mb-6">Vendor shops are tied to your Kink Social profile. One shop per account.</p>
+        <h1 className="mb-2 text-xl font-bold text-dc-text">Sign in to set up your shop</h1>
+        <p className="mb-6 text-sm text-dc-text-muted">
+          Vendor shops are tied to your Kink Social profile. One shop per account.
+        </p>
         <Link
           to={buildLoginHref('/vendors/onboarding')}
-          className="inline-flex min-h-11 items-center rounded-xl bg-dc-accent px-5 text-sm font-medium text-dc-text hover:bg-dc-accent-hover"
+          className="inline-flex min-h-11 items-center rounded-xl bg-dc-accent px-5 text-sm font-medium text-dc-accent-foreground hover:bg-dc-accent-hover"
         >
           Sign in
         </Link>
@@ -276,176 +242,193 @@ export default function VendorOnboardingWizard() {
   }
 
   if (status === 'loading' || status === 'idle') {
-    return <div className="mx-auto max-w-lg px-4 py-12 h-48 animate-pulse rounded-2xl bg-dc-elevated-muted" />
+    return <div className="mx-auto h-48 max-w-5xl animate-pulse rounded-2xl bg-dc-elevated-muted px-4 py-12" />
   }
 
-  return (
-    <div className="mx-auto max-w-lg px-4 py-8">
-      <Link to="/vendors" className="text-sm text-dc-accent hover:underline mb-4 inline-block">
-        ← Vendors & Shops
-      </Link>
-      <StepProgress step={step} />
+  const footer = (() => {
+    switch (step) {
+      case 'welcome':
+        return (
+          <WizardFooter
+            next={{
+              label: activeVendor ? 'Continue setup' : 'Get started',
+              onClick: () => setStep(activeVendor ? initialOnboardingStep(activeVendor) : 'basics'),
+            }}
+          />
+        )
+      case 'basics':
+        return (
+          <WizardFooter
+            back={{ label: 'Back', onClick: () => setStep('welcome') }}
+            next={{
+              label: VENDOR_BASICS_CONTINUE_LABEL,
+              loading: basicsBusy,
+              disabled: !displayName.trim(),
+              onClick: () => void submitBasics(),
+            }}
+          />
+        )
+      case 'inventory':
+        if (!activeVendor) {
+          return <WizardFooter next={{ label: 'Shop basics', onClick: () => setStep('basics') }} />
+        }
+        return (
+          <WizardFooter
+            back={{ label: 'Back', onClick: () => setStep('basics') }}
+            skip={
+              !vendorHasStoreConnector(activeVendor)
+                ? {
+                    label: 'Skip for now',
+                    onClick: () => {
+                      setInventorySkipped(true)
+                      setStep('appearance')
+                    },
+                  }
+                : undefined
+            }
+            next={{ label: 'Continue', disabled: !connectorReady, onClick: () => setStep('appearance') }}
+          />
+        )
+      case 'appearance':
+        return (
+          <WizardFooter
+            back={{ label: 'Back', onClick: () => setStep('inventory') }}
+            skip={{ label: 'Skip', onClick: () => setStep('publish') }}
+            next={{ label: 'Continue', onClick: () => setStep('publish') }}
+          />
+        )
+      case 'publish':
+        if (!activeVendor) {
+          return <WizardFooter next={{ label: 'Shop basics', onClick: () => setStep('basics') }} />
+        }
+        return (
+          <WizardFooter
+            back={{ label: 'Back', onClick: () => setStep('appearance') }}
+            next={{ label: 'View shop', href: finishHref }}
+          />
+        )
+      default:
+        return null
+    }
+  })()
 
-      {step === 'welcome' && (
-        <div className="space-y-6">
-          <h1 className="text-2xl font-bold text-dc-text">Set up your vendor shop</h1>
-          <p className="text-sm text-dc-text-muted">
-            Showcase your catalog on Kink Social. Import from Etsy, Shopify, WooCommerce, or link your existing
-            storefront. Checkout always happens on your store; we never take payments here.
-          </p>
-          <ul className="text-sm text-dc-text-muted space-y-2 list-disc pl-5">
+  return (
+    <WizardShell
+      brand="Vendor setup"
+      title="Set up your vendor shop"
+      description="Showcase your catalog on kink.social. Checkout always happens on your own store — we never take payments here."
+      steps={STEPS}
+      currentStepId={step}
+      onStepSelect={(id) => setStep(id as VendorOnboardingStep)}
+      footer={footer}
+    >
+      {step === 'welcome' ? (
+        <div>
+          <WizardStepHeader
+            icon={vicon(STEP_ICONS.welcome)}
+            eyebrow="Welcome"
+            title="Set up your vendor shop"
+            description="Import from Etsy, Shopify, WooCommerce, or link your existing storefront. Checkout always happens on your store; we never take payments here."
+          />
+          <ul className="list-disc space-y-2 pl-5 text-sm text-dc-text-muted">
             <li>One shop per account, linked to your profile</li>
             <li>Sync listings for home and discovery rails</li>
             <li>Get listed on events and conventions when organizers add you</li>
           </ul>
-          <StepNav
-            onNext={() => setStep(activeVendor ? initialOnboardingStep(activeVendor) : 'basics')}
-            nextLabel={activeVendor ? 'Continue setup' : 'Get started'}
-          />
         </div>
-      )}
+      ) : null}
 
-      {step === 'basics' && (
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-xl font-bold text-dc-text">{VENDOR_BASICS_HEADING}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-dc-text-muted">{VENDOR_BASICS_INTRO}</p>
-          </div>
+      {step === 'basics' ? (
+        <div>
+          <WizardStepHeader icon={vicon(STEP_ICONS.basics)} eyebrow="Vendor page" title={VENDOR_BASICS_HEADING} description={VENDOR_BASICS_INTRO} />
 
-          <div
-            className="rounded-xl border border-dc-border bg-dc-elevated-muted/60 p-4"
-            role="note"
-            aria-label="Next step preview"
-          >
+          <div className="mb-6 rounded-xl border border-dc-border bg-dc-elevated-muted/60 p-4" role="note" aria-label="Next step preview">
             <h3 className="text-sm font-semibold text-dc-text">Next step: connect your inventory</h3>
             <p className="mt-2 text-sm leading-relaxed text-dc-text-muted">
               After your vendor page is created, you can sync active listings from Etsy, Shopify, or WooCommerce. Buyers
-              can browse your listings on kink.social, then purchase through your external shop.
+              browse your listings on kink.social, then purchase through your external shop.
             </p>
-            <p className="mt-3 text-xs text-dc-text-muted">Checkout stays off kink.social.</p>
-            <ul
-              className="mt-4 flex flex-wrap gap-2"
-              aria-label="Inventory connectors available on the next step"
-            >
+            <ul className="mt-4 flex flex-wrap gap-2" aria-label="Inventory connectors available on the next step">
               {VENDOR_CONNECTOR_PREVIEW.map((name) => (
-                <li
-                  key={name}
-                  className="rounded-full border border-dc-border bg-dc-surface/50 px-3 py-1 text-xs text-dc-text-muted"
-                >
+                <li key={name} className="rounded-full border border-dc-border bg-dc-surface/50 px-3 py-1 text-xs text-dc-text-muted">
                   {name}
                 </li>
               ))}
             </ul>
           </div>
 
-          <form onSubmit={onBasicsSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="von-name" className="block text-sm text-dc-text-muted mb-1">
-                Shop / display name
-              </label>
-              <p className="text-xs text-dc-muted mb-2">The public name buyers will see.</p>
-              <input
-                id="von-name"
-                required
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full bg-dc-elevated/95 border border-dc-border rounded-xl px-3 py-2 text-dc-text text-sm"
+          <div className="space-y-5">
+            <WizardField
+              name="von-name"
+              label="Shop / display name"
+              hint="The public name buyers will see."
+              required
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+            {!activeVendor ? (
+              <WizardField
+                name="von-slug"
+                label="Slug"
+                optional
+                hint="Used in your kink.social shop URL. Leave blank to generate one from your shop name."
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                placeholder="my-leather-studio"
               />
-            </div>
-            {!activeVendor ?
-              <div>
-                <label htmlFor="von-slug" className="block text-sm text-dc-text-muted mb-1">
-                  Slug (optional)
-                </label>
-                <p className="text-xs text-dc-muted mb-2">
-                  Used in your kink.social shop URL. Leave blank to generate one from your shop name.
-                </p>
-                <input
-                  id="von-slug"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="my-leather-studio"
-                  className="w-full bg-dc-elevated/95 border border-dc-border rounded-xl px-3 py-2 text-dc-text text-sm"
-                />
-              </div>
-            : null}
+            ) : null}
+            <WizardTextarea
+              name="von-bio"
+              label="Bio"
+              hint="A short summary of what you make, sell, or offer."
+              rows={3}
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+            />
+            <WizardTextarea
+              name="von-maker"
+              label="Maker story"
+              hint="One or two sentences about who you make for, what you specialize in, and what makes your work different."
+              rows={2}
+              value={makerStory}
+              onChange={(e) => setMakerStory(e.target.value)}
+              placeholder="One sentence: who you make for (rope, leather, art prints...)"
+            />
+            <WizardField
+              name="von-web"
+              label="Main shop or website"
+              optional
+              type="url"
+              hint="Your main storefront, portfolio, or business website. You can connect inventory on the next step."
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              placeholder="https://"
+            />
+
             <div>
-              <label htmlFor="von-bio" className="block text-sm text-dc-text-muted mb-1">
-                Bio
+              <p className="text-sm font-medium text-dc-text">Shop category</p>
+              <p className="mt-1 text-xs text-dc-text-muted">Choose the category that best describes your shop.</p>
+              <WizardChoiceGrid label="Shop category" className="mt-3">
+                {VENDOR_CATEGORY_VALUES.map((cat) => (
+                  <WizardChoiceCard
+                    key={cat}
+                    title={cat}
+                    description={VENDOR_CATEGORY_DESCRIPTIONS[cat]}
+                    selected={category === cat}
+                    onSelect={() => setCategory(category === cat ? null : cat)}
+                  />
+                ))}
+              </WizardChoiceGrid>
+            </div>
+
+            <div>
+              <label htmlFor="von-tags" className="block text-sm font-medium text-dc-text">
+                Specialty tags <span className="font-normal text-dc-text-muted">(optional)</span>
               </label>
-              <p className="text-xs text-dc-muted mb-2">A short summary of what you make, sell, or offer.</p>
-              <textarea
-                id="von-bio"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                rows={3}
-                className="w-full bg-dc-elevated/95 border border-dc-border rounded-xl px-3 py-2 text-dc-text text-sm"
-              />
-            </div>
-            <div>
-              <label htmlFor="von-maker" className="block text-sm text-dc-text-muted mb-1">
-                Maker story
-              </label>
-              <p className="text-xs text-dc-muted mb-2">
-                One or two sentences about who you make for, what you specialize in, and what makes your work different.
-              </p>
-              <textarea
-                id="von-maker"
-                value={makerStory}
-                onChange={(e) => setMakerStory(e.target.value)}
-                rows={2}
-                placeholder="One sentence: who you make for (rope, leather, art prints...)"
-                className="w-full bg-dc-elevated/95 border border-dc-border rounded-xl px-3 py-2 text-dc-text text-sm"
-              />
-            </div>
-            <div>
-              <label htmlFor="von-web" className="block text-sm text-dc-text-muted mb-1">
-                Main shop or website (optional)
-              </label>
-              <p className="text-xs text-dc-muted mb-2">
-                Add your main storefront, portfolio, or business website. You can connect inventory on the next step.
-              </p>
-              <input
-                id="von-web"
-                type="url"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                placeholder="https://"
-                className="w-full bg-dc-elevated/95 border border-dc-border rounded-xl px-3 py-2 text-dc-text text-sm"
-              />
-            </div>
-            <div>
-              <p className="block text-sm text-dc-text-muted mb-1">Shop category</p>
-              <p className="text-xs text-dc-muted mb-2">Choose the category that best describes your shop.</p>
-              <div className="flex flex-wrap gap-2">
-                {VENDOR_CATEGORY_VALUES.map((cat) => {
-                  const pressed = category === cat
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      title={VENDOR_CATEGORY_DESCRIPTIONS[cat]}
-                      onClick={() => setCategory(pressed ? null : cat)}
-                      className={`px-3 py-1.5 rounded-full text-xs border ${
-                        pressed ?
-                          'border-dc-accent bg-dc-accent/15 text-dc-accent'
-                        : 'border-dc-border text-dc-text-muted hover:text-dc-text'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-            <div>
-              <label htmlFor="von-tags" className="block text-sm text-dc-text-muted mb-1">
-                Specialty tags (optional)
-              </label>
-              <p className="text-xs text-dc-muted mb-2">
+              <p className="mt-1 text-xs text-dc-text-muted">
                 Add searchable tags like rope, leather, commissions, pup gear, impact toys, aftercare, custom sizing.
               </p>
-              <div className="flex gap-2">
+              <div className="mt-2 flex gap-2">
                 <input
                   id="von-tags"
                   value={tagInput}
@@ -457,17 +440,17 @@ export default function VendorOnboardingWizard() {
                     }
                   }}
                   placeholder="rope, commissions, pup-play"
-                  className="flex-1 bg-dc-elevated/95 border border-dc-border rounded-xl px-3 py-2 text-dc-text text-sm"
+                  className="flex-1 rounded-xl border border-dc-border bg-dc-elevated px-3 py-2.5 text-base text-dc-text sm:text-sm"
                 />
                 <button
                   type="button"
                   onClick={addTagsFromInput}
-                  className="min-h-11 px-3 rounded-xl border border-dc-border text-sm text-dc-text-muted hover:text-dc-text"
+                  className="min-h-touch rounded-xl border border-dc-border px-3 text-sm text-dc-text-muted hover:text-dc-text"
                 >
                   Add
                 </button>
               </div>
-              {tags.length > 0 ?
+              {tags.length > 0 ? (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {tags.map((tag) => (
                     <button
@@ -480,53 +463,31 @@ export default function VendorOnboardingWizard() {
                     </button>
                   ))}
                 </div>
-              : null}
+              ) : null}
             </div>
-            <div>
-              <label htmlFor="von-ships" className="block text-sm text-dc-text-muted mb-1">
-                Ships to
-              </label>
-              <p className="text-xs text-dc-muted mb-2">Choose where you ship or provide services.</p>
-              <select
-                id="von-ships"
-                value={shipsTo}
-                onChange={(e) => setShipsTo(e.target.value as typeof shipsTo)}
-                className="w-full bg-dc-elevated/95 border border-dc-border rounded-xl px-3 py-2 text-dc-text text-sm"
-              >
-                <option value="US">US</option>
-                <option value="Canada">Canada</option>
-                <option value="International">International</option>
-              </select>
-            </div>
-            {basicsErr ?
-              <p className="text-sm text-red-200" role="alert">
-                {basicsErr}
-              </p>
-            : null}
-            <StepNav
-              onBack={() => setStep('welcome')}
-              secondaryAction={
-                <button
-                  type="submit"
-                  disabled={basicsBusy}
-                  className="w-full sm:flex-1 min-h-11 py-3 bg-dc-accent hover:bg-dc-accent-hover text-dc-accent-foreground font-medium rounded-xl disabled:opacity-50"
-                >
-                  {basicsBusy ? 'Saving…' : VENDOR_BASICS_CONTINUE_LABEL}
-                </button>
-              }
-            />
-          </form>
-        </div>
-      )}
 
-      {step === 'inventory' && activeVendor && (
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-xl font-bold text-dc-text">{VENDOR_INVENTORY_HEADING}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-dc-text-muted">{VENDOR_INVENTORY_INTRO}</p>
+            <WizardSelect
+              name="von-ships"
+              label="Ships to"
+              hint="Choose where you ship or provide services."
+              value={shipsTo}
+              onChange={(e) => setShipsTo(e.target.value as typeof shipsTo)}
+            >
+              <option value="US">US</option>
+              <option value="Canada">Canada</option>
+              <option value="International">International</option>
+            </WizardSelect>
+
+            {basicsErr ? <FormStatusMessage tone="error">{basicsErr}</FormStatusMessage> : null}
           </div>
+        </div>
+      ) : null}
 
-          <div className="rounded-xl border border-dc-accent-border/40 bg-dc-accent-muted/20 px-4 py-4" role="note">
+      {step === 'inventory' && activeVendor ? (
+        <div>
+          <WizardStepHeader icon={vicon(STEP_ICONS.inventory)} eyebrow="Inventory" title={VENDOR_INVENTORY_HEADING} description={VENDOR_INVENTORY_INTRO} />
+
+          <div className="mb-5 rounded-xl border border-dc-accent-border/40 bg-dc-accent-muted/20 px-4 py-4" role="note">
             <p className="text-sm font-semibold text-dc-text">No checkout on kink.social</p>
             <p className="mt-2 text-sm leading-relaxed text-dc-text-muted">
               kink.social does not process payment, manage shipping, handle taxes, or issue refunds. Your external shop
@@ -534,12 +495,12 @@ export default function VendorOnboardingWizard() {
             </p>
           </div>
 
-          {!vendorHasStoreConnector(activeVendor) && !inventorySkipped ?
-            <p className="text-sm text-dc-text-muted">
-              Connect Etsy, Shopify, WooCommerce, or add a store link to continue. You can also skip for now and publish
-              a vendor page without synced products.
+          {!vendorHasStoreConnector(activeVendor) && !inventorySkipped ? (
+            <p className="mb-4 text-sm text-dc-text-muted">
+              Connect Etsy, Shopify, WooCommerce, or add a store link to continue. You can also skip for now and publish a
+              vendor page without synced products.
             </p>
-          : null}
+          ) : null}
 
           <VendorExternalStorePanel
             externalStoreType={externalStoreType}
@@ -550,41 +511,21 @@ export default function VendorOnboardingWizard() {
             onUpdated={() => reload()}
             variant="onboarding"
           />
-          <StepNav
-            onBack={() => setStep('basics')}
-            onNext={() => setStep('appearance')}
-            nextLabel="Continue"
-            nextDisabled={!connectorReady}
-            secondaryAction={
-              !vendorHasStoreConnector(activeVendor) ?
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInventorySkipped(true)
-                    setStep('appearance')
-                  }}
-                  className="w-full sm:flex-1 min-h-11 py-3 rounded-xl border border-dc-border text-dc-text-muted hover:text-dc-text text-sm"
-                >
-                  <span className="block font-medium">Skip for now</span>
-                  <span className="block text-xs mt-0.5 opacity-90">You can connect inventory later from vendor settings.</span>
-                </button>
-              : null
-            }
+        </div>
+      ) : null}
+
+      {step === 'inventory' && !activeVendor ? (
+        <p className="text-sm text-dc-text-muted">Create shop basics first.</p>
+      ) : null}
+
+      {step === 'appearance' && activeVendor ? (
+        <div>
+          <WizardStepHeader
+            icon={vicon(STEP_ICONS.appearance)}
+            eyebrow="Appearance"
+            title="Shop appearance"
+            description="Optional banner and logo for your public shop page."
           />
-        </div>
-      )}
-
-      {step === 'inventory' && !activeVendor && (
-        <div className="space-y-4">
-          <p className="text-sm text-dc-text-muted">Create shop basics first.</p>
-          <StepNav onNext={() => setStep('basics')} nextLabel="Shop basics" />
-        </div>
-      )}
-
-      {step === 'appearance' && activeVendor && (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-dc-text">Shop appearance</h2>
-          <p className="text-sm text-dc-text-muted">Optional banner and logo for your public shop page.</p>
           <VendorShopAppearancePanel
             vendorSlug={activeVendor.slug}
             initialBannerUrl={activeVendor.bannerUrl ?? null}
@@ -592,75 +533,47 @@ export default function VendorOnboardingWizard() {
             initialLayout={activeVendor.shopHeaderLayout === 'BELOW' ? 'BELOW' : 'OVERLAY'}
             onSaved={() => reload()}
           />
-          <StepNav
-            onBack={() => setStep('inventory')}
-            onNext={() => setStep('publish')}
-            secondaryAction={
-              <button
-                type="button"
-                onClick={() => setStep('publish')}
-                className="w-full sm:flex-1 min-h-11 py-3 rounded-xl border border-dc-border text-dc-text-muted hover:text-dc-text text-sm"
-              >
-                Skip
-              </button>
+        </div>
+      ) : null}
+
+      {step === 'publish' && activeVendor ? (
+        <div>
+          <WizardStepHeader
+            icon={vicon(STEP_ICONS.publish)}
+            eyebrow="Publish"
+            title={published ? "You're all set" : 'Publish your shop'}
+            description={
+              published
+                ? 'Your shop is public in the vendor directory.'
+                : 'Publishing adds your shop to the vendor directory and discovery surfaces. You can stay unlisted until your listings are synced.'
             }
           />
-        </div>
-      )}
-
-      {step === 'publish' && activeVendor && (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-dc-text">{published ? "You're all set" : 'Publish your shop'}</h2>
-          {!published ?
-            <>
-              <p className="text-sm text-dc-text-muted">
-                Publishing adds your shop to the vendor directory and discovery surfaces. You can stay unlisted until your
-                listings are synced.
-              </p>
-              {publishErr ?
-                <p className="text-sm text-red-200" role="alert">
-                  {publishErr}
-                </p>
-              : null}
-              {publishMsg ?
-                <p className="text-sm text-emerald-300" role="status">
-                  {publishMsg}
-                </p>
-              : null}
+          {!published ? (
+            <div className="space-y-4">
+              {publishErr ? <FormStatusMessage tone="error">{publishErr}</FormStatusMessage> : null}
+              {publishMsg ? <FormStatusMessage tone="success">{publishMsg}</FormStatusMessage> : null}
               <button
                 type="button"
                 disabled={publishBusy}
                 onClick={() => void publishShop()}
-                className="min-h-11 w-full rounded-xl bg-dc-accent hover:bg-dc-accent-hover text-dc-text text-sm font-medium disabled:opacity-50"
+                className="min-h-touch w-full rounded-xl bg-dc-accent text-sm font-medium text-dc-accent-foreground hover:bg-dc-accent-hover disabled:opacity-50"
               >
                 {publishBusy ? 'Publishing…' : 'Publish to directory'}
               </button>
-            </>
-          : <p className="text-sm text-emerald-300">Your shop is public in the vendor directory.</p>}
-          <p className="text-sm text-dc-text-muted rounded-xl border border-dc-border bg-dc-surface-muted/40 px-4 py-3">
+            </div>
+          ) : null}
+          <p className="mt-4 rounded-xl border border-dc-border bg-dc-surface-muted/40 px-4 py-3 text-sm text-dc-text-muted">
             Want help managing this shop? You can add shop runners from vendor settings after setup.
           </p>
-          <VendorIntegrationGuide shopSlug={activeVendor.slug} />
-          <StepNav
-            onBack={() => setStep('appearance')}
-            secondaryAction={
-              <Link
-                to={finishHref}
-                className="w-full sm:flex-1 min-h-11 inline-flex items-center justify-center py-3 bg-dc-accent hover:bg-dc-accent-hover text-dc-accent-foreground font-medium rounded-xl text-center"
-              >
-                View shop
-              </Link>
-            }
-          />
+          <div className="mt-4">
+            <VendorIntegrationGuide shopSlug={activeVendor.slug} />
+          </div>
         </div>
-      )}
+      ) : null}
 
-      {step === 'publish' && !activeVendor && (
-        <div className="space-y-4">
-          <p className="text-sm text-dc-text-muted">Complete shop setup first.</p>
-          <StepNav onNext={() => setStep('basics')} nextLabel="Shop basics" />
-        </div>
-      )}
-    </div>
+      {step === 'publish' && !activeVendor ? (
+        <p className="text-sm text-dc-text-muted">Complete shop setup first.</p>
+      ) : null}
+    </WizardShell>
   )
 }

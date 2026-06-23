@@ -1596,6 +1596,19 @@ ALTER TABLE user_notification_preferences
 
 ALTER TABLE user_notification_preferences
   ALTER COLUMN push_hub_chat SET DEFAULT false;
+
+CREATE TABLE IF NOT EXISTS organization_claim_tokens (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+  token varchar(128) NOT NULL UNIQUE,
+  created_by_user_id uuid NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  expires_at timestamptz NOT NULL,
+  redeemed_by_user_id uuid REFERENCES users (id) ON DELETE SET NULL,
+  redeemed_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS organization_claim_tokens_org_idx ON organization_claim_tokens (organization_id);
 `
 
 async function main() {

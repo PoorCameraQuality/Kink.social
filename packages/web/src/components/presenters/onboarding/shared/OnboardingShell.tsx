@@ -1,7 +1,7 @@
 import type { PresenterOnboardingTrack } from '@/lib/presenter-focus'
-import { stepIndexForTrack } from '@/lib/presenter-onboarding'
 import type { ProfileFocus } from '@/lib/presenter-focus'
-import { stepsForTrack } from '@/lib/presenter-onboarding'
+import { PRESENTER_OPTIONAL_STEPS, PRESENTER_STEP_LABELS, stepsForTrack } from '@/lib/presenter-onboarding'
+import { WizardShell, type WizardStepMeta } from '@/components/ui/primitives'
 
 type OnboardingShellProps = {
   track: PresenterOnboardingTrack | null
@@ -11,34 +11,22 @@ type OnboardingShellProps = {
 }
 
 export function OnboardingShell({ track, step, hybridFocuses = [], children }: OnboardingShellProps) {
-  const steps = stepsForTrack(track, hybridFocuses)
-  const idx = stepIndexForTrack(track, step, hybridFocuses)
-  const total = steps.length
+  const steps: WizardStepMeta[] = stepsForTrack(track, hybridFocuses).map((id) => ({
+    id,
+    label: PRESENTER_STEP_LABELS[id] ?? id,
+    optional: PRESENTER_OPTIONAL_STEPS.has(id),
+  }))
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-10 sm:py-12">
-      <div className="mb-8 space-y-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-dc-text-muted">
-          Professional profile setup · Step {idx + 1} of {total}
-        </p>
-        <div
-          className="flex gap-1"
-          role="progressbar"
-          aria-valuenow={idx + 1}
-          aria-valuemin={1}
-          aria-valuemax={total}
-          aria-label={`Onboarding step ${idx + 1} of ${total}`}
-        >
-          {steps.map((s, i) => (
-            <div
-              key={s}
-              className={`flex-1 h-1 rounded-full ${i <= idx ? 'bg-dc-accent' : 'bg-dc-elevated-solid'}`}
-            />
-          ))}
-        </div>
-      </div>
+    <WizardShell
+      brand="Professional profile"
+      title="Set up your professional profile"
+      description="Creator and educator profiles share one capability profile on your account — portable across organizations and events."
+      steps={steps}
+      currentStepId={step}
+    >
       {children}
-    </div>
+    </WizardShell>
   )
 }
 

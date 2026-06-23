@@ -313,18 +313,15 @@ export default function PresenterOnboardingRouter() {
 
   return (
     <>
-      <Link to="/presenters" className="mx-auto block max-w-lg px-4 pt-10 text-sm text-dc-accent hover:underline">
+      <Link
+        to="/presenters"
+        className="mx-auto block max-w-5xl px-4 pt-6 text-sm text-dc-accent hover:underline sm:px-6 lg:px-8"
+      >
         ← Community professionals directory
       </Link>
-      <h1 className="mx-auto mt-4 max-w-lg px-4 text-2xl font-bold text-dc-text">Professional profile setup</h1>
-      <p className="mx-auto mt-2 max-w-lg px-4 text-sm text-dc-text-muted">
-        Creator and educator profiles share one capability profile on your account — portable across organizations and
-        events.
-      </p>
 
       <OnboardingShell track={track} step={step} hybridFocuses={hybridFocuses}>
-        <div className="rounded-2xl border border-dc-border bg-dc-elevated/95 p-6 shadow-[var(--dc-shadow-soft)]">
-          <OnboardingError message={error} />
+        <OnboardingError message={error} />
 
           {step === 'chooseTrack' ?
             <PresenterTrackChooser
@@ -1000,7 +997,6 @@ export default function PresenterOnboardingRouter() {
           {step === 'done' && track ?
             <DoneStep track={track} profileFocuses={effectiveFocuses} viewerUsername={viewerUsername} />
           : null}
-        </div>
       </OnboardingShell>
     </>
   )
