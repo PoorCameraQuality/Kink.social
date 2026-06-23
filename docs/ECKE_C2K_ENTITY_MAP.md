@@ -83,7 +83,7 @@ After the new owner publishes, ECKE serves the Supabase row at the **same slug**
 | `community` JSON | — | **C2K-only**; never publish wholesale |
 | Member graph, forums, chat | — | **Never publish** |
 
-**Dungeon org (`feature_flags.listingKind === 'dungeon'` or `eckeDungeonListing`):** on org **Publish**, C2K also upserts `dungeon_venues` inline (`publishDungeonRowToEcke`) and tracks `ecke_dungeon` in `ecke_publish_targets`. City/state on dungeon rows are not parsed from org bio today (nullable unless extended).
+**Dungeon org (`feature_flags.listingKind === 'dungeon'`/`venue` or `eckeDungeonListing`):** on org **Publish**, C2K also upserts `dungeon_venues` inline (`publishDungeonRowToEcke`) and tracks `ecke_dungeon` in `ecke_publish_targets`. City/state sync from org venue flags (`feature_flags.city` / `region`) via `buildOrgDungeonRow`. GET org publish status includes `ecke_dungeon` preview when venue listing.
 
 **Gap:** `ecke_listing` for orgs is webhook-only (`ECKE_PUBLISH_LISTING_WEBHOOK_URL`); generic org pages may still be manual/static. GET org publish status does not preview `ecke_dungeon` — query `ecke_publish_targets` after publish.
 
@@ -403,7 +403,7 @@ Requires `ecke_publish=true` and `publication_status=PUBLISHED`.
 | `display_name` | `name`, `meta_title` |
 | `bio` (≤12000) | `description`, `meta_description` (≤320) |
 | `external_site_url` | `website_url` |
-| Optional `city` / `state` args (not set from org row today) | `city`, `state` |
+| `feature_flags.city` / `feature_flags.region` (venue listing) | `city`, `state` |
 | — | `private_address` = false |
 | `id` | `c2k_source_id` (`organization`) |
 

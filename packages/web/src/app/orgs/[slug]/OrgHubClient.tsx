@@ -15,6 +15,7 @@ import OrgCommunityModules, {
 import OrgAnchorAttendeesCard from '@/components/org/OrgAnchorAttendeesCard'
 import OrgVoicePanel from '@/components/org/OrgVoicePanel'
 import OrgDiscordEmbedPanel from '@/components/org/OrgDiscordEmbedPanel'
+import OrgHubVenueEvents, { isVenueListing } from '@/components/places/OrgHubVenueEvents'
 import ForumPostList from '@/components/forum/ForumPostList'
 import ForumThreadReplyComposer from '@/components/forum/ForumThreadReplyComposer'
 import ReportAction from '@/components/moderation/ReportAction'
@@ -165,6 +166,8 @@ type OrgFlags = {
   subgroupsEnabled: boolean
   chatEnabled: boolean
   externalEmbedEnabled: boolean
+  listingKind?: 'community' | 'venue' | 'dungeon'
+  eckeDungeonListing?: boolean
 }
 
 type OrgCommunity = {
@@ -1521,6 +1524,10 @@ export default function OrgHubClient() {
                   </div>
                 </div>
               )}
+
+              {flags && isVenueListing(flags) && slug ?
+                <OrgHubVenueEvents orgSlug={slug} />
+              : null}
 
               {flags?.calendarEnabled && calendarLoadState === 'ready' && !overviewUpcomingPair.munch && !overviewUpcomingPair.convention && (
                 <div className="max-lg:order-2 rounded-xl border border-dashed border-dc-border-strong bg-dc-elevated/95 px-4 py-5">

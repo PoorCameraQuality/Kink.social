@@ -66,7 +66,7 @@ Query param: `?tab=` (default **home**). Labels from `packages/web/src/lib/organ
 | **people** | Member roster, filters, role guide; **Transfer ownership** claim link (OWNER); role changes when settings access |
 | **communications** | `OrganizerOrgCommunicationsPanel` — forum categories + chat channels managers; links to public hub |
 | **moderation** | `OrganizerOrgModerationPanel` — report inbox, bans, audit timeline |
-| **settings** | Sections via `?settingsSection=`: **general**, **branding**, **features**, **content**, **publish** (`Settings*Tab` panels; publish uses ECKE preview/publish UI) |
+| **settings** | Sections via `?settingsSection=`: **general** (includes **listing type**: community org vs permanent venue + map fields), **branding**, **features**, **content**, **publish** (`Settings*Tab` panels; publish uses ECKE preview/publish UI) |
 | **tools** | `OrganizerOrgToolsPanel` — program exports, ECKE publishing checklist, quick links; **payments** card is placeholder only |
 
 ### Tab capabilities (group)

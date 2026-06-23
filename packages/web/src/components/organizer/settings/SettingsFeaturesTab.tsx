@@ -30,7 +30,7 @@ export default function SettingsFeaturesTab({ flags, hasFaq, hasDocumentsModule,
         </p>
         <ul className="space-y-3">
           {FEATURE_DEFINITIONS.map((f) => {
-            const enabled = flags[f.key]
+            const enabled = Boolean(flags[f.key])
             return (
               <li
                 key={f.key}

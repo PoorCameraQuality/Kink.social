@@ -1858,6 +1858,8 @@ export const events = pgTable(
     visibility: varchar('visibility', { length: 32 }).notNull().default('public'),
     groupId: uuid('group_id').references(() => groups.id, { onDelete: 'set null' }),
     organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'set null' }),
+    /** When set, event takes place at this community map pin (venue) even if hosted by another org. */
+    venuePlaceId: uuid('venue_place_id').references(() => communityPlaces.id, { onDelete: 'set null' }),
     category: varchar('category', { length: 64 }),
     tags: text('tags').array(),
     imageUrl: text('image_url'),

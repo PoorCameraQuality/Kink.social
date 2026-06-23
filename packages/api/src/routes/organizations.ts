@@ -15,6 +15,8 @@ import {
 } from '../lib/org-reputation.js'
 import { parseOrgListSort, orgListOrderBy } from '../lib/org-list-sort.js'
 import { parseOrgFeatureFlags, serializeOrgFeatureFlags } from '../lib/org-features.js'
+import { syncOrgVenuePlace } from '../lib/org-venue-sync.js'
+import { loadEventsAtVenueOrg } from '../lib/venue-events.js'
 import { zLooseHttpUrl, zLooseHttpUrlNullable } from '../lib/loose-http-url.js'
 import { getProgramSummariesForEventIds } from '../lib/event-program.js'
 import {
@@ -362,6 +364,18 @@ const patchOrgBody = z.object({
       subgroupsEnabled: z.boolean().optional(),
       chatEnabled: z.boolean().optional(),
       externalEmbedEnabled: z.boolean().optional(),
+      listingKind: z.enum(['community', 'venue', 'dungeon']).optional(),
+      eckeDungeonListing: z.boolean().optional(),
+      venueCategory: z
+        .enum(['dungeon_club', 'nude_beach', 'kink_friendly_hotel', 'web_resource', 'other'])
+        .nullable()
+        .optional(),
+      city: z.string().max(128).nullable().optional(),
+      region: z.string().max(128).nullable().optional(),
+      country: z.string().max(128).nullable().optional(),
+      lat: z.number().nullable().optional(),
+      lng: z.number().nullable().optional(),
+      addressVisibility: z.enum(['city_only', 'full']).optional(),
     })
     .optional(),
   externalSiteUrl: z.string().url().nullable().optional(),
@@ -541,6 +555,20 @@ export async function registerOrganizationRoutes(app: FastifyInstance) {
     })
   })
 
+  app.get('/api/v1/organizations/:orgKey/venue-events', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const { orgKey } = req.params as { orgKey: string }
+    const orgId = await resolveOrganizationId(orgKey)
+    if (!orgId) return reply.status(404).send({ error: 'Not found' })
+    const [org] = await db.select().from(schema.organizations).where(eq(schema.organizations.id, orgId)).limit(1)
+    if (!org) return reply.status(404).send({ error: 'Not found' })
+    const viewer = resolveViewerFromRequest(req)
+    const viewerId = getViewerUserId(viewer.payload)
+    if (!(await canViewOrg(org, viewerId))) return reply.status(404).send({ error: 'Not found' })
+    const events = await loadEventsAtVenueOrg(org.id)
+    return reply.send({ events })
+  })
+
   app.post('/api/v1/organizations', async (req, reply) => {
     if (!requireDb(reply)) return
     const user = requireUser(req, reply)
@@ -608,8 +636,10 @@ export async function registerOrganizationRoutes(app: FastifyInstance) {
     if (data.externalSiteUrl !== undefined) externalSiteUrl = data.externalSiteUrl
     if (data.showExternalEmbed !== undefined) showExternalEmbed = data.showExternalEmbed
     const flags = data.featureFlags
-      ? serializeOrgFeatureFlags({
-          ...parseOrgFeatureFlags(current.featureFlags),
+      ? parseOrgFeatureFlags({
+          ...(typeof current.featureFlags === 'object' && current.featureFlags ?
+            (current.featureFlags as Record<string, unknown>)
+          : {}),
           ...data.featureFlags,
         })
       : parseOrgFeatureFlags(current.featureFlags)
@@ -684,6 +714,7 @@ export async function registerOrganizationRoutes(app: FastifyInstance) {
       })
       .where(eq(schema.organizations.id, orgId))
       .returning()
+    await syncOrgVenuePlace(updated!)
     return reply.send({ organization: mapOrgRow(updated!) })
   })
 

@@ -75,7 +75,11 @@ export type EckeDungeonRow = {
 export function isOrgDungeonListing(featureFlags: unknown): boolean {
   if (!featureFlags || typeof featureFlags !== 'object') return false
   const ff = featureFlags as Record<string, unknown>
-  return ff.listingKind === 'dungeon' || ff.eckeDungeonListing === true
+  return (
+    ff.listingKind === 'dungeon' ||
+    ff.listingKind === 'venue' ||
+    ff.eckeDungeonListing === true
+  )
 }
 
 function parseLocationParts(location: string | null | undefined): { city: string | null; state: string | null } {

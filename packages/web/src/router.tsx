@@ -38,6 +38,7 @@ import NotificationsPage from './app/notifications/page'
 import EmailUnsubscribePage from './app/email/unsubscribe/page'
 import EmailConfirmPage from './app/email/confirm/page'
 import PlacesPage from './app/places/page'
+import PlaceDetailPage from './app/places/[slug]/page'
 import PrivacyPage from './app/privacy/page'
 import ProfilePage from './app/profile/page'
 import ProfileEditLayout from './app/profile/edit/ProfileEditLayout'
@@ -176,6 +177,7 @@ export const router = createBrowserRouter([
       { path: 'events/:id', element: <EventDetailPage /> },
       { path: 'groups', element: <GroupsPage /> },
       { path: 'groups/:id', element: <GroupDetailPage /> },
+      { path: 'places/:slug', element: <PlaceDetailPage /> },
       { path: 'places', element: <PlacesPage /> },
       { path: 'vendors', element: <VendorsPage /> },
       { path: 'vendors/new', element: <VendorCreatePage /> },

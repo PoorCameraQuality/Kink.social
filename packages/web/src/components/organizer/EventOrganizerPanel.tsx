@@ -24,6 +24,16 @@ type HostEditDraft = {
   attendeeListVisibility: 'public' | 'count_only'
   dressCode: string
   expectedCostText: string
+  venuePlaceId: string
+  venuePlaceLabel: string
+}
+
+type VenuePlaceOption = {
+  id: string
+  slug: string
+  name: string
+  city: string | null
+  region: string | null
 }
 
 type AttendeesPayload = {
@@ -67,6 +77,8 @@ export default function EventOrganizerPanel({ eventId, orgSlug = '', groupId }: 
   const [rsvpOpenMsg, setRsvpOpenMsg] = useState<string | null>(null)
   const [coverBusy, setCoverBusy] = useState(false)
   const [coverMsg, setCoverMsg] = useState<string | null>(null)
+  const [venueOptions, setVenueOptions] = useState<VenuePlaceOption[]>([])
+  const [venueSearch, setVenueSearch] = useState('')
 
   const isUuid = UUID_RE.test(eventId)
   const isVirtual = apiEvent?.eventFormat === 'virtual'
@@ -127,8 +139,37 @@ export default function EventOrganizerPanel({ eventId, orgSlug = '', groupId }: 
       attendeeListVisibility: alv,
       dressCode: apiEvent.dressCode ?? '',
       expectedCostText: apiEvent.expectedCostText ?? '',
+      venuePlaceId: apiEvent.venuePlaceId ?? '',
+      venuePlaceLabel: apiEvent.venuePlaceName ?? '',
     })
   }, [apiEvent, canEdit])
+
+  useEffect(() => {
+    if (!canEdit || isVirtual) return
+    const q = venueSearch.trim()
+    if (q.length < 2) {
+      setVenueOptions([])
+      return
+    }
+    let cancelled = false
+    const t = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const p = new URLSearchParams({ q, category: 'dungeon_club', limit: '12' })
+          const r = await fetch(`/api/v1/community-places?${p.toString()}`, { credentials: 'include' })
+          if (!r.ok || cancelled) return
+          const data = (await r.json()) as { items?: VenuePlaceOption[] }
+          if (!cancelled) setVenueOptions(data.items ?? [])
+        } catch {
+          if (!cancelled) setVenueOptions([])
+        }
+      })()
+    }, 250)
+    return () => {
+      cancelled = true
+      window.clearTimeout(t)
+    }
+  }, [canEdit, isVirtual, venueSearch])
 
   useEffect(() => {
     if (!isUuid || loadState !== 'ready') return
@@ -277,6 +318,7 @@ export default function EventOrganizerPanel({ eventId, orgSlug = '', groupId }: 
         body.accessibilityNotes = hostEditDraft.accessibilityNotes.trim() || null
         body.capacityMax = capacityMax
         body.attendeeListVisibility = hostEditDraft.attendeeListVisibility
+        body.venuePlaceId = hostEditDraft.venuePlaceId.trim() || null
       } else {
         body.location = hostEditDraft.location.trim() || null
       }
@@ -543,6 +585,69 @@ export default function EventOrganizerPanel({ eventId, orgSlug = '', groupId }: 
                   />
                   <p className="mt-1 text-xs text-dc-muted">
                     Shown on the public page when the full address is hidden.
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="eo-venue-search" className="block text-xs text-dc-muted mb-1">
+                    Venue on Kinky Map (optional)
+                  </label>
+                  {hostEditDraft.venuePlaceId ?
+                    <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-dc-border bg-dc-surface/40 px-3 py-2 text-sm">
+                      <span className="text-dc-text">
+                        {hostEditDraft.venuePlaceLabel || 'Linked venue'}
+                      </span>
+                      <button
+                        type="button"
+                        className="text-xs font-semibold text-dc-accent hover:underline"
+                        onClick={() =>
+                          setHostEditDraft((d) =>
+                            d ? { ...d, venuePlaceId: '', venuePlaceLabel: '' } : d,
+                          )
+                        }
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  : null}
+                  <input
+                    id="eo-venue-search"
+                    value={venueSearch}
+                    onChange={(e) => setVenueSearch(e.target.value)}
+                    placeholder="Search dungeons & clubs…"
+                    className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+                  />
+                  {venueOptions.length > 0 ?
+                    <ul className="mt-2 max-h-40 overflow-y-auto rounded-lg border border-dc-border bg-dc-elevated-solid">
+                      {venueOptions.map((v) => (
+                        <li key={v.id}>
+                          <button
+                            type="button"
+                            className="block w-full px-3 py-2 text-left text-sm hover:bg-dc-surface/60"
+                            onClick={() => {
+                              setHostEditDraft((d) =>
+                                d ?
+                                  {
+                                    ...d,
+                                    venuePlaceId: v.id,
+                                    venuePlaceLabel: [v.name, v.city, v.region].filter(Boolean).join(' · '),
+                                  }
+                                : d,
+                              )
+                              setVenueSearch('')
+                              setVenueOptions([])
+                            }}
+                          >
+                            {v.name}
+                            {(v.city || v.region) ?
+                              <span className="text-dc-muted"> · {[v.city, v.region].filter(Boolean).join(', ')}</span>
+                            : null}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  : null}
+                  <p className="mt-1 text-xs text-dc-muted">
+                    Links this event to a permanent venue for map discovery and venue event lists.
                   </p>
                 </div>
                 <div>

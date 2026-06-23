@@ -20,7 +20,7 @@ import {
 } from '../lib/alpha-seed-labels.js'
 import { assertAlphaSeedAllowed } from '../lib/alpha-seed-guard.js'
 import { refreshEventRsvpCount } from '../lib/event-rsvp-helpers.js'
-import { serializeOrgFeatureFlags } from '../lib/org-features.js'
+import { serializeOrgFeatureFlags, venueOrgFeatureFlags } from '../lib/org-features.js'
 import { resolveVendorCategoryTags } from '../lib/vendor-public-dto.js'
 import {
   ECKE_DUNGEONS,
@@ -254,11 +254,7 @@ function parseDungeonLocation(location: string): { city: string | null; region: 
 }
 
 function dungeonOrgFeatureFlags() {
-  return {
-    ...serializeOrgFeatureFlags({ subgroupsEnabled: true, chatEnabled: false }),
-    listingKind: 'dungeon',
-    eckeDungeonListing: true,
-  }
+  return venueOrgFeatureFlags({ subgroupsEnabled: true, chatEnabled: false })
 }
 
 /** Import ECKE dungeons as managed organizations (primary operational home). */

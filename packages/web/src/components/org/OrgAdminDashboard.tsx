@@ -3,17 +3,20 @@ import { useEffect, useState } from 'react'
 
 
 export type OrgFlags = {
-
   calendarEnabled: boolean
-
   forumsEnabled: boolean
-
   subgroupsEnabled: boolean
-
   chatEnabled: boolean
-
   externalEmbedEnabled: boolean
-
+  listingKind?: 'community' | 'venue' | 'dungeon'
+  eckeDungeonListing?: boolean
+  venueCategory?: 'dungeon_club' | 'nude_beach' | 'kink_friendly_hotel' | 'web_resource' | 'other' | null
+  city?: string | null
+  region?: string | null
+  country?: string | null
+  lat?: number | null
+  lng?: number | null
+  addressVisibility?: 'city_only' | 'full'
 }
 
 
@@ -174,7 +177,7 @@ export default function OrgAdminDashboard({
 
 
 
-  const featureFlags: [keyof OrgFlags, string][] =
+  const featureFlags: [Extract<keyof OrgFlags, 'calendarEnabled' | 'forumsEnabled' | 'chatEnabled' | 'externalEmbedEnabled' | 'subgroupsEnabled'>, string][] =
 
     isOrganizer ?
 
@@ -588,7 +591,7 @@ export default function OrgAdminDashboard({
 
                     type="checkbox"
 
-                    checked={org.featureFlags[key]}
+                    checked={Boolean(org.featureFlags[key])}
 
                     onChange={(e) => onPatchFlags({ [key]: e.target.checked })}
 

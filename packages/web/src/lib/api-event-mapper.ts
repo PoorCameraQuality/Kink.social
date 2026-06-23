@@ -54,6 +54,9 @@ export type ApiEventListItem = {
   featuredUntil?: string | null
   isFeatured?: boolean
   rsvpOpen?: boolean | null
+  venuePlaceId?: string | null
+  venuePlaceSlug?: string | null
+  venuePlaceName?: string | null
   alphaLabel?: AlphaContentLabel
 }
 

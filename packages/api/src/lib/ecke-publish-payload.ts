@@ -81,9 +81,9 @@ export type EckeDancecardEventPayload = {
 }
 
 export type EckePublishTargetPreview = {
-  targetKind: 'ecke_listing' | 'dancecard_event' | 'ecke_event'
+  targetKind: 'ecke_listing' | 'dancecard_event' | 'ecke_event' | 'ecke_dungeon'
   externalSlug: string
-  payload: EckeListingPayload | EckeDancecardEventPayload
+  payload: EckeListingPayload | EckeDancecardEventPayload | Record<string, unknown>
   contentHash: string
   slotCount?: number
   staffShiftCount?: number
