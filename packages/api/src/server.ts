@@ -19,6 +19,7 @@ import { registerKinkTagRoutes } from './routes/kink-tags.js'
 import { registerLocationRoutes } from './routes/locations.js'
 import { registerMutesRoutes } from './routes/mutes.js'
 import { registerOrganizationRoutes } from './routes/organizations.js'
+import { registerOrgClaimRoutes } from './routes/org-claim-routes.js'
 import { registerProfileKinksRoutes } from './routes/profile-kinks.js'
 import { registerProfilePhotosRoutes } from './routes/profile-photos.js'
 import { registerMediaAssetRoutes } from './routes/media-assets.js'
@@ -244,6 +245,7 @@ await registerVendorExternalRoutes(app)
 await registerVendorEtsyRoutes(app)
 await registerShopifyIntegrationRoutes(app)
 await registerOrganizationRoutes(app)
+await registerOrgClaimRoutes(app)
 await registerLiveKitVoiceRoutes(app)
 await registerGroupForumRoutes(app)
 await registerConventionRoutes(app)

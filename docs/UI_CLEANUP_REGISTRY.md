@@ -50,7 +50,7 @@ Tracks questionable, misleading, or permission-inaccurate UI across C2K. Seeded 
 | `/orgs` | `org-directory-utils.ts` | demo-east-collective fake counts | gated | Yes (list API) | Public | Env-gate or remove override | M16 |
 | `/orgs` | `OrgDirectoryCard.tsx` | Verified organizer badge | clarified | Yes | Public | Require review threshold | M17 |
 | `/orgs/:slug` | `orgHubMeta.ts` | “New organization” fallback | clarified | Yes | Public | “No public rating yet” / “Reviews building” | M18 |
-| `/organizer/orgs/:slug?tab=people` | `OrganizerOrgPeoplePanel.tsx` | Invite member (disabled) | hidden | No invite API | MOD+ | Remove or implement | L11 |
+| `/organizer/orgs/:slug?tab=people` | `OrganizerOrgPeoplePanel.tsx` | Invite member (disabled) | clarified | Claim link via `POST .../claim-tokens` (OWNER) | OWNER | Use **Transfer ownership** panel | L11 — claim handoff shipped |
 | Org Tools | `ComingSoonPaymentsCard.tsx` | Payments coming soon | coming soon | No Stripe | admin | Keep — honest | L15 — strategy aligned |
 
 ---

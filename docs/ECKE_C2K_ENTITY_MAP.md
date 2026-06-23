@@ -35,6 +35,20 @@ Event Systems identity Phases 1–2 (API guards, unique `(convention_id, user_id
 
 **No FK links.** Integration is string slugs in `conventions.settings` (`dancecardSlug`, `eckeListingSlug`) plus the publish bridge.
 
+### Reverse import (ECKE static → C2K bootstrap)
+
+Operator CLI imports one ECKE `events.js` listing into a C2K org + convention (1:1), pins `settings.eckeListingSlug` to the existing ECKE SEO slug, and optionally mints a one-time org claim token.
+
+| Step | Command / route |
+|------|-----------------|
+| Import | `USE_DATABASE=true npm run import:ecke-event -w @c2k/api -- --slug dark-odyssey-fusion [--issue-claim-token]` |
+| Claim preview | `GET /api/v1/organizations/claim/preview/:token` |
+| Claim redeem | `POST /api/v1/organizations/claim/redeem` `{ token }` (signed-in user becomes OWNER; bootstrap operator removed) |
+| Mint claim link | `POST /api/v1/organizations/:orgKey/claim-tokens` (org OWNER or site operator) |
+| Web claim | `/orgs/claim/:token` |
+
+After the new owner publishes, ECKE serves the Supabase row at the **same slug** when `c2k_source_id` is set; static `events.js` remains as fallback when unpublished or Supabase unavailable (`unifiedEvents.ts`).
+
 ---
 
 ## Identity keys (routing)

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { OrgMemberRow } from '@/components/organizer/admin/OrgMemberAdminPanel'
+import OrgClaimTransferPanel from '@/components/organizer/people/OrgClaimTransferPanel'
 import MemberFilters from '@/components/organizer/people/MemberFilters'
 import MemberRoster from '@/components/organizer/people/MemberRoster'
 import PublicPersonnelPreviewCard from '@/components/organizer/people/PublicPersonnelPreviewCard'
@@ -19,6 +20,7 @@ type Props = {
   orgVisibility?: string | null
   canManageRoles: boolean
   viewerUserId: string | null
+  viewerRole?: string | null
 }
 
 function LoadErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
@@ -39,7 +41,13 @@ function LoadErrorBanner({ message, onRetry }: { message: string; onRetry: () =>
   )
 }
 
-export default function OrganizerOrgPeoplePanel({ orgSlug, orgVisibility, canManageRoles, viewerUserId }: Props) {
+export default function OrganizerOrgPeoplePanel({
+  orgSlug,
+  orgVisibility,
+  canManageRoles,
+  viewerUserId,
+  viewerRole,
+}: Props) {
   const [members, setMembers] = useState<OrgMemberRow[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
@@ -98,6 +106,7 @@ export default function OrganizerOrgPeoplePanel({ orgSlug, orgVisibility, canMan
   const stats = useMemo(() => computePeopleStats(sorted), [sorted])
 
   const soloOwnerGuidance = members?.length === 1 && members[0]?.role === 'OWNER'
+  const isOwner = viewerRole === 'OWNER'
 
   return (
     <div className="space-y-5">
@@ -170,6 +179,9 @@ export default function OrganizerOrgPeoplePanel({ orgSlug, orgVisibility, canMan
         </div>
 
         <aside className="order-1 flex min-w-0 flex-col gap-5 xl:order-2">
+          {isOwner ?
+            <OrgClaimTransferPanel orgSlug={orgSlug} />
+          : null}
           {members ?
             <PublicPersonnelPreviewCard
               members={sorted}

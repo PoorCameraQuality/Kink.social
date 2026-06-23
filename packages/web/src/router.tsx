@@ -87,6 +87,7 @@ import VendorOnboardingPage from './app/vendors/onboarding/page'
 import VendorDetailPage from './app/vendors/[id]/page'
 import OrgsListPage from './app/orgs/page'
 import OrgCreatePage from './app/orgs/new/page'
+import OrgClaimPage from './app/orgs/claim/OrgClaimPage'
 import OrgHubPage from './app/orgs/[slug]/page'
 import ConventionsListPage from './app/conventions/page'
 import ConventionProgramPage from './app/conventions/[slug]/page'
@@ -182,6 +183,7 @@ export const router = createBrowserRouter([
       { path: 'vendors/:id', element: <VendorDetailPage /> },
       { path: 'orgs', element: <OrgsListPage /> },
       { path: 'orgs/new', element: <OrgCreatePage /> },
+      { path: 'orgs/claim/:token', element: <OrgClaimPage /> },
       { path: 'orgs/:slug', element: <OrgHubPage /> },
       { path: 'conventions', element: <ConventionsListPage /> },
       { path: 'conventions/:slug', element: <ConventionProgramPage /> },
