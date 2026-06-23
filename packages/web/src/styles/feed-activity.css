@@ -179,23 +179,39 @@
 }
 
 .feed-stream .feed-stream-post--direct {
-  padding: 0.4375rem 0.5rem 0.375rem;
-  border-radius: 0.625rem;
-  border: 1px solid color-mix(in srgb, var(--dc-border) 78%, transparent);
-  background: color-mix(in srgb, var(--dc-elevated-solid) 94%, var(--dc-accent) 6%);
-  box-shadow: var(--dc-shadow-soft);
+  padding: 0.625rem 0.6875rem 0.5rem;
+  border-radius: 0.875rem;
+  /* Clean charcoal/navy object — no rose tint; let atmosphere supply the warmth. */
+  border: 1px solid color-mix(in srgb, var(--dc-border-strong) 42%, var(--dc-border-subtle));
+  background: color-mix(in srgb, var(--dc-surface-card) 70%, var(--dc-elevated-solid));
+  box-shadow:
+    var(--dc-shadow-soft),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 @media (min-width: 640px) {
   .feed-stream .feed-stream-post--direct {
-    padding: 0.875rem 0.875rem 0.75rem;
-    border-radius: 0.875rem;
+    padding: 1rem 1.125rem 0.875rem;
+    border-radius: 1.125rem;
+  }
+}
+
+/* Very short text-only posts read compact instead of a tall empty slab. */
+.feed-stream .feed-stream-post--direct.feed-stream-post--compact {
+  padding-top: 0.5rem;
+  padding-bottom: 0.4375rem;
+}
+
+@media (min-width: 640px) {
+  .feed-stream .feed-stream-post--direct.feed-stream-post--compact {
+    padding-top: 0.75rem;
+    padding-bottom: 0.625rem;
   }
 }
 
 .feed-stream .feed-stream-post--direct .feed-action-bar {
-  border-color: color-mix(in srgb, var(--dc-border) 55%, transparent);
-  background: color-mix(in srgb, var(--dc-surface-muted) 55%, transparent);
+  border-color: color-mix(in srgb, var(--dc-border-subtle) 50%, transparent);
+  background: color-mix(in srgb, var(--dc-surface) 35%, transparent);
 }
 
 .feed-stream .feed-stream-post--secondary {
@@ -346,39 +362,45 @@
 }
 
 .feed-stream .feed-stream-post__media {
-  margin-top: 0.4375rem;
+  margin-top: 0.5rem;
   margin-left: var(--feed-content-indent);
   overflow: hidden;
-  border-radius: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--dc-border) 70%, transparent);
-  background: var(--dc-surface-muted);
+  border-radius: 0.875rem;
+  /* Refined navy media shell — soft, not a harsh pure-black stage. */
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: radial-gradient(
+    ellipse 130% 90% at 50% 0%,
+    color-mix(in srgb, var(--dc-elevated-solid) 55%, var(--dc-surface-muted)) 0%,
+    var(--dc-surface-muted) 72%
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
   max-width: calc(100% - var(--feed-content-indent));
 }
 
 @media (min-width: 640px) {
   .feed-stream .feed-stream-post__media {
     margin-top: 0.75rem;
-    border-radius: 0.625rem;
+    border-radius: 0.875rem;
   }
 }
 
 .feed-stream .feed-stream-post__media img {
   display: block;
   width: 100%;
-  max-height: 13rem;
+  max-height: 22rem;
   object-fit: contain;
-  background: color-mix(in srgb, var(--dc-surface-muted) 80%, transparent);
+  background: transparent;
 }
 
 @media (min-width: 640px) {
   .feed-stream .feed-stream-post__media img {
-    max-height: 18rem;
+    max-height: 26rem;
   }
 }
 
 @media (min-width: 1024px) {
   .feed-stream .feed-stream-post__media img {
-    max-height: 22rem;
+    max-height: 30rem;
   }
 }
 
@@ -430,8 +452,9 @@
 .feed-stream .feed-action-bar {
   overflow: hidden;
   border-radius: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--dc-border) 65%, transparent);
-  background: color-mix(in srgb, var(--dc-elevated-muted) 35%, transparent);
+  /* Quieter, integrated footer strip — not a loud repeated pill. */
+  border: 1px solid color-mix(in srgb, var(--dc-border-subtle) 55%, transparent);
+  background: color-mix(in srgb, var(--dc-surface) 40%, transparent);
 }
 
 .feed-stream .feed-action-bar__track {
@@ -557,6 +580,19 @@
   color: var(--dc-text);
 }
 
+/* Active reaction — velvet rose. Anchored to the scoped selector so it wins over
+   the base button color (Tailwind utilities lose to `.feed-stream .feed-action-bar__btn`). */
+.feed-stream .feed-action-bar__btn[aria-pressed='true'] {
+  color: var(--dc-accent);
+  background: color-mix(in srgb, var(--dc-accent) 15%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dc-accent) 32%, transparent);
+}
+
+.feed-stream .feed-action-bar__btn[aria-pressed='true']:hover:not(:disabled) {
+  color: var(--dc-accent);
+  background: color-mix(in srgb, var(--dc-accent) 22%, transparent);
+}
+
 .feed-stream .feed-action-bar__btn:disabled {
   cursor: not-allowed;
 }
@@ -678,6 +714,25 @@
   padding-left: 0;
 }
 
+/* Long post readability — clamp with a Show more toggle. */
+.feed-stream .feed-stream-post__body-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 10;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.feed-stream .feed-stream-post__more-toggle {
+  margin-top: 0.3125rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--dc-accent);
+}
+
+.feed-stream .feed-stream-post__more-toggle:hover {
+  text-decoration: underline;
+}
+
 @media (min-width: 640px) {
   .feed-stream .feed-stream-post__body--inline {
     margin-top: 0.375rem;
@@ -740,4 +795,103 @@
   font-size: 0.6875rem;
   font-weight: 600;
   color: var(--dc-accent);
+}
+
+/* ── Header context label (inferred post type, honest — no fake "Near you") ── */
+.feed-stream .feed-stream-post__context {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--dc-text-subtle);
+}
+
+@media (min-width: 640px) {
+  .feed-stream .feed-stream-post__context {
+    font-size: 0.75rem;
+  }
+}
+
+/* ── Engagement summary (real counts only) ── */
+.feed-stream .feed-stream-post__summary {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  padding-left: var(--feed-content-indent);
+  font-size: 0.75rem;
+  color: var(--dc-muted);
+}
+
+.feed-stream .feed-stream-post__summary-dot {
+  opacity: 0.55;
+}
+
+/* ── Basic link preview for plain-text posts that contain a URL ── */
+.feed-stream .feed-link-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  margin-top: 0.5rem;
+  margin-left: var(--feed-content-indent);
+  max-width: calc(100% - var(--feed-content-indent));
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--dc-border-subtle) 70%, transparent);
+  background: color-mix(in srgb, var(--dc-surface) 45%, transparent);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.feed-stream .feed-link-preview:hover {
+  border-color: color-mix(in srgb, var(--dc-accent-border) 55%, var(--dc-border-subtle));
+  background: color-mix(in srgb, var(--dc-surface) 62%, transparent);
+}
+
+.feed-stream .feed-link-preview__domain {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--dc-accent);
+}
+
+.feed-stream .feed-link-preview__url {
+  overflow: hidden;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--dc-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Feed well — a near-invisible vertical backing behind the desktop center column so
+ * the feed reads as intentionally placed instead of floating in the atmosphere glow.
+ * Desktop only; kept subtle and inside the column slack so it never overlaps rails.
+ */
+@media (min-width: 1280px) {
+  .dc-feed-well {
+    position: relative;
+  }
+
+  .dc-feed-well::before {
+    content: '';
+    position: absolute;
+    inset: -1.25rem -0.75rem;
+    z-index: -1;
+    border-radius: 1.5rem;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in srgb, var(--dc-surface) 60%, transparent) 9%,
+      color-mix(in srgb, var(--dc-surface) 60%, transparent) 91%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
 }

@@ -26,5 +26,11 @@ export const shellHeaderClass =
 /** Feed and 2-col utility pages — 1440 reference at lg+; full width below lg. */
 export const shellFeedClass = `mx-auto w-full min-w-0 max-w-7xl lg:max-w-shell-feed ${SHELL_GUTTER}` as const
 
+/**
+ * 3-column Home feed — wider 1600 reference at lg+ so the center column reads as
+ * dominant instead of a narrow strip floating in empty side gutters on large monitors.
+ */
+export const shellFeedWideClass = `mx-auto w-full min-w-0 max-w-7xl lg:max-w-shell-feed-wide ${SHELL_GUTTER}` as const
+
 /** Directory / 3-col discover — fills shell-wide parent; no nested max-width island. */
 export const shellDirectoryClass = `w-full min-w-0 overflow-x-hidden ${SHELL_GUTTER}` as const

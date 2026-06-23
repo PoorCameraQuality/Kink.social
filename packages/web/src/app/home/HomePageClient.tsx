@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useSearchParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { isHomeFeedPresentation } from '@/lib/home-feed-layout'
-import { shellFeedClass, shellWideClass } from '@/lib/shell-contract'
+import { shellFeedWideClass, shellWideClass } from '@/lib/shell-contract'
 import { cn } from '@/lib/cn'
 import EventCard from '@/components/cards/EventCard'
 import ConventionCard from '@/components/cards/ConventionCard'
@@ -704,7 +704,7 @@ export default function HomePageClient() {
 
   return (
     <div
-      className={cn(showFeedThreeColumn ? shellFeedClass : shellWideClass, 'py-4 sm:py-6 md:py-6')}
+      className={cn(showFeedThreeColumn ? shellFeedWideClass : shellWideClass, 'py-4 sm:py-6 md:py-6 lg:pt-7')}
     >
       {showDevHeadline && !showFeedThreeColumn ?
         <p className={`mb-2 text-xs font-medium leading-snug ${headlineToneClass}`} role="status">
@@ -757,7 +757,7 @@ export default function HomePageClient() {
       <div
         className={
           showFeedThreeColumn ?
-            'mt-2 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(220px,240px)_minmax(0,1fr)_minmax(260px,300px)] lg:items-start lg:gap-x-6 lg:gap-y-5'
+            'mt-2 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(220px,244px)_minmax(0,1fr)_minmax(272px,312px)] lg:items-start lg:gap-x-6 lg:gap-y-5 xl:grid-cols-[minmax(244px,264px)_minmax(0,1fr)_minmax(320px,360px)] xl:gap-x-8'
           : 'mt-4 flex flex-col gap-8 lg:flex-row'
         }
       >
@@ -777,7 +777,7 @@ export default function HomePageClient() {
         <main
           className={
             showFeedThreeColumn ?
-              'mx-auto w-full max-w-[760px]'
+              'dc-feed-well mx-auto w-full max-w-[780px] xl:max-w-[840px]'
             : `min-w-0 w-full ${
                 homeMode === 'Following' || activeTab === 'Local' ? 'max-w-2xl lg:max-w-3xl'
                 : 'max-w-6xl'
@@ -1150,7 +1150,7 @@ export default function HomePageClient() {
           <HomeFeedDiscoverRail
             {...discoverRailProps}
             variant="mobile-supplement"
-            className="mx-auto w-full max-w-[760px] lg:hidden"
+            className="mx-auto w-full max-w-[780px] lg:hidden"
           />
         : null}
         </div>

@@ -29,6 +29,35 @@ import { feedStreamPostSurface, feedStreamPostSurfaceClass } from '@/lib/feed-st
 import { formatFeedCommentActionLabel } from '@/lib/feed-comment-label'
 import { cn } from '@/lib/cn'
 
+/** First bare http(s) URL in plain text, trimmed of trailing punctuation. */
+function extractFirstUrl(text: string): string | null {
+  const match = text.match(/https?:\/\/[^\s<>"']+/i)
+  if (!match) return null
+  return match[0].replace(/[).,!?;:]+$/, '')
+}
+
+function prettyDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return url.replace(/^https?:\/\//, '').split('/')[0] ?? url
+  }
+}
+
+function IconGlobe({ className = 'h-3.5 w-3.5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth={1.6} />
+      <path
+        d="M3.5 12h17M12 3.5c2.4 2.3 2.4 14.7 0 17M12 3.5c-2.4 2.3-2.4 14.7 0 17"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export type LocalPostCardProps = {
   post: HomeFeedPost
   layout?: 'default' | 'feed'
@@ -153,6 +182,7 @@ export default function LocalPostCard({
   const [isEditing, setIsEditing] = useState(false)
   const [editText, setEditText] = useState(post.body)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [bodyExpanded, setBodyExpanded] = useState(false)
   const { authorUsername, kind } = post
   const [localLikes, setLocalLikes] = useState(post.likes)
   const [connectionPreview, setConnectionPreview] = useState(post.connectionLikerPreview ?? [])
@@ -255,12 +285,24 @@ export default function LocalPostCard({
       reactions.viewerReaction ?? (post.likedByViewer ? 'love' : null)
     : null
 
+  const hasMedia = !!heroImageUrl || displayPost.attachments.length > 0
+  const plainBodyTrimmed = displayPost.bodyFormat !== 'html' ? displayPost.body.trim() : ''
+  const firstUrl = plainBodyTrimmed ? extractFirstUrl(plainBodyTrimmed) : null
+  const isShortTextPost =
+    !hasMedia && !displayPost.title && plainBodyTrimmed.length > 0 && plainBodyTrimmed.length <= 90
+  const isLongTextPost = plainBodyTrimmed.length > 440
+  const contextLabel = contentBadge?.label ?? null
+  const totalReactions =
+    reactionCounts.love + reactionCounts.respect + reactionCounts.sympathize + reactionCounts.helpful
+
   const cardClass = feedLayout ?
     cn(
       'feed-stream-post',
       feedStreamPostSurfaceClass(
         feedStreamPostSurface(post, { isRepost: !!isRepost, streamVerb: feedStreamReason ?? null }),
       ),
+      hasMedia && 'feed-stream-post--media',
+      isShortTextPost && 'feed-stream-post--compact',
     )
   : `${cardSurfaceSolidClass} ${cardSurfaceInteractiveClass} p-4 hover:bg-[var(--dc-elevated-hover)]`
 
@@ -318,10 +360,13 @@ export default function LocalPostCard({
                 />
               : null}
             </div>
-            {streamVerb || showOrganizerBadge || post.alphaLabel ?
+            {streamVerb || contextLabel || showOrganizerBadge || post.alphaLabel ?
               <div className="feed-stream-post__subtitle-row">
                 {streamVerb ?
                   <span className="feed-stream-post__verb">{streamVerb}</span>
+                : null}
+                {contextLabel && !streamVerb ?
+                  <span className="feed-stream-post__context">{contextLabel}</span>
                 : null}
                 {showOrganizerBadge ?
                   <span className="rounded-full border border-[rgba(214,178,59,0.25)] bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-dc-accent">
@@ -340,9 +385,24 @@ export default function LocalPostCard({
                   className="text-dc-text prose prose-invert max-w-none [&_a]:text-dc-accent"
                   dangerouslySetInnerHTML={{ __html: displayPost.body }}
                 />
-              : <p className={`${centerFeedBody ? 'max-w-[34ch]' : ''} whitespace-pre-wrap text-dc-text`}>
+              : <p
+                  className={cn(
+                    'whitespace-pre-wrap text-dc-text',
+                    centerFeedBody && 'max-w-[34ch]',
+                    isLongTextPost && !bodyExpanded && 'feed-stream-post__body-clamp',
+                  )}
+                >
                   {displayPost.body}
                 </p>}
+              {isLongTextPost && displayPost.bodyFormat !== 'html' ?
+                <button
+                  type="button"
+                  onClick={() => setBodyExpanded((v) => !v)}
+                  className="feed-stream-post__more-toggle"
+                >
+                  {bodyExpanded ? 'Show less' : 'Show more'}
+                </button>
+              : null}
               <MentionChips mentions={displayPost.mentions} />
             </div>
           </div>
@@ -354,11 +414,46 @@ export default function LocalPostCard({
           </div>
         : null}
 
+        {firstUrl && !hasMedia ?
+          <a
+            href={firstUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="feed-link-preview"
+          >
+            <span className="feed-link-preview__domain">
+              <IconGlobe />
+              {prettyDomain(firstUrl)}
+            </span>
+            <span className="feed-link-preview__url">{firstUrl.replace(/^https?:\/\//, '')}</span>
+          </a>
+        : null}
+
         <FeedPostCommentPreview
           preview={commentPreview}
           commentCount={commentCount}
           discussHref={discussHref}
         />
+
+        {totalReactions > 0 || commentCount > 0 ?
+          <div className="feed-stream-post__summary">
+            {totalReactions > 0 ?
+              <span>
+                {totalReactions} {totalReactions === 1 ? 'reaction' : 'reactions'}
+              </span>
+            : null}
+            {totalReactions > 0 && commentCount > 0 ?
+              <span className="feed-stream-post__summary-dot" aria-hidden>
+                ·
+              </span>
+            : null}
+            {commentCount > 0 ?
+              <span>
+                {commentCount} {commentCount === 1 ? 'comment' : 'comments'}
+              </span>
+            : null}
+          </div>
+        : null}
 
         <div className="feed-stream-post__actions">
           <FeedPostActionBar

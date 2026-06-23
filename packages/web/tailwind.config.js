@@ -97,6 +97,7 @@ export default {
       maxWidth: {
         'shell-wide': '1920px',
         'shell-feed': '1440px',
+        'shell-feed-wide': '1600px',
       },
       minHeight: {
         touch: '2.75rem',
