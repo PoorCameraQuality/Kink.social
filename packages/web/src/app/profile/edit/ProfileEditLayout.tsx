@@ -132,7 +132,7 @@ function ProfileEditLayoutInner() {
 
   const footerStatus =
     ctx.photoUploadStage === 'uploading' ? 'Uploading photo to server…'
-    : ctx.photoUploadStage === 'saving' ? 'Scanning and saving profile photo…'
+    : ctx.photoUploadStage === 'processing' ? 'Scanning your photo…'
     : ctx.photoUploadError ? 'Photo upload failed — see message above'
     : ctx.saving ? 'Saving…'
     : ctx.hasUnsavedChanges ? 'Unsaved changes — auto-saves when you leave a field'

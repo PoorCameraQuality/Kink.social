@@ -117,7 +117,7 @@ export default function HomeFeedRichComposer({
   const { quota, reload: reloadPhotoQuota } = usePersonalPhotoQuota(true)
 
   const composing = focused || hasDraft
-  useFeedComposerEngagement(!shellMode && composing)
+  useFeedComposerEngagement(shellMode === 'mobile' || (!shellMode && composing))
 
   const editor = useEditor({
 

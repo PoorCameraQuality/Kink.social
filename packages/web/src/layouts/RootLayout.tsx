@@ -42,7 +42,7 @@ function RootLayoutInner() {
     showCreateFabForPath(pathname) &&
     !suppressBottomNav &&
     !suppressMobileCreateFab(pathname) &&
-    !(pathname === '/home' && composerEngaged)
+    !composerEngaged
 
   const mainMobilePadClass = showMemberChrome ? mobileMainPadClass(pathname, showCreateFab, searchParams) : 'pb-0'
 

@@ -65,6 +65,7 @@ export default function OrgRichBioEditor({ bio, bioFormat, saving, error, onSave
       setUploading(true)
       try {
         const fd = new FormData()
+        fd.append('purpose', 'org_rich_bio')
         fd.append('file', file)
         const r = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: fd })
         const data = (await r.json().catch(() => ({}))) as { url?: string; error?: string }

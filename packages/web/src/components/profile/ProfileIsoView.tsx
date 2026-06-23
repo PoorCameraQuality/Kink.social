@@ -127,7 +127,7 @@ export default function ProfileIsoView({
       {lightbox ?
         <button
           type="button"
-          className="fixed inset-0 z-[100] flex cursor-zoom-out items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-dc-modal flex cursor-zoom-out items-center justify-center bg-black/90 p-4"
           onClick={() => setLightbox(null)}
           aria-label="Close image"
         >

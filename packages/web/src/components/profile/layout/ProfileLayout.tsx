@@ -42,12 +42,10 @@ export default function ProfileLayout({
       {hero}
       {gallery ? <div className="mt-5">{gallery}</div> : null}
 
-      <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(300px,340px)] lg:items-start lg:gap-8">
+      <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0 space-y-6">{primary}</div>
         {secondary ?
-          <aside className="mt-6 min-w-0 space-y-5 lg:mt-0 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
-            {secondary}
-          </aside>
+          <aside className="mt-6 min-w-0 space-y-5 lg:mt-0">{secondary}</aside>
         : null}
       </div>
 

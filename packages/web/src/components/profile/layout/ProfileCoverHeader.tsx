@@ -116,7 +116,7 @@ export default function ProfileCoverHeader({
   return (
     <header
       className={cn(
-        'relative mb-6 overflow-hidden rounded-2xl border border-white/[0.07] bg-dc-elevated/40 p-6 shadow-[var(--dc-shadow-soft)] c2k-profile-hero sm:p-7 xl:p-8',
+        'relative mb-6 overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--dc-border-strong)_70%,var(--dc-border-subtle))] bg-dc-elevated-solid p-6 shadow-[var(--dc-shadow-panel)] ring-1 ring-inset ring-white/[0.05] c2k-profile-hero sm:p-7 xl:p-8',
         className,
       )}
     >

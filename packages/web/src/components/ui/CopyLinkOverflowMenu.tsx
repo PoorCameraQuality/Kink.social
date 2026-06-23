@@ -1,6 +1,7 @@
 import ReportAction from '@/components/moderation/ReportAction'
 import { copyCanonicalLink } from '@c2k/shared'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 type Props = {
   path: string
@@ -25,18 +26,48 @@ type Props = {
 export default function CopyLinkOverflowMenu({ path, className = '', bookmark, report, extraMenuItems }: Props) {
   const menuId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  // Anchor the portaled menu to the trigger so it escapes any `overflow-hidden`
+  // card without being clipped (right-aligned under the button).
+  const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null)
+
+  const reposition = useCallback(() => {
+    const el = rootRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    setAnchor({ top: rect.bottom + 4, right: Math.max(8, window.innerWidth - rect.right) })
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!open) return
+    reposition()
+    window.addEventListener('resize', reposition)
+    window.addEventListener('scroll', reposition, true)
+    return () => {
+      window.removeEventListener('resize', reposition)
+      window.removeEventListener('scroll', reposition, true)
+    }
+  }, [open, reposition])
 
   useEffect(() => {
     if (!open) return
     const onPointerDown = (event: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
+      const target = event.target as Node
+      if (rootRef.current?.contains(target)) return
+      if (menuRef.current?.contains(target)) return
+      setOpen(false)
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
     }
     document.addEventListener('mousedown', onPointerDown)
-    return () => document.removeEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [open])
 
   useEffect(() => {
@@ -72,11 +103,14 @@ export default function CopyLinkOverflowMenu({ path, className = '', bookmark, r
           />
         </svg>
       </button>
-      {open ?
+      {open && anchor ?
+        createPortal(
         <div
+          ref={menuRef}
           id={menuId}
           role="menu"
-          className="absolute right-0 top-full z-20 mt-1 min-w-[10rem] overflow-hidden rounded-xl border border-dc-border bg-dc-elevated-solid py-1 shadow-[var(--dc-shadow-panel)]"
+          style={{ top: anchor.top, right: anchor.right }}
+          className="fixed z-dc-dropdown min-w-[10rem] overflow-hidden rounded-xl border border-dc-border bg-dc-elevated-solid py-1 shadow-[var(--dc-shadow-panel)]"
         >
           {bookmark ?
             <button
@@ -127,12 +161,14 @@ export default function CopyLinkOverflowMenu({ path, className = '', bookmark, r
           >
             Copy link
           </button>
-        </div>
+        </div>,
+        document.body,
+        )
       : null}
       {copied ?
         <div
           role="status"
-          className="absolute right-0 top-full z-30 mt-1 whitespace-nowrap rounded-lg border border-dc-border bg-dc-elevated-solid px-3 py-1.5 text-xs font-medium text-dc-text shadow-[var(--dc-shadow-panel)]"
+          className="absolute right-0 top-full z-dc-dropdown mt-1 whitespace-nowrap rounded-lg border border-dc-border bg-dc-elevated-solid px-3 py-1.5 text-xs font-medium text-dc-text shadow-[var(--dc-shadow-panel)]"
         >
           Link copied
         </div>

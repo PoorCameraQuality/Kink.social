@@ -122,7 +122,7 @@ export async function uploadProfilePhotoFile(
   }
 }
 
-/** Register a quarantined upload as a profile gallery photo. */
+/** Register a staged upload as a profile gallery photo. */
 export async function attachUploadedProfilePhoto(
   uploaded: ProfilePhotoUploadResult,
   sortOrder = 0,

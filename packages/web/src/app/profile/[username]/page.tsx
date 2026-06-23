@@ -160,9 +160,13 @@ export default function ProfileUsernamePage() {
     [selectTab],
   )
   const openPhotoGallery = useCallback(() => {
+    if (viewerIsSelf) {
+      navigate('/profile/edit')
+      return
+    }
     selectTab('Media')
     scrollToProfileMediaGallery()
-  }, [selectTab])
+  }, [viewerIsSelf, navigate, selectTab])
   const [reportOpen, setReportOpen] = useState<TsReportTarget | null>(null)
   const [photoReportOpen, setPhotoReportOpen] = useState<TsReportTarget | null>(null)
   const adultContentPref = useAdultContentPreference(isAuthenticated && !isFallback)
@@ -716,6 +720,7 @@ export default function ProfileUsernamePage() {
       photoDisplaySettings={primaryPhotoDisplaySettings ?? undefined}
       photoCount={displayPhotos.length}
       onOpenGallery={viewerIsSelf || displayPhotos.length > 0 ? openPhotoGallery : undefined}
+      managePhotosHref={viewerIsSelf ? '/profile/edit' : undefined}
       actions={profileHeroActions}
     />
   )
@@ -725,7 +730,8 @@ export default function ProfileUsernamePage() {
       photos={displayPhotos}
       viewer={mediaViewer}
       totalCount={displayPhotos.length}
-      onViewAll={openPhotoGallery}
+      onViewAll={viewerIsSelf ? undefined : openPhotoGallery}
+      managePhotosHref={viewerIsSelf ? '/profile/edit' : undefined}
       viewerIsOwner={viewerIsSelf}
     />
   )
@@ -738,6 +744,21 @@ export default function ProfileUsernamePage() {
         lookingFor={publicProfile?.profile?.lookingFor ?? []}
         viewerIsOwner={viewerIsSelf}
       />
+      {showProfilePosts ?
+        <ProfileRecentPostsSection
+          viewerIsOwner={viewerIsSelf}
+          viewerUsername={viewerUsername}
+          profileUsername={username}
+          items={profileFeedPosts.items}
+          status={profileFeedPosts.status}
+          error={profileFeedPosts.error}
+          onRetry={() => void profileFeedPosts.reload()}
+          graphStatus={viewerIsSelf ? null : graphStatus}
+          canMessage={!viewerIsSelf && (graphStatus?.canMessage === true)}
+          onFollow={viewerIsSelf ? undefined : () => void toggleFollow()}
+          onConnect={viewerIsSelf ? undefined : () => void sendConnectionRequest()}
+        />
+      : null}
     </>
   )
 
@@ -769,21 +790,6 @@ export default function ProfileUsernamePage() {
 
   const profileMore = (
     <>
-      {showProfilePosts ?
-        <ProfileRecentPostsSection
-          viewerIsOwner={viewerIsSelf}
-          viewerUsername={viewerUsername}
-          profileUsername={username}
-          items={profileFeedPosts.items}
-          status={profileFeedPosts.status}
-          error={profileFeedPosts.error}
-          onRetry={() => void profileFeedPosts.reload()}
-          graphStatus={viewerIsSelf ? null : graphStatus}
-          canMessage={!viewerIsSelf && (graphStatus?.canMessage === true)}
-          onFollow={viewerIsSelf ? undefined : () => void toggleFollow()}
-          onConnect={viewerIsSelf ? undefined : () => void sendConnectionRequest()}
-        />
-      : null}
       <ProfileExtendedSection
         viewerIsOwner={viewerIsSelf}
         visibleTabs={visibleTabs}

@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import {
   formatFeeAmount,
@@ -12,6 +12,7 @@ import { db, schema } from '../db/index.js'
 import { createNotification } from './create-notification.js'
 import { enqueueParticipationOfferEmail } from './convention-participation-offer-queue.js'
 import { requestConventionPeopleDirectorySync } from './convention-people-sync-queue.js'
+import { isTrustedRoleApplyOpen } from './convention-organizer/registration.js'
 
 export function mapParticipationOffer(
   row: typeof schema.conventionParticipationOffers.$inferSelect,
@@ -407,21 +408,43 @@ export async function loadParticipationOpportunities(
   const staffRoleId = participation.staffRoleId
   const volunteerRoleId = participation.volunteerRoleId
 
-  const roleIds = [staffRoleId, volunteerRoleId].filter((id): id is string => Boolean(id))
-  const roles =
-    roleIds.length > 0 ?
-      await db
-        .select()
-        .from(schema.conventionTrustedRoles)
-        .where(
-          and(
-            eq(schema.conventionTrustedRoles.conventionId, conventionId),
-            inArray(schema.conventionTrustedRoles.id, roleIds),
-          ),
-        )
-    : []
+  const allRoles = await db
+    .select()
+    .from(schema.conventionTrustedRoles)
+    .where(eq(schema.conventionTrustedRoles.conventionId, conventionId))
+    .orderBy(asc(schema.conventionTrustedRoles.sortOrder), asc(schema.conventionTrustedRoles.title))
 
-  const roleById = new Map(roles.map((r) => [r.id, r]))
+  const roleById = new Map(allRoles.map((r) => [r.id, r]))
+
+  function trustedRoleApplyUrl(role: (typeof allRoles)[number]): string {
+    const slug = role.applySlug?.trim() || role.slug
+    return `/conventions/${conventionSlug}/apply/${encodeURIComponent(slug)}`
+  }
+
+  function pathwayForLinkedRole(linkedId: string | null | undefined, fallbackKind: string) {
+    const role =
+      (linkedId ? roleById.get(linkedId) : undefined) ??
+      allRoles.find((r) => r.status === 'published' && r.roleKind === fallbackKind)
+    if (!role || role.status !== 'published') {
+      return { open: false, applyUrl: null as string | null }
+    }
+    return {
+      open: isTrustedRoleApplyOpen(role),
+      applyUrl: trustedRoleApplyUrl(role),
+    }
+  }
+
+  const trustedRoles = allRoles
+    .filter((r) => r.status === 'published')
+    .map((r) => ({
+      id: r.id,
+      name: r.title,
+      roleKind: r.roleKind ?? 'custom',
+      applySlug: r.applySlug?.trim() || r.slug,
+      open: isTrustedRoleApplyOpen(r),
+      applyUrl: trustedRoleApplyUrl(r),
+      introHtml: typeof r.introText === 'string' ? r.introText : null,
+    }))
 
   const pathways = {
     present: {
@@ -434,20 +457,8 @@ export async function loadParticipationOpportunities(
       applyUrl: `/conventions/${conventionSlug}/vend/apply`,
       introHtml: participation.vendorApply?.introHtml ?? null,
     },
-    staff: {
-      open: Boolean(staffRoleId && roleById.get(staffRoleId)?.status === 'published'),
-      applyUrl:
-        staffRoleId && roleById.get(staffRoleId) ?
-          `/conventions/${conventionSlug}/apply/${roleById.get(staffRoleId)!.applySlug ?? roleById.get(staffRoleId)!.slug}`
-        : null,
-    },
-    volunteer: {
-      open: Boolean(volunteerRoleId && roleById.get(volunteerRoleId)?.status === 'published'),
-      applyUrl:
-        volunteerRoleId && roleById.get(volunteerRoleId) ?
-          `/conventions/${conventionSlug}/apply/${roleById.get(volunteerRoleId)!.applySlug ?? roleById.get(volunteerRoleId)!.slug}`
-        : null,
-    },
+    staff: pathwayForLinkedRole(staffRoleId, 'staff'),
+    volunteer: pathwayForLinkedRole(volunteerRoleId, 'volunteer'),
   }
 
   let myStatus: Record<string, unknown> | null = null
@@ -484,7 +495,7 @@ export async function loadParticipationOpportunities(
     }
   }
 
-  return { pathways, myStatus, participation }
+  return { pathways, trustedRoles, myStatus, participation }
 }
 
 export { OfferBody }

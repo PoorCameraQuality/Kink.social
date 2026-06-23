@@ -4,6 +4,7 @@ import {
   formatMemberSinceMonthYear,
   formatPlaceLocationLabel,
   formatPronounDisplay,
+  parseLegacySexualityLabels,
   parseProfileFieldVisibility,
   parsePronounTags,
   PROFILE_GENDER_MAX,
@@ -11,7 +12,6 @@ import {
   PROFILE_ROLE_MAX,
   PUBLIC_PROFILE_KINK_STATUSES,
   profileFieldVisibilityLevelSchema,
-  splitProfileSexuality,
 } from '@c2k/shared'
 import { asc, eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
@@ -96,12 +96,7 @@ const patchBody = z.object({
 type ProfileRow = typeof schema.profiles.$inferSelect
 
 function legacySexualityToArray(sexuality: string | null): string[] {
-  const t = (sexuality ?? '').trim()
-  if (!t) return []
-  const { selectValue, customText } = splitProfileSexuality(t)
-  if (selectValue && selectValue !== 'Other (describe below)') return [selectValue]
-  if (customText) return [customText]
-  return [t]
+  return parseLegacySexualityLabels(sexuality)
 }
 
 /** Populate array fields from legacy varchar when arrays are empty. */

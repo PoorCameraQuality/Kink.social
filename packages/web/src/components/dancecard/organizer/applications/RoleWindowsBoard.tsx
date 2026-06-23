@@ -122,8 +122,29 @@ export function RoleWindowsBoard({
   const existingKinds = useMemo(() => new Set(roles.map((r) => (r.roleKind ?? 'custom').toLowerCase())), [roles])
   const missingTemplates = DEFAULT_ROLE_TEMPLATES.filter((t) => !existingKinds.has(t.roleKind))
 
+  async function patchParticipation(extra: Record<string, unknown>) {
+    if (readOnly) return
+    try {
+      await fetch(`/api/v1/conventions/${encodeURIComponent(eventSlug)}/participation-settings`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          participation: {
+            ...participation,
+            ...extra,
+          },
+        }),
+      })
+      invalidateOrganizerDancecardCache(eventSlug, '/participation-settings')
+    } catch {
+      setErr('Could not sync public apply links')
+    }
+  }
+
   async function patchRole(id: string, patch: Record<string, unknown>) {
     if (readOnly) return
+    const role = roles.find((r) => r.id === id)
     setBusy(true)
     setErr(null)
     setMsg(null)
@@ -133,6 +154,17 @@ export function RoleWindowsBoard({
         body: JSON.stringify(patch),
       })
       invalidateOrganizerDancecardCache(eventSlug, '/trusted-roles')
+
+      const kind = (role?.roleKind ?? 'custom').toLowerCase()
+      if (patch.status === 'published' && (kind === 'staff' || kind === 'volunteer')) {
+        await patchParticipation(kind === 'staff' ? { staffRoleId: id } : { volunteerRoleId: id })
+      }
+      if (patch.status === 'draft' && role) {
+        const p = participation as Record<string, unknown>
+        if (kind === 'staff' && p.staffRoleId === id) await patchParticipation({ staffRoleId: null })
+        if (kind === 'volunteer' && p.volunteerRoleId === id) await patchParticipation({ volunteerRoleId: null })
+      }
+
       await load()
       setMsg('Saved.')
     } catch (e) {

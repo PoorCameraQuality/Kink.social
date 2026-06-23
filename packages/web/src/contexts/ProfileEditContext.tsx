@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -19,7 +20,7 @@ import {
   PROFILE_ROMANTIC_ORIENTATION_GROUPS,
   PROFILE_SEXUAL_ORIENTATION_GROUPS,
   parsePronounTags,
-  splitProfileSexuality,
+  parseLegacySexualityLabels,
   DEFAULT_PROFILE_PHOTO_DISPLAY,
   normalizeProfilePhotoDisplaySettings,
   type ProfilePhotoDisplaySettings,
@@ -67,7 +68,7 @@ type ProfileEditContextValue = {
   loading: boolean
   saving: boolean
   photoUploading: boolean
-  photoUploadStage: 'idle' | 'uploading' | 'saving' | null
+  photoUploadStage: 'idle' | 'uploading' | 'processing' | null
   photoUploadError: string | null
   cancelPhotoUpload: () => void
   saveNotice: string | null
@@ -162,12 +163,7 @@ function savedGendersFromProfile(p: Record<string, unknown>): string[] {
 function savedSexualOrientationsFromProfile(p: Record<string, unknown>): string[] {
   const arr = p.sexualOrientations as string[] | undefined
   if (arr?.length) return arr
-  const t = (p.sexuality as string) ?? ''
-  if (!t.trim()) return []
-  const { selectValue, customText } = splitProfileSexuality(t)
-  if (selectValue && selectValue !== 'Other (describe below)') return [selectValue]
-  if (customText) return [customText]
-  return [t]
+  return parseLegacySexualityLabels((p.sexuality as string) ?? '')
 }
 
 function stringArraysEqual(a: string[], b: string[]): boolean {
@@ -277,6 +273,8 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
   const lastHydratedReloadToken = useRef<number | null>(null)
   /** When true, the next profileMe fetch replaces all draft fields from the server. */
   const hydrateAllFromServerRef = useRef(true)
+  /** Blocks autosave until identity fields are hydrated from the server (prevents wiping arrays). */
+  const identityHydratedRef = useRef(false)
   /** Blocks stale photo hydration between upload complete and profileMe.reload(). */
   const photoHydrateLockRef = useRef(false)
   const [kinkBaseline, setKinkBaseline] = useState('')
@@ -317,7 +315,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
   const photoBlobUrlRef = useRef<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [photoUploading, setPhotoUploading] = useState(false)
-  const [photoUploadStage, setPhotoUploadStage] = useState<'idle' | 'uploading' | 'saving' | null>(null)
+  const [photoUploadStage, setPhotoUploadStage] = useState<'idle' | 'uploading' | 'processing' | null>(null)
   const [photoUploadError, setPhotoUploadError] = useState<string | null>(null)
   const uploadAbortRef = useRef<AbortController | null>(null)
   const [saveNotice, setSaveNotice] = useState<string | null>(null)
@@ -381,7 +379,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
     })
   }, [profileMe.status, profileMe.data?.photos, profileMe.reloadToken, photoUploading])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (profileMe.status !== 'ready' || !profileMe.data) return
     if (lastHydratedReloadToken.current === profileMe.reloadToken) return
     lastHydratedReloadToken.current = profileMe.reloadToken
@@ -393,6 +391,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
         setPhotoPendingReview,
       })
       photoHydrateLockRef.current = false
+      identityHydratedRef.current = true
       return
     }
 
@@ -424,6 +423,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
     setLookingFor((p.lookingFor as string[]) ?? [])
     setHomeZip((p.homeZip as string) ?? '')
     setLocation((p.location as string) ?? '')
+    identityHydratedRef.current = true
     void reloadLinks()
     void reloadRelationships()
   }, [profileMe.status, profileMe.data, profileMe.reloadToken, reloadLinks, reloadRelationships])
@@ -810,18 +810,37 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
     let kinksSaved = !hasUnsavedKinkChanges
     try {
       if (hasUnsavedProfileChanges) {
+        const p = profileMe.data!.profile as Record<string, unknown>
+        const savedRomantic = (p.romanticOrientations as string[] | undefined) ?? []
+        const savedRoles = (p.roles as string[] | undefined) ?? []
+        const savedLookingFor = (p.lookingFor as string[] | undefined) ?? []
         const payload: Record<string, unknown> = {
           displayName: displayName.trim() || null,
           bio,
-          genders,
-          sexualOrientations,
-          romanticOrientations,
-          pronounTags,
-          roles: roles.slice(0, PROFILE_ROLE_MAX),
           birthDate: birthDate.trim() ? birthDate.trim() : null,
           lifestyleActivity: lifestyleActivity || null,
-          lookingFor,
           homeZip: homeZip.replace(/\D/g, '').slice(0, 5) || null,
+        }
+        if (!stringArraysEqual(savedGendersFromProfile(p), genders)) {
+          payload.genders = genders
+        }
+        if (!stringArraysEqual(savedSexualOrientationsFromProfile(p), sexualOrientations)) {
+          payload.sexualOrientations = sexualOrientations
+        }
+        if (!stringArraysEqual(savedRomantic, romanticOrientations)) {
+          payload.romanticOrientations = romanticOrientations
+        }
+        const savedPronounDisplay = formatPronounDisplay(
+          parsePronounTags((p.pronounTags as string[] | undefined) ?? (p.pronouns as string | undefined)),
+        )
+        if (formatPronounDisplay(pronounTags) !== savedPronounDisplay) {
+          payload.pronounTags = pronounTags
+        }
+        if (!stringArraysEqual(savedRoles, roles)) {
+          payload.roles = roles.slice(0, PROFILE_ROLE_MAX)
+        }
+        if (!stringArraysEqual(savedLookingFor, lookingFor)) {
+          payload.lookingFor = lookingFor
         }
         if (placeSelect === PLACE_CUSTOM) {
           payload.placeId = null
@@ -983,6 +1002,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
     if (profileMe.status !== 'ready' || !hasUnsavedChanges || saving || photoUploading) {
       return
     }
+    if (!identityHydratedRef.current) return
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
     autoSaveTimerRef.current = setTimeout(function attemptAutoSave() {
       if (autosavePausedRef.current) {
@@ -1051,7 +1071,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
           revertPhotoPreview()
           return
         }
-        setPhotoUploadStage('saving')
+        setPhotoUploadStage('processing')
         const attached = await attachUploadedProfilePhoto(uploaded, 0, {
           signal: abort.signal,
           caption: photoCaption,
@@ -1259,6 +1279,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
       setZipLocationHint(null)
       setZipCandidates([])
       setZipLocality(null)
+      identityHydratedRef.current = false
       hydrateAllFromServerRef.current = true
       void profileMe.reload()
     },
