@@ -11,6 +11,50 @@ test.describe('smoke', () => {
     expect(body.ok).toBe(true)
   })
 
+  test('api GET /api/health/live', async ({ request }) => {
+    const res = await request.get('/api/health/live')
+    expect(res.ok()).toBeTruthy()
+    const body = (await res.json()) as { ok?: boolean }
+    expect(body.ok).toBe(true)
+  })
+
+  test('api GET /api/health/storage', async ({ request }) => {
+    const res = await request.get('/api/health/storage')
+    expect(res.ok()).toBeTruthy()
+    const body = (await res.json()) as { ok?: boolean; s3?: string }
+    expect(body.ok).toBeDefined()
+    expect(['ok', 'error', 'skipped']).toContain(body.s3)
+  })
+
+  test('api GET /api/health/ecke', async ({ request }) => {
+    const res = await request.get('/api/health/ecke')
+    expect(res.ok()).toBeTruthy()
+    const body = (await res.json()) as { ok?: boolean; enabled?: boolean; mode?: string }
+    expect(body.ok).toBeDefined()
+    expect(body.mode).toBeTruthy()
+  })
+
+  test('api GET /api/health/worker', async ({ request }) => {
+    const res = await request.get('/api/health/worker')
+    expect(res.ok()).toBeTruthy()
+    const body = (await res.json()) as { ok?: boolean; worker?: string }
+    expect(body.ok).toBeDefined()
+    expect(['ok', 'stale', 'missing', 'skipped']).toContain(body.worker)
+  })
+
+  test('web GET /health.json', async ({ request }) => {
+    const res = await request.get('/health.json')
+    expect(res.ok()).toBeTruthy()
+    const body = (await res.json()) as { ok?: boolean; service?: string }
+    expect(body.ok).toBe(true)
+    expect(body.service).toBe('web')
+  })
+
+  test('api GET /api/health/error-test is hidden by default', async ({ request }) => {
+    const res = await request.get('/api/health/error-test')
+    expect(res.status()).toBe(404)
+  })
+
   test('api GET /api/health/ready', async ({ request }) => {
     const res = await request.get('/api/health/ready')
     expect(res.ok()).toBeTruthy()

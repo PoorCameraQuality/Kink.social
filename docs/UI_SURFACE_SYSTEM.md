@@ -52,6 +52,7 @@ Reach for these in order. Cards must always stay **visibly distinct** from the p
 | Need | Component |
 |---|---|
 | Generic card / panel | `components/ui/Card.tsx` |
+| Hub/detail section shell | `components/ui/ContentSection.tsx` (`cardSurfaceBaseClass`) |
 | Right-rail section | `components/ui/RailCard.tsx` |
 | Button (primary / secondary / ghost / danger) | `components/ui/Button.tsx` |
 | Modal / bottom sheet | `components/ui/Dialog.tsx` (portals to `document.body`) |

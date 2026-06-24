@@ -321,7 +321,11 @@ export default function LocalPostCard({
         : null}
 
         <header className="feed-stream-post__head">
-          <Link to={`/profile/${headerUsername}`} className="feed-stream-post__avatar">
+          <Link
+            to={`/profile/${headerUsername}`}
+            className="feed-stream-post__avatar"
+            aria-label={headerUsername ? `View @${headerUsername}'s profile` : 'View member profile'}
+          >
             <UserAvatar
               avatarUrl={displayPost.authorAvatarUrl}
               alt=""
@@ -493,7 +497,11 @@ export default function LocalPostCard({
       : null}
 
       <div className={feedLayout ? 'flex gap-3' : 'flex gap-3'}>
-        <Link to={`/profile/${headerUsername}`} className="flex-shrink-0">
+        <Link
+          to={`/profile/${headerUsername}`}
+          className="flex-shrink-0"
+          aria-label={headerUsername ? `View @${headerUsername}'s profile` : 'View member profile'}
+        >
           <UserAvatar
             avatarUrl={displayPost.authorAvatarUrl}
             alt=""

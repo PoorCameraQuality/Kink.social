@@ -1614,6 +1614,12 @@ ALTER TABLE events
   ADD COLUMN IF NOT EXISTS venue_place_id uuid REFERENCES community_places (id) ON DELETE SET NULL;
 
 CREATE INDEX IF NOT EXISTS events_venue_place_id_idx ON events (venue_place_id);
+
+-- Convention trusted roles: application window columns (Drizzle schema ahead of db:push on some baselines)
+ALTER TABLE convention_trusted_roles
+  ADD COLUMN IF NOT EXISTS apply_opens_at timestamptz;
+ALTER TABLE convention_trusted_roles
+  ADD COLUMN IF NOT EXISTS apply_closes_at timestamptz;
 `
 
 async function main() {

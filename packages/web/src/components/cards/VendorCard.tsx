@@ -111,7 +111,7 @@ export default function VendorCard({ vendor, compact = false }: VendorCardProps)
         compact && 'rounded-xl',
       )}
     >
-      <Link to={shopHref} className={imageFrameClass}>
+      <Link to={shopHref} className={imageFrameClass} aria-label={`View ${name}`}>
         {!compact ?
           <span className="absolute top-3 left-3 z-10 max-w-[calc(100%-1.5rem)] truncate rounded-full border border-dc-border/60 bg-black/60 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
             {name}

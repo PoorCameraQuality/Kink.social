@@ -1,6 +1,7 @@
 import { and, desc, eq, gt, inArray, or } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { loadAcceptedFriendUserIds } from './accepted-friends.js'
+import { deliverAvatarUrl } from './image-delivery.js'
 
 export type ConnectionRsvpPreviewItem = {
   username: string
@@ -50,7 +51,7 @@ export async function loadConnectionRsvpPreviewByEventIds(
     const list = result.get(row.eventId) ?? []
     if (list.length >= PREVIEW_LIMIT) continue
     if (list.some((item) => item.username === row.username)) continue
-    list.push({ username: row.username, avatarUrl: row.avatarUrl })
+    list.push({ username: row.username, avatarUrl: deliverAvatarUrl(row.avatarUrl, 'sm') })
     result.set(row.eventId, list)
   }
 

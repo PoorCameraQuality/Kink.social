@@ -236,7 +236,7 @@ Per-route **user experience** (forward/back navigation, staff/moderator clarity,
 
 | Module file | Prefix / domain | Legacy §4 table? |
 | ----------- | ---------------- | ---------------- |
-| `health.ts` | `/api/health`, `/api/health/ready` | ✓ |
+| `health.ts` | `/api/health`, `/api/health/live`, `/api/health/ready`, `/api/health/mail`, `/api/health/storage`, `/api/health/ecke`, `/api/health/search`, `/api/health/worker` | ✓ |
 | `public-seed-assets.ts` | `/api/public-seed/paf/:filename` | — (bullets) |
 | `auth.ts` | `/api/auth/*` | ✓ |
 | `locations.ts` | `/api/locations/*` | ✓ |

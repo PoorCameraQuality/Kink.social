@@ -82,6 +82,12 @@ import { resolveUserParticipationDefaults } from '../lib/convention-participatio
 import { sendEventRsvpConfirmationEmail } from '../lib/transactional-email.js'
 import { isEventFeatured } from '../lib/event-featured.js'
 import { viewerCanSeeActivityHistory } from '../lib/activity-history-visibility.js'
+import {
+  globalPublicEventDiscoveryFilter,
+  isGlobalPublicEventDiscoveryQuery,
+} from '../lib/event-discovery.js'
+import { canViewerSeeEventDetail } from '../lib/event-access.js'
+import { deliverBrandingLogoUrl, deliverCardImageUrl } from '../lib/image-delivery.js'
 import { loadConnectionRsvpPreviewByEventIds } from '../lib/connection-rsvp-preview.js'
 import { filterVendorVisibility, vendorVisibleForDetail } from '../lib/vendor-visibility.js'
 import { toPublicVendorDetail, toPublicVendorListItem, vendorProfileWriteFields } from '../lib/vendor-public-dto.js'
@@ -1312,6 +1318,10 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       (f): f is NonNullable<typeof f> => f != null
     )
 
+    if (isGlobalPublicEventDiscoveryQuery(q)) {
+      listFilters.push(globalPublicEventDiscoveryFilter())
+    }
+
     if (groupIdParam) {
       const [g] = await db
         .select()
@@ -1452,6 +1462,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         const shaped = applyEventLocationRedaction(r, joinVisible, physicalVisible)
         return {
           ...shaped,
+          imageUrl: deliverCardImageUrl(shaped.imageUrl),
           featured: r.featured,
           featuredUntil: r.featuredUntil?.toISOString?.() ?? r.featuredUntil ?? null,
           isFeatured: isEventFeatured(r),
@@ -1526,6 +1537,9 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     const program = await getProgramSummaryForEvent(eventId)
     const viewer = resolveViewerFromRequest(req)
     const viewerId = getViewerUserId(viewer.payload)
+    if (!(await canViewerSeeEventDetail(viewerId, row))) {
+      return reply.status(404).send({ error: 'Not found' })
+    }
     const detailJoinVisible = await virtualJoinLinkVisibleEventIds(viewerId, [
       {
         id: row.id,
@@ -1612,6 +1626,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     const connectionRsvpPreviewMap = await loadConnectionRsvpPreviewByEventIds(viewerId, [eventId])
     const event = await withAlphaLabel('event', {
       ...rowForClient,
+      imageUrl: deliverCardImageUrl(rowForClient.imageUrl),
       featured: row.featured,
       featuredUntil: row.featuredUntil?.toISOString?.() ?? row.featuredUntil ?? null,
       isFeatured: isEventFeatured(row),
@@ -2656,9 +2671,9 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         vendorId: v.id,
         vendorSlug: v.slug,
         shopName: v.displayName,
-        logoUrl: v.logoUrl,
+        logoUrl: deliverBrandingLogoUrl(v.logoUrl),
         listingTitle,
-        primaryImageUrl: p?.primaryImageUrl ?? ex?.primaryImageUrl ?? null,
+        primaryImageUrl: deliverCardImageUrl(p?.primaryImageUrl ?? ex?.primaryImageUrl ?? null),
         listingPriceCents: p?.priceCents ?? ex?.priceCents,
         listingCurrency: ex?.currency ?? (p?.priceCents != null ? 'USD' : undefined),
       })

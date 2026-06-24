@@ -4440,11 +4440,203 @@ async function cleanupE2eFeedPosts() {
   }
 }
 
+const PASS4_PUBLIC_GROUP_SLUG = 'pass4-public-test-group'
+const PASS4_APPROVAL_GROUP_SLUG = 'pass4-approval-test-group'
+const PASS4_PUBLIC_EVENT_TITLE = 'Pass4 Public Event'
+const PASS4_PRIVATE_EVENT_TITLE = 'Pass4 Private Event'
+const PASS4_GROUP_PRIVATE_EVENT_TITLE = 'Pass4 Group Private Event'
+const PASS4_ORG_PRIVATE_EVENT_TITLE = 'Pass4 Org Private Event'
+
+/** Idempotent Playwright Pass 4 fixtures — neutral alpha names; safe for local/dev/test only. */
+async function ensurePass4TestFixtures(ctx: {
+  ropeId: string
+  braxId: string
+  orgId?: string | null
+}) {
+  const { ropeId, braxId, orgId } = ctx
+
+  let pass4GroupId: string | undefined
+  const [existingPublicGroup] = await db
+    .select()
+    .from(schema.groups)
+    .where(eq(schema.groups.slug, PASS4_PUBLIC_GROUP_SLUG))
+    .limit(1)
+  if (existingPublicGroup) {
+    pass4GroupId = existingPublicGroup.id
+    await db
+      .update(schema.groups)
+      .set({
+        name: 'Pass4 Public Test Group',
+        visibility: 'public',
+        category: 'Education',
+        tags: ['pass4', 'test', 'education'],
+        description: 'Discoverable alpha test group for Pass 4 directory Playwright checks.',
+        ownerId: ropeId,
+        organizationId: orgId ?? existingPublicGroup.organizationId,
+      })
+      .where(eq(schema.groups.id, existingPublicGroup.id))
+  } else {
+    const [g] = await db
+      .insert(schema.groups)
+      .values({
+        slug: PASS4_PUBLIC_GROUP_SLUG,
+        name: 'Pass4 Public Test Group',
+        visibility: 'public',
+        category: 'Education',
+        tags: ['pass4', 'test', 'education'],
+        description: 'Discoverable alpha test group for Pass 4 directory Playwright checks.',
+        ownerId: ropeId,
+        organizationId: orgId ?? null,
+      })
+      .returning()
+    if (g) {
+      pass4GroupId = g.id
+      console.log('Seeded Pass4 Public Test Group.')
+    }
+  }
+
+  if (pass4GroupId) {
+    for (const [userId, role] of [
+      [ropeId, 'owner'],
+      [braxId, 'member'],
+    ] as const) {
+      const [mem] = await db
+        .select({ id: schema.groupMembers.id })
+        .from(schema.groupMembers)
+        .where(and(eq(schema.groupMembers.groupId, pass4GroupId), eq(schema.groupMembers.userId, userId)))
+        .limit(1)
+      if (!mem) {
+        await db.insert(schema.groupMembers).values({ groupId: pass4GroupId, userId, role })
+      }
+    }
+  }
+
+  const [existingApprovalGroup] = await db
+    .select()
+    .from(schema.groups)
+    .where(eq(schema.groups.slug, PASS4_APPROVAL_GROUP_SLUG))
+    .limit(1)
+  if (!existingApprovalGroup) {
+    const [g] = await db
+      .insert(schema.groups)
+      .values({
+        slug: PASS4_APPROVAL_GROUP_SLUG,
+        name: 'Pass4 Approval Test Group',
+        visibility: 'private',
+        category: 'Discussion',
+        tags: ['pass4', 'test', 'private'],
+        description: 'Approval-required alpha test group for access/privacy checks.',
+        ownerId: ropeId,
+        organizationId: orgId ?? null,
+      })
+      .returning()
+    if (g) {
+      await db.insert(schema.groupMembers).values({ groupId: g.id, userId: ropeId, role: 'owner' })
+      console.log('Seeded Pass4 Approval Test Group.')
+    }
+  }
+
+  const pass4EventBase = {
+    hostId: ropeId,
+    eventFormat: 'in-person' as const,
+    category: 'Social',
+    tags: ['pass4', 'test'],
+  }
+
+  const [publicEv] = await db
+    .select()
+    .from(schema.events)
+    .where(eq(schema.events.title, PASS4_PUBLIC_EVENT_TITLE))
+    .limit(1)
+  if (!publicEv) {
+    const start = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+    await db.insert(schema.events).values({
+      ...pass4EventBase,
+      title: PASS4_PUBLIC_EVENT_TITLE,
+      description: 'Public alpha test event for Pass 4 global discovery checks.',
+      location: 'Demo City, PA',
+      startsAt: start,
+      endsAt: new Date(start.getTime() + 2 * 60 * 60 * 1000),
+      visibility: 'public',
+      category: 'Munch',
+      rsvpCount: 3,
+    })
+    console.log(`Seeded ${PASS4_PUBLIC_EVENT_TITLE}.`)
+  }
+
+  const [privateEv] = await db
+    .select()
+    .from(schema.events)
+    .where(eq(schema.events.title, PASS4_PRIVATE_EVENT_TITLE))
+    .limit(1)
+  if (!privateEv) {
+    const start = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000)
+    await db.insert(schema.events).values({
+      ...pass4EventBase,
+      title: PASS4_PRIVATE_EVENT_TITLE,
+      description: 'Private alpha test event — strangers must not load detail by UUID (Pass 2A.2).',
+      location: 'Private venue (demo only)',
+      startsAt: start,
+      endsAt: new Date(start.getTime() + 2 * 60 * 60 * 1000),
+      visibility: 'private',
+      rsvpCount: 0,
+    })
+    console.log(`Seeded ${PASS4_PRIVATE_EVENT_TITLE}.`)
+  }
+
+  if (pass4GroupId) {
+    const [groupPrivateEv] = await db
+      .select()
+      .from(schema.events)
+      .where(eq(schema.events.title, PASS4_GROUP_PRIVATE_EVENT_TITLE))
+      .limit(1)
+    if (!groupPrivateEv) {
+      const start = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000)
+      await db.insert(schema.events).values({
+        ...pass4EventBase,
+        title: PASS4_GROUP_PRIVATE_EVENT_TITLE,
+        description: 'Group-scoped private alpha test event for group access checks.',
+        location: 'Group space (demo only)',
+        startsAt: start,
+        endsAt: new Date(start.getTime() + 2 * 60 * 60 * 1000),
+        visibility: 'private',
+        groupId: pass4GroupId,
+        rsvpCount: 0,
+      })
+      console.log(`Seeded ${PASS4_GROUP_PRIVATE_EVENT_TITLE}.`)
+    }
+  }
+
+  if (orgId) {
+    const [orgPrivateEv] = await db
+      .select()
+      .from(schema.events)
+      .where(eq(schema.events.title, PASS4_ORG_PRIVATE_EVENT_TITLE))
+      .limit(1)
+    if (!orgPrivateEv) {
+      const start = new Date(Date.now() + 35 * 24 * 60 * 60 * 1000)
+      await db.insert(schema.events).values({
+        ...pass4EventBase,
+        title: PASS4_ORG_PRIVATE_EVENT_TITLE,
+        description: 'Org-scoped private alpha test event for org access checks.',
+        location: 'Org venue (demo only)',
+        startsAt: start,
+        endsAt: new Date(start.getTime() + 2 * 60 * 60 * 1000),
+        visibility: 'private',
+        organizationId: orgId,
+        rsvpCount: 0,
+      })
+      console.log(`Seeded ${PASS4_ORG_PRIVATE_EVENT_TITLE}.`)
+    }
+  }
+}
+
 export async function runFullSeed() {
   await seedKinkTags()
   const brax = await ensureBraxSiteAdmin()
   const rope = await getOrCreateDemoUser()
   await getOrCreateOnboardingFreshUser()
+  await ensurePass4TestFixtures({ ropeId: rope.id, braxId: brax.id })
   await seedDemoPresenterCatalog(rope.id)
   await seedDemoVendors(rope.id)
   await ensureVendorCategoryTagsBackfill()
@@ -4534,4 +4726,6 @@ export async function runFullSeed() {
       ])
     }
   }
+
+  await ensurePass4TestFixtures({ ropeId: rope.id, braxId: brax.id, orgId: orgRow?.id ?? null })
 }

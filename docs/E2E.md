@@ -63,11 +63,15 @@ For a full run: start Docker (`docker compose -f docker-compose.dev.yml up -d`),
 
 **Seeded slugs** (from `db:seed`, overridable via env):
 
-| Slug | Default | Used for |
-|------|---------|----------|
+| Slug / title | Default | Used for |
+|--------------|---------|----------|
 | Org | `demo-east-collective` | Org hub, organizer console, calendar Program badge |
 | Preview convention | `preview-c2k-weekend` | Door, registration, dancecard, organizer convention tabs |
 | Program convention | `seed-demo-con-program` | Anchored schedule slots, unified calendar smokes |
+| Pass 4 public group | `pass4-public-test-group` | Pass 4 groups directory cards (`ui-directories.spec.ts`) |
+| Pass 4 private event | **Pass4 Private Event** (RopeDreamer host) | Pass 4 event privacy API (`ui-privacy-api.spec.ts`) |
+
+**`db:prepare`:** Requires Docker Postgres (`127.0.0.1:6432`). Runs `db:push`, incremental migration (including `convention_trusted_roles.apply_opens_at`), full seed, and preview attendee parity. See [`UI_TESTING_CONTRACT.md`](./UI_TESTING_CONTRACT.md) for Pass 4 fixture ↔ test mapping and skip troubleshooting.
 
 Many tests **skip** when Postgres is off, demo login fails, or optional seeds/Mailpit are unavailable.
 

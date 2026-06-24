@@ -44,7 +44,7 @@ export default defineConfig({
 
   projects: [
 
-    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
+    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }, testIgnore: /\.mobile\.spec\.ts$/ },
 
     {
 
@@ -52,7 +52,7 @@ export default defineConfig({
 
       use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 } },
 
-      testMatch: /route-smoke\.mobile|door\.spec/,
+      testMatch: /route-smoke\.mobile|door\.spec|\.mobile\.spec/,
 
     },
 

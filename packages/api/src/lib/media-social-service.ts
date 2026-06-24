@@ -25,6 +25,7 @@ import {
   type SubmitMediaAttestationInput,
 } from './media-asset-service.js'
 import { getMediaAssetForViewer, loadViewerAdultContentPref } from './media-asset-viewer.js'
+import { deliverBlurPreviewUrl, deliverFeedImageUrl } from './image-delivery.js'
 import { mediaContentProxyPath } from './media-pipeline.js'
 import { autoPublishProfileGalleryPhoto } from './profile-photo-policy.js'
 import { emitActivity } from './feed-activities.js'
@@ -156,6 +157,10 @@ export async function shapeMediaItemPreview(
     .from(schema.mediaItemTags)
     .where(eq(schema.mediaItemTags.mediaItemId, item.id))
 
+  const clearPreview = viewed?.blurred ? null : deliverFeedImageUrl(previewUrl)
+  const blurredPreview =
+    viewed?.blurred ? deliverBlurPreviewUrl(previewUrl ?? mediaContentProxyPath(asset.id)) : null
+
   return {
     id: item.id,
     mediaKind: item.mediaKind as MediaKind,
@@ -163,8 +168,8 @@ export async function shapeMediaItemPreview(
     visibility: item.visibility,
     commentPolicy: item.commentPolicy,
     pinnedToProfile: item.pinnedToProfile,
-    previewUrl: viewed?.blurred ? null : previewUrl,
-    blurredPreviewUrl: viewed?.blurred ? previewUrl : null,
+    previewUrl: clearPreview,
+    blurredPreviewUrl: blurredPreview,
     isBlurredByDefault: viewed?.blurred ?? item.isBlurredByDefault,
     contentRating: item.contentRating ?? asset.contentRating,
     width: asset.imageWidth ?? asset.videoWidth,

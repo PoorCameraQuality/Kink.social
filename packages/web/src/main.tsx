@@ -3,12 +3,22 @@ import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
 import { RouterProvider } from 'react-router-dom'
 import RootErrorBoundary from '@/components/RootErrorBoundary'
+import { initErrorTracking, captureClientException } from '@/lib/error-tracking'
 import { clearStaleLocalServiceWorkers } from '@/dev-sw-cleanup'
 import { disableBrowserScrollRestoration } from '@/lib/scroll-app-to-top'
 import { router } from './router'
 import './app/globals.css'
 
 async function bootstrap() {
+  initErrorTracking()
+
+  window.addEventListener('error', (event) => {
+    captureClientException(event.error ?? new Error(event.message))
+  })
+  window.addEventListener('unhandledrejection', (event) => {
+    captureClientException(event.reason)
+  })
+
   disableBrowserScrollRestoration()
   await clearStaleLocalServiceWorkers()
 

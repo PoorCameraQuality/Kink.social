@@ -1,4 +1,5 @@
 import './load-dev-env.js'
+import { initErrorTracking, setupFastifyErrorTracking } from './lib/error-tracking.js'
 import {
   assertAuthFallbackSafeForStartup,
   assertMediaScannerSafeForStartup,
@@ -93,6 +94,8 @@ import { getViewerUserId } from './auth/viewer-user-id.js'
 import { loadUserSessionVersion, sessionVersionMatches } from './auth/session-version.js'
 import { isUserIdentityBanned } from './lib/peer-reputation.js'
 
+initErrorTracking()
+
 assertProductionSecretsForStartup()
 assertAuthFallbackSafeForStartup()
 assertMediaScannerSafeForStartup()
@@ -108,6 +111,8 @@ const app = Fastify({
   },
   trustProxy: process.env.C2K_TRUST_PROXY !== 'false',
 })
+
+setupFastifyErrorTracking(app)
 
 const origin =
   process.env.CORS_ORIGIN?.split(',').map((s) => s.trim()) ?? ['http://localhost:5173', 'http://127.0.0.1:5173']
@@ -297,6 +302,10 @@ const host = process.env.HOST ?? '127.0.0.1'
 
 try {
   await app.listen({ port, host })
+  const { imgproxyStartupDiagnostic } = await import('./lib/imgproxy.js')
+  const imgproxy = imgproxyStartupDiagnostic()
+  if (imgproxy.warning) app.log.warn({ imgproxy }, imgproxy.warning)
+  else if (imgproxy.operational) app.log.info({ imgproxy: { enabled: true } }, 'imgproxy image delivery enabled')
   await initRealtimeRedisBridge(app.log)
 } catch (err) {
   app.log.error(err)

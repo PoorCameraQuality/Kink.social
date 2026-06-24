@@ -34,6 +34,7 @@ import {
   PersonalPhotoQuotaError,
 } from '../lib/personal-photo-quota.js'
 import { mediaContentProxyPath, resolveMediaClientUrl } from '../lib/media-pipeline.js'
+import { deliverProfileHeroUrl } from '../lib/image-delivery.js'
 import { isBrowserReachablePublicUrl } from '../lib/s3-upload.js'
 
 import type { MediaAsset } from '../db/schema.js'
@@ -106,12 +107,13 @@ function mapPhotoRow(
 ): ProfilePhotoDto {
 
   const mediaDto = mediaAssetToPhotoDto(media)
+  const rawUrl = resolveProfilePhotoUrl(r, media)
 
   return {
 
     id: r.id,
 
-    url: resolveProfilePhotoUrl(r, media),
+    url: deliverProfileHeroUrl(rawUrl) ?? rawUrl,
 
     caption: r.caption,
 

@@ -1,3 +1,4 @@
+import { captureClientException } from '@/lib/error-tracking'
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 
 type Props = { children: ReactNode }
@@ -19,6 +20,7 @@ export default class RootErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[RootErrorBoundary]', error, info.componentStack)
+    captureClientException(error, { componentStack: info.componentStack })
   }
 
   render() {

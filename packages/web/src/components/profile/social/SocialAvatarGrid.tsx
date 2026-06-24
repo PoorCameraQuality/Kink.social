@@ -21,7 +21,7 @@ export default function SocialAvatarGrid({ people, columns = 5 }: Props) {
             <Link
               to={`/profile/${encodeURIComponent(person.username)}`}
               className="block aspect-square overflow-hidden rounded-lg ring-1 ring-dc-border/80 transition hover:ring-dc-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
-              title={label}
+              aria-label={label}
             >
               {person.avatarUrl ?
                 <img

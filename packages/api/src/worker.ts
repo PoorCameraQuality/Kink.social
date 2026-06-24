@@ -2,6 +2,7 @@
  * BullMQ worker - `c2k-moderation` + `c2k-external-sync` (Etsy / Shopify / Woo).
  */
 import './load-dev-env.js'
+import { initErrorTracking, reportWorkerJobFailure } from './lib/error-tracking.js'
 import { assertAuthFallbackSafeForStartup, assertProductionSecretsForStartup } from './lib/production-guard.js'
 import { assertFieldEncryptionConfigured } from './lib/field-encryption.js'
 import { assertMailConfiguredForPasswordReset } from './lib/mail-config.js'
@@ -26,6 +27,10 @@ import { sendParticipationOfferEmail } from './lib/convention-participation-offe
 import { CONVENTION_PEOPLE_SYNC_QUEUE_NAME } from './lib/convention-people-sync-queue.js'
 import { syncConventionPeopleDirectory } from './lib/convention-people-sync.js'
 import {
+  SEARCH_SYNC_QUEUE_NAME,
+  processSearchSyncJob,
+} from './lib/search/search-sync-queue.js'
+import {
   FEED_ACTIVITIES_QUEUE_NAME,
 } from './lib/feed-activities-queue.js'
 import { insertFeedActivity, type EmitActivityParams } from './lib/feed-activities.js'
@@ -36,11 +41,16 @@ import {
 import type { EckePublishJobName } from './lib/ecke-publish-executor.js'
 import { MEDIA_RSS_QUEUE_NAME, getMediaRssQueue } from './lib/media-rss-queue.js'
 import { syncAllMediaShowFeeds, syncMediaShowRss } from './lib/media-rss-sync.js'
+import { startWorkerHeartbeat, stopWorkerHeartbeat } from './lib/worker-heartbeat.js'
+
+initErrorTracking()
 
 assertProductionSecretsForStartup()
 assertAuthFallbackSafeForStartup()
 assertFieldEncryptionConfigured()
 assertMailConfiguredForPasswordReset(console)
+
+startWorkerHeartbeat()
 
 const redisUrl = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
@@ -110,11 +120,11 @@ const externalSyncWorker = new Worker(
 )
 
 moderationWorker.on('failed', (job, err) => {
-  console.error('[worker] moderation job failed', job?.id, err)
+  reportWorkerJobFailure(MODERATION_QUEUE_NAME, job?.id, err)
 })
 
 externalSyncWorker.on('failed', (job, err) => {
-  console.error('[worker] external sync job failed', job?.id, err)
+  reportWorkerJobFailure(EXTERNAL_SYNC_QUEUE_NAME, job?.id, err)
 })
 
 const lifecycleWorker = new Worker(
@@ -191,7 +201,7 @@ const lifecycleWorker = new Worker(
 )
 
 lifecycleWorker.on('failed', (job, err) => {
-  console.error('[worker] lifecycle job failed', job?.id, err)
+  reportWorkerJobFailure(LIFECYCLE_QUEUE_NAME, job?.id, err)
 })
 
 const peopleSyncWorker = new Worker(
@@ -211,7 +221,21 @@ const peopleSyncWorker = new Worker(
 )
 
 peopleSyncWorker.on('failed', (job, err) => {
-  console.error('[worker] people-sync job failed', job?.id, err)
+  reportWorkerJobFailure(CONVENTION_PEOPLE_SYNC_QUEUE_NAME, job?.id, err)
+})
+
+const searchSyncWorker = new Worker(
+  SEARCH_SYNC_QUEUE_NAME,
+  async (job) => {
+    if (process.env.USE_DATABASE !== 'true') return
+    await processSearchSyncJob(job.name, job.data as Record<string, string | undefined>)
+    console.log('[worker] search sync ok', job.name, job.id)
+  },
+  { connection: { url: redisUrl } },
+)
+
+searchSyncWorker.on('failed', (job, err) => {
+  reportWorkerJobFailure(SEARCH_SYNC_QUEUE_NAME, job?.id, err)
 })
 
 const participationOfferWorker = new Worker(
@@ -231,7 +255,7 @@ const participationOfferWorker = new Worker(
 )
 
 participationOfferWorker.on('failed', (job, err) => {
-  console.error('[worker] participation-offer job failed', job?.id, err)
+  reportWorkerJobFailure(CONVENTION_PARTICIPATION_OFFER_QUEUE_NAME, job?.id, err)
 })
 
 const feedActivitiesWorker = new Worker(
@@ -251,7 +275,7 @@ const feedActivitiesWorker = new Worker(
 )
 
 feedActivitiesWorker.on('failed', (job, err) => {
-  console.error('[worker] feed-activities job failed', job?.id, err)
+  reportWorkerJobFailure(FEED_ACTIVITIES_QUEUE_NAME, job?.id, err)
 })
 
 const eckePublishWorker = new Worker(
@@ -265,11 +289,11 @@ const eckePublishWorker = new Worker(
 )
 
 eckePublishWorker.on('failed', (job, err) => {
-  console.error('[worker] ecke-publish job failed', job?.id, err)
+  reportWorkerJobFailure(ECKE_PUBLISH_QUEUE_NAME, job?.id, err)
 })
 
 console.log(
-  `[worker] listening on queues ${MODERATION_QUEUE_NAME}, ${EXTERNAL_SYNC_QUEUE_NAME}, ${LIFECYCLE_QUEUE_NAME}, ${CONVENTION_PEOPLE_SYNC_QUEUE_NAME}, ${CONVENTION_PARTICIPATION_OFFER_QUEUE_NAME}, ${FEED_ACTIVITIES_QUEUE_NAME}, ${ECKE_PUBLISH_QUEUE_NAME}`,
+  `[worker] listening on queues ${MODERATION_QUEUE_NAME}, ${EXTERNAL_SYNC_QUEUE_NAME}, ${LIFECYCLE_QUEUE_NAME}, ${CONVENTION_PEOPLE_SYNC_QUEUE_NAME}, ${SEARCH_SYNC_QUEUE_NAME}, ${CONVENTION_PARTICIPATION_OFFER_QUEUE_NAME}, ${FEED_ACTIVITIES_QUEUE_NAME}, ${ECKE_PUBLISH_QUEUE_NAME}`,
 )
 
 async function scheduleExternalRepeat(): Promise<void> {
@@ -530,7 +554,7 @@ const mediaRssWorker = new Worker(
 )
 
 mediaRssWorker.on('failed', (job, err) => {
-  console.error('[worker] media-rss job failed', job?.id, err)
+  reportWorkerJobFailure(MEDIA_RSS_QUEUE_NAME, job?.id, err)
 })
 
 async function scheduleMediaRssRepeat(): Promise<void> {
@@ -550,11 +574,17 @@ async function scheduleMediaRssRepeat(): Promise<void> {
 void scheduleMediaRssRepeat()
 
 async function shutdown() {
+  await stopWorkerHeartbeat()
   await Promise.all([
     moderationWorker.close(),
     externalSyncWorker.close(),
     lifecycleWorker.close(),
     mediaRssWorker.close(),
+    peopleSyncWorker.close(),
+    searchSyncWorker.close(),
+    participationOfferWorker.close(),
+    feedActivitiesWorker.close(),
+    eckePublishWorker.close(),
   ])
   process.exit(0)
 }

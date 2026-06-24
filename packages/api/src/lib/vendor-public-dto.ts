@@ -7,6 +7,7 @@ import {
 } from '@c2k/shared'
 
 import type { vendorProfiles } from '../db/schema.js'
+import { deliverBrandingBannerUrl, deliverBrandingLogoUrl } from './image-delivery.js'
 
 type VendorProfileRow = typeof vendorProfiles.$inferSelect
 type VendorProfileInsert = typeof vendorProfiles.$inferInsert
@@ -103,8 +104,8 @@ export function toPublicVendorListItem(row: VendorProfileRow): PublicVendorListI
     slug: row.slug,
     displayName: row.displayName,
     bio: row.bio,
-    logoUrl: row.logoUrl,
-    bannerUrl: row.bannerUrl,
+    logoUrl: deliverBrandingLogoUrl(row.logoUrl),
+    bannerUrl: deliverBrandingBannerUrl(row.bannerUrl),
     category,
     tags,
     categories,

@@ -39,9 +39,7 @@ function joinLabels(values: string[] | undefined): string | null {
 }
 
 /**
- * Unified responsive profile hero — cover banner, overlapping circular avatar,
- * compact identity line, role pills, and primary actions. Replaces the old
- * desktop cover header / mobile hero card split with one photo-forward header.
+ * Unified responsive profile hero — photo-forward top third, identity + actions below.
  */
 export default function ProfileHero({
   displayName,
@@ -69,17 +67,9 @@ export default function ProfileHero({
   const primaryMeta = [ageLabel, genderLabel, pronouns].filter(Boolean).join(' · ')
   const hasSecondaryMeta = Boolean(orientationLabel) || showLocation
 
-  const avatarFrameClass =
-    'h-24 w-24 overflow-hidden rounded-full bg-dc-surface-muted ring-4 ring-dc-elevated-solid shadow-[0_14px_36px_-14px_rgba(0,0,0,0.7)] sm:h-28 sm:w-28 lg:h-32 lg:w-32'
-
-  const avatarInner =
-    photoUrl ?
-      <ProfilePhotoImage src={photoUrl} displaySettings={photoDisplaySettings} className="h-full w-full" />
-    : <PlaceholderAvatar size="lg" className="h-full w-full !rounded-full" />
-
   const canManagePhotos = Boolean(managePhotosHref)
   const canOpenGallery = Boolean(onOpenGallery) && !canManagePhotos
-  const avatarLabel =
+  const photoLabel =
     canManagePhotos ?
       photoCount > 0 ?
         `Manage profile photos, ${photoCount} ${photoCount === 1 ? 'photo' : 'photos'}`
@@ -88,97 +78,102 @@ export default function ProfileHero({
       `Open photo gallery, ${photoCount} ${photoCount === 1 ? 'photo' : 'photos'}`
     : 'Add profile photos'
 
-  const avatarFrame = (
-    <span className={cn(avatarFrameClass, 'block transition-transform group-hover:scale-[1.02] group-active:scale-[0.99]')}>
-      {avatarInner}
-    </span>
+  const photoMedia = (
+    <div
+      className={cn(
+        'c2k-profile-hero relative h-full min-h-[7.5rem] w-full overflow-hidden',
+        'bg-gradient-to-br from-dc-surface-muted to-dc-elevated-solid',
+        'shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),inset_0_-24px_32px_-12px_rgba(0,0,0,0.35)]',
+      )}
+    >
+      {photoUrl ?
+        <ProfilePhotoImage
+          src={photoUrl}
+          displaySettings={photoDisplaySettings}
+          className="absolute inset-0 h-full w-full object-cover object-[center_22%] transition-transform duration-300 group-hover/profile-photo:scale-[1.02]"
+        />
+      : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <PlaceholderAvatar size="xl" className="!h-20 !w-20 !rounded-2xl sm:!h-24 sm:!w-24" />
+        </div>
+      )}
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-dc-elevated-solid from-[12%] via-dc-elevated-solid/72 via-[42%] to-transparent to-[92%]"
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/20" aria-hidden />
+    </div>
   )
 
-  const avatar =
+  const photoBand =
     canManagePhotos ?
       <Link
         to={managePhotosHref!}
-        aria-label={avatarLabel}
-        className="group block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface"
+        aria-label={photoLabel}
+        className="group/profile-photo block min-h-[7.5rem] flex-[1] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dc-accent"
       >
-        {avatarFrame}
+        {photoMedia}
       </Link>
     : canOpenGallery ?
       <button
         type="button"
         onClick={onOpenGallery}
-        aria-label={avatarLabel}
-        className="group block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface"
+        aria-label={photoLabel}
+        className="group/profile-photo block min-h-[7.5rem] w-full flex-[1] text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dc-accent"
       >
-        {avatarFrame}
+        {photoMedia}
       </button>
-    : <span className={cn(avatarFrameClass, 'block')}>{avatarInner}</span>
+    : (
+      <div className="min-h-[7.5rem] flex-[1]">{photoMedia}</div>
+    )
 
   return (
     <header
       className={cn(
-        'overflow-hidden ring-1 ring-inset ring-white/[0.05]',
+        'flex min-h-[18rem] flex-col overflow-hidden ring-1 ring-inset ring-white/[0.05]',
         cardSurfaceElevatedClass,
         className,
       )}
     >
-      <div
-        className="c2k-profile-hero pointer-events-none relative h-24 w-full sm:h-28 lg:h-32"
-        aria-hidden
-      >
-        {photoUrl ?
-          <ProfilePhotoImage
-            src={photoUrl}
-            displaySettings={photoDisplaySettings}
-            className="absolute inset-0 h-full w-full scale-110 opacity-40 blur-2xl"
-          />
-        : null}
-        <div className="absolute inset-0 bg-gradient-to-t from-dc-elevated/95 via-dc-elevated/30 to-transparent" />
-      </div>
+      {photoBand}
 
-      <div className="relative z-10 px-5 pb-6 sm:px-6 lg:px-8">
-        <div className="-mt-12 flex flex-col gap-4 sm:-mt-14 lg:-mt-16 lg:flex-row lg:items-end lg:gap-6">
-          <div className="shrink-0">{avatar}</div>
-
-          <div className="min-w-0 flex-1 lg:pb-1">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-              <div className="min-w-0">
-                <h1 className="break-words font-display text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">
-                  {displayName}
-                </h1>
-                {displayName !== username ?
-                  <p className="mt-0.5 text-sm text-dc-muted">@{username}</p>
+      <div className="relative z-10 flex flex-[2] flex-col px-5 pb-6 pt-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+          <div className="min-w-0">
+            <h1 className="break-words font-display text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">
+              {displayName}
+            </h1>
+            {displayName !== username ?
+              <p className="mt-0.5 text-sm text-dc-muted">@{username}</p>
+            : null}
+            {primaryMeta ?
+              <p className="mt-1.5 text-[15px] font-medium text-dc-text-muted">{primaryMeta}</p>
+            : null}
+            {hasSecondaryMeta ?
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-dc-text-muted">
+                {orientationLabel ? <span>{orientationLabel}</span> : null}
+                {showLocation ?
+                  <span className="inline-flex items-center gap-1.5">
+                    <IconMapPin className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                    {location}
+                  </span>
                 : null}
-                {primaryMeta ?
-                  <p className="mt-1.5 text-[15px] font-medium text-dc-text-muted">{primaryMeta}</p>
-                : null}
-                {hasSecondaryMeta ?
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-dc-text-muted">
-                    {orientationLabel ? <span>{orientationLabel}</span> : null}
-                    {showLocation ?
-                      <span className="inline-flex items-center gap-1.5">
-                        <IconMapPin className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                        {location}
-                      </span>
-                    : null}
-                  </div>
-                : null}
-              </div>
-
-              <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">{actions}</div>
-            </div>
-
-            {roles.length > 0 ?
-              <div className="mt-4 flex flex-wrap gap-2">
-                {roles.map((role) => (
-                  <ProfilePill key={role} className="px-3 py-1 text-xs">
-                    {role}
-                  </ProfilePill>
-                ))}
               </div>
             : null}
           </div>
+
+          <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">{actions}</div>
         </div>
+
+        {roles.length > 0 ?
+          <div className="mt-4 flex flex-wrap gap-2">
+            {roles.map((role) => (
+              <ProfilePill key={role} className="px-3 py-1 text-xs">
+                {role}
+              </ProfilePill>
+            ))}
+          </div>
+        : null}
 
         <ProfilePhotoCredit caption={photoCaption} className="mt-3" />
       </div>

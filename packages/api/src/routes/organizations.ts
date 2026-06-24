@@ -2,6 +2,7 @@ import { and, asc, count, desc, eq, ilike, inArray, isNotNull, isNull, lt, or, s
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import { zHttpOrRootMediaUrl, zHttpOrRootMediaUrlNullable } from '../lib/media-url.js'
+import { deliverBrandingBannerUrl, deliverBrandingLogoUrl } from '../lib/image-delivery.js'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { db, schema } from '../db/index.js'
@@ -161,9 +162,9 @@ function mapOrgRow(row: typeof schema.organizations.$inferSelect) {
     bioFormat: row.bioFormat === 'html' ? 'html' : 'text',
     galleryPublic: row.galleryPublic,
     ownerId: row.ownerId,
-    logoUrl: row.logoUrl,
-    bannerUrl: row.bannerUrl,
-    shareImageUrl: row.shareImageUrl,
+    logoUrl: deliverBrandingLogoUrl(row.logoUrl),
+    bannerUrl: deliverBrandingBannerUrl(row.bannerUrl),
+    shareImageUrl: deliverBrandingBannerUrl(row.shareImageUrl),
     visibility: row.visibility,
     theme: row.theme,
     community: row.community,

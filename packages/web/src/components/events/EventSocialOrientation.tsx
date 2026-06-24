@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import ContentSection from '@/components/ui/ContentSection'
 
 export type EventTimingStatus = 'upcoming' | 'past' | 'rsvp_closed' | 'at_capacity'
 
@@ -41,8 +42,10 @@ export default function EventSocialOrientation({
   const hostLabel = hostName?.trim() || hostUsername || 'Community host'
 
   return (
-    <section
-      className="mb-6 hidden rounded-2xl border border-dc-border bg-dc-elevated/50 p-4 sm:p-5 shadow-[var(--dc-shadow-soft)] lg:block"
+    <ContentSection
+      as="section"
+      padding="none"
+      className="mb-6 hidden p-4 sm:p-5 lg:block"
       aria-label="About this event"
     >
       <p className="text-xs font-semibold uppercase tracking-wide text-dc-muted">Event hub</p>
@@ -106,6 +109,6 @@ export default function EventSocialOrientation({
           View attendees
         </button>
       </div>
-    </section>
+    </ContentSection>
   )
 }

@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, inArray, lt, or, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
@@ -22,6 +22,8 @@ import { viewerCanReadEducationArticle } from '../lib/education-article-visibili
 import { estimateReadingMinutes, sanitizeEducationHtml } from '../lib/sanitize-education-body.js'
 import { maybeEnqueueEckeArticlePublish } from './ecke-publish-entity-routes.js'
 import { loadSeriesContextForArticle } from '../lib/education-series-context.js'
+import { listEducationArticlesForHub } from '../lib/search/education/education-query.js'
+import { enqueueSearchSyncJob } from '../lib/search/search-sync-queue.js'
 
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
@@ -169,41 +171,17 @@ export async function registerEducationArticleRoutes(app: FastifyInstance) {
     const viewerId = getViewerUserId(resolveViewerFromRequest(req).payload)
     const q = req.query as { category?: string; difficulty?: string; q?: string; limit?: string; cursor?: string }
     const limit = Math.min(50, Math.max(1, parseInt(String(q.limit ?? '24'), 10) || 24))
-    const conditions = [
-      eq(schema.educationArticles.listInEducation, true),
-      eq(schema.educationArticles.publicationStatus, 'PUBLISHED'),
-    ]
-    if (q.category?.trim()) {
-      conditions.push(sql`${q.category.trim()} = ANY(${schema.educationArticles.categories})`)
-    }
-    if (q.difficulty?.trim()) {
-      conditions.push(eq(schema.educationArticles.difficulty, q.difficulty.trim()))
-    }
-    if (q.q?.trim()) {
-      const pattern = `%${q.q.trim()}%`
-      conditions.push(or(ilike(schema.educationArticles.title, pattern), ilike(schema.educationArticles.excerpt, pattern))!)
-    }
-    if (q.cursor) {
-      const d = new Date(q.cursor)
-      if (!Number.isNaN(d.getTime())) {
-        conditions.push(lt(schema.educationArticles.publishedAt, d))
-      }
-    }
-    const rows = await db
-      .select()
-      .from(schema.educationArticles)
-      .where(and(...conditions))
-      .orderBy(desc(schema.educationArticles.publishedAt))
-      .limit(limit + 1)
+    const { rows, nextCursor } = await listEducationArticlesForHub({
+      category: q.category,
+      difficulty: q.difficulty,
+      q: q.q,
+      limit,
+      cursor: q.cursor,
+    })
     const visible = await filterVisibleArticles(rows, viewerId)
-    const page = visible.slice(0, limit)
     const items = await Promise.all(
-      page.map(async (row) => shapeArticleRow(row, await loadAuthor(row.authorUserId))),
+      visible.map(async (row) => shapeArticleRow(row, await loadAuthor(row.authorUserId))),
     )
-    const nextCursor =
-      visible.length > limit && page[page.length - 1]?.publishedAt
-        ? page[page.length - 1]!.publishedAt!.toISOString()
-        : null
     return reply.send({ items, nextCursor })
   })
 
@@ -335,6 +313,7 @@ export async function registerEducationArticleRoutes(app: FastifyInstance) {
     if (!row) return reply.status(500).send({ error: 'Insert failed' })
     const author = await loadAuthor(user.userId)
     await maybeEnqueueEckeArticlePublish(row, user.userId)
+    await enqueueSearchSyncJob('upsert-education-article', { articleId: row.id })
     return reply.send({ article: shapeArticleRow(row, author) })
   })
 
@@ -404,6 +383,7 @@ export async function registerEducationArticleRoutes(app: FastifyInstance) {
     if (!row) return reply.status(500).send({ error: 'Update failed' })
     const author = await loadAuthor(user.userId)
     await maybeEnqueueEckeArticlePublish(row, user.userId)
+    await enqueueSearchSyncJob('upsert-education-article', { articleId: row.id })
     return reply.send({ article: shapeArticleRow(row, author) })
   })
 
@@ -461,6 +441,7 @@ export async function registerEducationArticleRoutes(app: FastifyInstance) {
       .update(schema.educationArticles)
       .set({ publicationStatus: 'ARCHIVED', updatedAt: new Date() })
       .where(eq(schema.educationArticles.id, id))
+    await enqueueSearchSyncJob('delete-education-article', { articleId: id })
     return reply.send({ ok: true })
   })
 

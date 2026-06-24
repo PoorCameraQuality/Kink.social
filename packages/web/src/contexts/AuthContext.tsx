@@ -113,6 +113,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+/** Fixed session for Storybook — no `/api/auth/session` fetch. */
+export function FixedAuthProvider({
+  children,
+  value,
+}: {
+  children: ReactNode
+  value: AuthContextValue
+}) {
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export function defaultStoryAuthValue(overrides?: Partial<AuthContextValue>): AuthContextValue {
+  return {
+    status: 'ready',
+    viewerUsername: 'RopeDreamer',
+    isAuthenticated: true,
+    viewerUserId: '00000000-0000-4000-8000-000000000001',
+    isFallback: false,
+    viewerDisplayName: 'Rope Dreamer',
+    viewerEmail: 'demo@storybook.local',
+    refresh: async () => {},
+    logout: async () => {},
+    ...overrides,
+  }
+}
+
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')

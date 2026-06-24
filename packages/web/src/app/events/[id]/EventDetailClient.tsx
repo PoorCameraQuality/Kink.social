@@ -14,6 +14,7 @@ import { buildLoginHref } from '@/lib/auth-links'
 import MobileActionBar from '@/components/shell/MobileActionBar'
 import TabButton from '@/components/ui/TabButton'
 import CopyLinkOverflowMenu from '@/components/ui/CopyLinkOverflowMenu'
+import ContentSection from '@/components/ui/ContentSection'
 import ReportAction from '@/components/moderation/ReportAction'
 import PlaceholderAvatar from '@/components/PlaceholderAvatar'
 import { getMockEventById, getMockGroupById, mockPeople, mockVendors } from '@/data/mock-data'
@@ -26,6 +27,8 @@ import { isSocialStyleEventCategory, RSVP_LABEL_INTERESTED } from '@c2k/shared'
 import { useTabFromUrl } from '@/hooks/useTabFromUrl'
 import { useAuth } from '@/contexts/AuthContext'
 import { eventTarget } from '@/lib/moderation/report-targets'
+import { cardSurfaceBaseClass } from '@/lib/card-surface'
+import { cn } from '@/lib/cn'
 
 type AttendeesPayload = {
   goingCount: number
@@ -901,7 +904,7 @@ export default function EventDetailClient() {
                       targetId={target.targetId}
                       targetLabel="event"
                       surface="event_detail"
-                      className="rounded-xl border border-dc-border bg-dc-elevated/95 px-3 py-2 text-sm text-dc-muted hover:text-dc-accent min-h-10"
+                      className={cn(cardSurfaceBaseClass, 'rounded-xl px-3 py-2 text-sm text-dc-muted hover:text-dc-accent min-h-10')}
                     />
                   )
                 })()
@@ -910,12 +913,12 @@ export default function EventDetailClient() {
                 <EventSaveButton
                   eventId={id}
                   showLabel
-                  className="rounded-xl border border-dc-border bg-dc-elevated/95 text-dc-text"
+                  className={cn(cardSurfaceBaseClass, 'rounded-xl text-dc-text')}
                 />
               : null}
             </div>
             {viewerIsHost && hostEditDraft && UUID_PARAM_RE.test(id) && apiMode === 'ready' ?
-              <details className="rounded-2xl border border-dc-border bg-dc-elevated/95 p-4 mt-4">
+              <details className={cn(cardSurfaceBaseClass, 'p-4 mt-4')}>
                 <summary className="cursor-pointer text-sm font-medium text-dc-accent">
                   Edit event (host)
                 </summary>
@@ -1169,7 +1172,7 @@ export default function EventDetailClient() {
 
           <div className="mt-6">
             {activeTab === 'Overview' && (
-              <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-6 shadow-[var(--dc-shadow-soft)] space-y-6">
+              <ContentSection className="space-y-6">
                 {isConventionSurface && apiEvent?.conventionSlug && (
                   <div className="rounded-xl border border-dc-accent-border/30 bg-dc-accent/10 p-4 space-y-2">
                     <h3 className="text-sm font-semibold text-dc-accent uppercase">Convention</h3>
@@ -1519,7 +1522,7 @@ export default function EventDetailClient() {
                     <button
                       type="button"
                       onClick={() => void submitEventReview()}
-                      className="min-h-11 px-4 py-2 rounded-xl text-sm font-medium bg-dc-elevated/95 border border-dc-border text-dc-text hover:border-dc-accent-border/40"
+                      className={cn(cardSurfaceBaseClass, 'min-h-11 px-4 py-2 rounded-xl text-sm font-medium text-dc-text hover:border-dc-accent-border/40')}
                     >
                       Submit review
                     </button>
@@ -1548,11 +1551,11 @@ export default function EventDetailClient() {
                     : null}
                   </div>
                 )}
-              </div>
+              </ContentSection>
             )}
 
             {activeTab === 'Attendees' && (
-              <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-6 shadow-[var(--dc-shadow-soft)]">
+              <ContentSection>
                 {isApiEventRoute && apiMode === 'ready' && attendeesPayload ?
                   <>
                     <p className="text-sm text-dc-muted mb-4">
@@ -1612,11 +1615,11 @@ export default function EventDetailClient() {
                     </ul>
                   </>
                 )}
-              </div>
+              </ContentSection>
             )}
 
             {activeTab === 'Vendors' && (
-              <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-6 shadow-[var(--dc-shadow-soft)]">
+              <ContentSection>
                 {isApiEventRoute && apiMode === 'ready' ?
                   <>
                     {contributors.length > 0 ?
@@ -1672,7 +1675,7 @@ export default function EventDetailClient() {
                     </ul>
                   </>
                 )}
-              </div>
+              </ContentSection>
             )}
 
             {activeTab === 'Schedule' && apiMode === 'ready' && apiEvent?.hasProgram && apiEvent.conventionSlug && (
@@ -1684,28 +1687,28 @@ export default function EventDetailClient() {
                     documents, and staff tools.
                   </p>
                 </div>
-                <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-6 shadow-[var(--dc-shadow-soft)]">
+                <ContentSection>
                   <ConventionProgramSchedulePanel conventionSlug={apiEvent.conventionSlug} />
-                </div>
+                </ContentSection>
               </div>
             )}
 
             {activeTab === 'Matchmaker' && UUID_PARAM_RE.test(id) && apiMode === 'ready' && (
-              <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-6 shadow-[var(--dc-shadow-soft)] text-left">
+              <ContentSection className="text-left">
                 <EventMatchmakerPanel eventId={id} />
-              </div>
+              </ContentSection>
             )}
 
             {activeTab === 'Discussion' && (
-              <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-6 shadow-[var(--dc-shadow-soft)] text-left">
+              <ContentSection className="text-left">
                 {UUID_PARAM_RE.test(id) ?
                   <EventDiscussionPanel eventId={id} />
                 : <p className="text-sm text-dc-muted">Discussion is available for live events after you open an event from the calendar.</p>}
-              </div>
+              </ContentSection>
             )}
 
             {activeTab === 'Safety Info' && (
-              <div className="bg-dc-elevated/95 rounded-2xl border border-dc-border p-6 shadow-[var(--dc-shadow-soft)] text-left space-y-4">
+              <ContentSection className="text-left space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-dc-muted uppercase mb-2">Consent &amp; boundaries</h3>
                   <p className="text-sm text-dc-text-muted">{event.consentPolicy}</p>
@@ -1725,14 +1728,14 @@ export default function EventDetailClient() {
                     and reporting tools will connect to moderation when live.
                   </li>
                 </ul>
-              </div>
+              </ContentSection>
             )}
           </div>
         </main>
 
         {/* Sticky RSVP card — desktop sidebar; mobile uses MobileActionBar */}
         <aside className="hidden lg:block w-full flex-shrink-0 lg:order-2 lg:w-80">
-          <div className="lg:sticky lg:top-24 bg-dc-elevated/95 rounded-2xl border border-dc-border p-5 sm:p-6 shadow-[var(--dc-shadow-soft)] dc-card-polish">
+          <ContentSection padding="sidebar" className="lg:sticky lg:top-24 dc-card-polish">
             <h2 className="hidden lg:block text-lg font-semibold text-dc-text mb-2">{event.title}</h2>
             <p className="hidden lg:block text-sm text-dc-text-muted">{whenLine}</p>
             <p className="hidden lg:block text-sm text-dc-muted mt-1">
@@ -1875,7 +1878,7 @@ export default function EventDetailClient() {
                 </a>
               </div>
             )}
-          </div>
+          </ContentSection>
         </aside>
       </div>
 

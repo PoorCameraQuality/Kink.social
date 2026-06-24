@@ -6,6 +6,7 @@ import { feedAttachmentSchema, MEDIA_VISIBILITIES, type FeedAttachment } from '@
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { sanitizeEventActivityObjectForViewer } from './event-activity.js'
+import { deliverFeedImageUrl } from './image-delivery.js'
 import { sanitizeConventionActivityObjectForViewer } from './convention-activity.js'
 import type { MediaAsset, MediaItem } from '../db/schema.js'
 import { getMediaAssetForViewer } from './media-asset-viewer.js'
@@ -120,6 +121,13 @@ async function filterLegacyUrlAttachment(
   if (attachment.type === 'video' && attachment.posterUrl) {
     if (!(await proxyUrlAllowed(attachment.posterUrl, viewerUserId))) {
       return { ...attachment, posterUrl: null }
+    }
+  }
+
+  if (attachment.type === 'image') {
+    return {
+      ...attachment,
+      url: deliverFeedImageUrl(attachment.url) ?? attachment.url,
     }
   }
 

@@ -15,6 +15,7 @@ import {
   type ScoredTrendingItem,
   type TrendingCandidate,
 } from './trending-score.js'
+import { deliverAvatarUrl, deliverCardImageUrl } from './image-delivery.js'
 
 export type TrendingItemDto = {
   kind: string
@@ -415,7 +416,7 @@ export async function fetchTrendingItems(options: {
       title: item.title,
       subtitle: item.subtitle,
       href: item.href,
-      imageUrl: item.imageUrl,
+      imageUrl: deliverCardImageUrl(item.imageUrl),
       audioPreviewUrl: item.audioPreviewUrl,
       scoreSchemaVersion: TRENDING_SCHEMA_VERSION,
       ...(debug ? { score: Math.round(item.score * 100) / 100 } : {}),

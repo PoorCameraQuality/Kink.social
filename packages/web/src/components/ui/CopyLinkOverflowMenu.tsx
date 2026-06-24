@@ -35,14 +35,38 @@ export default function CopyLinkOverflowMenu({ path, className = '', bookmark, r
 
   const reposition = useCallback(() => {
     const el = rootRef.current
+    const menuEl = menuRef.current
     if (!el) return
     const rect = el.getBoundingClientRect()
-    setAnchor({ top: rect.bottom + 4, right: Math.max(8, window.innerWidth - rect.right) })
+    const right = Math.max(8, window.innerWidth - rect.right)
+    const gap = 4
+    const padding = 8
+    let top = rect.bottom + gap
+    if (menuEl) {
+      const menuHeight = menuEl.getBoundingClientRect().height
+      const overflowBelow = top + menuHeight > window.innerHeight - padding
+      const spaceAbove = rect.top - gap - padding
+      if (overflowBelow && spaceAbove >= menuHeight) {
+        top = rect.top - gap - menuHeight
+      } else if (overflowBelow) {
+        top = Math.max(padding, window.innerHeight - padding - menuHeight)
+      }
+    }
+    setAnchor({ top, right })
   }, [])
 
   useLayoutEffect(() => {
-    if (!open) return
+    if (!open) {
+      setAnchor(null)
+      return
+    }
     reposition()
+    const id = requestAnimationFrame(() => reposition())
+    return () => cancelAnimationFrame(id)
+  }, [open, reposition])
+
+  useEffect(() => {
+    if (!open) return
     window.addEventListener('resize', reposition)
     window.addEventListener('scroll', reposition, true)
     return () => {

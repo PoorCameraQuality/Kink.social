@@ -1,6 +1,7 @@
 import { and, count, eq, gt, inArray } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { loadPlaceLabels, mapGroupWithPlace, type PlaceLabel } from './group-place.js'
+import { deliverAvatarUrl, deliverCardImageUrl } from './image-delivery.js'
 
 export type GroupMemberAvatar = {
   userId: string
@@ -72,7 +73,7 @@ export async function loadGroupMemberAvatarStacks(
       groupId,
       members.slice(0, maxPerGroup).map((m) => ({
         userId: m.userId,
-        avatarUrl: m.avatarUrl,
+        avatarUrl: deliverAvatarUrl(m.avatarUrl, 'sm'),
         displayName: m.displayName,
       }))
     )
@@ -101,7 +102,7 @@ export function toGroupListItem(
     category: g.category ?? null,
     tags: g.tags ?? null,
     descriptionSnippet: description ? snippetText(description) : null,
-    coverImageUrl: g.bannerUrl ?? g.logoUrl ?? null,
+    coverImageUrl: deliverCardImageUrl(g.bannerUrl ?? g.logoUrl ?? null),
     memberCount,
     memberAvatars,
     placeLabel: mapped.placeLabel,

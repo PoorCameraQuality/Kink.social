@@ -69,7 +69,11 @@ export default function ProfileWritingTab({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <div className="flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        className="flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        role="tablist"
+        aria-label="Writing sections"
+      >
         {WRITING_SUBTABS.map((t) => (
           <TabButton key={t} label={t} isActive={subtab === t} onClick={() => setSubtab(t)} size="small" />
         ))}

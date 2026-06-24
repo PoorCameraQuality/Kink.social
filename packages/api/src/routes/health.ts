@@ -1,7 +1,12 @@
-import type { FastifyInstance, FastifyReply } from 'fastify'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import net from 'node:net'
 import { db } from '../db/index.js'
+import { eckeHealthDiagnostic } from '../lib/health-ecke.js'
+import { storageHealthDiagnostic } from '../lib/health-storage.js'
+import { searchHealthDiagnostic } from '../lib/search/health.js'
+import { isErrorTrackingTestRouteAllowed } from '../lib/error-tracking.js'
 import { mailConfigDiagnostic } from '../lib/mail-config.js'
+import { readWorkerHeartbeatDiagnostic } from '../lib/worker-heartbeat.js'
 
 const READY_DB_TIMEOUT_MS = 2500
 const DEP_CHECK_TIMEOUT_MS = 1200
@@ -25,11 +30,69 @@ async function pingTcp(host: string, port: number, timeoutMs = DEP_CHECK_TIMEOUT
   })
 }
 
+function isStrictReadinessEnabled(): boolean {
+  return process.env.HEALTH_STRICT_READINESS === 'true'
+}
+
+async function runDependencyChecks(): Promise<Record<string, 'ok' | 'error' | 'skipped'>> {
+  const checks: Record<string, 'ok' | 'error' | 'skipped'> = {}
+
+  if (process.env.NODE_ENV === 'production') {
+    const redisUrl = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
+    try {
+      const parsed = new URL(redisUrl.replace(/^redis:\/\//, 'http://'))
+      checks.redis = (await pingTcp(parsed.hostname, Number(parsed.port || 6379))) ? 'ok' : 'error'
+    } catch {
+      checks.redis = 'error'
+    }
+
+    const clamdHost = process.env.CLAMD_HOST ?? '127.0.0.1'
+    const clamdPort = Number(process.env.CLAMD_PORT ?? '3310')
+    checks.clamav = (await pingTcp(clamdHost, clamdPort)) ? 'ok' : 'error'
+
+    const s3Endpoint = process.env.S3_ENDPOINT?.trim()
+    if (s3Endpoint) {
+      try {
+        const u = new URL(s3Endpoint)
+        checks.s3 = (await pingTcp(u.hostname, Number(u.port || 9000))) ? 'ok' : 'error'
+      } catch {
+        checks.s3 = 'error'
+      }
+    } else {
+      checks.s3 = 'skipped'
+    }
+  }
+
+  return checks
+}
+
+function readinessStatus(degraded: boolean): number {
+  return degraded && isStrictReadinessEnabled() ? 503 : 200
+}
+
 /** Liveness: process is up; no dependency checks. */
 export async function registerHealthRoutes(app: FastifyInstance) {
   app.get('/api/health', async () => ({ ok: true }))
 
+  app.get('/api/health/live', async () => ({ ok: true }))
+
   app.get('/api/health/mail', async () => mailConfigDiagnostic())
+
+  app.get('/api/health/storage', async () => storageHealthDiagnostic())
+
+  app.get('/api/health/ecke', async () => eckeHealthDiagnostic())
+
+  app.get('/api/health/search', async () => searchHealthDiagnostic())
+
+  app.get('/api/health/worker', async () => readWorkerHeartbeatDiagnostic())
+
+  app.get('/api/health/error-test', async (req: FastifyRequest, reply: FastifyReply) => {
+    if (!isErrorTrackingTestRouteAllowed(req.headers as Record<string, unknown>)) {
+      return reply.status(404).send({ error: 'Not found' })
+    }
+    const err = new Error('C2K error tracking test — no sensitive data attached')
+    throw err
+  })
 
   /**
    * Readiness: when `USE_DATABASE=true`, verifies Postgres and optional prod deps.
@@ -58,34 +121,10 @@ export async function registerHealthRoutes(app: FastifyInstance) {
       })
     }
 
-    if (process.env.NODE_ENV === 'production') {
-      const redisUrl = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
-      try {
-        const parsed = new URL(redisUrl.replace(/^redis:\/\//, 'http://'))
-        checks.redis = (await pingTcp(parsed.hostname, Number(parsed.port || 6379))) ? 'ok' : 'error'
-      } catch {
-        checks.redis = 'error'
-      }
-
-      const clamdHost = process.env.CLAMD_HOST ?? '127.0.0.1'
-      const clamdPort = Number(process.env.CLAMD_PORT ?? '3310')
-      checks.clamav = (await pingTcp(clamdHost, clamdPort)) ? 'ok' : 'error'
-
-      const s3Endpoint = process.env.S3_ENDPOINT?.trim()
-      if (s3Endpoint) {
-        try {
-          const u = new URL(s3Endpoint)
-          checks.s3 = (await pingTcp(u.hostname, Number(u.port || 9000))) ? 'ok' : 'error'
-        } catch {
-          checks.s3 = 'error'
-        }
-      } else {
-        checks.s3 = 'skipped'
-      }
-    }
+    Object.assign(checks, await runDependencyChecks())
 
     const degraded = Object.values(checks).some((v) => v === 'error')
-    return reply.send({
+    return reply.status(readinessStatus(degraded)).send({
       ok: !degraded,
       ready: !degraded,
       ...checks,

@@ -17,6 +17,7 @@ import { filterRowsForEventActivity } from './event-activity.js'
 import { filterRowsForConventionActivity } from './convention-activity.js'
 import { extractTagIdsFromMentions, getMutedTagIds, hydrateRepostSourceTagIds, postMatchesMutedTags } from './muted-tags.js'
 import { ensureUserSettingsRow } from './user-settings-row.js'
+import { deliverAvatarUrl } from './image-delivery.js'
 
 export type FollowingFeedCursor = {
   createdAt: string
@@ -134,7 +135,7 @@ function shapePostItem(row: MergedRow): FollowingFeedItem {
       id: row.id,
       authorId: row.actorId,
       authorUsername: row.username,
-      authorAvatarUrl: row.avatarUrl ?? null,
+      authorAvatarUrl: deliverAvatarUrl(row.avatarUrl ?? null, 'sm'),
       kind: row.postRow?.kind,
       title: row.postRow?.title,
       body: row.postRow?.body,

@@ -18,7 +18,8 @@ export default function GroupsSectionNavLinks({
   const current = resolveGroupsSectionNavMatch(pathname, search)
   const items = groupsSectionNavForViewer(showRealPersonalLibrary)
   return (
-    <ul className="space-y-0.5" role="navigation" aria-label="Groups sections">
+    <nav aria-label="Groups sections">
+      <ul className="space-y-0.5">
       {items.map((item) => {
         const active = item.match === current
         return (
@@ -41,6 +42,7 @@ export default function GroupsSectionNavLinks({
           </li>
         )
       })}
-    </ul>
+      </ul>
+    </nav>
   )
 }

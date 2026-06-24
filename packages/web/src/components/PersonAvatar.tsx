@@ -30,6 +30,11 @@ function gradientClass(seed: string): string {
   return GRADIENTS[hashSeed(seed) % GRADIENTS.length]!
 }
 
+/** Tailwind gradient classes for initials fallback panels (e.g. directory photo strips). */
+export function personAvatarGradientClass(seed: string): string {
+  return gradientClass(seed)
+}
+
 const SIZE_CLASS = {
   sm: 'h-8 w-8 text-xs',
   md: 'h-14 w-14 text-base',

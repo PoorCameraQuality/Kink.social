@@ -23,7 +23,7 @@ export default function ProfileAttendedEventCard({
 
   return (
     <Card className="overflow-hidden hover:border-dc-accent-border/40 transition-colors">
-      <Link to={`/events/${encodeURIComponent(eventId)}`} className="block relative aspect-[2/1] bg-dc-elevated-solid">
+      <Link to={`/events/${encodeURIComponent(eventId)}`} className="block relative aspect-[2/1] bg-dc-elevated-solid" aria-label={`View event: ${title}`}>
         <img src={heroSrc} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         <span className="absolute top-3 left-3 rounded-lg bg-emerald-600/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
           Attended
