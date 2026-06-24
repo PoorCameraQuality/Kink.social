@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import LocalPostCard from '@/components/cards/LocalPostCard'
 
-import ActivityFeedCard from '@/components/home/ActivityFeedCard'
+import FollowingNetworkHighlights from '@/components/home/FollowingNetworkHighlights'
 import { followingFeedItemReason } from '@/lib/following-feed-present'
 import HomeFeedRichComposer from '@/components/home/HomeFeedRichComposer'
 import HomeMobileComposer from '@/components/home/HomeMobileComposer'
@@ -62,6 +62,23 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
     () => (feed.status === 'ready' ? presentFollowingFeedItems(feed.items) : []),
     [feed.items, feed.status],
   )
+
+  // Following hierarchy: posts are the primary stream; activity is folded into a
+  // compact "Network highlights" module so the feed reads social, not like a log.
+  const postItems = useMemo(
+    () => presentedItems.filter((item) => item.kind === 'post'),
+    [presentedItems],
+  )
+  const activityItems = useMemo(
+    () =>
+      presentedItems.filter(
+        (item): item is Extract<typeof item, { kind: 'activity' }> => item.kind === 'activity',
+      ),
+    [presentedItems],
+  )
+  // Highlights only belong on the blended "All activity" view. Content-type filters
+  // (Posts only, Photos, Articles) return posts and should stay a pure post stream.
+  const showHighlights = filter === 'all' && activityItems.length > 0
 
   const composerPlaceholder = feedShell
     ? 'Share an update, ask a question, or start a conversation…'
@@ -177,27 +194,29 @@ export default function FollowingFeedTab({ onPosted, onRepost, feedShell = false
         />
       : null}
 
-      {!filterComingSoon && feed.status === 'ready' && presentedItems.length > 0 ?
-        <p className="mb-3 text-sm leading-relaxed text-dc-text-muted">
-          Updates from people you follow or connect with, newest first.
+      {!filterComingSoon && feed.status === 'ready' && showHighlights ?
+        <FollowingNetworkHighlights items={activityItems} />
+      : null}
+
+      {!filterComingSoon && feed.status === 'ready' && postItems.length > 0 ?
+        <p className="mb-3 mt-1 text-sm leading-relaxed text-dc-text-muted">
+          {filter === 'posts' ? 'Posts from people you follow, newest first.'
+          : 'Posts and conversations from people you follow, newest first.'}
         </p>
       : null}
 
       {!filterComingSoon ?
         <div className="feed-stream dc-feed-stagger">
 
-        {presentedItems.map((item) => {
-          const key = item.kind === 'post' ? `post-${item.post.id}` : `activity-${item.cursor}`
-          return item.kind === 'post' ?
-              <LocalPostCard
-                key={key}
-                post={item.post}
-                layout="feed"
-                feedStreamReason={followingFeedItemReason(item)}
-                onRepost={onRepost}
-              />
-            : <ActivityFeedCard key={key} item={item} />
-        })}
+        {postItems.map((item) => (
+          <LocalPostCard
+            key={`post-${item.post.id}`}
+            post={item.post}
+            layout="feed"
+            feedStreamReason={followingFeedItemReason(item)}
+            onRepost={onRepost}
+          />
+        ))}
 
       </div>
       : null}

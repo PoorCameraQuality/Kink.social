@@ -131,6 +131,13 @@ function QuotedPostBody({ post, dense, flat }: { post: HomeFeedPost; dense?: boo
   )
 }
 
+function lovedByLabel(names: string[]): string {
+  if (names.length === 1) return `Loved by ${names[0]}`
+  if (names.length === 2) return `Loved by ${names[0]} and ${names[1]}`
+  // Preview is capped at 3 connection avatars; name the ones we can show.
+  return `Loved by ${names[0]}, ${names[1]} and ${names[2]}`
+}
+
 function ConnectionLikerStack({ preview }: { preview: ConnectionLikerPreview[] }) {
   const avatars = preview.slice(0, 3)
   if (avatars.length === 0) return null
@@ -160,7 +167,7 @@ function ConnectionLikerStack({ preview }: { preview: ConnectionLikerPreview[] }
           </Link>
         ))}
       </span>
-      <span className="text-xs text-dc-muted">Loved by connections</span>
+      <span className="text-xs text-dc-muted">{lovedByLabel(avatars.map((p) => p.username))}</span>
     </div>
   )
 }

@@ -895,3 +895,124 @@
     pointer-events: none;
   }
 }
+
+/*
+ * ── Network highlights ──────────────────────────────────────────────────────
+ * Following-feed activity, folded into one compact grouped module so the feed
+ * reads social (posts first) rather than as a raw activity log. Calm charcoal
+ * surface, subtle rose accent, list rhythm — never a stack of big cards.
+ */
+.dc-net-highlights {
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.875rem 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--dc-border-subtle) 70%, transparent);
+  background: color-mix(in srgb, var(--dc-surface-card) 55%, var(--dc-elevated-solid));
+  box-shadow: var(--dc-shadow-soft);
+}
+
+.dc-net-highlights__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0 0.125rem 0.375rem;
+}
+
+.dc-net-highlights__title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--dc-text);
+}
+
+.dc-net-highlights__sub {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--dc-text-subtle);
+}
+
+.dc-net-highlights__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dc-net-highlight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4375rem 0.25rem;
+  border-radius: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.14s ease;
+}
+
+.dc-net-highlight + .dc-net-highlight {
+  border-top: 1px solid color-mix(in srgb, var(--dc-border-subtle) 38%, transparent);
+}
+
+.dc-net-highlight--link {
+  cursor: pointer;
+}
+
+.dc-net-highlight--link:hover {
+  background: color-mix(in srgb, var(--dc-elevated-hover) 60%, transparent);
+}
+
+.dc-net-highlight__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--dc-accent) 22%, var(--dc-border-subtle));
+  background: color-mix(in srgb, var(--dc-accent) 12%, transparent);
+  color: var(--dc-accent);
+}
+
+.dc-net-highlight__text {
+  min-width: 0;
+  flex: 1;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--dc-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dc-net-highlight__actor {
+  font-weight: 600;
+  color: var(--dc-text);
+  text-decoration: none;
+}
+
+.dc-net-highlight--link:hover .dc-net-highlight__actor,
+.dc-net-highlight__actor:hover {
+  color: var(--dc-accent);
+}
+
+.dc-net-highlight__meta {
+  color: var(--dc-text-subtle);
+}
+
+.dc-net-highlight__time {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--dc-text-subtle);
+}
+
+.dc-net-highlights__more {
+  margin: 0.25rem 0.125rem 0.125rem;
+  padding: 0.25rem 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dc-accent);
+}
+
+.dc-net-highlights__more:hover {
+  text-decoration: underline;
+}
