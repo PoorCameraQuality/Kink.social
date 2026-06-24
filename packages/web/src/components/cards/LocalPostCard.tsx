@@ -299,8 +299,6 @@ export default function LocalPostCard({
     !hasMedia && !displayPost.title && plainBodyTrimmed.length > 0 && plainBodyTrimmed.length <= 90
   const isLongTextPost = plainBodyTrimmed.length > 440
   const contextLabel = contentBadge?.label ?? null
-  const totalReactions =
-    reactionCounts.love + reactionCounts.respect + reactionCounts.sympathize + reactionCounts.helpful
 
   const cardClass = feedLayout ?
     cn(
@@ -442,25 +440,6 @@ export default function LocalPostCard({
           discussHref={discussHref}
         />
 
-        {totalReactions > 0 || commentCount > 0 ?
-          <div className="feed-stream-post__summary">
-            {totalReactions > 0 ?
-              <span>
-                {totalReactions} {totalReactions === 1 ? 'reaction' : 'reactions'}
-              </span>
-            : null}
-            {totalReactions > 0 && commentCount > 0 ?
-              <span className="feed-stream-post__summary-dot" aria-hidden>
-                ·
-              </span>
-            : null}
-            {commentCount > 0 ?
-              <span>
-                {commentCount} {commentCount === 1 ? 'comment' : 'comments'}
-              </span>
-            : null}
-          </div>
-        : null}
 
         <div className="feed-stream-post__actions">
           <FeedPostActionBar
@@ -477,8 +456,8 @@ export default function LocalPostCard({
             commentDisabled={!canShare}
             shareHref={canShare ? `/share/post/${post.id}` : undefined}
             shareDisabled={!canShare}
+            connectionPreview={connectionPreview}
           />
-          <ConnectionLikerStack preview={connectionPreview} />
         </div>
 
         {showDiscussion && post.source === 'api' ?

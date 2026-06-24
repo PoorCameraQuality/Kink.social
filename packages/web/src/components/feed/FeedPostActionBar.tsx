@@ -1,20 +1,17 @@
-import FeedReactionsRow from '@/components/feed/FeedReactionsRow'
+import { useRef, useState } from 'react'
+import FeedEngagementSummary from '@/components/feed/FeedEngagementSummary'
+import FeedReactionPicker from '@/components/feed/FeedReactionPicker'
 import {
   IconDiscuss,
+  IconLove,
   IconShare,
 } from '@/components/feed/FeedInteractionIcons'
 import FeedTapControl from '@/components/feed/FeedTapControl'
-import ReportAction from '@/components/moderation/ReportAction'
 import { FEED_ACTION_LABELS, type FeedReactionId } from '@c2k/shared'
 import type { FeedReactionCounts } from '@/hooks/useFeedPostReactions'
-import { formatFeedCommentActionLabel } from '@/lib/feed-comment-label'
+import type { ConnectionLikerPreview } from '@/lib/feed-types'
+import { FEED_REACTION_OPTIONS, feedReactionPastLabel } from '@/lib/feed-reaction-ui'
 import { cn } from '@/lib/cn'
-
-type ReportProps = {
-  targetType: string
-  targetId: string
-  targetLabel?: string
-}
 
 type Props = {
   reactionCounts: FeedReactionCounts
@@ -27,24 +24,19 @@ type Props = {
   commentDisabled?: boolean
   shareHref?: string
   shareDisabled?: boolean
-  bookmarked?: boolean
-  bookmarkBusy?: boolean
-  bookmarkDisabled?: boolean
-  onBookmarkToggle?: () => void
-  report?: ReportProps
+  connectionPreview?: ConnectionLikerPreview[]
 }
 
-function IconBookmark({ className = 'h-4 w-4' }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M6 4.5h12v16l-6-4-6 4v-16Z"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
+function ReactActionIcon({
+  viewerReaction,
+  className,
+}: {
+  viewerReaction: FeedReactionId | null
+  className?: string
+}) {
+  const active = FEED_REACTION_OPTIONS.find((r) => r.id === viewerReaction)
+  const Icon = active?.Icon ?? IconLove
+  return <Icon className={className} />
 }
 
 export default function FeedPostActionBar({
@@ -58,87 +50,92 @@ export default function FeedPostActionBar({
   commentDisabled,
   shareHref,
   shareDisabled,
-  bookmarked = false,
-  bookmarkBusy,
-  bookmarkDisabled,
-  onBookmarkToggle,
-  report,
+  connectionPreview,
 }: Props) {
+  const reactAnchorRef = useRef<HTMLDivElement>(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
+
+  const reactLabel = viewerReaction ? feedReactionPastLabel(viewerReaction) : 'React'
+
   return (
-    <div className="feed-action-bar" role="group" aria-label="Post interactions">
-      <div className="feed-action-bar__track c2k-no-scrollbar">
-        <FeedReactionsRow
-          inline
-          compact
-          centered
-          reactionCounts={reactionCounts}
-          viewerReaction={viewerReaction}
-          busy={reactionBusy}
-          disabled={reactionDisabled}
-          onReaction={onReaction}
-        />
+    <>
+      <FeedEngagementSummary
+        reactionCounts={reactionCounts}
+        viewerReaction={viewerReaction}
+        commentCount={commentCount}
+        connectionPreview={connectionPreview}
+      />
 
-        <span className="feed-action-bar__vdivider" aria-hidden />
+      <div className="feed-action-bar" role="group" aria-label="Post interactions">
+        <div className="feed-action-bar__track">
+          <div ref={reactAnchorRef} className="feed-action-bar__react-anchor">
+            <FeedTapControl
+              disabled={reactionDisabled || reactionBusy}
+              ringOnTap
+              aria-haspopup="menu"
+              aria-expanded={pickerOpen}
+              aria-pressed={!!viewerReaction}
+              onClick={() => setPickerOpen((v) => !v)}
+              className={cn(
+                'feed-action-bar__btn feed-action-bar__btn--react',
+                viewerReaction && 'feed-action-bar__btn--react-active',
+              )}
+              aria-label={
+                viewerReaction ?
+                  `${reactLabel}. Change reaction`
+                : 'React to this post'
+              }
+              title={viewerReaction ? 'Change reaction' : 'React to this post'}
+            >
+              <ReactActionIcon viewerReaction={viewerReaction} className="h-4 w-4 shrink-0" />
+              <span className="feed-action-bar__label">{reactLabel}</span>
+            </FeedTapControl>
+          </div>
 
-        {commentHref && !commentDisabled ?
-          <FeedTapControl
-            as="link"
-            to={commentHref}
-            className="feed-action-bar__btn"
-            aria-label="Comment on this post"
-            title="View and add comments"
-          >
-            <IconDiscuss className="h-4 w-4 shrink-0" />
-            <span className="feed-action-bar__label">{formatFeedCommentActionLabel(commentCount)}</span>
-          </FeedTapControl>
-        : (
-          <FeedTapControl
-            disabled
-            className="feed-action-bar__btn opacity-70"
-            aria-label="Comments unavailable"
-          >
-            <IconDiscuss className="h-4 w-4 shrink-0" />
-            <span className="feed-action-bar__label">{FEED_ACTION_LABELS.discuss}</span>
-          </FeedTapControl>
-        )}
+          {commentHref && !commentDisabled ?
+            <FeedTapControl
+              as="link"
+              to={commentHref}
+              className="feed-action-bar__btn"
+              aria-label="Comment on this post"
+              title="View and add comments"
+            >
+              <IconDiscuss className="h-4 w-4 shrink-0" />
+              <span className="feed-action-bar__label">{FEED_ACTION_LABELS.discuss}</span>
+            </FeedTapControl>
+          : (
+            <FeedTapControl
+              disabled
+              className="feed-action-bar__btn opacity-70"
+              aria-label="Comments unavailable"
+            >
+              <IconDiscuss className="h-4 w-4 shrink-0" />
+              <span className="feed-action-bar__label">{FEED_ACTION_LABELS.discuss}</span>
+            </FeedTapControl>
+          )}
 
-        {shareHref && !shareDisabled ?
-          <FeedTapControl as="link" to={shareHref} className="feed-action-bar__btn" aria-label="Share post">
-            <IconShare className="h-4 w-4 shrink-0" />
-            <span className="feed-action-bar__label">Share</span>
-          </FeedTapControl>
-        : (
-          <FeedTapControl disabled className="feed-action-bar__btn opacity-70" aria-label="Share unavailable">
-            <IconShare className="h-4 w-4 shrink-0" />
-            <span className="feed-action-bar__label">Share</span>
-          </FeedTapControl>
-        )}
-
-        {onBookmarkToggle ?
-          <FeedTapControl
-            disabled={bookmarkDisabled || bookmarkBusy}
-            ringOnTap
-            aria-pressed={bookmarked}
-            onClick={onBookmarkToggle}
-            className={cn('feed-action-bar__btn', bookmarked && 'text-dc-accent')}
-            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark post'}
-          >
-            <IconBookmark className={cn('h-4 w-4 shrink-0', bookmarked && 'fill-current')} />
-            <span className="feed-action-bar__label">{bookmarked ? 'Saved' : 'Save'}</span>
-          </FeedTapControl>
-        : null}
-
-        {report ?
-          <ReportAction
-            variant="button"
-            targetType={report.targetType}
-            targetId={report.targetId}
-            targetLabel={report.targetLabel ?? 'feed post'}
-            surface="feed"
-            className="feed-action-bar__btn !min-h-0 !min-w-0 !px-2 !py-1 !text-[11px] !font-medium !text-dc-muted hover:!text-dc-text sm:!text-xs"
-          />
-        : null}
+          {shareHref && !shareDisabled ?
+            <FeedTapControl as="link" to={shareHref} className="feed-action-bar__btn" aria-label="Share post">
+              <IconShare className="h-4 w-4 shrink-0" />
+              <span className="feed-action-bar__label">Share</span>
+            </FeedTapControl>
+          : (
+            <FeedTapControl disabled className="feed-action-bar__btn opacity-70" aria-label="Share unavailable">
+              <IconShare className="h-4 w-4 shrink-0" />
+              <span className="feed-action-bar__label">Share</span>
+            </FeedTapControl>
+          )}
+        </div>
       </div>
-    </div>
+
+      <FeedReactionPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        anchorEl={reactAnchorRef.current}
+        viewerReaction={viewerReaction}
+        busy={reactionBusy}
+        onSelect={onReaction}
+      />
+    </>
   )
 }

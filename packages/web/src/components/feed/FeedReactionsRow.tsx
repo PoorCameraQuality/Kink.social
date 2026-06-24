@@ -1,28 +1,8 @@
-import {
-  IconHelpful,
-  IconLove,
-  IconRespect,
-  IconSympathize,
-} from '@/components/feed/FeedInteractionIcons'
 import FeedTapControl from '@/components/feed/FeedTapControl'
-import { FEED_REACTION_IDS, FEED_REACTION_LABELS, type FeedReactionId } from '@c2k/shared'
+import { FEED_REACTION_IDS, type FeedReactionId } from '@c2k/shared'
 import type { FeedReactionCounts } from '@/hooks/useFeedPostReactions'
+import { FEED_REACTION_OPTIONS } from '@/lib/feed-reaction-ui'
 import { cn } from '@/lib/cn'
-
-type ReactionDef = {
-  id: FeedReactionId
-  label: string
-  title: string
-  hint: string
-  Icon: typeof IconLove
-}
-
-const REACTIONS: ReactionDef[] = [
-  { id: 'love', label: FEED_REACTION_LABELS.love, title: 'Love', hint: 'Show you love this post', Icon: IconLove },
-  { id: 'respect', label: FEED_REACTION_LABELS.respect, title: 'Respect', hint: 'Acknowledge their perspective', Icon: IconRespect },
-  { id: 'sympathize', label: FEED_REACTION_LABELS.sympathize, title: 'Sympathize', hint: 'Offer empathy or support', Icon: IconSympathize },
-  { id: 'helpful', label: FEED_REACTION_LABELS.helpful, title: 'Helpful', hint: 'Mark this as useful', Icon: IconHelpful },
-]
 
 type Props = {
   reactionCounts: FeedReactionCounts
@@ -58,7 +38,7 @@ export default function FeedReactionsRow({
       role="group"
       aria-label="Reactions"
     >
-      {REACTIONS.map(({ id, label, title, hint, Icon }) => {
+      {FEED_REACTION_OPTIONS.map(({ id, label, title, hint, Icon }) => {
         const active = viewerReaction === id
         const count = reactionCounts[id] ?? 0
         const isDisabled = disabled || busy
