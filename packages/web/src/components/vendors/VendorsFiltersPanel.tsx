@@ -2,7 +2,13 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { VENDOR_CATEGORY_DESCRIPTIONS } from '@c2k/shared'
 import { VENDOR_CATEGORY_VALUES } from '@/lib/vendor-filters'
-import type { ShipsToFilter, VendorSortTab } from '@/lib/vendor-filters'
+import type { ShipsToFilter } from '@/lib/vendor-filters'
+
+/**
+ * Directory sort options. Discovery-first: defaults to "Recommended" and avoids
+ * leading with "Top rated" when community review data is still sparse.
+ */
+export type DirectorySort = 'Recommended' | 'Recently added' | 'Vending soon' | 'A–Z' | 'Community reviewed'
 
 const RATING_PRESETS = [
   { value: 0, label: 'Any' },
@@ -15,7 +21,7 @@ export type VendorsFilterState = {
   selectedCategory: string | null
   shipsTo: ShipsToFilter
   minRating: number
-  sortTab: VendorSortTab
+  sortTab: DirectorySort
 }
 
 type Props = {
@@ -23,14 +29,14 @@ type Props = {
   filters: VendorsFilterState
   categoryCounts: Record<string, number>
   totalCount: number
-  sortTabs: VendorSortTab[]
+  sortTabs: readonly DirectorySort[]
   shopFacetVendors: Array<{ slug?: string; id?: number | string; name: string }>
   filteredCount: number
   showHeading?: boolean
   onCategoryChange: (cat: string | null) => void
   onShipsToChange: (v: ShipsToFilter) => void
   onMinRatingChange: (v: number) => void
-  onSortChange: (tab: VendorSortTab) => void
+  onSortChange: (tab: DirectorySort) => void
   onClearFilters: () => void
 }
 

@@ -75,10 +75,10 @@ export default function EventsFeaturedStrip({ events }: { events: MockEvent[] })
   if (featured.length < 2) return null
 
   return (
-    <section className="mb-4" aria-label="Featured upcoming events">
+    <section className="mb-4" aria-label="Featured events">
       <div className="mb-2">
-        <h2 className="text-sm font-semibold text-dc-text">Happening soon</h2>
-        <p className="text-xs text-dc-text-muted">Quick picks to compare date, place, and who is going.</p>
+        <h2 className="text-sm font-semibold text-dc-text">Featured by organizers</h2>
+        <p className="text-xs text-dc-text-muted">Spotlighted gatherings — compare date, place, and who is going.</p>
       </div>
       <div className="relative">
         <AutoScrollRow aria-label="Featured upcoming events carousel" trackClassName="gap-3 scroll-smooth">

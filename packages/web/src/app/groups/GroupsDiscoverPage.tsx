@@ -21,6 +21,7 @@ import { shellOuterClass } from '@/lib/shell-contract'
 import {
   countGroupsByPurpose,
   deriveGroupDiscoverBadge,
+  deriveGroupRecommendation,
   filterGroupsByPurpose,
   mockFriendsHereCount,
   sortGroupsForDiscover,
@@ -83,7 +84,7 @@ export default function GroupsDiscoverPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPurposes, setSelectedPurposes] = useState<GroupPurposeFilter[]>([])
   const [scopeTab, setScopeTab] = useState<GroupsScopeTab>('all')
-  const [sortMode, setSortMode] = useState<GroupsSortMode>('popular')
+  const [sortMode, setSortMode] = useState<GroupsSortMode>('recommended')
   const [distance, setDistance] = useState(MAX_DISTANCE_MI)
   const { country, setCountry, city, setCity } = usePersistedGeoText()
   const [createOpen, setCreateOpen] = useState(false)
@@ -212,7 +213,7 @@ export default function GroupsDiscoverPage() {
     setSearchQuery('')
     setSelectedPurposes([])
     setScopeTab('all')
-    setSortMode('popular')
+    setSortMode('recommended')
     setDistance(MAX_DISTANCE_MI)
     setCountry('')
     setCity('')
@@ -256,9 +257,23 @@ export default function GroupsDiscoverPage() {
         className="py-4 sm:py-6"
         desktopAsideFrom="lg"
         header={
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">Discover Groups</h1>
-            <p className="mt-1 text-sm text-dc-text-muted">Find your people, munches, classes, and local scenes.</p>
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-dc-text sm:text-3xl">Discover Groups</h1>
+              <p className="mt-1 text-sm text-dc-text-muted">
+                Find your people, munches, classes, and local scenes.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCreateOpen(true)}
+              className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-dc-accent px-4 text-sm font-semibold text-dc-accent-foreground transition-colors hover:bg-dc-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent focus-visible:ring-offset-2 focus-visible:ring-offset-dc-bg"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Create group
+            </button>
           </div>
         }
         toolbar={
@@ -299,11 +314,11 @@ export default function GroupsDiscoverPage() {
                 id="groups-sort"
                 value={sortMode}
                 onChange={(e) => setSortMode(e.target.value as GroupsSortMode)}
-                className="min-h-11 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 text-sm text-dc-text"
+                className="min-h-11 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 text-sm text-dc-text focus:border-dc-accent focus:outline-none focus:ring-1 focus:ring-dc-accent"
               >
-                <option value="popular">Sort by: Popular</option>
-                <option value="new">Sort by: Newest</option>
+                <option value="recommended">Sort by: Recommended</option>
                 <option value="active">Sort by: Recently active</option>
+                <option value="new">Sort by: Newest</option>
                 <option value="members">Sort by: Most members</option>
                 <option value="name">Sort by: Name</option>
               </select>
@@ -380,6 +395,7 @@ export default function GroupsDiscoverPage() {
                     group={g}
                     badge={deriveGroupDiscoverBadge(g, index, scopeTab)}
                     friendsHere={useDemoFallback ? mockFriendsHereCount(g.id) : undefined}
+                    recommendation={deriveGroupRecommendation(g, scopeTab)}
                   />
                 </li>
               ))}

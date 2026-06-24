@@ -98,9 +98,9 @@ export default function VendorsRightRail({ vendors, useDemoFallback }: Props) {
 
       <RailCard title="How vendor listings work">
         <ol className="list-decimal space-y-2 pl-4 text-xs leading-relaxed text-dc-text-muted">
-          <li>Vendors add a profile and link their external store.</li>
-          <li>Kink Social shows product previews and community reviews for discovery.</li>
-          <li>Purchases, shipping, and refunds happen on the vendor&apos;s own shop.</li>
+          <li>Vendors create a profile and link their external shop.</li>
+          <li>Kink Social shows previews, categories, and community context for discovery.</li>
+          <li>Purchases, shipping, refunds, and custom orders happen on the vendor&apos;s own shop.</li>
         </ol>
       </RailCard>
 

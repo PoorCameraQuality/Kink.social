@@ -1,11 +1,11 @@
 import type { GroupsScopeTab } from '@/lib/groups-page-utils'
 
 const TABS: { id: GroupsScopeTab; label: string }[] = [
-  { id: 'all', label: 'All' },
+  { id: 'all', label: 'Recommended' },
   { id: 'near-you', label: 'Near you' },
   { id: 'new', label: 'New' },
-  { id: 'popular', label: 'Popular' },
   { id: 'suggested', label: 'Suggested' },
+  { id: 'popular', label: 'Most members' },
 ]
 
 type Props = {
@@ -25,7 +25,7 @@ export default function GroupsScopeTabs({ active, onChange }: Props) {
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(tab.id)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent focus-visible:ring-offset-1 focus-visible:ring-offset-dc-bg ${
               selected ?
                 'bg-dc-accent text-dc-accent-foreground shadow-[var(--dc-tab-active-shadow)]'
               : 'border border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:border-dc-accent-border/50 hover:text-dc-text'

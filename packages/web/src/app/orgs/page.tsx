@@ -20,15 +20,17 @@ import {
 import { shellOuterClass } from '@/lib/shell-contract'
 
 const FILTER_CHIPS: { id: OrgFilterChip; label: string }[] = [
-  { id: 'all', label: 'Top rated' },
+  { id: 'all', label: 'Recommended' },
   { id: 'nearby', label: 'Nearby' },
   { id: 'recentlyActive', label: 'Recently active' },
   { id: 'hostingSoon', label: 'Hosting soon' },
   { id: 'new', label: 'New' },
 ]
 
+// Rating data is sparse across the directory, so "Recommended" is a more honest
+// default than "Top rated" (which implies a dense, comparable rating set).
 const SORT_OPTIONS: { value: OrgDirectorySort; label: string }[] = [
-  { value: 'popular', label: 'Top rated' },
+  { value: 'popular', label: 'Recommended' },
   { value: 'name', label: 'A to Z' },
 ]
 
@@ -161,10 +163,11 @@ export default function OrgsListPage() {
                     key={chip.id}
                     type="button"
                     onClick={() => setFilterChip(chip.id)}
-                    className={`min-h-9 shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    aria-pressed={filterChip === chip.id}
+                    className={`min-h-9 shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent/40 ${
                       filterChip === chip.id ?
-                        'border-dc-accent bg-dc-accent text-dc-accent-foreground'
-                      : 'border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:text-dc-text'
+                        'border-dc-accent-border bg-dc-accent-muted/35 text-dc-accent'
+                      : 'border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:border-dc-accent-border/40 hover:text-dc-text'
                     }`}
                   >
                     {chip.label}

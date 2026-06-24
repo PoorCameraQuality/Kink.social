@@ -14,7 +14,9 @@ export type GroupDiscoverCardGroup = {
   placeLabel?: string | null
   distanceMi?: number
   tags?: string[]
+  visibility?: 'public' | 'private' | 'invite-only'
   joinMode?: 'open' | 'apply'
+  createdAt?: string
   coverImageUrl?: string | null
   memberAvatars?: Array<{
     userId: string

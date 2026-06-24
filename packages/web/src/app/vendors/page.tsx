@@ -1,8 +1,8 @@
 import { useMemo, useId, useState } from 'react'
 import { Link } from 'react-router-dom'
-import VendorCard from '@/components/cards/VendorCard'
+import VendorDirectoryCard from '@/components/vendors/VendorDirectoryCard'
 import VendorsCategoryChips from '@/components/vendors/VendorsCategoryChips'
-import VendorsFiltersPanel from '@/components/vendors/VendorsFiltersPanel'
+import VendorsFiltersPanel, { type DirectorySort } from '@/components/vendors/VendorsFiltersPanel'
 import VendorsRightRail from '@/components/vendors/VendorsRightRail'
 import EmptyState from '@/components/ui/EmptyState'
 import TextInput from '@/components/ui/TextInput'
@@ -11,18 +11,84 @@ import FilterSheet from '@/components/templates/FilterSheet'
 import { cn } from '@/lib/cn'
 import { shellOuterClass } from '@/lib/shell-contract'
 import { mockVendors } from '@/data/mock-data'
+import type { MockVendor } from '@/data/types'
 import { useAuth } from '@/contexts/AuthContext'
 import { useApiVendors } from '@/hooks/useApiVendors'
 import { countVendorsByCategory } from '@/lib/vendor-directory-utils'
-import {
-  countActiveVendorFilters,
-  filterVendors,
-  filterSummaryLabel,
-  type ShipsToFilter,
-  type VendorSortTab,
-} from '@/lib/vendor-filters'
+import { filterVendors, type ShipsToFilter, type VendorSortTab } from '@/lib/vendor-filters'
 
-const SORT_TABS: VendorSortTab[] = ['Top rated', 'Vending soon', 'A–Z', 'Recently added']
+const SORT_OPTIONS: readonly DirectorySort[] = [
+  'Recommended',
+  'Recently added',
+  'Vending soon',
+  'A–Z',
+  'Community reviewed',
+]
+
+const DEFAULT_SORT: DirectorySort = 'Recommended'
+
+/** Map discovery sort labels onto the underlying client-side sort engine. */
+const SORT_TO_VENDOR_TAB: Record<DirectorySort, VendorSortTab> = {
+  Recommended: 'Top rated',
+  'Recently added': 'Recently added',
+  'Vending soon': 'Vending soon',
+  'A–Z': 'A–Z',
+  'Community reviewed': 'Top rated',
+}
+
+/** Composite "recommended" score: surfaces active, reviewed, visual vendors first. */
+function recommendationScore(v: MockVendor): number {
+  let score = 0
+  if (v.conventionSlot || (v.upcomingEvents ?? 0) > 0) score += 3
+  score += Math.min(v.verifiedFeedbackCount ?? 0, 10) * 0.2
+  score += (v.rating ?? 0) * 0.4
+  if (v.listingImageUrl?.trim() || v.logoUrl?.trim() || v.bannerUrl?.trim()) score += 0.5
+  return score
+}
+
+function applyDirectorySort(list: MockVendor[], sort: DirectorySort): MockVendor[] {
+  if (sort === 'Community reviewed') {
+    return [...list].sort(
+      (a, b) => (b.verifiedFeedbackCount ?? 0) - (a.verifiedFeedbackCount ?? 0) || (b.rating ?? 0) - (a.rating ?? 0),
+    )
+  }
+  if (sort === 'Recommended') {
+    return [...list].sort((a, b) => recommendationScore(b) - recommendationScore(a))
+  }
+  return list
+}
+
+function directoryFilterSummary(opts: {
+  searchQuery: string
+  selectedCategory: string | null
+  shipsTo: ShipsToFilter
+  minRating: number
+  sortTab: DirectorySort
+}): string | null {
+  const parts: string[] = []
+  if (opts.searchQuery.trim()) parts.push(`"${opts.searchQuery.trim()}"`)
+  if (opts.selectedCategory) parts.push(opts.selectedCategory)
+  if (opts.shipsTo) parts.push(`Ships ${opts.shipsTo}`)
+  if (opts.minRating > 0) parts.push(`${opts.minRating}+ stars`)
+  if (opts.sortTab !== DEFAULT_SORT) parts.push(opts.sortTab)
+  return parts.length > 0 ? parts.join(' · ') : null
+}
+
+function countDirectoryFilters(opts: {
+  searchQuery: string
+  selectedCategory: string | null
+  shipsTo: ShipsToFilter
+  minRating: number
+  sortTab: DirectorySort
+}): number {
+  let n = 0
+  if (opts.searchQuery.trim()) n++
+  if (opts.selectedCategory) n++
+  if (opts.shipsTo) n++
+  if (opts.minRating > 0) n++
+  if (opts.sortTab !== DEFAULT_SORT) n++
+  return n
+}
 
 export default function VendorsPage() {
   const { isAuthenticated } = useAuth()
@@ -31,7 +97,7 @@ export default function VendorsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [shipsTo, setShipsTo] = useState<ShipsToFilter>('')
   const [minRating, setMinRating] = useState(0)
-  const [sortTab, setSortTab] = useState<VendorSortTab>('Top rated')
+  const [sortTab, setSortTab] = useState<DirectorySort>(DEFAULT_SORT)
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)
 
   const homeDemoFallbackEnv = import.meta.env.VITE_HOME_DEMO_FALLBACK === 'true'
@@ -65,26 +131,25 @@ export default function VendorsPage() {
 
   const categoryCounts = useMemo(() => countVendorsByCategory(vendorsForCounts), [vendorsForCounts])
 
-  const filteredVendors = useMemo(
-    () =>
-      filterVendors(vendorSource, {
-        searchQuery: apiBackedVendors && searchQuery.trim().length >= 2 ? '' : searchQuery,
-        selectedCategory: apiBackedVendors ? null : selectedCategory,
-        shipsTo: apiBackedVendors ? '' : shipsTo,
-        minRating: apiBackedVendors ? 0 : minRating,
-        sortTab,
-      }),
-    [vendorSource, searchQuery, selectedCategory, shipsTo, minRating, sortTab, apiBackedVendors],
-  )
+  const filteredVendors = useMemo(() => {
+    const base = filterVendors(vendorSource, {
+      searchQuery: apiBackedVendors && searchQuery.trim().length >= 2 ? '' : searchQuery,
+      selectedCategory: apiBackedVendors ? null : selectedCategory,
+      shipsTo: apiBackedVendors ? '' : shipsTo,
+      minRating: apiBackedVendors ? 0 : minRating,
+      sortTab: SORT_TO_VENDOR_TAB[sortTab],
+    })
+    return applyDirectorySort(base, sortTab)
+  }, [vendorSource, searchQuery, selectedCategory, shipsTo, minRating, sortTab, apiBackedVendors])
 
   const hasActiveFilters =
     Boolean(searchQuery.trim()) ||
     selectedCategory !== null ||
     shipsTo !== '' ||
     minRating > 0 ||
-    sortTab !== 'Top rated'
+    sortTab !== DEFAULT_SORT
 
-  const activeFilterCount = countActiveVendorFilters({
+  const activeFilterCount = countDirectoryFilters({
     searchQuery,
     selectedCategory,
     shipsTo,
@@ -112,11 +177,11 @@ export default function VendorsPage() {
     setSelectedCategory(null)
     setShipsTo('')
     setMinRating(0)
-    setSortTab('Top rated')
+    setSortTab(DEFAULT_SORT)
     setFilterSheetOpen(false)
   }
 
-  const activeFilterSummary = filterSummaryLabel({
+  const activeFilterSummary = directoryFilterSummary({
     searchQuery,
     selectedCategory,
     shipsTo,
@@ -132,7 +197,7 @@ export default function VendorsPage() {
     filters: { selectedCategory, shipsTo, minRating, sortTab },
     categoryCounts,
     totalCount: vendorsForCounts.length,
-    sortTabs: SORT_TABS,
+    sortTabs: SORT_OPTIONS,
     shopFacetVendors,
     filteredCount: filteredVendors.length,
     onCategoryChange: setSelectedCategory,
@@ -153,7 +218,7 @@ export default function VendorsPage() {
             <div className="min-w-0 flex-1">
               <h1 className="text-xl font-bold tracking-tight text-dc-text sm:text-2xl lg:text-3xl">Vendors &amp; Shops</h1>
               <p className="mt-1 max-w-2xl text-xs leading-snug text-dc-text-muted sm:text-sm">
-                Discover makers, vendors, and service providers. Purchases happen through each vendor&apos;s own shop.
+                Discover vendors, makers, educators, and service providers in the community.
               </p>
               <p className="mt-2 flex max-w-2xl items-start gap-2 text-[11px] leading-relaxed text-dc-muted sm:text-xs">
                 <svg className="mt-0.5 h-4 w-4 shrink-0 text-dc-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -165,8 +230,8 @@ export default function VendorsPage() {
                   />
                 </svg>
                 <span>
-                  Kink Social helps you discover vendors. Orders, payments, shipping, and refunds happen through the vendor&apos;s
-                  external shop.
+                  Kink Social does not process orders or payments — purchases, shipping, refunds, and commissions happen
+                  through each vendor&apos;s external shop.
                 </span>
               </p>
             </div>
@@ -202,7 +267,7 @@ export default function VendorsPage() {
                 id={searchId}
                 type="search"
                 name="vendor-search"
-                placeholder="Search vendors by name, specialty, category, or product…"
+                placeholder="Search vendors by name, specialty, or category…"
                 autoComplete="off"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -217,10 +282,10 @@ export default function VendorsPage() {
               <select
                 id="vendor-sort-mobile"
                 value={sortTab}
-                onChange={(e) => setSortTab(e.target.value as VendorSortTab)}
+                onChange={(e) => setSortTab(e.target.value as DirectorySort)}
                 className="min-h-11 min-w-0 flex-1 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 text-sm text-dc-text sm:w-auto sm:flex-none"
               >
-                {SORT_TABS.map((tab) => (
+                {SORT_OPTIONS.map((tab) => (
                   <option key={tab} value={tab}>
                     Sort: {tab}
                   </option>
@@ -292,7 +357,7 @@ export default function VendorsPage() {
         : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filteredVendors.map((v, index) => (
-              <VendorCard key={String(v.id)} vendor={v} compact={index >= 3} />
+              <VendorDirectoryCard key={String(v.id)} vendor={v} compact={index >= 3} />
             ))}
           </div>
         )}

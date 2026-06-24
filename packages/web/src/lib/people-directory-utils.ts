@@ -95,6 +95,24 @@ export function getPersonCommunityBadges(person: MockPerson): PersonCommunityBad
 
   }
 
+  if (roles.some((r) => /volunteer/i.test(r))) {
+
+    badges.push({ id: 'volunteer', label: 'Volunteer', tone: 'green' })
+
+  }
+
+  if (roles.some((r) => /moderator/i.test(r))) {
+
+    badges.push({ id: 'moderator', label: 'Moderator', tone: 'orange' })
+
+  }
+
+  if (person.badges?.includes('education_completed') || person.badges?.includes('community_contributor')) {
+
+    badges.push({ id: 'education', label: 'Education contributor', tone: 'blue' })
+
+  }
+
   return badges
 
 }
@@ -117,11 +135,15 @@ export function getPersonHeadlineRole(person: MockPerson): string | null {
 
 
 
-export function formatPersonContextLines(person: MockPerson): string[] {
-
-  const lines: string[] = []
-
-  const hosted = person.hostedEventsCount ?? 0
+/**
+ * One short, privacy-safe "why you're seeing this" line per card.
+ *
+ * Returns at most a single reason, prioritized strongest-signal first. Only uses
+ * counts already present in the page's data flow (co-attendance / mutual graph /
+ * public contribution counts). Never exposes hidden groups, private RSVPs, or
+ * presence — all inputs are either mutual-with-viewer or public profile facts.
+ */
+export function formatPersonContextLine(person: MockPerson): string | null {
 
   const mutualGroups = person.mutualGroupsCount ?? 0
 
@@ -129,21 +151,30 @@ export function formatPersonContextLines(person: MockPerson): string[] {
 
   const mutual = person.mutualCount ?? 0
 
-
-
-  if (hosted > 0) lines.push(`${hosted} hosted event${hosted === 1 ? '' : 's'}`)
-
-  if (shared > 0) lines.push(`${shared} mutual event${shared === 1 ? '' : 's'}`)
-
-  else if (mutual > 0) lines.push(`${mutual} mutual`)
-
-  if (mutualGroups > 0) lines.push(`${mutualGroups} mutual group${mutualGroups === 1 ? '' : 's'}`)
+  const hosted = person.hostedEventsCount ?? 0
 
   const articles = person.publishedArticlesCount ?? 0
 
-  if (articles > 0) lines.push(`${articles} published article${articles === 1 ? '' : 's'}`)
+  if (mutualGroups > 0) return mutualGroups === 1 ? 'Shared group' : `${mutualGroups} shared groups`
 
-  return lines
+  if (shared > 0) return shared === 1 ? 'Shared event' : `${shared} shared events`
+
+  if (mutual > 0) return mutual === 1 ? '1 mutual connection' : `${mutual} mutual connections`
+
+  if (hosted > 0) return 'Hosts community events'
+
+  if (articles > 0) return 'Education contributor'
+
+  return null
+
+}
+
+/** @deprecated Use formatPersonContextLine — kept for any legacy imports. */
+export function formatPersonContextLines(person: MockPerson): string[] {
+
+  const line = formatPersonContextLine(person)
+
+  return line ? [line] : []
 
 }
 

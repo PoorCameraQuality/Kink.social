@@ -28,7 +28,7 @@ export default function ExploreFeaturedTrendingCard({ item }: Props) {
         <p className="text-[10px] font-bold uppercase tracking-wider text-dc-accent sm:text-xs">{trendingKindLabel(item.kind)}</p>
         <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug text-dc-text sm:text-base">{item.title}</p>
         {item.subtitle ?
-          <p className="mt-0.5 line-clamp-1 text-xs text-dc-text-muted">{item.subtitle}</p>
+          <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-dc-text-muted">{item.subtitle}</p>
         : null}
       </div>
     </Link>

@@ -8,9 +8,8 @@ import { useAuth } from '@/contexts/AuthContext'
 import { profileTarget } from '@/lib/moderation/report-targets'
 import { activityIndicatorFromISO } from '@/lib/profile-activity'
 import {
-  formatPersonContextLines,
+  formatPersonContextLine,
   getPersonCommunityBadges,
-  getPersonHeadlineRole,
 } from '@/lib/people-directory-utils'
 import type { MockPerson } from '@/data/types'
 
@@ -22,12 +21,14 @@ type Props = {
   mobileCompact?: boolean
 }
 
+// Quiet, single-language role pills. Reserve color/accent for the verified pill
+// only; community roles read as calm context, not loud rainbow tags.
 const BADGE_TONE_CLASS: Record<string, string> = {
-  gold: 'border-dc-accent/50 bg-dc-accent-muted/40 text-dc-accent',
-  green: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
-  blue: 'border-sky-500/40 bg-sky-500/10 text-sky-300',
-  purple: 'border-violet-500/40 bg-violet-500/10 text-violet-300',
-  orange: 'border-orange-500/40 bg-orange-500/10 text-orange-300',
+  gold: 'border-dc-accent/30 bg-dc-accent-muted/30 text-dc-accent/90',
+  green: 'border-dc-border bg-dc-elevated-muted/60 text-dc-text-muted',
+  blue: 'border-dc-border bg-dc-elevated-muted/60 text-dc-text-muted',
+  purple: 'border-dc-border bg-dc-elevated-muted/60 text-dc-text-muted',
+  orange: 'border-dc-border bg-dc-elevated-muted/60 text-dc-text-muted',
 }
 
 export default function FindPeopleProfileCard({ person, recommended, mobileCompact = false }: Props) {
@@ -66,17 +67,28 @@ export default function FindPeopleProfileCard({ person, recommended, mobileCompa
   } = person
 
   const displayName = sceneName?.trim() || username
-  const headlineRole = getPersonHeadlineRole(person)
   const communityBadges = getPersonCommunityBadges(person)
   const visibleBadges = mobileCompact ? communityBadges.slice(0, 2) : communityBadges
   const extraBadgeCount = mobileCompact ? Math.max(0, communityBadges.length - visibleBadges.length) : 0
-  const contextLines = formatPersonContextLines(person)
+  const contextLine = formatPersonContextLine(person)
   const activity = activityIndicatorFromISO(lastActiveAt ?? undefined)
   const showActivity = activity.label && !activity.hidden
-  const locationLine = [headlineRole, location?.trim()].filter(Boolean).join(' · ')
+  const locationLine = location?.trim() || ''
   const distanceSuffix = distance?.trim() ? distance.trim() : null
   const showMessage = localConnectionStatus === 'connected' || canMessageDirectly === true
   const apiConnectEnabled = isAuthenticated && !isFallback
+
+  const profileHref = `/profile/${username}`
+  // Primary card action: View profile (neutral-strong, no rose). Rose is reserved
+  // for page-level actions, not repeated per-card CTAs.
+  const primaryActionClass =
+    'inline-flex min-h-10 flex-1 items-center justify-center rounded-lg border border-dc-border-strong bg-dc-elevated-solid px-3 text-xs font-semibold text-dc-text transition-colors hover:border-dc-accent-border/60 hover:text-dc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dc-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface sm:min-h-11'
+  // Intentional secondary (Message / Respond): accent outline, never solid.
+  const secondaryAccentClass =
+    'inline-flex min-h-10 flex-1 items-center justify-center rounded-lg border border-dc-accent/50 bg-transparent px-3 text-xs font-semibold text-dc-accent transition-colors hover:bg-dc-accent-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dc-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface disabled:opacity-60 sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]'
+  // Quiet secondary (Connect): de-emphasized outline.
+  const quietActionClass =
+    'inline-flex min-h-10 flex-1 items-center justify-center rounded-lg border border-dc-border bg-transparent px-3 text-xs font-medium text-dc-text-muted transition-colors hover:border-dc-accent-border/50 hover:text-dc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dc-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]'
 
   const sendConnectRequest = async () => {
     if (!apiConnectEnabled || connectBusy) return
@@ -98,10 +110,6 @@ export default function FindPeopleProfileCard({ person, recommended, mobileCompa
       setConnectBusy(false)
     }
   }
-
-  const connectBtnClass = recommended ?
-      'inline-flex min-h-10 flex-1 items-center justify-center rounded-lg bg-dc-accent px-3 text-xs font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover disabled:opacity-60 sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]'
-    : 'inline-flex min-h-10 flex-1 items-center justify-center rounded-lg border border-dc-accent/60 bg-transparent px-3 text-xs font-semibold text-dc-accent hover:bg-dc-accent-muted disabled:opacity-60 sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]'
 
   return (
     <Card
@@ -137,8 +145,13 @@ export default function FindPeopleProfileCard({ person, recommended, mobileCompa
           {!mobileCompact && bio?.trim() ?
             <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-dc-text-muted">{bio.trim()}</p>
           : null}
-          {!mobileCompact && contextLines.length > 0 ?
-            <p className="mt-1.5 text-[11px] leading-snug text-dc-text-muted">{contextLines.join(' · ')}</p>
+          {!mobileCompact && contextLine ?
+            <p className="mt-1.5 inline-flex items-center gap-1 text-[11px] leading-snug text-dc-muted">
+              <svg className="h-3 w-3 shrink-0 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {contextLine}
+            </p>
           : null}
           {!mobileCompact && showActivity ?
             <p className="mt-1 text-[11px] text-dc-muted">{activity.label}</p>
@@ -208,57 +221,31 @@ export default function FindPeopleProfileCard({ person, recommended, mobileCompa
       </div>
 
       <div className={`mt-4 flex flex-wrap items-center gap-2 border-t border-dc-border pt-3 ${mobileCompact ? 'max-sm:mt-3 max-sm:pt-2' : ''}`}>
+        <Link to={profileHref} className={primaryActionClass}>
+          View profile
+        </Link>
         {showMessage ?
-          <>
-            <Link
-              to={`/messaging?user=${encodeURIComponent(username)}`}
-              className={recommended ?
-                'inline-flex min-h-10 flex-1 items-center justify-center rounded-lg bg-dc-accent px-3 text-xs font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]'
-              : 'inline-flex min-h-10 flex-1 items-center justify-center rounded-lg border border-dc-accent/60 bg-transparent px-3 text-xs font-semibold text-dc-accent hover:bg-dc-accent-muted sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]'}
-            >
-              Message
-            </Link>
-            <Link
-              to={`/profile/${username}`}
-              className="inline-flex min-h-10 flex-1 items-center justify-center rounded-lg px-3 text-xs font-medium text-dc-text-muted hover:text-dc-text sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]"
-            >
-              View profile
-            </Link>
-          </>
-        : <>
-            {localConnectionStatus === 'pending_incoming' ?
-              <Link
-                to="/connections?tab=requests"
-                className="inline-flex min-h-10 flex-1 items-center justify-center rounded-lg bg-dc-accent px-3 text-xs font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]"
-              >
-                Respond
-              </Link>
-            : localConnectionStatus === 'pending_outgoing' ?
-              <button
-                type="button"
-                disabled
-                className="inline-flex min-h-10 flex-1 cursor-not-allowed items-center justify-center rounded-lg bg-dc-accent/40 px-3 text-xs font-semibold text-dc-accent-foreground/80 sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]"
-              >
-                Request sent
-              </button>
-            : apiConnectEnabled ?
-              <button
-                type="button"
-                disabled={connectBusy}
-                onClick={() => void sendConnectRequest()}
-                className={connectBtnClass}
-              >
-                {connectBusy ? 'Sending…' : 'Connect'}
-              </button>
-            : null}
-            <Link
-              to={`/profile/${username}`}
-              className="inline-flex min-h-10 flex-1 items-center justify-center rounded-lg px-3 text-xs font-medium text-dc-text-muted hover:text-dc-text sm:min-h-11 sm:flex-none sm:min-w-[5.5rem]"
-            >
-              View profile
-            </Link>
-          </>
-        }
+          <Link to={`/messaging?user=${encodeURIComponent(username)}`} className={secondaryAccentClass}>
+            Message
+          </Link>
+        : localConnectionStatus === 'pending_incoming' ?
+          <Link to="/connections?tab=requests" className={secondaryAccentClass}>
+            Respond
+          </Link>
+        : localConnectionStatus === 'pending_outgoing' ?
+          <button type="button" disabled className={quietActionClass}>
+            Request sent
+          </button>
+        : apiConnectEnabled ?
+          <button
+            type="button"
+            disabled={connectBusy}
+            onClick={() => void sendConnectRequest()}
+            className={quietActionClass}
+          >
+            {connectBusy ? 'Sending…' : 'Connect'}
+          </button>
+        : null}
       </div>
     </Card>
   )

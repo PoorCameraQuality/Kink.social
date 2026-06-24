@@ -9,7 +9,7 @@ import DirectoryTemplate, { DirectoryFilterButton } from '@/components/templates
 import FilterSheet from '@/components/templates/FilterSheet'
 import EmptyState from '@/components/ui/EmptyState'
 import { useApiPeopleSearch } from '@/hooks/useApiPeopleSearch'
-import { PEOPLE_STREAM_TABS } from '@/lib/people-search-constants'
+import { PEOPLE_STREAM_TABS, peopleStreamTabLabel } from '@/lib/people-search-constants'
 import type { CommunityRoleFilterId } from '@/lib/people-search-constants'
 import { shellOuterClass } from '@/lib/shell-contract'
 import { cn } from '@/lib/cn'
@@ -248,7 +248,7 @@ export default function FindPeopleDiscoverPage() {
               >
                 {PEOPLE_STREAM_TABS.map((tab) => (
                   <option key={tab} value={tab}>
-                    {tab}
+                    {peopleStreamTabLabel(tab)}
                   </option>
                 ))}
               </select>
@@ -259,7 +259,7 @@ export default function FindPeopleDiscoverPage() {
         desktopAside={<FindPeopleRightRail peopleApiBacked={peopleApiBacked} useDemoFallback={useDemoFallback} />}
       >
         {!searchQuery.trim() ?
-          <FindPeopleScopeTabs active={streamTab} onChange={setStreamTab} totalCount={totalCount} />
+          <FindPeopleScopeTabs active={streamTab} onChange={setStreamTab} />
         : null}
 
         {peopleLoadError && !peopleLoading ?

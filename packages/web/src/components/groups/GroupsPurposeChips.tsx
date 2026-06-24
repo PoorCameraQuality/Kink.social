@@ -30,10 +30,11 @@ export default function GroupsPurposeChips({ selected, onToggle, moreOpen, onMor
               key={chip.label}
               type="button"
               onClick={() => onToggle(p)}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+              aria-pressed={on}
+              className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent ${
                 on ?
-                  'bg-dc-accent text-dc-accent-foreground'
-                : 'border border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:text-dc-text'
+                  'border border-dc-accent-border bg-dc-accent-muted text-dc-accent'
+                : 'border border-dc-border bg-dc-elevated-solid text-dc-text-muted hover:border-dc-accent-border/40 hover:text-dc-text'
               }`}
             >
               {chip.label}
@@ -43,10 +44,10 @@ export default function GroupsPurposeChips({ selected, onToggle, moreOpen, onMor
         <button
           type="button"
           onClick={onMoreToggle}
-          className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent ${
             moreOpen ?
-              'border border-dc-accent-border text-dc-accent'
-            : 'border border-dc-border text-dc-text-muted hover:text-dc-text'
+              'border border-dc-accent-border bg-dc-accent-muted/60 text-dc-accent'
+            : 'border border-dc-border text-dc-text-muted hover:border-dc-accent-border/40 hover:text-dc-text'
           }`}
           aria-expanded={moreOpen}
         >
@@ -62,8 +63,11 @@ export default function GroupsPurposeChips({ selected, onToggle, moreOpen, onMor
                 key={p}
                 type="button"
                 onClick={() => onToggle(p)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-                  on ? 'bg-dc-accent-muted text-dc-accent' : 'text-dc-text-muted hover:text-dc-text'
+                aria-pressed={on}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent ${
+                  on ?
+                    'border-dc-accent-border bg-dc-accent-muted text-dc-accent'
+                  : 'border-transparent text-dc-text-muted hover:border-dc-border hover:text-dc-text'
                 }`}
               >
                 {p}

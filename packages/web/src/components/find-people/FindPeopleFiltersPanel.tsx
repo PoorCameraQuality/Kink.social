@@ -134,7 +134,7 @@ export default function FindPeopleFiltersPanel({
 
         <div className="flex items-center justify-between gap-2">
 
-          <h3 className="text-sm font-semibold text-dc-text">Refine your search</h3>
+          <h3 className="text-sm font-semibold text-dc-text">Refine search</h3>
 
           <button type="button" onClick={onResetAll} className="text-xs font-medium text-dc-accent hover:underline">
 
@@ -259,7 +259,7 @@ export default function FindPeopleFiltersPanel({
 
         <h4 id={`${idPrefix}-community-heading`} className="mb-3 text-xs font-semibold uppercase tracking-wide text-dc-muted">
 
-          Community filters
+          Community role &amp; discoverability
 
         </h4>
 
@@ -412,7 +412,9 @@ export default function FindPeopleFiltersPanel({
 
                       onClick={() => onToggleInterestRole(role)}
 
-                      className={`min-h-9 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                      aria-pressed={selected}
+
+                      className={`min-h-9 rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dc-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface ${
 
                         selected ?
 

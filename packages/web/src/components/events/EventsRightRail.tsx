@@ -6,13 +6,28 @@ import { EVENT_CATEGORY_VALUES } from '@c2k/shared'
 import type { MockEvent } from '@/data/types'
 import { countEventsByCategory, resolveEventHeroUrl } from '@/lib/events-page-utils'
 
-const LOCATION_COUNTS = [
-  { city: 'Philadelphia, PA', count: 46 },
-  { city: 'New York, NY', count: 38 },
-  { city: 'Baltimore, MD', count: 29 },
-  { city: 'Pittsburgh, PA', count: 22 },
-  { city: 'Washington, DC', count: 19 },
-]
+/** Curated regions shown only when we cannot derive real cities from the data. */
+const FALLBACK_REGIONS = ['Philadelphia, PA', 'New York, NY', 'Baltimore, MD', 'Pittsburgh, PA', 'Washington, DC']
+
+const CITY_STATE_RE = /([A-Za-z][A-Za-z .'-]+,\s*[A-Z]{2})\b/
+
+/** Pull "City, ST" out of public location strings, skipping redacted/online ones. */
+function deriveCityCounts(events: MockEvent[]): { city: string; count: number }[] {
+  const counts = new Map<string, number>()
+  for (const e of events) {
+    const loc = e.location?.trim()
+    if (!loc) continue
+    if (/online|shared after rsvp|tba/i.test(loc)) continue
+    const match = loc.match(CITY_STATE_RE)
+    if (!match) continue
+    const city = match[1].replace(/\s+/g, ' ').trim()
+    counts.set(city, (counts.get(city) ?? 0) + 1)
+  }
+  return [...counts.entries()]
+    .map(([city, count]) => ({ city, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+}
 
 type Props = {
   allEvents: MockEvent[]
@@ -22,6 +37,7 @@ type Props = {
 export default function EventsRightRail({ allEvents, suggested }: Props) {
   const categoryCounts = countEventsByCategory(allEvents)
   const picks = suggested.length > 0 ? suggested.slice(0, 3) : allEvents.slice(3, 6)
+  const cityCounts = deriveCityCounts(allEvents)
 
   return (
     <aside className={railAsideClass} aria-label="Events discovery">
@@ -33,6 +49,11 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
       </RailCard>
 
       <RailCard title="Worth checking next">
+        {picks.length === 0 ?
+          <p className="text-xs text-dc-text-muted">
+            No events to compare yet. New gatherings show up here as organizers post them.
+          </p>
+        : <>
         <p className="mb-2 text-xs text-dc-text-muted">Compare these before you RSVP.</p>
         <ul className="space-y-3">
           {picks.map((ev) => {
@@ -51,7 +72,9 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
                     <span className="block text-sm font-medium text-dc-text line-clamp-2">{ev.title}</span>
                     <span className="text-xs text-dc-muted">{ev.date}</span>
                     <span className="block text-xs text-dc-muted">
-                      {(ev.mutualGoingCount ?? 0) > 0 ? `${ev.mutualGoingCount} friends going` : `${ev.rsvpCount} going`}
+                      {(ev.mutualGoingCount ?? 0) > 0 ?
+                        `${ev.mutualGoingCount} connection${ev.mutualGoingCount === 1 ? '' : 's'} going`
+                      : `${ev.rsvpCount} going`}
                     </span>
                   </span>
                 </Link>
@@ -59,6 +82,8 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
             )
           })}
         </ul>
+        </>
+        }
       </RailCard>
 
       <RailCard title="Explore by category">
@@ -74,15 +99,31 @@ export default function EventsRightRail({ allEvents, suggested }: Props) {
       </RailCard>
 
       <RailCard title="Browse by city">
-        <p className="mb-2 text-xs text-dc-text-muted">Popular places members list events.</p>
-        <ul className="space-y-2 text-sm">
-          {LOCATION_COUNTS.map((row) => (
-            <li key={row.city} className="flex items-center justify-between gap-2">
-              <span className="text-dc-text-muted">{row.city}</span>
-              <span className="shrink-0 text-xs text-dc-muted">{row.count} events</span>
-            </li>
-          ))}
-        </ul>
+        {cityCounts.length > 0 ?
+          <>
+            <p className="mb-2 text-xs text-dc-text-muted">Where listed events are happening.</p>
+            <ul className="space-y-2 text-sm">
+              {cityCounts.map((row) => (
+                <li key={row.city} className="flex items-center justify-between gap-2">
+                  <span className="text-dc-text-muted">{row.city}</span>
+                  <span className="shrink-0 text-xs text-dc-muted">
+                    {row.count} event{row.count === 1 ? '' : 's'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </>
+        : <>
+            <p className="mb-2 text-xs text-dc-text-muted">Regions where members tend to gather.</p>
+            <ul className="space-y-2 text-sm">
+              {FALLBACK_REGIONS.map((city) => (
+                <li key={city} className="text-dc-text-muted">
+                  {city}
+                </li>
+              ))}
+            </ul>
+          </>
+        }
       </RailCard>
 
       <div className="rounded-2xl border border-dc-border/80 bg-dc-elevated-solid/60 p-4">

@@ -9,12 +9,12 @@ import ExploreFeaturedTrendingCard from '@/components/explore/ExploreFeaturedTre
 import ExploreFiltersPanel from '@/components/explore/ExploreFiltersPanel'
 import ExploreHubHeader from '@/components/explore/ExploreHubHeader'
 import ExploreHubSection from '@/components/explore/ExploreHubSection'
+import ExplorePersonPreviewCard from '@/components/explore/ExplorePersonPreviewCard'
 import ExploreSuggestedRow from '@/components/explore/ExploreSuggestedRow'
-import FindPeopleProfileCard from '@/components/find-people/FindPeopleProfileCard'
 import MediaChannelCard from '@/components/media/MediaChannelCard'
 import OrgDirectoryCard from '@/components/orgs/OrgDirectoryCard'
 import EmptyState from '@/components/ui/EmptyState'
-import { mockPeople, mockVendors } from '@/data/mock-data'
+import { mockPeople, mockVendors, type MockVendor } from '@/data/mock-data'
 import { useAuth } from '@/contexts/AuthContext'
 import { useApiEducationArticles } from '@/hooks/useApiEducationArticles'
 import { useApiMediaShows } from '@/hooks/useApiMediaShows'
@@ -35,6 +35,7 @@ import {
   buildExploreActiveFilterPills,
   buildExplorePeoplePool,
   buildSuggestedItems,
+  exploreFiltersActive,
   filterArticles,
   filterEvents,
   filterGroups,
@@ -62,6 +63,18 @@ const START_EXPLORING_LINKS = [
   { href: '/orgs', label: 'Organizations', hint: 'Find hosts and educators near you.' },
   { href: '/education', label: 'Education', hint: 'Read guides and workshop paths.' },
 ] as const
+
+/**
+ * Explore frames vendors as discovery only — never a storefront. Strip pricing so
+ * previews don't read like a marketplace; checkout always happens on the vendor's
+ * own external store (VendorCard keeps the "Sold externally" framing).
+ */
+function toExploreVendor(vendor: MockVendor): MockVendor {
+  const copy = { ...vendor }
+  delete copy.featuredListingPriceCents
+  delete copy.featuredListingCurrency
+  return copy
+}
 
 const EXPLORE_MOBILE_ORDER: Record<number, string> = {
   3: 'order-3',
@@ -176,6 +189,8 @@ export default function ExploreDashboardPage() {
   )
 
   const q = searchQuery.trim()
+  const filtersActive = useMemo(() => exploreFiltersActive(filters), [filters])
+  const hasSearchOrFilter = q.length > 0 || filtersActive
 
   const events = useMemo(() => {
     const searched = filterEvents(rankedEvents, q)
@@ -196,6 +211,17 @@ export default function ExploreDashboardPage() {
     const searched = filterVendors(vendingSoon, q)
     return applyExploreVendorFilters(searched, filters)
   }, [vendingSoon, q, filters])
+
+  /**
+   * Discovery preview: prefer "vending soon" matches; when nothing is vending and
+   * the visitor hasn't searched/filtered, fall back to a couple of recent vendors so
+   * the module never looks like a broken/empty search.
+   */
+  const vendorPreview = useMemo(() => {
+    if (vendors.length > 0) return vendors.slice(0, 2)
+    if (!hasSearchOrFilter) return vendorPool.slice(0, 2)
+    return []
+  }, [vendors, hasSearchOrFilter, vendorPool])
 
   const trending = useMemo(() => {
     const searched = filterTrending(displayTrendingItems, q)
@@ -329,7 +355,7 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.featured, 'third', !showEvents)}
         title="Featured this week"
-        description="Posts, events, and education with recent engagement across the network."
+        description="A quick pulse of what's active — posts, events, and education getting attention across the network right now."
       >
         {homeTrendingLoading ?
           <ul className="space-y-2" aria-busy="true">
@@ -409,9 +435,23 @@ export default function ExploreDashboardPage() {
         : featuredOrgs.length === 0 ?
           <p className="text-sm text-dc-muted">No organizations match your search.</p>
         : <div className="space-y-3">
-            {featuredOrgs.map((org) => (
-              <OrgDirectoryCard key={org.id} org={org} canManage={viewerCanManageOrg(bySlug, org.slug)} compact />
-            ))}
+            {featuredOrgs.map((org) => {
+              const canManage = viewerCanManageOrg(bySlug, org.slug)
+              return (
+                <div key={org.id} className="space-y-1.5">
+                  {/* Explore is discovery: lead with the public page, not an admin console. */}
+                  <OrgDirectoryCard org={org} canManage={false} compact />
+                  {canManage ?
+                    <Link
+                      to={`/organizer/orgs/${encodeURIComponent(org.slug)}`}
+                      className="inline-flex items-center gap-1 rounded px-1 text-xs font-medium text-dc-text-muted hover:text-dc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
+                    >
+                      Manage this organization →
+                    </Link>
+                  : null}
+                </div>
+              )
+            })}
           </div>
         }
       </ExploreHubSection>
@@ -423,7 +463,7 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.people, 'third')}
         title="People to discover"
-        description="Members active near you and in scenes you follow — connection decisions start here."
+        description="Members active near you and in scenes you follow. Open a profile to learn more — connecting is up to you."
         href={PEOPLE_DIRECTORY_PATH}
         linkLabel="Open people directory"
       >
@@ -433,9 +473,9 @@ export default function ExploreDashboardPage() {
               'No people match your search.'
             : 'No suggestions yet. Attend events or open the full People directory to browse members.'}
           </p>
-        : <div className="space-y-3">
-            {people.slice(0, 2).map((person, index) => (
-              <FindPeopleProfileCard key={String(person.id)} person={person} mobileCompact={index > 0} />
+        : <div className="space-y-2">
+            {people.slice(0, 3).map((person) => (
+              <ExplorePersonPreviewCard key={String(person.id)} person={person} />
             ))}
           </div>
         }
@@ -448,17 +488,28 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.vendors, 'third')}
         title="Vendors"
-        description="Shops and makers — browse listings or visit an external store. Checkout stays on vendor sites."
+        description="Shops and makers in the community. Discover them here, then check out on each vendor's own store — kink.social never handles payment."
         href="/vendors"
         linkLabel="Browse all vendors"
       >
-        {vendors.length === 0 ?
-          <p className="text-sm text-dc-muted">No vendors match your search.</p>
-        : <div className="space-y-3">
-            {vendors.slice(0, 1).map((v) => (
-              <VendorCard key={String(v.id)} vendor={v} />
+        {vendorPreview.length > 0 ?
+          <div className="space-y-3">
+            {vendorPreview.map((v) => (
+              <VendorCard key={String(v.id)} vendor={toExploreVendor(v)} compact />
             ))}
           </div>
+        : <Link
+            to="/vendors"
+            className="xpl-teaser-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
+          >
+            <p className="text-sm font-semibold text-dc-text">Vendor directory</p>
+            <p className="text-sm text-dc-text-muted">
+              {hasSearchOrFilter ?
+                'No vendor matches yet. Browse all vendors or adjust your filters.'
+              : 'No featured vendors yet. Browse the full directory of community shops and makers — checkout always stays on the vendor’s own store.'}
+            </p>
+            <span className="mt-1 text-sm font-medium text-dc-accent">Browse all vendors →</span>
+          </Link>
         }
       </ExploreHubSection>
     : null

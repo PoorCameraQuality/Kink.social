@@ -23,7 +23,7 @@ export default function ExploreCompactTrendingRow({ item }: Props) {
           <p className="text-xs font-semibold uppercase tracking-wide text-dc-accent">{trendingKindLabel(item.kind)}</p>
           <p className="text-sm font-medium text-dc-text line-clamp-2">{item.title}</p>
           {item.subtitle ?
-            <p className="text-xs text-dc-text-muted line-clamp-1 mt-0.5">{item.subtitle}</p>
+            <p className="text-xs text-dc-text-muted line-clamp-2 mt-0.5">{item.subtitle}</p>
           : null}
         </div>
       </Link>

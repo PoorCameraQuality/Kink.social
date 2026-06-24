@@ -102,40 +102,29 @@ export default function FindPeopleRightRail({ useDemoFallback, peopleApiBacked }
 
   return (
     <aside className={railAsideClass} aria-label="People discovery suggestions">
-      <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-        <h3 className="text-sm font-semibold text-dc-text">Follow vs Connect</h3>
-        <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">{FOLLOW_VS_CONNECT_SHORT}</p>
-        <Link to="/connections" className="mt-2 inline-block text-xs font-medium text-dc-accent hover:underline">
-          Manage connections
-        </Link>
-      </div>
+      <RailCard title="Follow vs Connect" footerHref="/connections" footerLabel="Manage connections">
+        <p className="text-xs leading-relaxed text-dc-text-muted">{FOLLOW_VS_CONNECT_SHORT}</p>
+      </RailCard>
 
-      <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-        <div className="flex items-start gap-2">
-          <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dc-accent-muted text-dc-accent"
-            aria-hidden
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.75}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
-          </span>
-          <div>
-            <h3 className="text-sm font-semibold text-dc-text">Connection safety</h3>
-            <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">
-              Only connect with people you trust. You can ignore, block, or report someone anytime.
-            </p>
-            <Link to="/support" className="mt-2 inline-block text-xs font-medium text-dc-accent hover:underline">
-              Safety tips
-            </Link>
-          </div>
-        </div>
-      </div>
+      <RailCard
+        title="Connection safety"
+        footerHref="/support"
+        footerLabel="Safety tips"
+        icon={
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.75}
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            />
+          </svg>
+        }
+      >
+        <p className="text-xs leading-relaxed text-dc-text-muted">
+          Only connect with people you trust. You can ignore, block, or report someone anytime.
+        </p>
+      </RailCard>
 
       <RailCard title="Suggested from shared events" footerHref="/connections" footerLabel="Connections →">
         <SuggestedRows rows={coRows} emptyMessage={coEmptyMessage} />
@@ -168,26 +157,25 @@ export default function FindPeopleRightRail({ useDemoFallback, peopleApiBacked }
         }
       </RailCard>
 
-      <div className="rounded-2xl border border-dc-accent-border/60 bg-dc-accent-muted/30 p-4">
-        <p className="text-sm font-semibold text-dc-accent">Expand your circle</p>
-        <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">
+      <RailCard title="Expand your circle" emphasize>
+        <p className="text-xs leading-relaxed text-dc-text-muted">
           Explore groups and events where members are already gathering.
         </p>
         <div className="mt-3 flex flex-col gap-2">
           <Link
             to="/groups"
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-dc-accent text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-dc-accent text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dc-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface"
           >
             Explore groups
           </Link>
           <Link
             to="/events"
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-dc-border text-sm font-semibold text-dc-text hover:border-dc-accent-border"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-dc-border text-sm font-semibold text-dc-text hover:border-dc-accent-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dc-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface"
           >
             Browse events
           </Link>
         </div>
-      </div>
+      </RailCard>
     </aside>
   )
 }

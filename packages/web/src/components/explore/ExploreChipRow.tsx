@@ -30,9 +30,9 @@ export default function ExploreChipRow({ chips, onToggle, ariaLabel, variant = '
             key={chip.id}
             type="button"
             aria-pressed={chip.active}
-            className={`xpl-chip ${variant === 'discovery' ? 'xpl-chip--discovery' : 'xpl-chip--topic'} ${
-              chip.active ? 'xpl-chip--active xpl-chip--accent-fill' : ''
-            }`}
+            className={`xpl-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent ${
+              variant === 'discovery' ? 'xpl-chip--discovery' : 'xpl-chip--topic'
+            } ${chip.active ? 'xpl-chip--active' : ''}`}
             onClick={() => onToggle(chip.id)}
           >
             {chip.label}

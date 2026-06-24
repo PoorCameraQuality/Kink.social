@@ -89,14 +89,50 @@ export function mockFriendsHereCount(groupId: string): number {
   return h % 6
 }
 
-export type GroupsSortMode = 'popular' | 'new' | 'name' | 'members' | 'active'
+export type GroupsSortMode = 'recommended' | 'new' | 'name' | 'members' | 'active'
 
+/**
+ * Access / privacy badge shown on discover cards. Derived only from data the
+ * directory already exposes (visibility + joinMode); never leaks membership or
+ * hidden-member state. Hidden groups are not listed by the API, so we never
+ * surface them here.
+ */
+export type GroupAccess = 'Public' | 'Approval required' | 'Private' | 'Invite only'
+
+export function deriveGroupAccess(group: MockGroup): GroupAccess {
+  if (group.visibility === 'invite-only') return 'Invite only'
+  if (group.visibility === 'private') return 'Private'
+  if (group.joinMode === 'apply') return 'Approval required'
+  return 'Public'
+}
+
+/**
+ * Honest activity signal. We only have createdAt in the directory payload, so we
+ * only claim "New" when the group is genuinely recent. No fabricated
+ * "recently active" / post-count claims without real data.
+ */
 export function groupActivityLabel(
   group: MockGroup,
   badge?: GroupDiscoverBadge | null,
 ): string | null {
-  if (badge === 'New' || isRecentGroup(group)) return 'New group'
-  if ((group.members ?? 0) > 0) return 'Recently active'
+  if (badge === 'New' || isRecentGroup(group)) return 'New this month'
+  return null
+}
+
+/**
+ * Privacy-safe recommendation context. Driven purely by the active scope plus
+ * region/category signals the directory already exposes — never RSVP- or
+ * membership-derived.
+ */
+export function deriveGroupRecommendation(
+  group: MockGroup,
+  scopeTab: GroupsScopeTab,
+): string | null {
+  if (scopeTab === 'near-you' && group.distanceMi != null) {
+    if (group.category === GROUP_CATEGORIES.education) return 'Education group near you'
+    return 'Suggested from your region'
+  }
+  if (scopeTab === 'suggested') return 'Suggested for you'
   return null
 }
 
@@ -121,9 +157,10 @@ export function sortGroupsForDiscover(groups: MockGroup[], sort: GroupsSortMode)
     case 'active':
       copy.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
       break
-    case 'popular':
+    case 'recommended':
     default:
-      copy.sort((a, b) => (b.members ?? 0) - (a.members ?? 0))
+      // Preserve the upstream relevance/diverse ranking from rankGroups.
+      return copy
   }
   return copy
 }

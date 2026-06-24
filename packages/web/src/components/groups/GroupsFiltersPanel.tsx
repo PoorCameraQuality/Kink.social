@@ -72,17 +72,22 @@ export default function GroupsFiltersPanel({
           />
         </div>
       : null}
-      <GeoFilterControl
-        idPrefix={idPrefix}
-        distance={f.distance}
-        onDistanceChange={f.setDistance}
-        country={f.country}
-        onCountryChange={f.setCountry}
-        city={f.city}
-        onCityChange={f.setCity}
-      />
-      <fieldset>
-        <legend className="mb-2 block text-sm font-medium text-dc-text-muted">Purpose</legend>
+      <section aria-label="Location filters" className="space-y-2">
+        <h4 className="text-[11px] font-semibold uppercase tracking-wider text-dc-muted">Location</h4>
+        <GeoFilterControl
+          idPrefix={idPrefix}
+          distance={f.distance}
+          onDistanceChange={f.setDistance}
+          country={f.country}
+          onCountryChange={f.setCountry}
+          city={f.city}
+          onCityChange={f.setCity}
+        />
+      </section>
+      <fieldset className="border-t border-dc-border/60 pt-4">
+        <legend className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-dc-muted">
+          Purpose
+        </legend>
         <ul className="max-h-56 space-y-1 overflow-y-auto pr-1">
           {GROUP_PURPOSE_FILTERS.map((label) => {
             const checked = f.selectedPurposes.includes(label)
@@ -94,14 +99,14 @@ export default function GroupsFiltersPanel({
             return (
               <li key={label}>
                 <label
-                  className="flex cursor-pointer items-center gap-2 rounded-lg py-1 text-sm hover:bg-dc-elevated-hover"
+                  className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1 text-sm hover:bg-dc-elevated-hover"
                   title={desc}
                 >
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={() => f.togglePurpose(label)}
-                    className="rounded border-dc-border text-dc-accent focus:ring-dc-accent"
+                    className="rounded border-dc-border text-dc-accent focus:ring-2 focus:ring-dc-accent focus:ring-offset-0"
                   />
                   <span className="flex-1 text-dc-text-muted">{label}</span>
                   <span className="text-xs tabular-nums text-dc-muted">{count}</span>
@@ -115,7 +120,7 @@ export default function GroupsFiltersPanel({
         <button
           type="button"
           onClick={f.clearFilters}
-          className="w-full min-h-10 rounded-xl border border-dc-border text-sm font-medium text-dc-text-muted hover:bg-dc-elevated-hover hover:text-dc-text"
+          className="w-full min-h-10 rounded-xl border border-dc-border text-sm font-medium text-dc-text-muted transition-colors hover:bg-dc-elevated-hover hover:text-dc-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent"
         >
           Reset filters
         </button>

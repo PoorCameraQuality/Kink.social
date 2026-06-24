@@ -4,6 +4,24 @@ import { PROFILE_ROLE_OPTIONS } from '@c2k/shared'
 
 export const PEOPLE_STREAM_TABS = ['Recommended', 'Near you', 'New', 'Popular', 'Recently active'] as const
 
+/**
+ * Display labels for stream tabs. The underlying tab *values* stay stable so the
+ * sort mapping in discovery-sort-config keeps working; only the user-facing copy
+ * changes. "Popular" → contributor framing; "Recently active" → privacy-safe
+ * public-activity wording (no "online now" / presence).
+ */
+export const PEOPLE_STREAM_TAB_LABELS: Record<string, string> = {
+  Recommended: 'Recommended',
+  'Near you': 'Near you',
+  New: 'New',
+  Popular: 'Community contributors',
+  'Recently active': 'Recently posted',
+}
+
+export function peopleStreamTabLabel(tab: string): string {
+  return PEOPLE_STREAM_TAB_LABELS[tab] ?? tab
+}
+
 
 
 /** Radius slider bounds (mi) on People discover. */

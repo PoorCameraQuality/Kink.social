@@ -1,12 +1,12 @@
 import { useId, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import EventCard from '@/components/cards/EventCard'
+import EventsGridCard from '@/components/events/EventsGridCard'
 import EventsMobileFastFilters from '@/components/events/EventsMobileFastFilters'
 import EventsFeaturedStrip from '@/components/events/EventsFeaturedStrip'
 import EventsDiscoverLeftRail from '@/components/events/EventsDiscoverLeftRail'
 import EventsPagination from '@/components/events/EventsPagination'
 import EventFiltersPanel, { type EventFilterState } from '@/components/events/EventFiltersPanel'
-import EventsListRow from '@/components/events/EventsListRow'
+import EventsAgendaList from '@/components/events/EventsAgendaList'
 import EventsRightRail from '@/components/events/EventsRightRail'
 import EventsScopeTabs from '@/components/events/EventsScopeTabs'
 import EmptyState from '@/components/ui/EmptyState'
@@ -213,6 +213,15 @@ export default function EventsDiscoverPage() {
     [filteredEvents, page],
   )
 
+  // Strip is for organizer-featured picks only — not a duplicate of the list head.
+  const featuredStripEvents = useMemo(
+    () => filteredEvents.filter((e) => e.featured === true || e.isFeatured === true),
+    [filteredEvents],
+  )
+
+  // Agenda grouping only makes sense in chronological (upcoming) order.
+  const agendaGrouped = sortMode === 'upcoming' && !pastView
+
   const hasActiveFilters =
     Boolean(searchQuery.trim()) ||
     selectedCategories.length > 0 ||
@@ -330,6 +339,7 @@ export default function EventsDiscoverPage() {
   const resetFastFilters = () => {
     setScopeTab('all')
     setEventFormatFilter('all')
+    setSelectedCategories([])
     setPage(1)
   }
 
@@ -361,14 +371,10 @@ export default function EventsDiscoverPage() {
         ctaHref={hasActiveFilters ? undefined : '/events'}
       />
     : viewMode === 'list' ?
-      <div className="space-y-3">
-        {pageEvents.map((event) => (
-          <EventsListRow key={String(event.id)} event={event} />
-        ))}
-      </div>
+      <EventsAgendaList events={pageEvents} grouped={agendaGrouped} />
     : <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {pageEvents.map((event) => (
-          <EventCard key={String(event.id)} event={event} />
+          <EventsGridCard key={String(event.id)} event={event} />
         ))}
       </div>
 
@@ -491,6 +497,7 @@ export default function EventsDiscoverPage() {
         scopeTab={scopeTab}
         eventFormatFilter={eventFormatFilter}
         isAuthenticated={isAuthenticated}
+        selectedCategories={selectedCategories}
         onScopeChange={(tab) => {
           setScopeTab(tab)
           setPage(1)
@@ -499,6 +506,7 @@ export default function EventsDiscoverPage() {
           setEventFormatFilter(format)
           setPage(1)
         }}
+        onToggleCategory={toggleCategory}
         onReset={resetFastFilters}
       />
 
@@ -514,14 +522,14 @@ export default function EventsDiscoverPage() {
       </div>
 
       <div className="hidden lg:block">
-        {!pastView && filteredEvents.length > 1 ? <EventsFeaturedStrip events={filteredEvents} /> : null}
+        {!pastView && featuredStripEvents.length > 1 ? <EventsFeaturedStrip events={featuredStripEvents} /> : null}
       </div>
 
       {eventListBody}
 
-      {!pastView && filteredEvents.length > 1 ?
+      {!pastView && featuredStripEvents.length > 1 ?
         <div className="mt-6 lg:hidden">
-          <EventsFeaturedStrip events={filteredEvents} />
+          <EventsFeaturedStrip events={featuredStripEvents} />
         </div>
       : null}
 

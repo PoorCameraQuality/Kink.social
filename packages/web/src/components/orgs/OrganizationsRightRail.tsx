@@ -13,9 +13,41 @@ const CAPABILITY_ITEMS = [
 
 export default function OrganizationsRightRail() {
   const { hasAnyScope, loading: scopesLoading } = useOrganizerOrgScopes()
+  const showDashboard = !scopesLoading && hasAnyScope
 
   return (
     <aside className={railAsideClass} aria-label="About organizations on Kink Social">
+      <RailCard title={showDashboard ? 'Manage your community' : 'Start a community'} emphasize>
+        <p className="text-xs leading-relaxed text-dc-text-muted">
+          {showDashboard ?
+            'Jump back into your organizer tools — events, schedules, staff, and attendee workflows in one place.'
+          : 'Bring your events, schedules, staff, and attendee workflows into one organizer workspace.'}
+        </p>
+        {showDashboard ?
+          <>
+            <Link
+              to="/organizer"
+              className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-dc-accent text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover"
+            >
+              Open organizer dashboard
+            </Link>
+            <Link
+              to="/orgs/new"
+              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-dc-accent hover:underline"
+            >
+              Create another organization
+              <span aria-hidden>→</span>
+            </Link>
+          </>
+        : <Link
+            to="/orgs/new"
+            className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-dc-accent text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover"
+          >
+            Create organization
+          </Link>
+        }
+      </RailCard>
+
       <RailCard title="What organizations can do">
         <ul className="space-y-2">
           {CAPABILITY_ITEMS.map((item) => (
@@ -29,48 +61,27 @@ export default function OrganizationsRightRail() {
         </ul>
       </RailCard>
 
-      <RailCard title="For organizers">
+      <RailCard
+        title="Already helping run a community?"
+        footerHref="/guidelines"
+        footerLabel="Learn about roles"
+      >
         <p className="text-xs leading-relaxed text-dc-text-muted">
-          Bring your community tools, schedules, staff, and attendee workflows into one place.
-        </p>
-        <Link
-          to="/orgs/new"
-          className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-dc-accent text-sm font-semibold text-dc-accent-foreground hover:bg-dc-accent-hover"
-        >
-          Create organization
-        </Link>
-        {!scopesLoading && hasAnyScope ?
-          <Link
-            to="/organizer"
-            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-dc-accent hover:underline"
-          >
-            Organizer dashboard
-            <span aria-hidden>→</span>
-          </Link>
-        : null}
-      </RailCard>
-
-      <div className="rounded-2xl border border-dc-border bg-dc-elevated-muted/40 p-4">
-        <h3 className="text-sm font-semibold text-dc-text">Already helping run a community?</h3>
-        <p className="mt-2 text-xs leading-relaxed text-dc-text-muted">
           Ask an organization owner to add you as staff so you can help manage events, groups, or convention
           tools.
         </p>
-        <Link to="/guidelines" className="mt-2 inline-block text-xs font-medium text-dc-accent hover:underline">
-          Learn about roles
-        </Link>
-      </div>
+      </RailCard>
 
-      <div className="rounded-2xl border border-dc-border bg-dc-elevated-muted/40 p-4">
-        <h3 className="text-sm font-semibold text-dc-text">Why reputation matters</h3>
-        <p className="mt-2 text-xs leading-relaxed text-dc-text-muted">
+      <RailCard
+        title="Why reputation matters"
+        footerHref="/guidelines"
+        footerLabel="How reputation works"
+      >
+        <p className="text-xs leading-relaxed text-dc-text-muted">
           Reviews and consistent real-world participation help communities trust organizers. Higher standing
           improves visibility across events and discovery.
         </p>
-        <Link to="/guidelines" className="mt-2 inline-block text-xs font-medium text-dc-accent hover:underline">
-          How reputation works
-        </Link>
-      </div>
+      </RailCard>
     </aside>
   )
 }
