@@ -8,9 +8,12 @@ import { getVendorShopAccess, type VendorProfileRow } from './vendor-shop-people
 import { isUserIdentityBanned } from './peer-reputation.js'
 import {
   buildConventionListingPreview,
+  buildConventionEventAnchorPreview,
   buildDancecardEventPreview,
   buildDungeonProfilePreview,
   buildOrganizationListingPreview,
+  executeConventionEventAnchorPublish,
+  executeConventionEventAnchorUnpublish,
   executeConventionListingPublish,
   executeConventionListingUnpublish,
   executeDancecardEventPublish,
@@ -22,6 +25,14 @@ import {
   FINAL_SUPPORTED_WRITE_KINDS,
   isFinalSupportedWriteKind,
 } from './ecke-publish-final-kinds.js'
+import {
+  buildPresenterProfilePreview,
+  buildVenueProfilePreview,
+  executePresenterProfilePublish,
+  executePresenterProfileUnpublish,
+  executeVenueProfilePublish,
+  executeVenueProfileUnpublish,
+} from './ecke-publish-presenter-venue.js'
 import { isOrgDungeonListing } from './ecke-directory-sync.js'
 import { loadConventionEckeContext, loadOrgEckePublishRow } from './ecke-publish-org-convention.js'
 import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm'
@@ -166,6 +177,7 @@ export type EckeGroupOverviewCard = {
     | 'group_listing'
     | 'organization_listing'
     | 'convention_listing'
+    | 'convention_event_anchor'
     | 'events'
     | 'education'
     | 'venues'
@@ -1078,6 +1090,15 @@ export async function getEckePublishPreview(
   ) {
     return buildDancecardEventPreview(viewer, sourceId, getRegistryEntry('dancecard_event')!)
   }
+  if (sourceKind === 'presenter_profile') {
+    return buildPresenterProfilePreview(viewer, sourceId, entry)
+  }
+  if (sourceKind === 'venue_profile') {
+    return buildVenueProfilePreview(viewer, sourceId, entry)
+  }
+  if (sourceKind === 'convention_event_anchor') {
+    return buildConventionEventAnchorPreview(viewer, sourceId, entry)
+  }
 
   return {
     ok: false,
@@ -1759,7 +1780,7 @@ export async function getConventionEckePublishOverview(
     title: 'ECKE Publish overview',
     supportState: 'info',
     summary: isEckeBridgeConfigured()
-      ? 'Convention listing and Dancecard bundle publish separately. The convention anchor event directory row (ecke_event) still uses the legacy bundled publish route if you need all targets at once.'
+      ? 'Convention listing, event directory anchor, and Dancecard bundle publish separately. Full admins control each target from this panel.'
       : 'ECKE publish bridge is not configured on this server.',
   })
 
@@ -1780,6 +1801,28 @@ export async function getConventionEckePublishOverview(
       status: listingPreview.result.status,
       preview: listingPreview.result,
       writeEnabled: true,
+    })
+  }
+
+  const anchorPreview = await buildConventionEventAnchorPreview(
+    viewer,
+    ctx.conv.id,
+    getRegistryEntry('convention_event_anchor')!,
+  )
+  if (anchorPreview.ok) {
+    cards.push({
+      section: 'convention_event_anchor',
+      sourceKind: 'convention_event_anchor',
+      sourceId: ctx.conv.id,
+      title: `${ctx.conv.name} event directory anchor`,
+      supportState: 'active_existing',
+      eligible: anchorPreview.result.eligible,
+      reason: anchorPreview.result.reason,
+      status: anchorPreview.result.status,
+      preview: anchorPreview.result,
+      writeEnabled: true,
+      summary:
+        'Publishes the ECKE events directory row (ecke_event) for this convention. Listing and Dancecard are separate targets.',
     })
   }
 
@@ -1822,7 +1865,7 @@ export async function getConventionEckePublishOverview(
       conventionName: ctx.conv.name,
       bridgeConnected: isEckeBridgeConfigured(),
       passNotice:
-        'Convention full admins can preview and publish the ECKE listing webhook and Dancecard bundle. Private staff notes, volunteer assignments, and attendee data never publish.',
+        'Convention full admins can preview and publish the ECKE listing webhook, event directory anchor, and Dancecard bundle. Private staff notes, volunteer assignments, and attendee data never publish.',
       cards,
       history: historyRows.map((r) => ({
         targetKind: r.targetKind,
@@ -2519,6 +2562,15 @@ export async function publishEckeSource(
   ) {
     return executeDancecardEventPublish(viewer, input.sourceId)
   }
+  if (input.sourceKind === 'presenter_profile') {
+    return executePresenterProfilePublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'venue_profile') {
+    return executeVenueProfilePublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'convention_event_anchor') {
+    return executeConventionEventAnchorPublish(viewer, input.sourceId)
+  }
   return executeEventListingPublish(viewer, input.sourceId, input.expectedGroupId)
 }
 
@@ -2573,6 +2625,15 @@ export async function syncEckeSource(
   ) {
     return executeDancecardEventPublish(viewer, input.sourceId)
   }
+  if (input.sourceKind === 'presenter_profile') {
+    return executePresenterProfilePublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'venue_profile') {
+    return executeVenueProfilePublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'convention_event_anchor') {
+    return executeConventionEventAnchorPublish(viewer, input.sourceId)
+  }
   return executeEventListingPublish(viewer, input.sourceId, input.expectedGroupId)
 }
 
@@ -2626,6 +2687,15 @@ export async function unpublishEckeSource(
     input.sourceKind === 'dancecard_staff_shift'
   ) {
     return executeDancecardEventUnpublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'presenter_profile') {
+    return executePresenterProfileUnpublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'venue_profile') {
+    return executeVenueProfileUnpublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'convention_event_anchor') {
+    return executeConventionEventAnchorUnpublish(viewer, input.sourceId)
   }
   return executeEventListingUnpublish(viewer, input.sourceId, input.expectedGroupId)
 }

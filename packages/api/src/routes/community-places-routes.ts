@@ -14,6 +14,8 @@ import { withAlphaLabels } from '../lib/alpha-seed-labels.js'
 
 import { loadEventsAtVenuePlace } from '../lib/venue-events.js'
 
+import { resolveOrgEckePublishAccess } from '../lib/ecke-publish-org-convention.js'
+
 
 
 function useDatabase(): boolean {
@@ -306,9 +308,23 @@ export async function registerCommunityPlacesRoutes(app: FastifyInstance) {
 
     const [labeledPlace] = await withAlphaLabels('community_place', [mapped])
 
+    const viewer = resolveViewerFromRequest(req)
+    const viewerUserId = viewer.authenticated && viewer.payload?.sub ? getViewerUserId(viewer.payload) : null
+    let viewerCanManageEcke = false
+    if (viewerUserId) {
+      if (row.place.submittedByUserId === viewerUserId) {
+        viewerCanManageEcke = true
+      } else if (row.place.linkedOrganizationId) {
+        const access = await resolveOrgEckePublishAccess(row.place.linkedOrganizationId, viewerUserId)
+        viewerCanManageEcke = Boolean(access?.canManage)
+      }
+    }
+
     return reply.send({
 
       place: labeledPlace ?? mapped,
+
+      viewerCanManageEcke,
 
       linkedOrganization:
 
@@ -409,6 +425,62 @@ export async function registerCommunityPlacesRoutes(app: FastifyInstance) {
       .returning()
 
     return reply.send({ place: { ...row, linkedOrganization: null } })
+
+  })
+
+  app.patch('/api/v1/community-places/:placeId/ecke-publish', async (req, reply) => {
+
+    if (!requireDb(reply)) return
+
+    const user = requireUser(req, reply)
+
+    if (!user) return
+
+    const { placeId } = req.params as { placeId: string }
+
+    const parsed = z.object({ eckePublish: z.boolean() }).safeParse(req.body)
+
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+
+    const [existing] = await db
+
+      .select()
+
+      .from(schema.communityPlaces)
+
+      .where(eq(schema.communityPlaces.id, placeId))
+
+      .limit(1)
+
+    if (!existing) return reply.status(404).send({ error: 'Place not found' })
+
+    let canManage = existing.submittedByUserId === user.userId
+
+    if (!canManage && existing.linkedOrganizationId) {
+
+      const access = await resolveOrgEckePublishAccess(existing.linkedOrganizationId, user.userId)
+
+      canManage = Boolean(access?.canManage)
+
+    }
+
+    if (!canManage) {
+
+      return reply.status(403).send({ error: 'Venue owner or org moderator access required' })
+
+    }
+
+    const [row] = await db
+
+      .update(schema.communityPlaces)
+
+      .set({ eckePublish: parsed.data.eckePublish, updatedAt: new Date() })
+
+      .where(eq(schema.communityPlaces.id, placeId))
+
+      .returning()
+
+    return reply.send({ place: row })
 
   })
 

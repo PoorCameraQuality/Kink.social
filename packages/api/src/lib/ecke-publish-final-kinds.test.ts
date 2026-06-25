@@ -34,8 +34,9 @@ describe('final ECKE supported kinds', () => {
     assert.ok(isFinalSupportedWriteKind('dancecard_event'))
     assert.ok(FINAL_SUPPORTED_WRITE_KINDS.has('group_listing'))
     assert.ok(FINAL_SUPPORTED_WRITE_KINDS.has('vendor_profile'))
-    assert.equal(isFinalSupportedWriteKind('presenter_profile'), false)
-    assert.equal(isFinalSupportedWriteKind('venue_profile'), false)
+    assert.ok(isFinalSupportedWriteKind('presenter_profile'))
+    assert.ok(isFinalSupportedWriteKind('venue_profile'))
+    assert.ok(isFinalSupportedWriteKind('convention_event_anchor'))
   })
 })
 

@@ -305,6 +305,29 @@ export function getDancecardDeferredFields(): EckeOmittedField[] {
   ]
 }
 
+export function getPresenterOmittedFields(): EckeOmittedField[] {
+  return [
+    { label: 'Private contact', reason: 'Email, phone, and private messaging never publish.' },
+    { label: 'Legal name', reason: 'Legal identity fields stay on kink.social unless explicitly public.' },
+    { label: 'References', reason: 'Reference materials stay private.' },
+    { label: 'Application answers', reason: 'Application materials never publish.' },
+    { label: 'Runner-only materials', reason: 'Internal runner materials stay private.' },
+    { label: 'Background story', reason: 'Organizer-only background narrative stays private.' },
+    { label: 'Private notes', reason: 'Internal notes never publish.' },
+    { label: 'Moderation notes', reason: 'Moderation data never publishes.' },
+    { label: 'Reports', reason: 'Safety and moderation reports stay internal.' },
+    { label: 'Private files', reason: 'Private attachments never publish.' },
+  ]
+}
+
+export function getPresenterDeferredFields(): EckeOmittedField[] {
+  return [
+    { label: 'Public classes', reason: 'Public-safe but ECKE may not list classes yet.' },
+    { label: 'Public articles', reason: 'Public-safe but ECKE may not embed education articles yet.' },
+    { label: 'Convention appearances', reason: 'Public-safe but ECKE presenter page may not list appearances yet.' },
+  ]
+}
+
 export function isPublicGroupVisibility(visibility: string): boolean {
   return visibility.toLowerCase() === 'public'
 }

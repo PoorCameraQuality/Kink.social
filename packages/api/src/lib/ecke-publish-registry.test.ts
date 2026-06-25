@@ -22,6 +22,7 @@ const EXPECTED_SOURCE_KINDS = [
   'presenter_profile',
   'dungeon_profile',
   'venue_profile',
+  'convention_event_anchor',
 ] as const
 
 describe('ecke-publish-registry', () => {

@@ -1,6 +1,6 @@
 # ECKE Publish Control Plane
 
-**Status:** Pass 5 Slice 3 — `group_listing` + `event_listing` + `education_article` + `vendor_profile` write actions enabled  
+**Status:** Testing-ready — all registry source kinds including `presenter_profile`, `venue_profile`, and `convention_event_anchor` (see `ECKE_PUBLISH_FINAL_COMPLETION_AUDIT.md`)  
 **Purpose:** Single source of truth for “can publish?”, “who?”, “what payload?”, “what ECKE pages?”
 
 **Product rule:** kink.social is the workflow source of truth; ECKE is the public discovery surface. Do not permanently flatten richer **public-safe** kink.social data — expand ECKE display modules opt-in over time. See `ECKE_PUBLISH_PARITY_AUDIT.md` § *Product rule* and *ECKE Expansion Rule*. Privacy contract unchanged.

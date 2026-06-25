@@ -597,7 +597,25 @@ export function resolveEckePublicVendorUrl(slug: string | null | undefined): str
 export function resolveEckePublicConventionUrl(slug: string | null | undefined): string | null {
   const trimmed = slug?.trim()
   if (!trimmed) return null
-  return `${resolveEckePublicBaseUrl()}/events/${encodeURIComponent(trimmed)}`
+  return `${resolveEckePublicBaseUrl()}/conventions/${encodeURIComponent(trimmed)}`
+}
+
+export function resolveEckePublicOrganizationUrl(slug: string | null | undefined): string | null {
+  const trimmed = slug?.trim()
+  if (!trimmed) return null
+  return `${resolveEckePublicBaseUrl()}/organizations/${encodeURIComponent(trimmed)}`
+}
+
+export function resolveEckePublicPresenterUrl(slug: string | null | undefined): string | null {
+  const trimmed = slug?.trim()
+  if (!trimmed) return null
+  return `${resolveEckePublicBaseUrl()}/presenters/${encodeURIComponent(trimmed)}`
+}
+
+export function resolveEckePublicVenueUrl(slug: string | null | undefined): string | null {
+  const trimmed = slug?.trim()
+  if (!trimmed) return null
+  return `${resolveEckePublicBaseUrl()}/venues/${encodeURIComponent(trimmed)}`
 }
 
 export function resolveEckePublicDungeonUrl(slug: string | null | undefined): string | null {

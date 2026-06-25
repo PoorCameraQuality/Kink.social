@@ -7,10 +7,13 @@ import {
   publishListingToEcke,
   resolveEckePublicConventionUrl,
   resolveEckePublicDungeonUrl,
+  resolveEckePublicEventUrl,
   resolveEckePublicGroupListingUrl,
   unpublishDungeonRowToEcke,
   unpublishListingToEcke,
 } from './ecke-publish-client.js'
+import { buildEckeEventRowFromListing } from './ecke-directory-sync.js'
+import { executeEckePublishConventionEvent } from './ecke-publish-executor.js'
 import {
   getConventionDeferredFields,
   getConventionOmittedFields,
@@ -62,6 +65,9 @@ export const FINAL_SUPPORTED_WRITE_KINDS = new Set<EckeSourceKind>([
   'dancecard_location',
   'dancecard_program_slot',
   'dancecard_staff_shift',
+  'presenter_profile',
+  'venue_profile',
+  'convention_event_anchor',
 ])
 
 export function isFinalSupportedWriteKind(sourceKind: EckeSourceKind): boolean {
@@ -755,4 +761,115 @@ export function payloadExcludesPrivateDancecardFields(payload: Record<string, un
   if (/staffAccessCode":\s*"[^[\]]/.test(raw) && !raw.includes('[configured]')) return false
   if (/registrationAccessCode":\s*"[^[\]]/.test(raw) && !raw.includes('[configured]')) return false
   return !forbidden.some((token) => serialized.includes(token))
+}
+
+async function loadConventionEventAnchorTarget(conventionId: string) {
+  return loadEckePublishTarget({ scopeType: 'convention', conventionId }, 'ecke_event')
+}
+
+export async function buildConventionEventAnchorPreview(
+  viewer: EckePublishViewer,
+  conventionId: string,
+  entry: EckeRegistryEntry,
+): Promise<{ ok: true; result: EckePublishPreviewResult } | { ok: false; status: number; error: string }> {
+  const ctx = await loadConventionEckeContext(conventionId, viewer.userId)
+  if (!ctx) return { ok: false, status: 404, error: 'Convention not found' }
+  if (!ctx.canManage) {
+    return { ok: false, status: 403, error: 'Convention full admin access required to preview ECKE publish' }
+  }
+
+  const pub = buildConventionListingPublishContext(ctx)
+  const eventRow = buildEckeEventRowFromListing(pub.listingPayload, ctx.conv.id, 'convention')
+  const contentHash = pub.contentHash
+  const row = await loadConventionEventAnchorTarget(ctx.conv.id)
+  const status = deriveTargetDisplayStatus(contentHash, row)
+  const bridgeConfigured = loadEckePublishClientConfig() !== null
+
+  return {
+    ok: true,
+    result: {
+      sourceKind: 'convention_event_anchor',
+      sourceId: ctx.conv.id,
+      supportState: entry.supportState,
+      eligible: pub.eligibility.eligible,
+      status,
+      contentHash,
+      publishedContentHash: row?.publishedContentHash ?? null,
+      lastPublishedAt: row?.lastPublishedAt?.toISOString() ?? null,
+      lastPreviewAt: row?.lastPreviewAt?.toISOString() ?? null,
+      lastError: row?.lastError ?? null,
+      externalSlug: eventRow.slug,
+      eckePublicUrl: row?.eckePublicUrl ?? resolveEckePublicEventUrl(eventRow.slug),
+      eckePublicUrlKnown: Boolean(row?.eckePublicUrl),
+      currentTransport: entry.currentTransport,
+      eckeSurfacesAffected: entry.eckeSurfacesAffected,
+      actions: listingActions({ eligible: pub.eligibility.eligible, status, bridgeConfigured }),
+      staleNotice:
+        status === 'stale' ?
+          'Convention event directory row changed since last publish. Sync to update ECKE events.'
+        : null,
+      wouldPublish: buildConventionListingPlainFields(pub),
+      wouldPublishDeferred: getConventionDeferredFields(),
+      wouldNotPublish: getConventionOmittedFields(),
+      payload: eventRow,
+      canonicalKinkSocialUrl: pub.canonicalKinkSocialUrl,
+    },
+  }
+}
+
+export async function executeConventionEventAnchorPublish(viewer: EckePublishViewer, conventionId: string) {
+  const preview = await buildConventionEventAnchorPreview(
+    viewer,
+    conventionId,
+    getRegistryEntry('convention_event_anchor')!,
+  )
+  if (!preview.ok) return preview
+  if (!preview.result.eligible) {
+    return { ok: false as const, status: 400, error: preview.result.reason ?? 'Not eligible' }
+  }
+
+  const result = await executeEckePublishConventionEvent(conventionId, viewer.userId)
+  if (!result.ok) {
+    return { ok: false as const, status: 502, error: result.error ?? 'ECKE event publish failed', errorCode: 'ecke_publish_failed' }
+  }
+
+  const after = await buildConventionEventAnchorPreview(
+    viewer,
+    conventionId,
+    getRegistryEntry('convention_event_anchor')!,
+  )
+  return {
+    ok: true as const,
+    result: {
+      ok: true,
+      sourceKind: 'convention_event_anchor' as const,
+      sourceId: conventionId,
+      status: after.ok ? after.result.status : 'published',
+      message: 'Convention event directory row published to ECKE',
+      preview: after.ok ? after.result : undefined,
+    },
+  }
+}
+
+export async function executeConventionEventAnchorUnpublish(viewer: EckePublishViewer, conventionId: string) {
+  const ctx = await loadConventionEckeContext(conventionId, viewer.userId)
+  if (!ctx?.canManage) {
+    return { ok: false as const, status: 403, error: 'Convention full admin access required' }
+  }
+  const preview = await buildConventionEventAnchorPreview(
+    viewer,
+    conventionId,
+    getRegistryEntry('convention_event_anchor')!,
+  )
+  return {
+    ok: true as const,
+    result: {
+      ok: true,
+      sourceKind: 'convention_event_anchor' as const,
+      sourceId: conventionId,
+      status: preview.ok ? preview.result.status : 'unpublished',
+      message: 'Use legacy convention unpublish for remote ecke_event draft flip; local status unchanged in this pass.',
+      preview: preview.ok ? preview.result : undefined,
+    },
+  }
 }

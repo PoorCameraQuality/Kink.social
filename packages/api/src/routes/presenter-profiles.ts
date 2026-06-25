@@ -87,6 +87,7 @@ const patchPresenterBody = z.object({
   profileKind: profileKindSchema.optional(),
   expertiseTags: z.array(z.string().max(64)).max(40).optional().nullable(),
   directoryVisibility: directoryVisibilitySchema.optional(),
+  eckePublish: z.boolean().optional(),
   backgroundStory: z.string().max(16000).optional().nullable(),
   mentorshipOffered: z.boolean().optional(),
   mentorshipNotes: z.string().max(4000).optional().nullable(),
@@ -1132,6 +1133,8 @@ export async function registerPresenterProfileRoutes(app: FastifyInstance) {
             parsed.data.mentorshipNotes !== undefined ?
               parsed.data.mentorshipNotes
             : existing.mentorshipNotes,
+          eckePublish:
+            parsed.data.eckePublish !== undefined ? parsed.data.eckePublish : existing.eckePublish,
           updatedAt: new Date(),
         })
         .where(eq(schema.presenterProfiles.userId, user.userId))
@@ -1151,6 +1154,7 @@ export async function registerPresenterProfileRoutes(app: FastifyInstance) {
           backgroundStory: parsed.data.backgroundStory ?? undefined,
           mentorshipOffered: parsed.data.mentorshipOffered ?? false,
           mentorshipNotes: parsed.data.mentorshipNotes ?? undefined,
+          eckePublish: parsed.data.eckePublish ?? false,
         })
         .returning()
     }

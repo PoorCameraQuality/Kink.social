@@ -268,6 +268,7 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     }
     const allowed = [
       'convention_listing',
+      'convention_event_anchor',
       'dancecard_event',
       'dancecard_location',
       'dancecard_program_slot',

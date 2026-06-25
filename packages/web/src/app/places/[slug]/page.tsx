@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import CommunityPlacesMap from '@/components/places/CommunityPlacesMap'
 import VenueEventsList, { type VenueEventRow } from '@/components/places/VenueEventsList'
+import VenueEckePanel from '@/components/ecke/VenueEckePanel'
 import LoadErrorBanner from '@/components/ui/LoadErrorBanner'
 import { mediaDisplayUrl } from '@/lib/media-display-url'
 
@@ -17,6 +18,7 @@ type PlaceDetail = {
   country: string | null
   lat: number | null
   lng: number | null
+  eckePublish?: boolean
   linkedOrganization?: { slug: string; displayName: string } | null
 }
 
@@ -36,6 +38,9 @@ export default function PlaceDetailPage({ slug: slugProp }: Props) {
     externalSiteUrl?: string | null
   } | null>(null)
   const [events, setEvents] = useState<VenueEventRow[]>([])
+  const [viewerCanManageEcke, setViewerCanManageEcke] = useState(false)
+  const [eckePublish, setEckePublish] = useState(false)
+  const [eckeSaving, setEckeSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -60,11 +65,14 @@ export default function PlaceDetailPage({ slug: slugProp }: Props) {
           place: PlaceDetail
           linkedOrganization: typeof linkedOrg
           upcomingEvents: VenueEventRow[]
+          viewerCanManageEcke?: boolean
         }
         if (cancelled) return
         setPlace(data.place)
         setLinkedOrg(data.linkedOrganization)
         setEvents(data.upcomingEvents ?? [])
+        setViewerCanManageEcke(Boolean(data.viewerCanManageEcke))
+        setEckePublish(Boolean(data.place.eckePublish))
       } catch {
         if (!cancelled) {
           setError('Network error loading place.')
@@ -104,6 +112,22 @@ export default function PlaceDetailPage({ slug: slugProp }: Props) {
 
   const logoSrc = mediaDisplayUrl(place.logoUrl ?? linkedOrg?.logoUrl)
   const org = linkedOrg ?? place.linkedOrganization
+
+  async function saveEckePublish(next: boolean) {
+    if (!place) return
+    setEckeSaving(true)
+    try {
+      const r = await fetch(`/api/v1/community-places/${encodeURIComponent(place.id)}/ecke-publish`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eckePublish: next }),
+      })
+      if (r.ok) setEckePublish(next)
+    } finally {
+      setEckeSaving(false)
+    }
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 py-6">
@@ -152,6 +176,28 @@ export default function PlaceDetailPage({ slug: slugProp }: Props) {
           </p>
         : null}
       </header>
+
+      {viewerCanManageEcke ?
+        <section className="rounded-2xl border border-dc-border bg-dc-elevated/95 p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-dc-text">ECKE publish</h2>
+          <label className="flex items-start gap-2 text-sm text-dc-text cursor-pointer">
+            <input
+              type="checkbox"
+              checked={eckePublish}
+              disabled={eckeSaving}
+              onChange={(e) => void saveEckePublish(e.target.checked)}
+              className="mt-1"
+            />
+            <span>
+              Allow this published place to sync to East Coast Kink Events. Exact addresses and member-only access
+              details never publish.
+            </span>
+          </label>
+          {eckePublish ?
+            <VenueEckePanel placeId={place.id} />
+          : null}
+        </section>
+      : null}
 
       <CommunityPlacesMap
         places={[{ id: place.id, slug: place.slug, name: place.name, lat: place.lat, lng: place.lng, city: place.city, region: place.region }]}

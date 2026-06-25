@@ -8,6 +8,8 @@ export type EckeTargetScope =
   | { scopeType: 'organization'; organizationId: string }
   | { scopeType: 'convention'; conventionId: string }
   | { scopeType: 'event'; eventId: string }
+  | { scopeType: 'presenter_profile'; presenterUserId: string }
+  | { scopeType: 'venue_profile'; communityPlaceId: string }
 
 export type EckeTargetKind = 'ecke_listing' | 'dancecard_event' | 'ecke_event' | 'ecke_dungeon'
 
@@ -39,6 +41,18 @@ function scopeWhere(scope: EckeTargetScope, targetKind: EckeTargetKind) {
   if (scope.scopeType === 'convention') {
     return and(
       eq(schema.eckePublishTargets.conventionId, scope.conventionId),
+      eq(schema.eckePublishTargets.targetKind, targetKind),
+    )
+  }
+  if (scope.scopeType === 'presenter_profile') {
+    return and(
+      eq(schema.eckePublishTargets.presenterUserId, scope.presenterUserId),
+      eq(schema.eckePublishTargets.targetKind, targetKind),
+    )
+  }
+  if (scope.scopeType === 'venue_profile') {
+    return and(
+      eq(schema.eckePublishTargets.communityPlaceId, scope.communityPlaceId),
       eq(schema.eckePublishTargets.targetKind, targetKind),
     )
   }
@@ -81,6 +95,8 @@ export async function touchEckePublishPreview(input: {
     conventionId: input.scope.scopeType === 'convention' ? input.scope.conventionId : null,
     groupId: input.scope.scopeType === 'group' ? input.scope.groupId : null,
     eventId: input.scope.scopeType === 'event' ? input.scope.eventId : null,
+    presenterUserId: input.scope.scopeType === 'presenter_profile' ? input.scope.presenterUserId : null,
+    communityPlaceId: input.scope.scopeType === 'venue_profile' ? input.scope.communityPlaceId : null,
     targetKind: input.targetKind,
     externalSlug: input.externalSlug,
     contentHash: input.contentHash,
@@ -179,6 +195,8 @@ export async function ensureEckePublishTargetRow(input: {
     conventionId: input.scope.scopeType === 'convention' ? input.scope.conventionId : null,
     groupId: input.scope.scopeType === 'group' ? input.scope.groupId : null,
     eventId: input.scope.scopeType === 'event' ? input.scope.eventId : null,
+    presenterUserId: input.scope.scopeType === 'presenter_profile' ? input.scope.presenterUserId : null,
+    communityPlaceId: input.scope.scopeType === 'venue_profile' ? input.scope.communityPlaceId : null,
     targetKind: input.targetKind,
     externalSlug: input.externalSlug,
     contentHash: input.contentHash,
