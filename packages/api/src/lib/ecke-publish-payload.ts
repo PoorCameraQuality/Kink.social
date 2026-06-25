@@ -28,6 +28,10 @@ export type EckeListingPayload = {
   venue?: string | null
   /** Official external website (powers the ECKE "Visit official site" CTA). */
   website?: string | null
+  /** Public website for org/presenter/venue listing webhook (HTTPS only). */
+  websiteUrl?: string | null
+  city?: string | null
+  state?: string | null
 }
 
 export type EckeDancecardSlotPayload = {
@@ -369,6 +373,49 @@ export function buildStandaloneEventListingPayload(input: {
     orgDisplayName: organizer,
     visibility: eligibility.eligible ? 'public' : 'hidden',
     memberActionUrl: `${APP_URL}/events/${encodeURIComponent(input.eventId)}`,
+  }
+}
+
+export function buildPresenterListingPayload(input: {
+  username: string
+  displayName: string
+  bioShort?: string | null
+  directoryVisibility: string
+  eckePublish: boolean
+  websiteUrl?: string | null
+}): EckeListingPayload {
+  const hidden = input.directoryVisibility !== 'PUBLIC' || !input.eckePublish
+  return {
+    slug: input.username.toLowerCase(),
+    title: input.displayName.trim(),
+    description: input.bioShort?.trim() || null,
+    websiteUrl: input.websiteUrl ?? null,
+    visibility: hidden ? 'hidden' : 'public',
+  }
+}
+
+export function buildVenueListingPayload(input: {
+  slug: string
+  name: string
+  description?: string | null
+  city?: string | null
+  region?: string | null
+  status: string
+  eckePublish: boolean
+  publicLocationSummary?: string | null
+  websiteUrl?: string | null
+}): EckeListingPayload {
+  const hidden = input.status !== 'published' || !input.eckePublish
+  const location = input.publicLocationSummary?.trim() || [input.city, input.region].filter(Boolean).join(', ') || null
+  return {
+    slug: input.slug.toLowerCase(),
+    title: input.name.trim(),
+    description: input.description?.trim() || null,
+    location,
+    city: input.city ?? null,
+    state: input.region ?? null,
+    websiteUrl: input.websiteUrl ?? null,
+    visibility: hidden ? 'hidden' : 'public',
   }
 }
 

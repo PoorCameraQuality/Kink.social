@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import PresenterEckePanel from '@/components/ecke/PresenterEckePanel'
 
 type PresenterRow = {
   userId: string
@@ -14,6 +15,7 @@ type PresenterRow = {
   profileKind: string
   expertiseTags: string[] | null
   directoryVisibility: string
+  eckePublish?: boolean
 }
 
 type SkillClaimRow = {
@@ -79,6 +81,7 @@ export default function PresenterCatalogSection() {
   const [profileKind, setProfileKind] = useState<'PRES' | 'AUTHOR' | 'BOTH' | 'PHOTO'>('PRES')
   const [tagsInput, setTagsInput] = useState('')
   const [visibility, setVisibility] = useState<'PUBLIC' | 'UNLISTED'>('UNLISTED')
+  const [eckePublish, setEckePublish] = useState(false)
   const [linkRows, setLinkRows] = useState<LinkRow[]>([])
 
   const [offerings, setOfferings] = useState<Offering[]>([])
@@ -154,6 +157,7 @@ export default function PresenterCatalogSection() {
         setProfileKind((pdata.presenter.profileKind as typeof profileKind) ?? 'PRES')
         setTagsInput((pdata.presenter.expertiseTags ?? []).join(', '))
         setVisibility((pdata.presenter.directoryVisibility as typeof visibility) ?? 'UNLISTED')
+        setEckePublish(Boolean(pdata.presenter.eckePublish))
         const links = pdata.presenter.links ?? {}
         setLinkRows(
           Object.entries(links).map(([label, url], i) => ({
@@ -170,6 +174,7 @@ export default function PresenterCatalogSection() {
         setProfileKind('PRES')
         setTagsInput('')
         setVisibility('UNLISTED')
+        setEckePublish(false)
         setLinkRows([])
       }
       if (off.ok) {
@@ -239,6 +244,7 @@ export default function PresenterCatalogSection() {
           profileKind,
           expertiseTags: expertiseTags.length ? expertiseTags : null,
           directoryVisibility: visibility,
+          eckePublish: visibility === 'PUBLIC' ? eckePublish : false,
         }),
       })
       const data = (await r.json()) as { error?: string; presenter?: PresenterRow }
@@ -696,6 +702,22 @@ export default function PresenterCatalogSection() {
               </p>
             : null}
           </div>
+          {visibility === 'PUBLIC' ?
+            <div className="rounded-lg border border-dc-border p-3 bg-dc-surface-muted/40">
+              <label className="flex items-start gap-2 text-sm text-dc-text cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={eckePublish}
+                  onChange={(e) => setEckePublish(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  Publish presenter profile to East Coast Kink Events (ECKE) when I choose Publish below.
+                  Private contact, references, and runner materials never sync.
+                </span>
+              </label>
+            </div>
+          : null}
         </div>
         <div>
           <label className="block text-xs font-medium text-dc-text-muted mb-1">Expertise tags (comma-separated)</label>
@@ -716,6 +738,13 @@ export default function PresenterCatalogSection() {
           {saving ? 'Saving…' : 'Save presenter profile'}
         </button>
       </div>
+
+      {viewerUserId && presenter && visibility === 'PUBLIC' && eckePublish ?
+        <div className="mt-8 pt-6 border-t border-dc-border">
+          <h3 className="text-sm font-semibold text-dc-text mb-3">ECKE publish</h3>
+          <PresenterEckePanel presenterUserId={viewerUserId} />
+        </div>
+      : null}
 
       <div className="mt-8 pt-6 border-t border-dc-border">
         <h3 className="text-sm font-semibold text-dc-text mb-2">Portfolio gallery</h3>

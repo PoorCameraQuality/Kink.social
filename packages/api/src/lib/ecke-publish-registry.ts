@@ -1,8 +1,10 @@
 import {
+  getConventionOmittedFields,
   getEducationOmittedFields,
   getEventOmittedFields,
   getGroupOmittedFields,
   getOrgOmittedFields,
+  getPresenterOmittedFields,
   getVendorOmittedFields,
   getVenueOmittedFields,
 } from './ecke-redaction.js'
@@ -21,6 +23,7 @@ export type EckeSourceKind =
   | 'presenter_profile'
   | 'dungeon_profile'
   | 'venue_profile'
+  | 'convention_event_anchor'
 
 export type EckePublishSupportState =
   | 'active_existing'
@@ -267,13 +270,13 @@ export const ECKE_PUBLISH_REGISTRY: readonly EckeRegistryEntry[] = [
     visibleInOrgDashboard: false,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: true,
-    supportState: 'planned',
-    eckeTargetKind: 'presenter_profile',
-    currentTransport: 'none',
+    supportState: 'active_existing',
+    eckeTargetKind: 'ecke_listing',
+    currentTransport: 'listing_webhook',
     requiresPermission: 'presenter.owner',
-    privacySummary: 'Not yet implemented.',
-    omittedFields: ['Private profile fields', 'Moderation notes'],
-    eckeSurfacesAffected: [],
+    privacySummary: 'Public presenter directory only; private materials omitted.',
+    omittedFields: getPresenterOmittedFields().map((f) => f.label),
+    eckeSurfacesAffected: ['ECKE presenters index', 'ECKE presenter detail'],
   },
   {
     sourceKind: 'dungeon_profile',
@@ -301,13 +304,30 @@ export const ECKE_PUBLISH_REGISTRY: readonly EckeRegistryEntry[] = [
     visibleInOrgDashboard: true,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
-    supportState: 'planned',
-    eckeTargetKind: 'ecke_dungeon',
-    currentTransport: 'none',
+    supportState: 'active_existing',
+    eckeTargetKind: 'ecke_listing',
+    currentTransport: 'listing_webhook',
     requiresPermission: 'org.moderator',
-    privacySummary: 'Group-owned venue publishing not wired yet.',
+    privacySummary: 'Published community places only; hidden addresses omitted.',
     omittedFields: getVenueOmittedFields().map((f) => f.label),
-    eckeSurfacesAffected: ['ECKE dungeons index'],
+    eckeSurfacesAffected: ['ECKE venues index', 'ECKE venue detail'],
+  },
+  {
+    sourceKind: 'convention_event_anchor',
+    label: 'Convention ECKE event row',
+    description: 'Public convention anchor row in ECKE events directory (Supabase).',
+    ownerKind: 'convention',
+    visibleInGroupDashboard: false,
+    visibleInOrgDashboard: false,
+    visibleInConventionDashboard: true,
+    visibleInUserDashboard: false,
+    supportState: 'active_existing',
+    eckeTargetKind: 'ecke_event',
+    currentTransport: 'supabase_rest',
+    requiresPermission: 'convention.full_admin',
+    privacySummary: 'Public convention listing fields only; no attendee data.',
+    omittedFields: getConventionOmittedFields().map((f) => f.label),
+    eckeSurfacesAffected: ['ECKE events directory', 'ECKE event detail'],
   },
 ] as const
 

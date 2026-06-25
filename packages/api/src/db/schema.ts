@@ -2478,6 +2478,7 @@ export const communityPlaces = pgTable(
     region: varchar('region', { length: 128 }),
     country: varchar('country', { length: 128 }),
     status: communityPlaceStatusEnum('status').notNull().default('pending_moderation'),
+    eckePublish: boolean('ecke_publish').notNull().default(false),
     submittedByUserId: uuid('submitted_by_user_id').references(() => users.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -2989,6 +2990,7 @@ export const presenterProfiles = pgTable(
     profileKind: presenterProfileKindEnum('profile_kind').notNull().default('PRES'),
     expertiseTags: text('expertise_tags').array(),
     directoryVisibility: presenterDirectoryVisibilityEnum('directory_visibility').notNull().default('UNLISTED'),
+    eckePublish: boolean('ecke_publish').notNull().default(false),
     /** Weighted rollup from `presenter_reviews` (org-weighted in application). */
     ratingAvg: doublePrecision('rating_avg').notNull().default(0),
     reviewCount: integer('review_count').notNull().default(0),
@@ -3774,7 +3776,8 @@ export const eckePublishScopeEnum = pgEnum('ecke_publish_scope', [
   'event',
   'education_article',
   'vendor_profile',
-  'event',
+  'presenter_profile',
+  'venue_profile',
 ])
 
 export const eckePublishTargetKindEnum = pgEnum('ecke_publish_target_kind', [
@@ -3806,6 +3809,8 @@ export const eckePublishTargets = pgTable(
     educationArticleId: uuid('education_article_id').references(() => educationArticles.id, { onDelete: 'cascade' }),
     vendorProfileId: uuid('vendor_profile_id').references(() => vendorProfiles.id, { onDelete: 'cascade' }),
     eventId: uuid('event_id').references(() => events.id, { onDelete: 'cascade' }),
+    presenterUserId: uuid('presenter_user_id').references(() => users.id, { onDelete: 'cascade' }),
+    communityPlaceId: uuid('community_place_id').references(() => communityPlaces.id, { onDelete: 'cascade' }),
     targetKind: eckePublishTargetKindEnum('target_kind').notNull(),
     externalSlug: varchar('external_slug', { length: 128 }).notNull(),
     status: eckePublishStatusEnum('status').notNull().default('never'),
@@ -3829,6 +3834,8 @@ export const eckePublishTargets = pgTable(
     uniqueIndex('ecke_publish_targets_article_kind_uq').on(t.educationArticleId, t.targetKind),
     uniqueIndex('ecke_publish_targets_vendor_kind_uq').on(t.vendorProfileId, t.targetKind),
     uniqueIndex('ecke_publish_targets_event_kind_uq').on(t.eventId, t.targetKind),
+    uniqueIndex('ecke_publish_targets_presenter_kind_uq').on(t.presenterUserId, t.targetKind),
+    uniqueIndex('ecke_publish_targets_place_kind_uq').on(t.communityPlaceId, t.targetKind),
     index('ecke_publish_targets_external_slug_idx').on(t.externalSlug),
   ]
 )

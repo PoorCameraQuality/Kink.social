@@ -39,19 +39,21 @@ type Props = {
   conventionSlug: string
 }
 
-const SECTION_ORDER = ['overview', 'convention_listing', 'dancecard', 'history'] as const
+const SECTION_ORDER = ['overview', 'convention_listing', 'convention_event_anchor', 'dancecard', 'history'] as const
 
 const SECTION_HEADINGS: Record<string, string> = {
   overview: 'Overview',
   convention_listing: 'Convention listing',
+  convention_event_anchor: 'Event directory anchor',
   dancecard: 'Dancecard bundle',
   history: 'Publish history',
 }
 
 function cardWriteKind(
   card: OverviewCard,
-): 'convention_listing' | 'dancecard_event' {
+): 'convention_listing' | 'convention_event_anchor' | 'dancecard_event' {
   if (card.sourceKind === 'dancecard_event') return 'dancecard_event'
+  if (card.sourceKind === 'convention_event_anchor') return 'convention_event_anchor'
   return 'convention_listing'
 }
 
