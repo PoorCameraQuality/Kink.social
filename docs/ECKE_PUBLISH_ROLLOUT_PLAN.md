@@ -164,3 +164,16 @@ Existing companions: `ECKE_PUBLIC_PUBLISHING_CONTRACT.md`, `ECKE_C2K_ENTITY_MAP.
 - Unpublish added: remote draft flip + local `unpublished` status
 - **Next pass (Pass 6):** dungeons/venues after ECKE table mapping confirmed
 
+---
+
+## Final ECKE Publish Parity Pass (2026-06-25)
+
+- **Branch:** `ecke-publish-final-parity` — [PR #18](https://github.com/PoorCameraQuality/Kink.social/pull/18)
+- **Completed source kinds:** `organization_listing`, `dungeon_profile`, `convention_listing`, `dancecard_event` (+ bundled dancecard sub-kinds)
+- **Blocked:** `presenter_profile` (no ECKE public surface), standalone `venue_profile` (no `community_places` target)
+- **Convention UI:** `ConventionEckePanel` on Dancecard Integrations tab replaces legacy stub for unified preview/status/publish
+- **Org route fix:** org-scoped writes now include `organization_listing` and `dungeon_profile`
+- **EastCoast:** not modified in this pass — operator smoke required for org listing consumer display
+- **Tests:** ECKE publish unit suite + `ecke-publish-final-kinds.test.ts`
+- **Operator smoke:** org listing webhook, dungeon `/dungeons/{slug}`, convention listing + dancecard, access-code redaction, group/event/education/vendor regressions
+

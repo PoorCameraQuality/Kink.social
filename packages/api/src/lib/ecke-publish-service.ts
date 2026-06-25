@@ -23,7 +23,7 @@ import {
   isFinalSupportedWriteKind,
 } from './ecke-publish-final-kinds.js'
 import { isOrgDungeonListing } from './ecke-directory-sync.js'
-import { loadOrgEckePublishRow } from './ecke-publish-org-convention.js'
+import { loadConventionEckeContext, loadOrgEckePublishRow } from './ecke-publish-org-convention.js'
 import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import {
@@ -161,7 +161,17 @@ export type EckePublishPreviewResult = EckePublishStatusResult & {
 }
 
 export type EckeGroupOverviewCard = {
-  section: 'overview' | 'group_listing' | 'organization_listing' | 'events' | 'education' | 'venues' | 'vendors' | 'dancecard' | 'history'
+  section:
+    | 'overview'
+    | 'group_listing'
+    | 'organization_listing'
+    | 'convention_listing'
+    | 'events'
+    | 'education'
+    | 'venues'
+    | 'vendors'
+    | 'dancecard'
+    | 'history'
   sourceKind?: EckeSourceKind
   sourceId?: string
   title: string
@@ -180,6 +190,16 @@ export type EckeOrgOverviewResult = {
   organizationId: string
   organizationSlug: string
   organizationName: string
+  bridgeConnected: boolean
+  passNotice: string
+  cards: EckeGroupOverviewCard[]
+  history: EckeGroupOverviewResult['history']
+}
+
+export type EckeConventionOverviewResult = {
+  conventionId: string
+  conventionSlug: string
+  conventionName: string
   bridgeConnected: boolean
   passNotice: string
   cards: EckeGroupOverviewCard[]
@@ -645,6 +665,21 @@ async function loadOrgFeaturedVendorSummaries(orgId: string) {
     )
     .where(eq(schema.organizationFeaturedVendors.organizationId, orgId))
     .orderBy(asc(schema.organizationFeaturedVendors.sortOrder))
+}
+
+async function loadConventionEckeHistory(conventionId: string) {
+  return db
+    .select({
+      targetKind: schema.eckePublishTargets.targetKind,
+      externalSlug: schema.eckePublishTargets.externalSlug,
+      status: schema.eckePublishTargets.status,
+      lastPublishedAt: schema.eckePublishTargets.lastPublishedAt,
+      lastError: schema.eckePublishTargets.lastError,
+      lastPreviewAt: schema.eckePublishTargets.lastPreviewAt,
+    })
+    .from(schema.eckePublishTargets)
+    .where(eq(schema.eckePublishTargets.conventionId, conventionId))
+    .orderBy(desc(schema.eckePublishTargets.lastAttemptAt))
 }
 
 async function loadVendorProfileEckeHistory(vendorProfileIds: string[]) {
@@ -1692,6 +1727,102 @@ export async function getOrgEckePublishOverview(
       bridgeConnected: isEckeBridgeConfigured(),
       passNotice:
         'Public org listings and dungeon profiles publish via org moderators. Education articles and featured vendors follow author/owner rules.',
+      cards,
+      history: historyRows.map((r) => ({
+        targetKind: r.targetKind,
+        externalSlug: r.externalSlug,
+        status: r.status,
+        lastPublishedAt: r.lastPublishedAt?.toISOString() ?? null,
+        lastError: r.lastError ?? null,
+        lastPreviewAt: r.lastPreviewAt?.toISOString() ?? null,
+      })),
+    },
+  }
+}
+
+export async function getConventionEckePublishOverview(
+  viewer: EckePublishViewer,
+  conventionKey: string,
+): Promise<{ ok: true; result: EckeConventionOverviewResult } | { ok: false; status: number; error: string }> {
+  const ctx = await loadConventionEckeContext(conventionKey, viewer.userId)
+  if (!ctx) {
+    return { ok: false, status: 404, error: 'Convention not found' }
+  }
+  if (!ctx.canManage) {
+    return { ok: false, status: 403, error: 'Convention full admin access required' }
+  }
+
+  const cards: EckeGroupOverviewCard[] = []
+
+  cards.push({
+    section: 'overview',
+    title: 'ECKE Publish overview',
+    supportState: 'info',
+    summary: isEckeBridgeConfigured()
+      ? 'Convention listing and Dancecard bundle publish separately. The convention anchor event directory row (ecke_event) still uses the legacy bundled publish route if you need all targets at once.'
+      : 'ECKE publish bridge is not configured on this server.',
+  })
+
+  const listingPreview = await buildConventionListingPreview(
+    viewer,
+    ctx.conv.id,
+    getRegistryEntry('convention_listing')!,
+  )
+  if (listingPreview.ok) {
+    cards.push({
+      section: 'convention_listing',
+      sourceKind: 'convention_listing',
+      sourceId: ctx.conv.id,
+      title: `${ctx.conv.name} listing`,
+      supportState: 'active_existing',
+      eligible: listingPreview.result.eligible,
+      reason: listingPreview.result.reason,
+      status: listingPreview.result.status,
+      preview: listingPreview.result,
+      writeEnabled: true,
+    })
+  }
+
+  const dancecardPreview = await buildDancecardEventPreview(
+    viewer,
+    ctx.conv.id,
+    getRegistryEntry('dancecard_event')!,
+  )
+  if (dancecardPreview.ok) {
+    cards.push({
+      section: 'dancecard',
+      sourceKind: 'dancecard_event',
+      sourceId: ctx.conv.id,
+      title: `${ctx.conv.name} Dancecard bundle`,
+      supportState: 'active_existing',
+      eligible: dancecardPreview.result.eligible,
+      reason: dancecardPreview.result.reason,
+      status: dancecardPreview.result.status,
+      preview: dancecardPreview.result,
+      writeEnabled: true,
+      summary:
+        'Locations, program slots, and staff shifts publish together in the Dancecard bundle. Access codes appear as configured in preview, not raw values.',
+    })
+  } else {
+    cards.push({
+      section: 'dancecard',
+      title: 'Dancecard bundle',
+      supportState: 'info',
+      plannedMessage: dancecardPreview.error,
+    })
+  }
+
+  const historyRows = await loadConventionEckeHistory(ctx.conv.id)
+
+  return {
+    ok: true,
+    result: {
+      conventionId: ctx.conv.id,
+      conventionSlug: ctx.conv.slug,
+      conventionName: ctx.conv.name,
+      bridgeConnected: isEckeBridgeConfigured(),
+      passNotice:
+        'Convention full admins can preview and publish the ECKE listing webhook and Dancecard bundle. Private staff notes, volunteer assignments, and attendee data never publish.',
       cards,
       history: historyRows.map((r) => ({
         targetKind: r.targetKind,

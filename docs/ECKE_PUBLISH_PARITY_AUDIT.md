@@ -501,7 +501,7 @@ Do **not** remove Supabase REST or webhook paths until pilot verification.
 - Org ECKE tab: org listing, dungeon (when flagged), education, featured vendors
 - Vendor shop settings: vendor ECKE panel
 - Education writer: article ECKE panel
-- Convention: unified API via `/api/v1/ecke-publish/*` with `convention_listing` / `dancecard_event` source IDs (convention UUID)
+- Convention: unified API + **`ConventionEckePanel`** on Dancecard Integrations tab (`convention_listing`, `dancecard_event`)
 
 ### Operator smoke checklist (remaining)
 

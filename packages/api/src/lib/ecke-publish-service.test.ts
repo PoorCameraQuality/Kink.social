@@ -172,9 +172,10 @@ describe('ecke-publish-service preview helpers', () => {
     assert.equal(PASS3_UNSUPPORTED_ERROR.errorCode, 'unsupported_in_pass_3')
   })
 
-  it('Pass 5 unsupported error covers kinds beyond group_listing, event_listing, and education_article', () => {
+  it('Pass 5 unsupported error points operators to the registry for unsupported kinds', () => {
     assert.equal(PASS5_UNSUPPORTED_ERROR.errorCode, 'unsupported_in_pass_5')
-    assert.match(PASS5_UNSUPPORTED_ERROR.message, /education articles/i)
+    assert.match(PASS5_UNSUPPORTED_ERROR.message, /registry/i)
+    assert.match(PASS5_UNSUPPORTED_ERROR.message, /unified ECKE control plane/i)
   })
 
   it('Pass 4 unsupported error message remains for historical reference', () => {

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
 import { describe, it } from 'node:test'
 import type { EducationArticlePublishRow } from './ecke-public-publish.js'
 import {
@@ -53,6 +54,26 @@ describe('education dashboard publish permissions', () => {
   it('author-only message is defined for dashboard read-only state', () => {
     assert.match(EDUCATION_ECKE_AUTHOR_ONLY_MESSAGE, /author/i)
     assert.match(EDUCATION_ECKE_AUTHOR_ONLY_MESSAGE, /education writer/i)
+  })
+})
+
+describe('ecke-publish-control convention dashboard routes', () => {
+  it('registers convention-scoped overview and write routes', () => {
+    const src = fs.readFileSync(
+      new URL('../routes/ecke-publish-control-routes.ts', import.meta.url),
+      'utf8',
+    )
+    assert.match(src, /\/api\/v1\/conventions\/:conventionKey\/ecke-publish/)
+    assert.match(src, /getConventionEckePublishOverview/)
+  })
+
+  it('org-scoped writes include listing and dungeon kinds', () => {
+    const src = fs.readFileSync(
+      new URL('../routes/ecke-publish-control-routes.ts', import.meta.url),
+      'utf8',
+    )
+    assert.match(src, /organization_listing/)
+    assert.match(src, /dungeon_profile/)
   })
 })
 
