@@ -155,4 +155,8 @@ export async function loadEducationArticleForPublish(articleId: string) {
   return loadEducationArticlePublishRow(articleId)
 }
 
+export async function loadEducationArticleAuthorContextForPublish(article: EducationArticlePublishRow) {
+  return loadEducationArticleAuthorContext(article)
+}
+
 export { getEducationArticleIneligibilityReason }

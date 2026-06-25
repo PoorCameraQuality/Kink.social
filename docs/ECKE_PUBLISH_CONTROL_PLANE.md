@@ -1,6 +1,6 @@
 # ECKE Publish Control Plane
 
-**Status:** Pass 4 — `group_listing` + `event_listing` write actions enabled  
+**Status:** Pass 5 Slice 1 — `group_listing` + `event_listing` + `education_article` write actions enabled  
 **Purpose:** Single source of truth for “can publish?”, “who?”, “what payload?”, “what ECKE pages?”
 
 **Product rule:** kink.social is the workflow source of truth; ECKE is the public discovery surface. Do not permanently flatten richer **public-safe** kink.social data — expand ECKE display modules opt-in over time. See `ECKE_PUBLISH_PARITY_AUDIT.md` § *Product rule* and *ECKE Expansion Rule*. Privacy contract unchanged.
@@ -201,4 +201,17 @@ Registry entries may declare optional `expansionModules[]` (e.g. `schedule`, `ma
 - Preview response includes `wouldPublishDeferred[]` for ECKE capability gaps
 - Location redaction enforced server-side via `resolveStandaloneEventPublicLocation`
 - Preview/status remain read-only; writes go through action methods only
+
+---
+
+## Pass 5 Slice 1 Implementation Notes
+
+- `education_article` wired into unified control plane (`getEckePublishPreview`, `publishEckeSource`, `syncEckeSource`, `unpublishEckeSource`)
+- Transport: **ingest_api** via existing `executeEckePublishArticle` / `executeEckeUnpublishEducationArticleWithTargetUpdate`
+- Author-only permission (`article.author`); org/group dashboard education cards deferred to Slice 2
+- Preview response: `wouldPublish`, `wouldPublishDeferred`, `wouldNotPublish`, `actions`, `eckePublicUrl`, stale hash
+- Writer page: `EducationArticleEckePanel` → unified `/api/v1/ecke-publish/*` routes
+- Legacy `/api/v1/me/education-articles/:id/ecke-publish` routes unchanged
+- Unpublish lifecycle: status `unpublished` + `unpublishedAt` + cleared `publishedContentHash`
+- Successful publish persists `eckePublicUrl` and `eckeRecordId` on `ecke_publish_targets`
 

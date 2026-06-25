@@ -123,11 +123,46 @@ export function getEventDeferredFields(): EckeOmittedField[] {
 
 export function getEducationOmittedFields(): EckeOmittedField[] {
   return [
-    { label: 'Draft body', reason: 'Draft content is never published.' },
+    { label: 'Draft body', reason: 'Draft content is never published to ECKE.' },
     { label: 'Member-only body', reason: 'Member-only sections stay on kink.social.' },
     { label: 'Connection-only body', reason: 'Connection-only content is not public SEO.' },
-    { label: 'Hidden author data', reason: 'Private profile fields are omitted.' },
+    { label: 'Private notes', reason: 'Author private notes stay on kink.social.' },
+    { label: 'Internal notes', reason: 'Internal editorial notes are never published.' },
     { label: 'Moderation notes', reason: 'Moderation data is never published.' },
+    { label: 'Application materials', reason: 'Application or vetting materials stay private.' },
+    { label: 'Hidden author profile data', reason: 'Private profile fields are omitted.' },
+    { label: 'Author private email', reason: 'Email addresses are never published to ECKE.' },
+    { label: 'Private contact info', reason: 'Private contact fields stay on kink.social.' },
+    { label: 'Private files', reason: 'Private attachments and files are never published.' },
+    { label: 'Unpublished attachments', reason: 'Draft or unpublished attachments stay on kink.social.' },
+    { label: 'Staff comments', reason: 'Staff-only comments are never published.' },
+    { label: 'Reports', reason: 'Moderation reports and safety reports stay internal.' },
+  ]
+}
+
+/** Public-safe education data ECKE does not display yet — shown in preview as deferred, not omitted. */
+export function getEducationDeferredFields(): EckeOmittedField[] {
+  return [
+    {
+      label: 'Related public articles',
+      reason: 'Public-safe but ECKE education pages may not show related article modules yet.',
+    },
+    {
+      label: 'Learning path placement',
+      reason: 'Public-safe but ECKE may not display series or learning path placement yet.',
+    },
+    {
+      label: 'Presenter profile links',
+      reason: 'Public-safe but ECKE may not surface presenter cross-links beyond basic attribution yet.',
+    },
+    {
+      label: 'Related public classes or events',
+      reason: 'Public-safe but ECKE may not display linked class or event modules yet.',
+    },
+    {
+      label: 'Public org or group context',
+      reason: 'Public-safe but ECKE education pages may not show org or group affiliation yet.',
+    },
   ]
 }
 

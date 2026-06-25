@@ -25,7 +25,7 @@ type Props = {
   eckePublicUrl?: string | null
   eckePublicUrlKnown?: boolean
   writeEnabled?: boolean
-  writeKind?: 'group_listing' | 'event_listing'
+  writeKind?: 'group_listing' | 'event_listing' | 'education_article'
   onLoadPreview?: (sourceKind: string, sourceId: string) => Promise<EckePreviewData | null>
   onPublish?: (sourceKind: string, sourceId: string) => Promise<boolean>
   onSync?: (sourceKind: string, sourceId: string) => Promise<boolean>

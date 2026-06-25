@@ -61,6 +61,13 @@ Reference: `buildGroupListingPayload` L137 — hidden when `visibility !== 'publ
 
 Reference: `ecke-public-publish.ts` L67–172.
 
+**Pass 5 Slice 1 — unified control plane redaction helpers:**
+
+- `getEducationOmittedFields()` — drafts, member-only/connection-only body, private/internal/moderation notes, author private email, private contact, private files, staff comments, reports
+- `getEducationDeferredFields()` — related public articles, learning path placement, presenter links, related classes/events, org/group context (public-safe but ECKE may not display yet)
+- Preview built server-side via `buildEducationArticlePublishContext`; client payload ignored
+- Publish blocked when `publicationStatus !== PUBLISHED`, `visibility !== PUBLIC`, or `eckePublish !== true`
+
 ### Vendors
 
 - Only public vendor profiles.
