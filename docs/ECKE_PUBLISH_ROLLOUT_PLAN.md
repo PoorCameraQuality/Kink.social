@@ -143,3 +143,13 @@ Existing companions: `ECKE_PUBLIC_PUBLISHING_CONTRACT.md`, `ECKE_C2K_ENTITY_MAP.
 - Group/org dashboard education cards deferred to **Pass 5 Slice 2**
 - Vendor parity, dungeons, presenters, Dancecard, maps unchanged (out of scope)
 
+---
+
+## Pass 5 Slice 2 Implementation Notes
+
+- Org dashboard ECKE tab: `GET /api/v1/organizations/:orgKey/ecke-publish` lists org-linked articles (`education_articles.organization_id`)
+- Group dashboard education section: surfaces same org-linked articles when `groups.organization_id` is set
+- Org/group moderators: preview + status; publish/sync/unpublish remain **author-only**
+- `OrganizerOrgEckePanel` + updated `OrganizerGroupEckePanel` use `EckePublishPanel` with `writeEnabled` from API
+- No new ownership tables; vendor parity still deferred
+

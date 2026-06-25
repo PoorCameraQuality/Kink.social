@@ -11,6 +11,7 @@ import OrganizerPeoplePanel from '@/components/organizer/OrganizerPeoplePanel'
 import OrganizerSchedulePanel from '@/components/organizer/OrganizerSchedulePanel'
 import OrganizerToolsPanel from '@/components/organizer/OrganizerToolsPanel'
 import OrganizerOrgModerationPanel from '@/components/organizer/admin/OrganizerOrgModerationPanel'
+import OrganizerOrgEckePanel from '@/components/organizer/OrganizerOrgEckePanel'
 import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
 import { buildOrgChecklistWithConventions } from '@/lib/organizer/build-org-checklist'
@@ -240,6 +241,7 @@ export default function OrganizerOrgClient() {
 
   useEffect(() => {
     if (tab === 'settings' && !showSettings) setTab('home')
+    if (tab === 'ecke' && !showSettings) setTab('home')
     if (tab === 'moderation' && !showModeration) setTab('home')
   }, [tab, showSettings, showModeration, setTab])
 
@@ -248,9 +250,10 @@ export default function OrganizerOrgClient() {
     const base = `/organizer/orgs/${encodeURIComponent(slug)}`
     const tabs: OrganizerTab[] = ['home', 'schedule', 'people', 'communications']
     if (showModeration) tabs.push('moderation')
+    if (showSettings) tabs.push('ecke')
     tabs.push('settings', 'tools')
     return tabs
-      .filter((t) => t !== 'settings' || showSettings)
+      .filter((t) => (t !== 'settings' && t !== 'ecke') || showSettings)
       .map((t) => ({
         id: `tab-${t}`,
         label: `Go to ${ORGANIZER_TAB_LABELS[t]}`,
@@ -483,6 +486,9 @@ export default function OrganizerOrgClient() {
           showSettings={showSettings}
           viewerRole={org.viewerRole}
         />
+      : null}
+      {tab === 'ecke' && showSettings ?
+        <OrganizerOrgEckePanel orgSlug={slug} />
       : null}
       {tab === 'moderation' && showModeration ?
         <OrganizerOrgModerationPanel

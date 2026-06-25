@@ -41,11 +41,12 @@ describe('ecke-publish-registry', () => {
     assert.equal(entry.currentTransport, 'listing_webhook')
   })
 
-  it('lists group dashboard entries including group_listing and event_listing', () => {
+  it('lists group dashboard entries including group_listing, event_listing, and education_article', () => {
     const dashboard = listRegistryForGroupDashboard()
     const kinds = dashboard.map((e) => e.sourceKind)
     assert.ok(kinds.includes('group_listing'))
     assert.ok(kinds.includes('event_listing'))
+    assert.ok(kinds.includes('education_article'))
   })
 
   it('validates source kind strings', () => {

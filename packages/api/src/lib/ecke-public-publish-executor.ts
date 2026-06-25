@@ -35,6 +35,7 @@ const ARTICLE_PUBLISH_SELECT = {
   publicationStatus: schema.educationArticles.publicationStatus,
   eckePublish: schema.educationArticles.eckePublish,
   authorUserId: schema.educationArticles.authorUserId,
+  organizationId: schema.educationArticles.organizationId,
   presenterProfileUserId: schema.educationArticles.presenterProfileUserId,
 } as const
 

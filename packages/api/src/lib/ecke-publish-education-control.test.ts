@@ -40,6 +40,7 @@ function baseArticle(overrides: Partial<EducationArticlePublishRow> = {}): Educa
     publicationStatus: 'PUBLISHED',
     eckePublish: true,
     authorUserId: AUTHOR_ID,
+    organizationId: null,
     presenterProfileUserId: null,
     ...overrides,
   }

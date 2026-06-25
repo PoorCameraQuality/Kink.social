@@ -19,11 +19,10 @@ type OverviewCard = {
 }
 
 type OverviewResponse = {
-  groupId: string
-  groupSlug: string
-  groupName: string
+  organizationId: string
+  organizationSlug: string
+  organizationName: string
   bridgeConnected: boolean
-  readOnlyPass: boolean
   passNotice: string
   cards: OverviewCard[]
   history: Array<{
@@ -37,43 +36,26 @@ type OverviewResponse = {
 }
 
 type Props = {
-  groupId: string
+  orgSlug: string
 }
 
-const SECTION_ORDER = [
-  'overview',
-  'group_listing',
-  'events',
-  'education',
-  'venues',
-  'vendors',
-  'dancecard',
-  'history',
-] as const
+const SECTION_ORDER = ['overview', 'education', 'history'] as const
 
 const SECTION_HEADINGS: Record<string, string> = {
   overview: 'Overview',
-  group_listing: 'Group listing',
-  events: 'Events',
-  education: 'Education',
-  venues: 'Venues / Dungeons / Places',
-  vendors: 'Vendors / Sponsors',
-  dancecard: 'Dancecard',
+  education: 'Education articles',
   history: 'Publish history',
 }
 
-function cardWriteKind(card: OverviewCard): 'group_listing' | 'event_listing' | 'education_article' {
-  if (card.sourceKind === 'education_article') return 'education_article'
-  if (card.section === 'events') return 'event_listing'
-  return 'group_listing'
+function cardWriteKind(_card: OverviewCard): 'education_article' {
+  return 'education_article'
 }
 
 function cardWriteEnabled(card: OverviewCard): boolean {
-  if (card.writeEnabled !== undefined) return card.writeEnabled
-  return card.section === 'group_listing' || card.section === 'events'
+  return card.writeEnabled ?? false
 }
 
-export default function OrganizerGroupEckePanel({ groupId }: Props) {
+export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
   const [data, setData] = useState<OverviewResponse | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -82,11 +64,15 @@ export default function OrganizerGroupEckePanel({ groupId }: Props) {
     setLoading(true)
     setLoadError(null)
     try {
-      const r = await fetch(`/api/v1/groups/${encodeURIComponent(groupId)}/ecke-publish`, {
+      const r = await fetch(`/api/v1/organizations/${encodeURIComponent(orgSlug)}/ecke-publish`, {
         credentials: 'include',
       })
       if (!r.ok) {
-        setLoadError(r.status === 403 ? 'You need moderator access to view ECKE publish.' : 'Could not load ECKE publish overview.')
+        setLoadError(
+          r.status === 403 ?
+            'You need moderator access to view ECKE publish.'
+          : 'Could not load ECKE publish overview.',
+        )
         setData(null)
         return
       }
@@ -97,7 +83,7 @@ export default function OrganizerGroupEckePanel({ groupId }: Props) {
     } finally {
       setLoading(false)
     }
-  }, [groupId])
+  }, [orgSlug])
 
   useEffect(() => {
     void loadOverview()
@@ -107,19 +93,19 @@ export default function OrganizerGroupEckePanel({ groupId }: Props) {
     async (sourceKind: string, sourceId: string): Promise<EckePreviewData | null> => {
       const params = new URLSearchParams({ sourceKind, sourceId })
       const r = await fetch(
-        `/api/v1/groups/${encodeURIComponent(groupId)}/ecke-publish/preview?${params.toString()}`,
+        `/api/v1/organizations/${encodeURIComponent(orgSlug)}/ecke-publish/preview?${params.toString()}`,
         { credentials: 'include' },
       )
       if (!r.ok) return null
       return (await r.json()) as EckePreviewData
     },
-    [groupId],
+    [orgSlug],
   )
 
   const runWriteAction = useCallback(
     async (action: 'publish' | 'sync' | 'unpublish', sourceKind: string, sourceId: string): Promise<boolean> => {
       const r = await fetch(
-        `/api/v1/groups/${encodeURIComponent(groupId)}/ecke-publish/${action}`,
+        `/api/v1/organizations/${encodeURIComponent(orgSlug)}/ecke-publish/${action}`,
         {
           method: 'POST',
           credentials: 'include',
@@ -129,7 +115,7 @@ export default function OrganizerGroupEckePanel({ groupId }: Props) {
       )
       return r.ok
     },
-    [groupId],
+    [orgSlug],
   )
 
   if (loading) {
@@ -161,7 +147,7 @@ export default function OrganizerGroupEckePanel({ groupId }: Props) {
         <p className="text-xs uppercase tracking-wide text-dc-accent">East Coast Kink Events</p>
         <h2 className="text-2xl font-semibold text-dc-text">ECKE Publish</h2>
         <p className="max-w-2xl text-sm text-dc-text-muted">
-          Preview exactly what would appear on East Coast Kink Events for {data.groupName}.{' '}
+          Preview org-linked education articles for {data.organizationName}.{' '}
           <span className="text-amber-200/90">{data.passNotice}</span>
         </p>
         <p className="text-xs text-dc-text-muted">
@@ -175,7 +161,7 @@ export default function OrganizerGroupEckePanel({ groupId }: Props) {
             <section key={section} className="space-y-3">
               <h3 className="text-lg font-semibold text-dc-text">{SECTION_HEADINGS[section]}</h3>
               {data.history.length === 0 ?
-                <p className="text-sm text-dc-text-muted">No publish history recorded for this group yet.</p>
+                <p className="text-sm text-dc-text-muted">No education publish history recorded for this organization yet.</p>
               : (
                 <ul className="divide-y divide-dc-border rounded-xl border border-dc-border">
                   {data.history.map((row) => (
@@ -208,33 +194,32 @@ export default function OrganizerGroupEckePanel({ groupId }: Props) {
             <div className="space-y-4">
               {sectionCards.map((card) => {
                 const writeEnabled = cardWriteEnabled(card)
-                const writeKind = cardWriteKind(card)
                 const canWrite = writeEnabled && Boolean(card.sourceKind && card.sourceId)
                 return (
-                <EckePublishPanel
-                  key={`${card.section}-${card.sourceId ?? card.title}`}
-                  title={card.title}
-                  sourceKind={card.sourceKind}
-                  sourceId={card.sourceId}
-                  supportState={card.supportState}
-                  eligible={card.eligible}
-                  reason={card.reason}
-                  status={card.status ?? card.preview?.status}
-                  summary={card.summary}
-                  plannedMessage={card.plannedMessage}
-                  publishRestrictedMessage={card.publishRestrictedMessage}
-                  preview={card.preview}
-                  staleNotice={card.preview?.staleNotice}
-                  eckePublicUrl={card.preview?.eckePublicUrl}
-                  eckePublicUrlKnown={card.preview?.eckePublicUrlKnown}
-                  writeEnabled={writeEnabled}
-                  writeKind={writeKind}
-                  onLoadPreview={card.sourceKind && card.sourceId ? loadPreview : undefined}
-                  onPublish={canWrite ? (sk, sid) => runWriteAction('publish', sk, sid) : undefined}
-                  onSync={canWrite ? (sk, sid) => runWriteAction('sync', sk, sid) : undefined}
-                  onUnpublish={canWrite ? (sk, sid) => runWriteAction('unpublish', sk, sid) : undefined}
-                  onActionComplete={() => void loadOverview()}
-                />
+                  <EckePublishPanel
+                    key={`${card.section}-${card.sourceId ?? card.title}`}
+                    title={card.title}
+                    sourceKind={card.sourceKind}
+                    sourceId={card.sourceId}
+                    supportState={card.supportState}
+                    eligible={card.eligible}
+                    reason={card.reason}
+                    status={card.status ?? card.preview?.status}
+                    summary={card.summary}
+                    plannedMessage={card.plannedMessage}
+                    publishRestrictedMessage={card.publishRestrictedMessage}
+                    preview={card.preview}
+                    staleNotice={card.preview?.staleNotice}
+                    eckePublicUrl={card.preview?.eckePublicUrl}
+                    eckePublicUrlKnown={card.preview?.eckePublicUrlKnown}
+                    writeEnabled={writeEnabled}
+                    writeKind={cardWriteKind(card)}
+                    onLoadPreview={card.sourceKind && card.sourceId ? loadPreview : undefined}
+                    onPublish={canWrite ? (sk, sid) => runWriteAction('publish', sk, sid) : undefined}
+                    onSync={canWrite ? (sk, sid) => runWriteAction('sync', sk, sid) : undefined}
+                    onUnpublish={canWrite ? (sk, sid) => runWriteAction('unpublish', sk, sid) : undefined}
+                    onActionComplete={() => void loadOverview()}
+                  />
                 )
               })}
             </div>

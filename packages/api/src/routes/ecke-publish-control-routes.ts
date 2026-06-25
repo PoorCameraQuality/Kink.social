@@ -6,8 +6,11 @@ import {
   getEckePublishRegistryForViewer,
   getEckePublishStatus,
   getGroupEckePublishOverview,
+  getOrgEckePublishOverview,
   isValidEckeSourceKind,
   publishEckeSource,
+  resolveGroupPublishAccess,
+  resolveOrgPublishAccess,
   syncEckeSource,
   unpublishEckeSource,
   type EckePublishViewer,
@@ -122,7 +125,65 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
       return reply.status(400).send({ error: 'Unknown sourceKind' })
     }
 
-    const result = await getEckePublishPreview(viewer, sourceKind, sourceId)
+    let result
+    if (sourceKind === 'education_article') {
+      const groupAccess = await resolveGroupPublishAccess(groupId, viewer.userId)
+      if (!groupAccess?.canManage) {
+        return reply.status(403).send({ error: 'Group moderator access required to preview ECKE publish' })
+      }
+      result = await getEckePublishPreview(viewer, sourceKind, sourceId, {
+        groupOrganizationId: groupAccess.group.organizationId ?? undefined,
+        groupModerator: groupAccess.canManage,
+      })
+    } else {
+      result = await getEckePublishPreview(viewer, sourceKind, sourceId)
+    }
+
+    if (!result.ok) {
+      return reply.status(result.status).send({ error: result.error })
+    }
+    return reply.send(result.result)
+  })
+
+  app.get('/api/v1/organizations/:orgKey/ecke-publish', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const viewer = requireViewer(req, reply)
+    if (!viewer) return
+    const { orgKey } = req.params as { orgKey: string }
+
+    const result = await getOrgEckePublishOverview(viewer, orgKey)
+    if (!result.ok) {
+      return reply.status(result.status).send({ error: result.error })
+    }
+    return reply.send(result.result)
+  })
+
+  app.get('/api/v1/organizations/:orgKey/ecke-publish/preview', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const viewer = requireViewer(req, reply)
+    if (!viewer) return
+    const { orgKey } = req.params as { orgKey: string }
+    const sourceKind = (req.query as { sourceKind?: string }).sourceKind?.trim()
+    const sourceId = (req.query as { sourceId?: string }).sourceId?.trim()
+
+    if (!sourceKind || !sourceId) {
+      return reply.status(400).send({ error: 'sourceKind and sourceId are required' })
+    }
+    if (!isValidEckeSourceKind(sourceKind)) {
+      return reply.status(400).send({ error: 'Unknown sourceKind' })
+    }
+
+    const orgAccess = await resolveOrgPublishAccess(orgKey, viewer.userId)
+    if (!orgAccess?.canManage) {
+      return reply.status(403).send({ error: 'Organization moderator access required to preview ECKE publish' })
+    }
+
+    const result = await getEckePublishPreview(
+      viewer,
+      sourceKind,
+      sourceId,
+      sourceKind === 'education_article' ? { organizationId: orgAccess.organization.id } : undefined,
+    )
     if (!result.ok) {
       return reply.status(result.status).send({ error: result.error })
     }
@@ -135,7 +196,7 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     action: 'publish' | 'sync' | 'unpublish',
     sourceKind: string,
     sourceId: string,
-    expectedGroupId?: string,
+    options?: { expectedGroupId?: string; expectedOrgKey?: string },
   ) {
     if (!requireDb(reply)) return null
     const viewer = requireViewer(req, reply)
@@ -151,7 +212,8 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     const result = await runner(viewer, {
       sourceKind: sourceKind as import('../lib/ecke-publish-registry.js').EckeSourceKind,
       sourceId: sourceId.trim(),
-      expectedGroupId,
+      expectedGroupId: options?.expectedGroupId,
+      expectedOrgKey: options?.expectedOrgKey,
     })
     if (!result.ok) {
       reply.status(result.status).send({ error: result.error, errorCode: result.errorCode })
@@ -168,12 +230,26 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     if (sourceKind === 'group_listing') {
       return { sourceKind, sourceId: groupId }
     }
-    if (sourceKind === 'event_listing') {
+    if (sourceKind === 'event_listing' || sourceKind === 'education_article') {
       const sourceId = body.sourceId?.trim()
-      if (!sourceId) return { error: 'sourceId is required for event_listing' }
+      if (!sourceId) return { error: `sourceId is required for ${sourceKind}` }
       return { sourceKind, sourceId }
     }
     return { error: 'Unsupported sourceKind for group-scoped ECKE publish' }
+  }
+
+  function resolveOrgScopedWrite(
+    body: { sourceKind?: string; sourceId?: string },
+  ): { sourceKind: string; sourceId: string } | { error: string } {
+    const sourceKind = body.sourceKind?.trim()
+    const sourceId = body.sourceId?.trim()
+    if (!sourceKind || !sourceId) {
+      return { error: 'sourceKind and sourceId are required' }
+    }
+    if (sourceKind !== 'education_article') {
+      return { error: 'Unsupported sourceKind for org-scoped ECKE publish' }
+    }
+    return { sourceKind, sourceId }
   }
 
   app.post('/api/v1/ecke-publish/publish', async (req, reply) => {
@@ -208,7 +284,9 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     const body = (req.body ?? {}) as { sourceKind?: string; sourceId?: string }
     const resolved = resolveGroupScopedWrite(groupId, body)
     if ('error' in resolved) return reply.status(400).send({ error: resolved.error })
-    const result = await handleWriteAction(req, reply, 'publish', resolved.sourceKind, resolved.sourceId, groupId)
+    const result = await handleWriteAction(req, reply, 'publish', resolved.sourceKind, resolved.sourceId, {
+      expectedGroupId: groupId,
+    })
     if (result) return reply.send(result)
   })
 
@@ -217,7 +295,9 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     const body = (req.body ?? {}) as { sourceKind?: string; sourceId?: string }
     const resolved = resolveGroupScopedWrite(groupId, body)
     if ('error' in resolved) return reply.status(400).send({ error: resolved.error })
-    const result = await handleWriteAction(req, reply, 'sync', resolved.sourceKind, resolved.sourceId, groupId)
+    const result = await handleWriteAction(req, reply, 'sync', resolved.sourceKind, resolved.sourceId, {
+      expectedGroupId: groupId,
+    })
     if (result) return reply.send(result)
   })
 
@@ -226,7 +306,42 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     const body = (req.body ?? {}) as { sourceKind?: string; sourceId?: string }
     const resolved = resolveGroupScopedWrite(groupId, body)
     if ('error' in resolved) return reply.status(400).send({ error: resolved.error })
-    const result = await handleWriteAction(req, reply, 'unpublish', resolved.sourceKind, resolved.sourceId, groupId)
+    const result = await handleWriteAction(req, reply, 'unpublish', resolved.sourceKind, resolved.sourceId, {
+      expectedGroupId: groupId,
+    })
+    if (result) return reply.send(result)
+  })
+
+  app.post('/api/v1/organizations/:orgKey/ecke-publish/publish', async (req, reply) => {
+    const { orgKey } = req.params as { orgKey: string }
+    const body = (req.body ?? {}) as { sourceKind?: string; sourceId?: string }
+    const resolved = resolveOrgScopedWrite(body)
+    if ('error' in resolved) return reply.status(400).send({ error: resolved.error })
+    const result = await handleWriteAction(req, reply, 'publish', resolved.sourceKind, resolved.sourceId, {
+      expectedOrgKey: orgKey,
+    })
+    if (result) return reply.send(result)
+  })
+
+  app.post('/api/v1/organizations/:orgKey/ecke-publish/sync', async (req, reply) => {
+    const { orgKey } = req.params as { orgKey: string }
+    const body = (req.body ?? {}) as { sourceKind?: string; sourceId?: string }
+    const resolved = resolveOrgScopedWrite(body)
+    if ('error' in resolved) return reply.status(400).send({ error: resolved.error })
+    const result = await handleWriteAction(req, reply, 'sync', resolved.sourceKind, resolved.sourceId, {
+      expectedOrgKey: orgKey,
+    })
+    if (result) return reply.send(result)
+  })
+
+  app.post('/api/v1/organizations/:orgKey/ecke-publish/unpublish', async (req, reply) => {
+    const { orgKey } = req.params as { orgKey: string }
+    const body = (req.body ?? {}) as { sourceKind?: string; sourceId?: string }
+    const resolved = resolveOrgScopedWrite(body)
+    if ('error' in resolved) return reply.status(400).send({ error: resolved.error })
+    const result = await handleWriteAction(req, reply, 'unpublish', resolved.sourceKind, resolved.sourceId, {
+      expectedOrgKey: orgKey,
+    })
     if (result) return reply.send(result)
   })
 }
