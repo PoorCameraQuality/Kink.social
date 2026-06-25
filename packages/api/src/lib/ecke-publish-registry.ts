@@ -2,6 +2,7 @@ import {
   getEducationOmittedFields,
   getEventOmittedFields,
   getGroupOmittedFields,
+  getOrgOmittedFields,
   getVendorOmittedFields,
   getVenueOmittedFields,
 } from './ecke-redaction.js'
@@ -135,7 +136,7 @@ export const ECKE_PUBLISH_REGISTRY: readonly EckeRegistryEntry[] = [
     currentTransport: 'listing_webhook',
     requiresPermission: 'org.moderator',
     privacySummary: 'Only public organizations.',
-    omittedFields: ['Internal org notes', 'Member roster', 'Moderation notes'],
+    omittedFields: getOrgOmittedFields().map((f) => f.label),
     eckeSurfacesAffected: ['ECKE directory/listing pages'],
   },
   {

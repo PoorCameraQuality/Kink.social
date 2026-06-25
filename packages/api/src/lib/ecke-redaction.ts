@@ -218,6 +218,90 @@ export function getVenueOmittedFields(): EckeOmittedField[] {
     { label: 'Private address', reason: 'Exact private addresses are omitted for non-public venues.' },
     { label: 'Staff notes', reason: 'Operational notes stay internal.' },
     { label: 'Internal owner notes', reason: 'Internal notes are never published.' },
+    { label: 'Hidden access instructions', reason: 'Non-public access details stay on kink.social.' },
+    { label: 'Member-only location details', reason: 'Member-only venue data is never published.' },
+    { label: 'Owner private contact', reason: 'Private contact stays on kink.social.' },
+    { label: 'Moderation notes', reason: 'Moderation data is never published.' },
+    { label: 'Reports', reason: 'Moderation reports are never published.' },
+    { label: 'Internal safety notes', reason: 'Staff-only safety notes are never published.' },
+  ]
+}
+
+export function getOrgOmittedFields(): EckeOmittedField[] {
+  return [
+    { label: 'Member roster', reason: 'Organization member lists never publish to ECKE.' },
+    { label: 'Private staff lists', reason: 'Internal staff rosters stay on kink.social.' },
+    { label: 'Private addresses', reason: 'Exact private addresses are omitted unless explicitly public.' },
+    { label: 'Internal org notes', reason: 'Internal notes are never published.' },
+    { label: 'Moderation notes', reason: 'Moderation data is never published.' },
+    { label: 'Reports', reason: 'Moderation reports are never published.' },
+    { label: 'Private contact info', reason: 'Private email/phone never publish.' },
+    { label: 'Application answers', reason: 'Membership application data is never published.' },
+  ]
+}
+
+export function getOrgDeferredFields(): EckeOmittedField[] {
+  return [
+    { label: 'Public maps', reason: 'Public-safe but ECKE org pages may not show map modules yet.' },
+    { label: 'Public pins', reason: 'Public-safe but ECKE may not display map pins yet.' },
+    { label: 'Public schedules', reason: 'Public-safe but ECKE org pages may not embed schedules yet.' },
+    { label: 'Public recurring meetup info', reason: 'Public-safe but ECKE may not display recurring meetups yet.' },
+    { label: 'Public policies', reason: 'Public-safe but ECKE may not show policy modules yet.' },
+    { label: 'Public vendor/presenter relationships', reason: 'Public-safe but ECKE may not link related modules yet.' },
+  ]
+}
+
+export function getConventionOmittedFields(): EckeOmittedField[] {
+  return [
+    { label: 'Attendee list', reason: 'Convention attendee rosters never publish.' },
+    { label: 'Applications', reason: 'Registration applications never publish.' },
+    { label: 'Private staff notes', reason: 'Staff-only notes stay internal.' },
+    { label: 'Private locations', reason: 'Hidden venue addresses stay on kink.social.' },
+    { label: 'Volunteer/private shifts', reason: 'Internal shift assignments with private notes never publish.' },
+    { label: 'Internal room notes', reason: 'Operational room notes stay internal.' },
+    { label: 'Moderation/safety reports', reason: 'Reports never publish.' },
+    { label: 'Private contact info', reason: 'Private organizer contact never publishes.' },
+  ]
+}
+
+export function getConventionDeferredFields(): EckeOmittedField[] {
+  return [
+    { label: 'Full schedule', reason: 'Public-safe slots may publish via Dancecard; full ECKE schedule modules may lag.' },
+    { label: 'Public maps', reason: 'Public-safe but ECKE convention pages may not show maps yet.' },
+    { label: 'Public vendors', reason: 'Public-safe but ECKE may not embed vendor modules yet.' },
+    { label: 'Public presenters/classes', reason: 'Public-safe but ECKE may not show class grids yet.' },
+    { label: 'Public sponsor blocks', reason: 'Public-safe but ECKE may not display sponsors yet.' },
+    { label: 'Public policies/code of conduct', reason: 'Public-safe but ECKE may not show policy modules yet.' },
+  ]
+}
+
+export function getDancecardOmittedFields(): EckeOmittedField[] {
+  return [
+    { label: 'Raw staff access codes', reason: 'Access codes are redacted in preview; only “configured” is shown.' },
+    { label: 'Raw registration access codes', reason: 'Registration codes are redacted in preview.' },
+    { label: 'Private staff notes', reason: 'Staff-only notes on shifts never publish.' },
+    { label: 'Private volunteer notes', reason: 'Volunteer operational notes stay internal.' },
+    { label: 'Staff user IDs', reason: 'Internal user identifiers never publish.' },
+    { label: 'Private contact info', reason: 'Private contact never publishes.' },
+    { label: 'Attendee data', reason: 'Attendee information never publishes.' },
+    { label: 'Safety notes', reason: 'Internal safety notes stay internal.' },
+  ]
+}
+
+export function getDancecardDeferredFields(): EckeOmittedField[] {
+  return [
+    {
+      label: 'Dancecard location rows',
+      reason: 'Locations publish inside the dancecard bundle; separate location cards are preview-only.',
+    },
+    {
+      label: 'Dancecard program slots',
+      reason: 'Slots publish inside the dancecard bundle; separate slot cards are preview-only.',
+    },
+    {
+      label: 'Dancecard staff shifts',
+      reason: 'Staff shifts publish inside the dancecard bundle; separate shift cards are preview-only.',
+    },
   ]
 }
 

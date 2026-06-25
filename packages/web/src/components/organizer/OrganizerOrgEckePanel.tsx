@@ -39,17 +39,24 @@ type Props = {
   orgSlug: string
 }
 
-const SECTION_ORDER = ['overview', 'education', 'vendors', 'history'] as const
+const SECTION_ORDER = ['overview', 'organization_listing', 'venues', 'education', 'vendors', 'history'] as const
 
 const SECTION_HEADINGS: Record<string, string> = {
   overview: 'Overview',
+  organization_listing: 'Organization listing',
+  venues: 'Dungeon / venue',
   education: 'Education articles',
   vendors: 'Featured vendors',
   history: 'Publish history',
 }
 
-function cardWriteKind(card: OverviewCard): 'education_article' | 'vendor_profile' {
-  return card.sourceKind === 'vendor_profile' ? 'vendor_profile' : 'education_article'
+function cardWriteKind(
+  card: OverviewCard,
+): 'education_article' | 'vendor_profile' | 'organization_listing' | 'dungeon_profile' {
+  if (card.sourceKind === 'vendor_profile') return 'vendor_profile'
+  if (card.sourceKind === 'organization_listing') return 'organization_listing'
+  if (card.sourceKind === 'dungeon_profile') return 'dungeon_profile'
+  return 'education_article'
 }
 
 function cardWriteEnabled(card: OverviewCard): boolean {

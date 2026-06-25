@@ -223,7 +223,7 @@ describe('ecke-publish-service vendor control plane wiring', () => {
   })
 
   it('Pass 5 supported write kinds include vendor_profile', () => {
-    assert.match(PASS5_UNSUPPORTED_ERROR.message, /vendor profiles/i)
+    assert.match(PASS5_UNSUPPORTED_ERROR.message, /unified ECKE control plane/i)
   })
 
   it('executor persists eckePublicUrl for vendors', async () => {

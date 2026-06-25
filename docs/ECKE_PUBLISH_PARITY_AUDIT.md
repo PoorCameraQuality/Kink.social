@@ -463,3 +463,52 @@ Do **not** remove Supabase REST or webhook paths until pilot verification.
 - **66** ECKE publish unit tests passing (vendor control + education + registry + target-store + directory-sync)
 
 ---
+
+## Final ECKE Publish Parity Status
+
+**Audit date:** 2026-06-25  
+**Branch:** `ecke-publish-final-parity` (kink.social)  
+**EastCoast repo:** not modified in this pass (no local clone; display gaps documented below)
+
+### Master parity matrix
+
+| Source kind | kink.social model | Transport | Unified preview | Unified publish/sync/unpublish | ECKE target | Permission | Status |
+|---|---|---|---|---|---|---|---|
+| group_listing | `groups` | listing_webhook | Yes | Yes | `ecke_listing` | group/org mod | **Complete** |
+| event_listing | `events` (group-owned in unified plane) | supabase_rest | Yes | Yes | `ecke_event` | group mod | **Complete** (group scope) |
+| education_article | `education_articles` | ingest_api | Yes | Yes | `ecke_article` | author publish; mod preview | **Complete** |
+| vendor_profile | `vendor_profiles` | supabase_rest | Yes | Yes | `ecke_vendor` | owner/co-owner | **Complete** |
+| organization_listing | `organizations` | listing_webhook | Yes | Yes | `ecke_listing` | org mod | **Complete** (final pass) |
+| dungeon_profile | `organizations` + dungeon flags | supabase_rest | Yes | Yes | `ecke_dungeon` | org mod | **Complete** (final pass) |
+| convention_listing | `conventions` | listing_webhook | Yes | Yes | `ecke_listing` | convention full admin | **Complete** (final pass) |
+| dancecard_event | `conventions` + program data | supabase_rest | Yes | Yes (bundle) | `dancecard_event` | convention full admin | **Complete** (final pass) |
+| dancecard_location | bundled in dancecard | supabase_rest | Preview via dancecard bundle | Same bundle write | `dancecard_event` | convention full admin | **Bundled** |
+| dancecard_program_slot | bundled in dancecard | supabase_rest | Preview via dancecard bundle | Same bundle write | `dancecard_event` | convention full admin | **Bundled** |
+| dancecard_staff_shift | bundled in dancecard | supabase_rest | Preview via dancecard bundle | Same bundle write | `dancecard_event` | convention full admin | **Bundled** |
+| presenter_profile | `presenter_profiles` | none | No | No | none | n/a | **Blocked** — no ECKE public presenter surface wired |
+| venue_profile | `community_places` | none | No | No | none | n/a | **Blocked** — no standalone venue FK/target; org dungeon flag covers org-flagged venues only |
+
+### Blocked / deferred (explicit)
+
+- **presenter_profile:** No ECKE ingest/table/page confirmed for presenter listings; registry remains `planned`.
+- **venue_profile (standalone):** `community_places` not mapped to `ecke_publish_targets`; group dashboard stays info-only.
+- **EastCoast org listing consumer:** kink.social publishes via listing webhook; verify ECKE displays org directory pages before claiming full parity in prod smoke.
+- **Convention `ecke_event` row:** Legacy bundled publish still handles convention anchor event row; unified plane covers listing + dancecard in final pass (event row remains legacy path).
+
+### Pilot-ready unified surfaces
+
+- Group ECKE tab: group listing, group events, org-linked education
+- Org ECKE tab: org listing, dungeon (when flagged), education, featured vendors
+- Vendor shop settings: vendor ECKE panel
+- Education writer: article ECKE panel
+- Convention: unified API via `/api/v1/ecke-publish/*` with `convention_listing` / `dancecard_event` source IDs (convention UUID)
+
+### Operator smoke checklist (remaining)
+
+1. Public org → preview org listing → publish → verify ECKE directory/webhook consumer
+2. Dungeon-flagged org → preview dungeon → publish → verify `/dungeons/{slug}`
+3. Convention admin → preview convention listing + dancecard → publish → verify listing + dancecard
+4. Dancecard access codes show as “configured” in preview, not raw values
+5. Vendor/education/group regressions unchanged
+
+---

@@ -6,6 +6,24 @@ import {
 } from '@c2k/shared'
 import { getVendorShopAccess, type VendorProfileRow } from './vendor-shop-people.js'
 import { isUserIdentityBanned } from './peer-reputation.js'
+import {
+  buildConventionListingPreview,
+  buildDancecardEventPreview,
+  buildDungeonProfilePreview,
+  buildOrganizationListingPreview,
+  executeConventionListingPublish,
+  executeConventionListingUnpublish,
+  executeDancecardEventPublish,
+  executeDancecardEventUnpublish,
+  executeDungeonProfilePublish,
+  executeDungeonProfileUnpublish,
+  executeOrganizationListingPublish,
+  executeOrganizationListingUnpublish,
+  FINAL_SUPPORTED_WRITE_KINDS,
+  isFinalSupportedWriteKind,
+} from './ecke-publish-final-kinds.js'
+import { isOrgDungeonListing } from './ecke-directory-sync.js'
+import { loadOrgEckePublishRow } from './ecke-publish-org-convention.js'
 import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import {
@@ -89,15 +107,10 @@ export const PASS4_UNSUPPORTED_ERROR = {
 export const PASS5_UNSUPPORTED_ERROR = {
   errorCode: 'unsupported_in_pass_5',
   message:
-    'Only group listings, public event listings, education articles, and vendor profiles can be published from the unified ECKE control plane in this pass.',
+    'This source kind is not enabled in the unified ECKE control plane. See ECKE publish registry for supported kinds.',
 } as const
 
-const PASS5_SUPPORTED_WRITE_KINDS = new Set<EckeSourceKind>([
-  'group_listing',
-  'event_listing',
-  'education_article',
-  'vendor_profile',
-])
+const PASS5_SUPPORTED_WRITE_KINDS = FINAL_SUPPORTED_WRITE_KINDS
 
 export type EckePublishViewer = {
   userId: string
@@ -148,7 +161,7 @@ export type EckePublishPreviewResult = EckePublishStatusResult & {
 }
 
 export type EckeGroupOverviewCard = {
-  section: 'overview' | 'group_listing' | 'events' | 'education' | 'venues' | 'vendors' | 'dancecard' | 'history'
+  section: 'overview' | 'group_listing' | 'organization_listing' | 'events' | 'education' | 'venues' | 'vendors' | 'dancecard' | 'history'
   sourceKind?: EckeSourceKind
   sourceId?: string
   title: string
@@ -1011,6 +1024,25 @@ export async function getEckePublishPreview(
   if (sourceKind === 'vendor_profile') {
     return buildVendorProfilePreview(viewer, sourceId, entry, vendorScope)
   }
+  if (sourceKind === 'organization_listing') {
+    return buildOrganizationListingPreview(viewer, sourceId, entry)
+  }
+  if (sourceKind === 'dungeon_profile') {
+    return buildDungeonProfilePreview(viewer, sourceId, entry)
+  }
+  if (sourceKind === 'convention_listing') {
+    return buildConventionListingPreview(viewer, sourceId, entry)
+  }
+  if (sourceKind === 'dancecard_event') {
+    return buildDancecardEventPreview(viewer, sourceId, entry)
+  }
+  if (
+    sourceKind === 'dancecard_location' ||
+    sourceKind === 'dancecard_program_slot' ||
+    sourceKind === 'dancecard_staff_shift'
+  ) {
+    return buildDancecardEventPreview(viewer, sourceId, getRegistryEntry('dancecard_event')!)
+  }
 
   return {
     ok: false,
@@ -1557,9 +1589,52 @@ export async function getOrgEckePublishOverview(
     title: 'ECKE Publish overview',
     supportState: 'info',
     summary: isEckeBridgeConfigured()
-      ? 'Org-linked education articles and featured vendor profiles can be previewed here. Publish actions require the article author or vendor owner/co-owner.'
-      : 'ECKE publish bridge is not configured on this server. Configure ECKE env vars to publish education articles and vendor profiles.',
+      ? 'Organization listing, dungeon/venue (when configured), education, and featured vendors can be managed here. Vendor and article writes follow owner/author rules.'
+      : 'ECKE publish bridge is not configured on this server.',
   })
+
+  const orgListingPreview = await buildOrganizationListingPreview(
+    viewer,
+    access.organization.id,
+    getRegistryEntry('organization_listing')!,
+  )
+  if (orgListingPreview.ok) {
+    cards.push({
+      section: 'organization_listing',
+      sourceKind: 'organization_listing',
+      sourceId: access.organization.id,
+      title: `${access.organization.displayName} listing`,
+      supportState: 'active_existing',
+      eligible: orgListingPreview.result.eligible,
+      reason: orgListingPreview.result.reason,
+      status: orgListingPreview.result.status,
+      preview: orgListingPreview.result,
+      writeEnabled: true,
+    })
+  }
+
+  const orgRow = await loadOrgEckePublishRow(access.organization.id)
+  if (orgRow && isOrgDungeonListing(orgRow.featureFlags)) {
+    const dungeonPreview = await buildDungeonProfilePreview(
+      viewer,
+      access.organization.id,
+      getRegistryEntry('dungeon_profile')!,
+    )
+    if (dungeonPreview.ok) {
+      cards.push({
+        section: 'venues',
+        sourceKind: 'dungeon_profile',
+        sourceId: access.organization.id,
+        title: `${access.organization.displayName} dungeon/venue`,
+        supportState: 'active_existing',
+        eligible: dungeonPreview.result.eligible,
+        reason: dungeonPreview.result.reason,
+        status: dungeonPreview.result.status,
+        preview: dungeonPreview.result,
+        writeEnabled: true,
+      })
+    }
+  }
 
   const orgArticles = await loadOrgLinkedEducationArticleSummaries(access.organization.id)
   if (orgArticles.length === 0) {
@@ -1616,7 +1691,7 @@ export async function getOrgEckePublishOverview(
       organizationName: access.organization.displayName,
       bridgeConnected: isEckeBridgeConfigured(),
       passNotice:
-        'Only published public education articles and public vendor profiles with ECKE opt-in are eligible. Publish actions require the article author or vendor owner/co-owner; org moderators can preview status and omitted fields.',
+        'Public org listings and dungeon profiles publish via org moderators. Education articles and featured vendors follow author/owner rules.',
       cards,
       history: historyRows.map((r) => ({
         targetKind: r.targetKind,
@@ -1955,7 +2030,7 @@ async function executeEventListingUnpublish(
 }
 
 function isPass5WriteKind(sourceKind: EckeSourceKind): boolean {
-  return PASS5_SUPPORTED_WRITE_KINDS.has(sourceKind)
+  return isFinalSupportedWriteKind(sourceKind)
 }
 
 async function executeEducationArticlePublish(
@@ -2296,6 +2371,23 @@ export async function publishEckeSource(
       expectedOrgKey: input.expectedOrgKey,
     })
   }
+  if (input.sourceKind === 'organization_listing') {
+    return executeOrganizationListingPublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'dungeon_profile') {
+    return executeDungeonProfilePublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'convention_listing') {
+    return executeConventionListingPublish(viewer, input.sourceId)
+  }
+  if (
+    input.sourceKind === 'dancecard_event' ||
+    input.sourceKind === 'dancecard_location' ||
+    input.sourceKind === 'dancecard_program_slot' ||
+    input.sourceKind === 'dancecard_staff_shift'
+  ) {
+    return executeDancecardEventPublish(viewer, input.sourceId)
+  }
   return executeEventListingPublish(viewer, input.sourceId, input.expectedGroupId)
 }
 
@@ -2333,6 +2425,23 @@ export async function syncEckeSource(
       expectedOrgKey: input.expectedOrgKey,
     })
   }
+  if (input.sourceKind === 'organization_listing') {
+    return executeOrganizationListingPublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'dungeon_profile') {
+    return executeDungeonProfilePublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'convention_listing') {
+    return executeConventionListingPublish(viewer, input.sourceId)
+  }
+  if (
+    input.sourceKind === 'dancecard_event' ||
+    input.sourceKind === 'dancecard_location' ||
+    input.sourceKind === 'dancecard_program_slot' ||
+    input.sourceKind === 'dancecard_staff_shift'
+  ) {
+    return executeDancecardEventPublish(viewer, input.sourceId)
+  }
   return executeEventListingPublish(viewer, input.sourceId, input.expectedGroupId)
 }
 
@@ -2369,6 +2478,23 @@ export async function unpublishEckeSource(
     return executeVendorProfileUnpublish(viewer, input.sourceId, {
       expectedOrgKey: input.expectedOrgKey,
     })
+  }
+  if (input.sourceKind === 'organization_listing') {
+    return executeOrganizationListingUnpublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'dungeon_profile') {
+    return executeDungeonProfileUnpublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'convention_listing') {
+    return executeConventionListingUnpublish(viewer, input.sourceId)
+  }
+  if (
+    input.sourceKind === 'dancecard_event' ||
+    input.sourceKind === 'dancecard_location' ||
+    input.sourceKind === 'dancecard_program_slot' ||
+    input.sourceKind === 'dancecard_staff_shift'
+  ) {
+    return executeDancecardEventUnpublish(viewer, input.sourceId)
   }
   return executeEventListingUnpublish(viewer, input.sourceId, input.expectedGroupId)
 }

@@ -240,3 +240,13 @@ Registry entries may declare optional `expansionModules[]` (e.g. `schedule`, `ma
 - Successful publish persists `eckePublicUrl` on `ecke_publish_targets`
 - Org ECKE tab: featured vendor cards with read-only publish unless viewer is owner/co-owner
 
+---
+
+## Final Parity Pass Implementation Notes
+
+- `organization_listing`, `dungeon_profile`, `convention_listing`, `dancecard_event` (+ bundled dancecard sub-kinds) on unified control plane
+- Org ECKE tab: org listing + dungeon/venue cards when org dungeon flags are set
+- Dancecard preview redacts access codes; unpublish sets remote draft status
+- `presenter_profile` and standalone `venue_profile` remain blocked — see audit matrix
+- Legacy organizer ECKE routes unchanged
+

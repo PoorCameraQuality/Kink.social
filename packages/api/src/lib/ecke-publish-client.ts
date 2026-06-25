@@ -594,6 +594,18 @@ export function resolveEckePublicVendorUrl(slug: string | null | undefined): str
   return `${resolveEckePublicBaseUrl()}/vendors/${encodeURIComponent(trimmed)}`
 }
 
+export function resolveEckePublicConventionUrl(slug: string | null | undefined): string | null {
+  const trimmed = slug?.trim()
+  if (!trimmed) return null
+  return `${resolveEckePublicBaseUrl()}/events/${encodeURIComponent(trimmed)}`
+}
+
+export function resolveEckePublicDungeonUrl(slug: string | null | undefined): string | null {
+  const trimmed = slug?.trim()
+  if (!trimmed) return null
+  return `${resolveEckePublicBaseUrl()}/dungeons/${encodeURIComponent(trimmed)}`
+}
+
 export async function publishVendorRowToEcke(cfg: EckePublishClientConfig, row: EckeVendorRow): Promise<EckePublishResult> {
   return upsertEckeRow(cfg, 'vendors', row as unknown as Record<string, unknown>, 'ecke_vendor')
 }
@@ -604,6 +616,15 @@ export async function unpublishVendorRowToEcke(cfg: EckePublishClientConfig, slu
     'vendors',
     { slug, status: 'draft' },
     'ecke_vendor',
+  )
+}
+
+export async function unpublishDungeonRowToEcke(cfg: EckePublishClientConfig, slug: string): Promise<EckePublishResult> {
+  return upsertEckeRow(
+    cfg,
+    'dungeon_venues',
+    { slug, status: 'draft' },
+    'ecke_dungeon',
   )
 }
 
