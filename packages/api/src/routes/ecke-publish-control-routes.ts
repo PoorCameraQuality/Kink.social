@@ -257,10 +257,10 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     return { sourceKind, sourceId }
   }
 
-  function resolveConventionScopedWrite(
+  async function resolveConventionScopedWrite(
     conventionKey: string,
     body: { sourceKind?: string; sourceId?: string },
-  ): { sourceKind: string; sourceId: string } | Promise<{ sourceKind: string; sourceId: string } | { error: string }> {
+  ): Promise<{ sourceKind: string; sourceId: string } | { error: string }> {
     const sourceKind = body.sourceKind?.trim()
     const sourceId = body.sourceId?.trim()
     if (!sourceKind || !sourceId) {
@@ -276,13 +276,12 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     if (!allowed.includes(sourceKind as (typeof allowed)[number])) {
       return { error: 'Unsupported sourceKind for convention-scoped ECKE publish' }
     }
-    return resolveConventionId(conventionKey).then((conventionId) => {
-      if (!conventionId) return { error: 'Convention not found' }
-      if (conventionId !== sourceId) {
-        return { error: 'sourceId does not match this convention' }
-      }
-      return { sourceKind, sourceId }
-    })
+    const conventionId = await resolveConventionId(conventionKey)
+    if (!conventionId) return { error: 'Convention not found' }
+    if (conventionId !== sourceId) {
+      return { error: 'sourceId does not match this convention' }
+    }
+    return { sourceKind, sourceId }
   }
 
   app.get('/api/v1/conventions/:conventionKey/ecke-publish', async (req, reply) => {
