@@ -219,6 +219,8 @@ export type EckePublishResult =
       detail?: string
       eckeSlug?: string
       eckePublicUrl?: string
+      eckePublicUrlKnown?: boolean
+      eckeRecordId?: string
     }
   | {
       ok: false
@@ -392,9 +394,53 @@ export async function publishDancecardEventToEcke(
   }
 }
 
+export function resolveEckePublicEventUrl(slug: string): string {
+  return `${resolveEckePublicBaseUrl()}/events/${encodeURIComponent(slug)}`
+}
+
+/** Best-effort public URL when listing webhook does not return one. */
+export function resolveEckePublicGroupListingUrl(slug: string): string {
+  return `${resolveEckePublicBaseUrl()}/groups/${encodeURIComponent(slug)}`
+}
+
+type ListingWebhookResponse = {
+  slug?: string
+  eckeSlug?: string
+  publicUrl?: string
+  eckePublicUrl?: string
+  recordId?: string
+  eckeRecordId?: string
+}
+
+function parseListingWebhookResponse(text: string, fallbackSlug: string): {
+  eckeSlug: string
+  eckePublicUrl: string | null
+  eckePublicUrlKnown: boolean
+  eckeRecordId?: string
+} {
+  try {
+    const parsed = JSON.parse(text) as ListingWebhookResponse
+    const eckeSlug = (parsed.eckeSlug ?? parsed.slug ?? fallbackSlug).toLowerCase()
+    const eckePublicUrl = parsed.eckePublicUrl ?? parsed.publicUrl ?? null
+    return {
+      eckeSlug,
+      eckePublicUrl,
+      eckePublicUrlKnown: Boolean(eckePublicUrl),
+      eckeRecordId: parsed.eckeRecordId ?? parsed.recordId,
+    }
+  } catch {
+    return {
+      eckeSlug: fallbackSlug,
+      eckePublicUrl: null,
+      eckePublicUrlKnown: false,
+    }
+  }
+}
+
 export async function publishListingToEcke(
   cfg: EckePublishClientConfig,
   payload: EckeListingPayload,
+  meta?: { sourceSystem?: string; sourceId?: string; canonicalKinkSocialUrl?: string; entityType?: string },
 ): Promise<EckePublishResult> {
   if (payload.visibility === 'hidden') {
     return { ok: false, targetKind: 'ecke_listing', error: 'Listing is not public' }
@@ -417,15 +463,76 @@ export async function publishListingToEcke(
     const res = await fetch(cfg.listingWebhookUrl, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ kind: 'ecke_listing', payload }),
+      body: JSON.stringify({
+        kind: 'ecke_listing',
+        action: 'upsert',
+        entityType: meta?.entityType ?? 'group',
+        sourceSystem: meta?.sourceSystem ?? 'kink.social',
+        sourceId: meta?.sourceId,
+        canonicalKinkSocialUrl: meta?.canonicalKinkSocialUrl,
+        payload,
+      }),
     })
 
+    const text = await res.text()
     if (!res.ok) {
-      const text = await res.text()
       return { ok: false, targetKind: 'ecke_listing', error: `listing webhook ${res.status}: ${text.slice(0, 500)}` }
     }
 
-    return { ok: true, targetKind: 'ecke_listing' }
+    const parsed = parseListingWebhookResponse(text, payload.slug)
+    const eckePublicUrl =
+      parsed.eckePublicUrl ??
+      (parsed.eckePublicUrlKnown ? null : resolveEckePublicGroupListingUrl(parsed.eckeSlug))
+
+    return {
+      ok: true,
+      targetKind: 'ecke_listing',
+      eckeSlug: parsed.eckeSlug,
+      eckePublicUrl: eckePublicUrl ?? undefined,
+      eckePublicUrlKnown: parsed.eckePublicUrlKnown,
+      eckeRecordId: parsed.eckeRecordId,
+      detail: eckePublicUrl ?? parsed.eckeSlug,
+    }
+  } catch (e) {
+    return { ok: false, targetKind: 'ecke_listing', error: e instanceof Error ? e.message : 'Unknown error' }
+  }
+}
+
+export async function unpublishListingToEcke(
+  cfg: EckePublishClientConfig,
+  input: { slug: string; sourceId?: string; entityType?: string },
+): Promise<EckePublishResult> {
+  if (!cfg.listingWebhookUrl) {
+    return {
+      ok: true,
+      targetKind: 'ecke_listing',
+      detail: 'Local unpublish recorded; listing webhook not configured',
+    }
+  }
+
+  try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (cfg.listingWebhookSecret) headers.Authorization = `Bearer ${cfg.listingWebhookSecret}`
+
+    const res = await fetch(cfg.listingWebhookUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        kind: 'ecke_listing',
+        action: 'unpublish',
+        entityType: input.entityType ?? 'group',
+        sourceSystem: 'kink.social',
+        sourceId: input.sourceId,
+        payload: { slug: input.slug, visibility: 'hidden' },
+      }),
+    })
+
+    const text = await res.text()
+    if (!res.ok && res.status !== 404) {
+      return { ok: false, targetKind: 'ecke_listing', error: `listing unpublish webhook ${res.status}: ${text.slice(0, 500)}` }
+    }
+
+    return { ok: true, targetKind: 'ecke_listing', detail: 'unpublished' }
   } catch (e) {
     return { ok: false, targetKind: 'ecke_listing', error: e instanceof Error ? e.message : 'Unknown error' }
   }
@@ -471,10 +578,6 @@ export async function unpublishEventRowToEcke(cfg: EckePublishClientConfig, slug
 
 export function resolveEckePublicBaseUrl(): string {
   return (process.env.ECKE_PUBLIC_BASE_URL?.trim() || 'https://www.eastcoastkinkevents.com').replace(/\/$/, '')
-}
-
-export function resolveEckePublicEventUrl(slug: string): string {
-  return `${resolveEckePublicBaseUrl()}/events/${encodeURIComponent(slug)}`
 }
 
 export async function publishVendorRowToEcke(cfg: EckePublishClientConfig, row: EckeVendorRow): Promise<EckePublishResult> {

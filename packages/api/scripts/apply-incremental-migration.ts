@@ -1620,6 +1620,18 @@ ALTER TABLE convention_trusted_roles
   ADD COLUMN IF NOT EXISTS apply_opens_at timestamptz;
 ALTER TABLE convention_trusted_roles
   ADD COLUMN IF NOT EXISTS apply_closes_at timestamptz;
+
+-- ECKE publish targets: Pass 3 group_listing lifecycle columns
+ALTER TABLE ecke_publish_targets
+  ADD COLUMN IF NOT EXISTS ecke_public_url text;
+ALTER TABLE ecke_publish_targets
+  ADD COLUMN IF NOT EXISTS ecke_record_id uuid;
+ALTER TABLE ecke_publish_targets
+  ADD COLUMN IF NOT EXISTS unpublished_at timestamptz;
+
+DO $$ BEGIN
+  ALTER TYPE ecke_publish_status ADD VALUE IF NOT EXISTS 'unpublished';
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 `
 
 async function main() {

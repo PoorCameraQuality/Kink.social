@@ -58,12 +58,21 @@ export function NavIconTools({ className = base }: IconProps) {
   )
 }
 
+export function NavIconEcke({ className = base }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+      <path strokeWidth={1.75} strokeLinecap="round" d="M12 3v3M5 9h14M7 21h10M12 12a3 3 0 100-6 3 3 0 000 6zM4 7l2-2M20 7l-2-2" />
+    </svg>
+  )
+}
+
 export const ORGANIZER_TAB_ICONS = {
   home: NavIconHome,
   schedule: NavIconSchedule,
   people: NavIconPeople,
   communications: NavIconCommunications,
   moderation: NavIconModeration,
+  ecke: NavIconEcke,
   settings: NavIconSettings,
   tools: NavIconTools,
 } as const

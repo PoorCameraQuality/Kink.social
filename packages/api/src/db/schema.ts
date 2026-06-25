@@ -3792,6 +3792,7 @@ export const eckePublishStatusEnum = pgEnum('ecke_publish_status', [
   'published',
   'error',
   'stale',
+  'unpublished',
 ])
 
 export const eckePublishTargets = pgTable(
@@ -3815,6 +3816,9 @@ export const eckePublishTargets = pgTable(
     lastAttemptAt: timestamp('last_attempt_at', { withTimezone: true }),
     lastError: text('last_error'),
     publishedByUserId: uuid('published_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+    eckePublicUrl: text('ecke_public_url'),
+    eckeRecordId: uuid('ecke_record_id'),
+    unpublishedAt: timestamp('unpublished_at', { withTimezone: true }),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

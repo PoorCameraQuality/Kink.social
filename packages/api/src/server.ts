@@ -82,6 +82,7 @@ import { registerGroupLeadershipRoutes } from './routes/group-leadership-routes.
 import { registerOrganizerRoutes } from './routes/organizer-routes.js'
 import { registerEckePublishRoutes } from './routes/ecke-publish-routes.js'
 import { registerEckePublishEntityRoutes } from './routes/ecke-publish-entity-routes.js'
+import { registerEckePublishControlRoutes } from './routes/ecke-publish-control-routes.js'
 import { registerShareRoutes } from './routes/share-routes.js'
 import { registerLiveKitVoiceRoutes } from './routes/livekit-voice-routes.js'
 import { registerStaffProfileRoutes } from './routes/staff-profiles.js'
@@ -294,6 +295,7 @@ await registerGroupLeadershipRoutes(app)
 await registerOrganizerRoutes(app)
 await registerEckePublishRoutes(app)
 await registerEckePublishEntityRoutes(app)
+await registerEckePublishControlRoutes(app)
 await registerShareRoutes(app)
 await registerStaffProfileRoutes(app)
 
