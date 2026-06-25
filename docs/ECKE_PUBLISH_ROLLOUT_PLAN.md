@@ -153,3 +153,14 @@ Existing companions: `ECKE_PUBLIC_PUBLISHING_CONTRACT.md`, `ECKE_C2K_ENTITY_MAP.
 - `OrganizerOrgEckePanel` + updated `OrganizerGroupEckePanel` use `EckePublishPanel` with `writeEnabled` from API
 - No new ownership tables; vendor parity still deferred
 
+---
+
+## Pass 5 Slice 3 Implementation Notes
+
+- `vendor_profile` unified control plane: preview/status/publish/sync/unpublish via `/api/v1/ecke-publish/*`
+- Transport: **supabase_rest** (existing vendor executor path)
+- Owner/co-owner write; org featured-vendor cards preview-only for org moderators
+- `VendorEckePanel` on vendor shop settings replaces legacy status widget for ECKE actions
+- Unpublish added: remote draft flip + local `unpublished` status
+- **Next pass (Pass 6):** dungeons/venues after ECKE table mapping confirmed
+

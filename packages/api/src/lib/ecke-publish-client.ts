@@ -588,8 +588,23 @@ export function resolveEckePublicEducationUrl(slug: string | null | undefined): 
   return `${base.replace(/\/$/, '')}/education/${encodeURIComponent(trimmed)}`
 }
 
+export function resolveEckePublicVendorUrl(slug: string | null | undefined): string | null {
+  const trimmed = slug?.trim()
+  if (!trimmed) return null
+  return `${resolveEckePublicBaseUrl()}/vendors/${encodeURIComponent(trimmed)}`
+}
+
 export async function publishVendorRowToEcke(cfg: EckePublishClientConfig, row: EckeVendorRow): Promise<EckePublishResult> {
   return upsertEckeRow(cfg, 'vendors', row as unknown as Record<string, unknown>, 'ecke_vendor')
+}
+
+export async function unpublishVendorRowToEcke(cfg: EckePublishClientConfig, slug: string): Promise<EckePublishResult> {
+  return upsertEckeRow(
+    cfg,
+    'vendors',
+    { slug, status: 'draft' },
+    'ecke_vendor',
+  )
 }
 
 export async function publishArticleRowToEcke(cfg: EckePublishClientConfig, row: EckeArticleRow): Promise<EckePublishResult> {

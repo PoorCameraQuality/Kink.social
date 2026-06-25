@@ -1,7 +1,7 @@
 import { VENDOR_CATEGORY_DESCRIPTIONS, normalizeVendorTags, type VendorCategory } from '@c2k/shared'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import EckeEntityPublishStatus from '@/components/ecke/EckeEntityPublishStatus'
+import VendorEckePanel from '@/components/ecke/VendorEckePanel'
 import VendorExternalStorePanel from '@/components/VendorExternalStorePanel'
 import VendorIntegrationGuide from '@/components/vendors/VendorIntegrationGuide'
 import { useAuth } from '@/contexts/AuthContext'
@@ -473,11 +473,7 @@ export default function VendorShopSection() {
       </label>
 
       {eckePublish && visibility === 'PUBLIC' ?
-        <EckeEntityPublishStatus
-          entityLabel="Vendor shop"
-          loadUrl="/api/v1/vendors/me/ecke-publish"
-          queueUrl="/api/v1/vendors/me/ecke-publish"
-        />
+        <VendorEckePanel vendorProfileId={vendor.id} />
       : null}
 
       {err ?

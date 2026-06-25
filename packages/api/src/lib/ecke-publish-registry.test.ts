@@ -49,6 +49,12 @@ describe('ecke-publish-registry', () => {
     assert.ok(kinds.includes('education_article'))
   })
 
+  it('marks vendor_profile visible on org dashboard', () => {
+    const entry = getRegistryEntry('vendor_profile')!
+    assert.equal(entry.visibleInOrgDashboard, true)
+    assert.equal(entry.currentTransport, 'supabase_rest')
+  })
+
   it('validates source kind strings', () => {
     assert.equal(isValidEckeSourceKind('group_listing'), true)
     assert.equal(isValidEckeSourceKind('not_real'), false)

@@ -1,4 +1,4 @@
-import { sanitizeEckeHeroImageUrl, sanitizeEckePublicText } from '@c2k/shared'
+import { sanitizeEckeExternalUrl, sanitizeEckeHeroImageUrl, sanitizeEckePublicText } from '@c2k/shared'
 import type { EckeListingPayload } from './ecke-publish-payload.js'
 
 export type EckeEventRow = {
@@ -180,7 +180,7 @@ export function buildEckeVendorRow(input: {
     slug: input.slug.toLowerCase(),
     name: input.displayName,
     description: desc,
-    website_url: input.website || null,
+    website_url: sanitizeEckeExternalUrl(input.website) ?? null,
     city: null,
     state: null,
     online_only: onlineOnly,

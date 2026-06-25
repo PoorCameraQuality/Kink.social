@@ -70,9 +70,17 @@ Reference: `ecke-public-publish.ts` L67–172.
 
 ### Vendors
 
-- Only public vendor profiles.
-- No private owner contact unless explicitly marked public.
-- Store links HTTPS only.
+- Only public vendor profiles with `eckePublish` opt-in.
+- Owner/co-owner publish only; org moderators may preview featured vendors but cannot publish unless they own/co-own the shop.
+- No private owner contact, payment/payout info, or shop integration secrets.
+- Store links HTTPS only (`sanitizeVendorEckeWebsiteUrl`).
+
+**Pass 5 Slice 3 — unified control plane redaction helpers:**
+
+- `getVendorOmittedFields()` — owner legal name, private contact/email/phone, internal/moderation notes, inventory/orders, payment/payout, API/OAuth/Etsy/Shopify/Woo secrets, private files, draft products, staff comments, reports
+- `getVendorDeferredFields()` — event appearances, sponsor relationships, product highlights, booth locations, review summaries (public-safe but ECKE may not display yet)
+- Preview built server-side via `buildVendorProfilePublishContext`; client payload ignored
+- Publish blocked when `visibility !== PUBLIC` or `eckePublish !== true`
 
 ### Dungeons / venues
 

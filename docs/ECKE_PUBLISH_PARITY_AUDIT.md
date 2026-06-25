@@ -431,3 +431,35 @@ Do **not** remove Supabase REST or webhook paths until pilot verification.
 **Pass 5 Slice 1 fixes:** unified preview/status/publish/sync/unpublish via `/api/v1/ecke-publish/*`; unpublish status `unpublished` (was incorrectly `stale`); `EckePublishPanel` on writer page.
 
 ---
+
+## Pass 5 Slice 3: Vendor Profile Existing Path
+
+**Audit date:** 2026-06-25
+
+| Question | Finding |
+|----------|---------|
+| Where does vendor publish happen today? | Legacy entity routes (`GET/POST /api/v1/vendors/me/ecke-publish`) in `ecke-publish-entity-routes.ts` + BullMQ `publish-vendor` + `executeEckePublishVendor` |
+| Transport | **Supabase REST** → ECKE `vendors` table via `publishVendorRowToEcke` |
+| Unpublish backend | **No** before Slice 3 — unified control plane adds `unpublishVendorRowToEcke` (draft flip) + `executeEckeUnpublishVendorWithTargetUpdate` |
+| Writes `ecke_publish_targets`? | Yes — `vendorProfileId`, `targetKind: ecke_vendor`, `scopeType: vendor_profile` |
+| Vendor fields published | slug, name, description (bio/maker story), HTTPS website URL, online_only flag, city/state (null today), c2k source attribution |
+| Visibility/status fields | `visibility` (PUBLIC required), `eckePublish` opt-in boolean |
+| Ownership model | Primary owner (`vendor_profiles.user_id`); `vendor_co_owners` grant shop management (co-owner publish in Slice 3); `organization_featured_vendors` is display link only — org moderators preview only |
+| ECKE URL returned | `resolveEckePublicVendorUrl` → `https://www.eastcoastkinkevents.com/vendors/{slug}`; persisted on successful publish |
+| Stale detection | Hash of `buildEckeVendorRow` payload vs `publishedContentHash` |
+| UI before Slice 3 | `EckeEntityPublishStatus` on vendor shop settings — no preview drawer |
+
+**Pass 5 Slice 3 fixes:** unified preview/status/publish/sync/unpublish via `/api/v1/ecke-publish/*`; `VendorEckePanel` on vendor shop settings; org ECKE tab lists featured vendors (read-only unless owner/co-owner); owner/co-owner write enforcement; private payment/shop secret data excluded.
+
+---
+
+## Pass 5 Slice 3 Implementation Notes
+
+- `vendor_profile` wired into unified control plane
+- Transport: **supabase_rest** via existing `executeEckePublishVendor` / `executeEckeUnpublishVendorWithTargetUpdate`
+- Vendor owner/co-owner write restrictions enforced; org moderator preview-only for featured vendors
+- Org dashboard vendor cards are read-only unless viewer owns/co-owns vendor
+- Private owner/payment/shop secret data excluded from payload and preview omitted lists
+- **66** ECKE publish unit tests passing (vendor control + education + registry + target-store + directory-sync)
+
+---

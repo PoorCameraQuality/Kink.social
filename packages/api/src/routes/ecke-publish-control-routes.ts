@@ -183,6 +183,7 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
       sourceKind,
       sourceId,
       sourceKind === 'education_article' ? { organizationId: orgAccess.organization.id } : undefined,
+      sourceKind === 'vendor_profile' ? { organizationId: orgAccess.organization.id } : undefined,
     )
     if (!result.ok) {
       return reply.status(result.status).send({ error: result.error })
@@ -246,7 +247,7 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     if (!sourceKind || !sourceId) {
       return { error: 'sourceKind and sourceId are required' }
     }
-    if (sourceKind !== 'education_article') {
+    if (sourceKind !== 'education_article' && sourceKind !== 'vendor_profile') {
       return { error: 'Unsupported sourceKind for org-scoped ECKE publish' }
     }
     return { sourceKind, sourceId }

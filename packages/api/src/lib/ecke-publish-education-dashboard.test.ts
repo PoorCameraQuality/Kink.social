@@ -64,6 +64,7 @@ describe('ecke-publish-control org dashboard routes', () => {
     assert.match(src, /getOrgEckePublishOverview/)
     assert.match(src, /\/api\/v1\/organizations\/:orgKey\/ecke-publish/)
     assert.match(src, /education_article/)
+    assert.match(src, /vendor_profile/)
   })
 
   it('group scoped write resolver accepts education_article', async () => {
