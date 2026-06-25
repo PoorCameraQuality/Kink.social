@@ -39,16 +39,17 @@ type Props = {
   orgSlug: string
 }
 
-const SECTION_ORDER = ['overview', 'education', 'history'] as const
+const SECTION_ORDER = ['overview', 'education', 'vendors', 'history'] as const
 
 const SECTION_HEADINGS: Record<string, string> = {
   overview: 'Overview',
   education: 'Education articles',
+  vendors: 'Featured vendors',
   history: 'Publish history',
 }
 
-function cardWriteKind(_card: OverviewCard): 'education_article' {
-  return 'education_article'
+function cardWriteKind(card: OverviewCard): 'education_article' | 'vendor_profile' {
+  return card.sourceKind === 'vendor_profile' ? 'vendor_profile' : 'education_article'
 }
 
 function cardWriteEnabled(card: OverviewCard): boolean {
@@ -147,7 +148,7 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
         <p className="text-xs uppercase tracking-wide text-dc-accent">East Coast Kink Events</p>
         <h2 className="text-2xl font-semibold text-dc-text">ECKE Publish</h2>
         <p className="max-w-2xl text-sm text-dc-text-muted">
-          Preview org-linked education articles for {data.organizationName}.{' '}
+          Preview org-linked education articles and featured vendor profiles for {data.organizationName}.{' '}
           <span className="text-amber-200/90">{data.passNotice}</span>
         </p>
         <p className="text-xs text-dc-text-muted">
@@ -161,7 +162,7 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
             <section key={section} className="space-y-3">
               <h3 className="text-lg font-semibold text-dc-text">{SECTION_HEADINGS[section]}</h3>
               {data.history.length === 0 ?
-                <p className="text-sm text-dc-text-muted">No education publish history recorded for this organization yet.</p>
+                <p className="text-sm text-dc-text-muted">No ECKE publish history recorded for this organization yet.</p>
               : (
                 <ul className="divide-y divide-dc-border rounded-xl border border-dc-border">
                   {data.history.map((row) => (

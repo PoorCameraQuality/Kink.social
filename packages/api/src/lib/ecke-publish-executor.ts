@@ -15,7 +15,9 @@ import {
   publishEventRowToEcke,
   publishVendorRowToEcke,
   resolveEckePublicEventUrl,
+  resolveEckePublicVendorUrl,
   unpublishEventRowToEcke,
+  unpublishVendorRowToEcke,
   type EckePublishResult,
 } from './ecke-publish-client.js'
 import {
@@ -114,6 +116,8 @@ export async function executeEckePublishVendor(vendorProfileId: string, userId?:
     vendorProfileId: vendor.id,
     targetKind: 'ecke_vendor',
     contentHash,
+    externalSlug: row.slug,
+    eckePublicUrl: result.ok ? resolveEckePublicVendorUrl(row.slug) ?? undefined : undefined,
     userId,
     result,
   })
@@ -640,6 +644,77 @@ export async function markEducationArticleEckeUnpublished(
         eq(schema.eckePublishTargets.targetKind, 'ecke_article'),
       ),
     )
+}
+
+export async function markVendorProfileEckeUnpublished(vendorProfileId: string, userId?: string): Promise<void> {
+  const now = new Date()
+  await db
+    .update(schema.eckePublishTargets)
+    .set({
+      status: 'unpublished',
+      unpublishedAt: now,
+      lastAttemptAt: now,
+      lastError: null,
+      publishedContentHash: null,
+      updatedAt: now,
+    })
+    .where(
+      and(
+        eq(schema.eckePublishTargets.vendorProfileId, vendorProfileId),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_vendor'),
+      ),
+    )
+}
+
+export async function executeEckeUnpublishVendorWithTargetUpdate(
+  vendorProfileId: string,
+  userId?: string,
+): Promise<EckePublishResult> {
+  const cfg = loadEckePublishClientConfig()
+  if (!cfg) {
+    return { ok: false, targetKind: 'ecke_vendor', error: 'Publish bridge not configured' }
+  }
+
+  const [target] = await db
+    .select({ externalSlug: schema.eckePublishTargets.externalSlug, status: schema.eckePublishTargets.status })
+    .from(schema.eckePublishTargets)
+    .where(
+      and(
+        eq(schema.eckePublishTargets.vendorProfileId, vendorProfileId),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_vendor'),
+      ),
+    )
+    .limit(1)
+
+  if (!target?.externalSlug || target.status === 'unpublished') {
+    await markVendorProfileEckeUnpublished(vendorProfileId, userId)
+    return { ok: true, targetKind: 'ecke_vendor' }
+  }
+
+  const result = await unpublishVendorRowToEcke(cfg, target.externalSlug)
+  const now = new Date()
+
+  if (result.ok) {
+    await markVendorProfileEckeUnpublished(vendorProfileId, userId)
+    return result
+  }
+
+  await db
+    .update(schema.eckePublishTargets)
+    .set({
+      status: 'error',
+      lastAttemptAt: now,
+      lastError: result.error,
+      updatedAt: now,
+    })
+    .where(
+      and(
+        eq(schema.eckePublishTargets.vendorProfileId, vendorProfileId),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_vendor'),
+      ),
+    )
+
+  return result
 }
 
 export async function executeEckeUnpublishEducationArticleWithTargetUpdate(

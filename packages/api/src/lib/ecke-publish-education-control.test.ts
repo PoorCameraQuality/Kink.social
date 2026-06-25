@@ -218,9 +218,9 @@ describe('ecke-publish-service education control plane wiring', () => {
     assert.match(src, /education_article/)
   })
 
-  it('Pass 5 unsupported error excludes vendor_profile', () => {
+  it('Pass 5 supported write kinds include vendor_profile', () => {
     assert.equal(PASS5_UNSUPPORTED_ERROR.errorCode, 'unsupported_in_pass_5')
-    assert.match(PASS5_UNSUPPORTED_ERROR.message, /education articles/i)
+    assert.match(PASS5_UNSUPPORTED_ERROR.message, /vendor profiles/i)
   })
 
   it('executor persists eckePublicUrl on successful publish', async () => {

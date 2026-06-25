@@ -1,6 +1,6 @@
 # ECKE Publish Control Plane
 
-**Status:** Pass 5 Slice 1 — `group_listing` + `event_listing` + `education_article` write actions enabled  
+**Status:** Pass 5 Slice 3 — `group_listing` + `event_listing` + `education_article` + `vendor_profile` write actions enabled  
 **Purpose:** Single source of truth for “can publish?”, “who?”, “what payload?”, “what ECKE pages?”
 
 **Product rule:** kink.social is the workflow source of truth; ECKE is the public discovery surface. Do not permanently flatten richer **public-safe** kink.social data — expand ECKE display modules opt-in over time. See `ECKE_PUBLISH_PARITY_AUDIT.md` § *Product rule* and *ECKE Expansion Rule*. Privacy contract unchanged.
@@ -225,4 +225,18 @@ Registry entries may declare optional `expansionModules[]` (e.g. `schedule`, `ma
 - Dashboard UI: `OrganizerOrgEckePanel` (org `?tab=ecke`), updated `OrganizerGroupEckePanel` education cards
 - Group-scoped writes accept `education_article` when article belongs to parent org
 - Org-scoped writes: `POST /api/v1/organizations/:orgKey/ecke-publish/{publish|sync|unpublish}`
+
+---
+
+## Pass 5 Slice 3 Implementation Notes
+
+- `vendor_profile` wired into unified control plane (`getEckePublishPreview`, `publishEckeSource`, `syncEckeSource`, `unpublishEckeSource`)
+- Transport: **supabase_rest** via existing `executeEckePublishVendor` / `executeEckeUnpublishVendorWithTargetUpdate`
+- Owner/co-owner permission (`vendor.owner_or_co_owner`); org moderators preview org-featured vendor cards only
+- Preview response: `wouldPublish`, `wouldPublishDeferred`, `wouldNotPublish`, `actions`, `eckePublicUrl`, stale hash
+- Vendor shop settings: `VendorEckePanel` → unified `/api/v1/ecke-publish/*` routes
+- Legacy `/api/v1/vendors/me/ecke-publish` routes unchanged
+- Unpublish lifecycle: remote draft flip + local status `unpublished` + `unpublishedAt`
+- Successful publish persists `eckePublicUrl` on `ecke_publish_targets`
+- Org ECKE tab: featured vendor cards with read-only publish unless viewer is owner/co-owner
 

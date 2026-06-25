@@ -1,4 +1,11 @@
-import { APP_URL } from '@c2k/shared'
+import {
+  APP_URL,
+  isEckePublishEligible,
+  sanitizeEckeExternalUrl,
+  sanitizeEckeHeroImageUrl,
+} from '@c2k/shared'
+import { getVendorShopAccess, type VendorProfileRow } from './vendor-shop-people.js'
+import { isUserIdentityBanned } from './peer-reputation.js'
 import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import {
@@ -7,13 +14,17 @@ import {
   publishListingToEcke,
   resolveEckePublicEducationUrl,
   resolveEckePublicEventUrl,
+  resolveEckePublicVendorUrl,
   unpublishEventRowToEcke,
   unpublishListingToEcke,
 } from './ecke-publish-client.js'
+import { buildEckeVendorRow } from './ecke-directory-sync.js'
 import {
   executeEckePublishArticle,
   executeEckePublishStandaloneEvent,
+  executeEckePublishVendor,
   executeEckeUnpublishEducationArticleWithTargetUpdate,
+  executeEckeUnpublishVendorWithTargetUpdate,
 } from './ecke-publish-executor.js'
 import {
   buildGroupListingPayload,
@@ -28,6 +39,8 @@ import {
   getEventOmittedFields,
   getEducationOmittedFields,
   getGroupOmittedFields,
+  getVendorDeferredFields,
+  getVendorOmittedFields,
   isGroupListingEntityEligible,
   resolvePublicLocationForEcke,
   type EckeOmittedField,
@@ -76,13 +89,14 @@ export const PASS4_UNSUPPORTED_ERROR = {
 export const PASS5_UNSUPPORTED_ERROR = {
   errorCode: 'unsupported_in_pass_5',
   message:
-    'Only group listings, public event listings, and education articles can be published from the unified ECKE control plane in this pass.',
+    'Only group listings, public event listings, education articles, and vendor profiles can be published from the unified ECKE control plane in this pass.',
 } as const
 
 const PASS5_SUPPORTED_WRITE_KINDS = new Set<EckeSourceKind>([
   'group_listing',
   'event_listing',
   'education_article',
+  'vendor_profile',
 ])
 
 export type EckePublishViewer = {
@@ -213,6 +227,8 @@ export function computeGroupListingActions(input: {
 export const computeEventListingActions = computeGroupListingActions
 
 export const computeEducationArticleActions = computeGroupListingActions
+
+export const computeVendorProfileActions = computeGroupListingActions
 
 export type ArticlePublishAccess = {
   article: EducationArticlePublishRow
@@ -410,6 +426,266 @@ async function loadEducationArticleEckeHistory(articleIds: string[]) {
 
 export const EDUCATION_ECKE_AUTHOR_ONLY_MESSAGE =
   'Only the article author can publish, sync, or unpublish to ECKE. Open the education writer to manage this article.'
+
+export const VENDOR_ECKE_OWNER_ONLY_MESSAGE =
+  'Only the vendor owner or approved co-owner can publish this vendor profile to ECKE.'
+
+export type VendorProfilePreviewScope = {
+  organizationId?: string
+}
+
+export type VendorPublishAccess = {
+  vendor: VendorProfileRow
+  shopAccess: NonNullable<Awaited<ReturnType<typeof getVendorShopAccess>>>
+  canPreview: boolean
+  canPublish: boolean
+}
+
+/** Vendor shop website must be HTTPS for ECKE publish preview/payload. */
+export function sanitizeVendorEckeWebsiteUrl(url: string | null | undefined): string | null {
+  const trimmed = url?.trim()
+  if (!trimmed || !/^https:\/\//i.test(trimmed)) return null
+  return sanitizeEckeExternalUrl(trimmed)
+}
+
+export function getVendorIneligibilityReason(
+  vendor: Pick<VendorProfileRow, 'eckePublish' | 'visibility'>,
+  ownerBanned = false,
+): string | null {
+  if (ownerBanned) {
+    return 'Vendor owner account is suspended.'
+  }
+  if (!isEckePublishEligible({ publishToEcke: vendor.eckePublish, visibility: vendor.visibility })) {
+    if (!vendor.eckePublish) {
+      return 'Vendor has not opted into ECKE publish.'
+    }
+    if (vendor.visibility !== 'PUBLIC') {
+      return 'Only public vendor profiles can publish to ECKE.'
+    }
+    return 'Vendor is not eligible for ECKE publish.'
+  }
+  return null
+}
+
+export function canViewerPublishVendorProfileEcke(
+  vendor: Pick<VendorProfileRow, 'userId'>,
+  shopAccess: { canManageShop: boolean },
+): boolean {
+  return shopAccess.canManageShop
+}
+
+export function payloadExcludesPrivateVendorFields(payload: Record<string, unknown>): boolean {
+  const serialized = JSON.stringify(payload).toLowerCase()
+  const forbidden = [
+    'email',
+    'phone',
+    'secrets',
+    'oauth',
+    'apikey',
+    'api_key',
+    'payout',
+    'external_store_secrets',
+    'etsyshopid',
+    'commission_notes',
+    'externalstoresecretsenc',
+  ]
+  return !forbidden.some((token) => serialized.includes(token))
+}
+
+export type VendorProfilePublishContext = {
+  access: VendorPublishAccess
+  payload: ReturnType<typeof buildEckeVendorRow>
+  contentHash: string
+  eligibility: { eligible: boolean; reason?: string }
+  canonicalKinkSocialUrl: string
+  externalSlug: string
+}
+
+export function buildVendorProfilePublishContext(access: VendorPublishAccess): VendorProfilePublishContext {
+  const { vendor } = access
+  const website = sanitizeVendorEckeWebsiteUrl(vendor.website)
+  const payload = buildEckeVendorRow({
+    id: vendor.id,
+    slug: vendor.slug,
+    displayName: vendor.displayName,
+    bio: vendor.bio,
+    makerStory: vendor.makerStory,
+    website,
+    categories: vendor.categories,
+    visibility: vendor.visibility,
+  })
+  const contentHash = hashEckePayload(payload)
+  const reason = getVendorIneligibilityReason(vendor)
+  return {
+    access,
+    payload,
+    contentHash,
+    eligibility: reason ? { eligible: false, reason } : { eligible: true },
+    canonicalKinkSocialUrl: `${APP_URL}/vendors/${encodeURIComponent(vendor.slug)}`,
+    externalSlug: payload.slug,
+  }
+}
+
+export function buildVendorProfilePlainFields(
+  ctx: VendorProfilePublishContext,
+  registry: EckeRegistryEntry,
+): EckePublishPlainField[] {
+  const { vendor } = ctx.access
+  const { payload } = ctx
+  const logoUrl = sanitizeEckeHeroImageUrl(vendor.logoUrl)
+  const categorySummary = [vendor.category, ...(vendor.categories ?? []), ...(vendor.tags ?? [])]
+    .filter(Boolean)
+    .join(', ')
+  return [
+    { label: 'Vendor name', value: payload.name },
+    { label: 'Slug', value: payload.slug },
+    { label: 'Public description', value: payload.description ?? null },
+    { label: 'Public category / tags', value: categorySummary || null },
+    { label: 'Public website / shop URL', value: payload.website_url ?? null },
+    { label: 'Public logo / image', value: logoUrl ?? null },
+    { label: 'Ships to', value: vendor.shipsTo ?? null },
+    { label: 'Online only', value: payload.online_only ? 'Yes' : 'No' },
+    { label: 'Canonical kink.social vendor URL', value: ctx.canonicalKinkSocialUrl },
+    { label: 'Source attribution', value: `${payload.c2k_source_type}:${payload.c2k_source_id}` },
+    { label: 'Updated', value: vendor.createdAt?.toISOString?.() ?? null },
+    { label: 'Affected ECKE surfaces', value: registry.eckeSurfacesAffected.join('; ') },
+  ]
+}
+
+async function loadVendorProfileForPublish(vendorProfileId: string): Promise<VendorProfileRow | null> {
+  const [vendor] = await db
+    .select()
+    .from(schema.vendorProfiles)
+    .where(eq(schema.vendorProfiles.id, vendorProfileId))
+    .limit(1)
+  return vendor ?? null
+}
+
+async function loadVendorProfileTarget(vendorProfileId: string) {
+  const [row] = await db
+    .select()
+    .from(schema.eckePublishTargets)
+    .where(
+      and(
+        eq(schema.eckePublishTargets.vendorProfileId, vendorProfileId),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_vendor'),
+      ),
+    )
+    .limit(1)
+  return row
+}
+
+async function isVendorFeaturedByOrganization(orgId: string, vendorProfileId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: schema.organizationFeaturedVendors.id })
+    .from(schema.organizationFeaturedVendors)
+    .where(
+      and(
+        eq(schema.organizationFeaturedVendors.organizationId, orgId),
+        eq(schema.organizationFeaturedVendors.vendorProfileId, vendorProfileId),
+      ),
+    )
+    .limit(1)
+  return Boolean(row)
+}
+
+export async function resolveVendorEckeAccess(
+  vendorProfileId: string,
+  userId: string,
+  scope?: VendorProfilePreviewScope,
+): Promise<VendorPublishAccess | null> {
+  const vendor = await loadVendorProfileForPublish(vendorProfileId)
+  if (!vendor) return null
+
+  const shopAccess = await getVendorShopAccess(vendorProfileId, userId)
+  if (!shopAccess) return null
+
+  const ownerBanned = await isUserIdentityBanned(vendor.userId)
+  const canPublish = !ownerBanned && canViewerPublishVendorProfileEcke(vendor, shopAccess)
+
+  if (scope?.organizationId) {
+    const featured = await isVendorFeaturedByOrganization(scope.organizationId, vendorProfileId)
+    if (!featured && !shopAccess.canManageShop) {
+      return { vendor, shopAccess, canPreview: false, canPublish: false }
+    }
+    const orgModCanPreview =
+      featured && (await isOrgModeratorForOrganization(scope.organizationId, userId))
+    const canPreview = canPublish || orgModCanPreview
+    return { vendor, shopAccess, canPreview, canPublish }
+  }
+
+  const canPreview = canPublish
+  return { vendor, shopAccess, canPreview, canPublish }
+}
+
+async function loadOrgFeaturedVendorSummaries(orgId: string) {
+  return db
+    .select({
+      id: schema.vendorProfiles.id,
+      displayName: schema.vendorProfiles.displayName,
+      slug: schema.vendorProfiles.slug,
+    })
+    .from(schema.organizationFeaturedVendors)
+    .innerJoin(
+      schema.vendorProfiles,
+      eq(schema.organizationFeaturedVendors.vendorProfileId, schema.vendorProfiles.id),
+    )
+    .where(eq(schema.organizationFeaturedVendors.organizationId, orgId))
+    .orderBy(asc(schema.organizationFeaturedVendors.sortOrder))
+}
+
+async function loadVendorProfileEckeHistory(vendorProfileIds: string[]) {
+  if (vendorProfileIds.length === 0) return []
+  return db
+    .select({
+      targetKind: schema.eckePublishTargets.targetKind,
+      externalSlug: schema.eckePublishTargets.externalSlug,
+      status: schema.eckePublishTargets.status,
+      lastPublishedAt: schema.eckePublishTargets.lastPublishedAt,
+      lastError: schema.eckePublishTargets.lastError,
+      lastPreviewAt: schema.eckePublishTargets.lastPreviewAt,
+    })
+    .from(schema.eckePublishTargets)
+    .where(
+      and(
+        inArray(schema.eckePublishTargets.vendorProfileId, vendorProfileIds),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_vendor'),
+      ),
+    )
+    .orderBy(desc(schema.eckePublishTargets.lastAttemptAt))
+}
+
+async function buildVendorProfileOverviewCard(
+  viewer: EckePublishViewer,
+  vendorProfileId: string,
+  title: string,
+  scope?: VendorProfilePreviewScope,
+): Promise<EckeGroupOverviewCard | null> {
+  const previewResult = await buildVendorProfilePreview(
+    viewer,
+    vendorProfileId,
+    getRegistryEntry('vendor_profile')!,
+    scope,
+  )
+  if (!previewResult.ok) return null
+
+  const access = await resolveVendorEckeAccess(vendorProfileId, viewer.userId, scope)
+  const writeEnabled = access?.canPublish ?? false
+
+  return {
+    section: 'vendors',
+    sourceKind: 'vendor_profile',
+    sourceId: vendorProfileId,
+    title,
+    supportState: 'active_existing',
+    eligible: previewResult.result.eligible,
+    reason: previewResult.result.reason,
+    status: previewResult.result.status,
+    preview: previewResult.result,
+    writeEnabled,
+    publishRestrictedMessage: writeEnabled ? undefined : VENDOR_ECKE_OWNER_ONLY_MESSAGE,
+  }
+}
 
 async function buildEducationArticleOverviewCard(
   viewer: EckePublishViewer,
@@ -716,6 +992,7 @@ export async function getEckePublishPreview(
   sourceKind: EckeSourceKind,
   sourceId: string,
   educationScope?: EducationArticlePreviewScope,
+  vendorScope?: VendorProfilePreviewScope,
 ): Promise<{ ok: true; result: EckePublishPreviewResult } | { ok: false; status: number; error: string }> {
   const entry = getRegistryEntry(sourceKind)
   if (!entry) {
@@ -730,6 +1007,9 @@ export async function getEckePublishPreview(
   }
   if (sourceKind === 'education_article') {
     return buildEducationArticlePreview(viewer, sourceId, entry, educationScope)
+  }
+  if (sourceKind === 'vendor_profile') {
+    return buildVendorProfilePreview(viewer, sourceId, entry, vendorScope)
   }
 
   return {
@@ -1012,6 +1292,92 @@ async function buildEducationArticlePreview(
   }
 }
 
+async function buildVendorProfilePreview(
+  viewer: EckePublishViewer,
+  vendorProfileId: string,
+  entry: EckeRegistryEntry,
+  scope?: VendorProfilePreviewScope,
+): Promise<{ ok: true; result: EckePublishPreviewResult } | { ok: false; status: number; error: string }> {
+  const access = await resolveVendorEckeAccess(vendorProfileId, viewer.userId, scope)
+  if (!access) {
+    return { ok: false, status: 404, error: 'Vendor not found' }
+  }
+  if (!access.canPreview) {
+    return {
+      ok: false,
+      status: 403,
+      error: 'Vendor owner, co-owner, or organization moderator access required to preview ECKE publish',
+    }
+  }
+
+  const ownerBanned = await isUserIdentityBanned(access.vendor.userId)
+  let ctx: VendorProfilePublishContext
+  try {
+    ctx = buildVendorProfilePublishContext(access)
+    if (ownerBanned) {
+      ctx = {
+        ...ctx,
+        eligibility: { eligible: false, reason: getVendorIneligibilityReason(access.vendor, true) ?? undefined },
+      }
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      status: 400,
+      error: err instanceof Error ? err.message : 'Could not build ECKE publish preview',
+    }
+  }
+
+  const row = await loadVendorProfileTarget(vendorProfileId)
+  const status = deriveTargetDisplayStatus(ctx.contentHash, row)
+  const bridgeConfigured = loadEckePublishClientConfig() !== null
+  const eckePublicUrl = row?.eckePublicUrl ?? resolveEckePublicVendorUrl(row?.externalSlug ?? ctx.externalSlug)
+
+  const baseActions = computeVendorProfileActions({
+    eligible: ctx.eligibility.eligible,
+    status,
+    bridgeConfigured,
+  })
+  const actions =
+    access.canPublish ?
+      baseActions
+    : { preview: true, publish: false, sync: false, unpublish: false }
+
+  return {
+    ok: true,
+    result: {
+      sourceKind: 'vendor_profile',
+      sourceId: vendorProfileId,
+      supportState: entry.supportState,
+      eligible: ctx.eligibility.eligible,
+      reason:
+        ctx.eligibility.reason ??
+        (!access.canPublish ? VENDOR_ECKE_OWNER_ONLY_MESSAGE : undefined),
+      status,
+      contentHash: ctx.contentHash,
+      publishedContentHash: row?.publishedContentHash ?? null,
+      lastPublishedAt: row?.lastPublishedAt?.toISOString() ?? null,
+      lastPreviewAt: row?.lastPreviewAt?.toISOString() ?? null,
+      lastError: row?.lastError ?? null,
+      externalSlug: row?.externalSlug ?? ctx.externalSlug,
+      eckePublicUrl,
+      eckePublicUrlKnown: Boolean(row?.eckePublicUrl),
+      currentTransport: entry.currentTransport,
+      eckeSurfacesAffected: entry.eckeSurfacesAffected,
+      actions,
+      staleNotice:
+        status === 'stale' ?
+          'This vendor profile has changed since it was last published to ECKE. Sync to update the public listing.'
+        : null,
+      wouldPublish: buildVendorProfilePlainFields(ctx, entry),
+      wouldPublishDeferred: getVendorDeferredFields(),
+      wouldNotPublish: getVendorOmittedFields(),
+      payload: ctx.payload,
+      canonicalKinkSocialUrl: ctx.canonicalKinkSocialUrl,
+    },
+  }
+}
+
 export async function getGroupEckePublishOverview(
   viewer: EckePublishViewer,
   groupId: string,
@@ -1127,7 +1493,8 @@ export async function getGroupEckePublishOverview(
     section: 'vendors',
     title: 'Vendors / Sponsors',
     supportState: 'planned',
-    plannedMessage: 'Group-owned vendor publishing is planned (Pass 5). User-owned vendors publish from vendor shop settings.',
+    plannedMessage:
+      'Group-linked vendor publishing is not wired yet. User-owned vendors publish from vendor shop settings; org-featured vendors appear on the parent org ECKE tab.',
   })
 
   cards.push({
@@ -1190,8 +1557,8 @@ export async function getOrgEckePublishOverview(
     title: 'ECKE Publish overview',
     supportState: 'info',
     summary: isEckeBridgeConfigured()
-      ? 'Org-linked education articles can be previewed here. Only the article author can publish, sync, or unpublish to East Coast Kink Events.'
-      : 'ECKE publish bridge is not configured on this server. Configure ECKE env vars to publish education articles.',
+      ? 'Org-linked education articles and featured vendor profiles can be previewed here. Publish actions require the article author or vendor owner/co-owner.'
+      : 'ECKE publish bridge is not configured on this server. Configure ECKE env vars to publish education articles and vendor profiles.',
   })
 
   const orgArticles = await loadOrgLinkedEducationArticleSummaries(access.organization.id)
@@ -1212,8 +1579,34 @@ export async function getOrgEckePublishOverview(
     }
   }
 
+  const featuredVendors = await loadOrgFeaturedVendorSummaries(access.organization.id)
+  if (featuredVendors.length === 0) {
+    cards.push({
+      section: 'vendors',
+      title: 'No featured vendors',
+      supportState: 'info',
+      plannedMessage:
+        'No vendors are featured on this organization yet. Add featured vendors in org settings to preview ECKE vendor publish status here.',
+    })
+  } else {
+    for (const vendor of featuredVendors) {
+      const card = await buildVendorProfileOverviewCard(viewer, vendor.id, vendor.displayName, {
+        organizationId: access.organization.id,
+      })
+      if (card) cards.push(card)
+    }
+  }
+
   const articleIds = orgArticles.map((a) => a.id)
-  const historyRows = await loadEducationArticleEckeHistory(articleIds)
+  const vendorIds = featuredVendors.map((v) => v.id)
+  const historyRows = [
+    ...(await loadEducationArticleEckeHistory(articleIds)),
+    ...(await loadVendorProfileEckeHistory(vendorIds)),
+  ].sort((a, b) => {
+    const aTime = a.lastPublishedAt?.getTime() ?? 0
+    const bTime = b.lastPublishedAt?.getTime() ?? 0
+    return bTime - aTime
+  })
 
   return {
     ok: true,
@@ -1223,7 +1616,7 @@ export async function getOrgEckePublishOverview(
       organizationName: access.organization.displayName,
       bridgeConnected: isEckeBridgeConfigured(),
       passNotice:
-        'Only published public education articles with ECKE opt-in are eligible. Publish actions require the article author; org moderators can preview status and omitted fields.',
+        'Only published public education articles and public vendor profiles with ECKE opt-in are eligible. Publish actions require the article author or vendor owner/co-owner; org moderators can preview status and omitted fields.',
       cards,
       history: historyRows.map((r) => ({
         targetKind: r.targetKind,
@@ -1733,6 +2126,142 @@ async function executeEducationArticleUnpublish(
   }
 }
 
+async function executeVendorProfilePublish(
+  viewer: EckePublishViewer,
+  vendorProfileId: string,
+  scope?: { expectedOrgKey?: string },
+): Promise<
+  | { ok: true; result: EckePublishActionResult }
+  | { ok: false; status: number; error: string; errorCode?: string }
+> {
+  if (scope?.expectedOrgKey) {
+    const orgAccess = await resolveOrgPublishAccess(scope.expectedOrgKey, viewer.userId)
+    if (!orgAccess?.canManage) {
+      return { ok: false, status: 403, error: 'Organization moderator access required' }
+    }
+    const featured = await isVendorFeaturedByOrganization(orgAccess.organization.id, vendorProfileId)
+    if (!featured) {
+      return { ok: false, status: 403, error: 'Vendor is not featured on this organization' }
+    }
+  }
+
+  const access = await resolveVendorEckeAccess(vendorProfileId, viewer.userId)
+  if (!access) return { ok: false, status: 404, error: 'Vendor not found' }
+  if (!access.canPublish) {
+    return { ok: false, status: 403, error: 'Vendor owner or co-owner access required to publish ECKE vendor profile' }
+  }
+
+  const previewResult = await buildVendorProfilePreview(
+    viewer,
+    vendorProfileId,
+    getRegistryEntry('vendor_profile')!,
+  )
+  if (!previewResult.ok) return previewResult
+  if (!previewResult.result.eligible) {
+    return {
+      ok: false,
+      status: 400,
+      error: previewResult.result.reason ?? 'Vendor is not eligible for ECKE publish',
+    }
+  }
+  if (!payloadExcludesPrivateVendorFields(previewResult.result.payload as Record<string, unknown>)) {
+    return { ok: false, status: 400, error: 'Payload contains restricted private fields' }
+  }
+  if (!loadEckePublishClientConfig()) {
+    return { ok: false, status: 503, error: 'ECKE publish bridge is not configured' }
+  }
+
+  const publishResult = await executeEckePublishVendor(vendorProfileId, viewer.userId)
+  const preview = await buildVendorProfilePreview(viewer, vendorProfileId, getRegistryEntry('vendor_profile')!)
+
+  if (!publishResult.ok) {
+    return {
+      ok: false,
+      status: 502,
+      error: publishResult.error,
+      errorCode: 'ecke_publish_failed',
+    }
+  }
+
+  return {
+    ok: true,
+    result: {
+      ok: true,
+      sourceKind: 'vendor_profile',
+      sourceId: vendorProfileId,
+      status: preview.ok ? preview.result.status : 'published',
+      message: 'Vendor profile published to ECKE',
+      preview: preview.ok ? preview.result : undefined,
+    },
+  }
+}
+
+async function executeVendorProfileUnpublish(
+  viewer: EckePublishViewer,
+  vendorProfileId: string,
+  scope?: { expectedOrgKey?: string },
+): Promise<
+  | { ok: true; result: EckePublishActionResult }
+  | { ok: false; status: number; error: string; errorCode?: string }
+> {
+  if (scope?.expectedOrgKey) {
+    const orgAccess = await resolveOrgPublishAccess(scope.expectedOrgKey, viewer.userId)
+    if (!orgAccess?.canManage) {
+      return { ok: false, status: 403, error: 'Organization moderator access required' }
+    }
+    const featured = await isVendorFeaturedByOrganization(orgAccess.organization.id, vendorProfileId)
+    if (!featured) {
+      return { ok: false, status: 403, error: 'Vendor is not featured on this organization' }
+    }
+  }
+
+  const access = await resolveVendorEckeAccess(vendorProfileId, viewer.userId)
+  if (!access) return { ok: false, status: 404, error: 'Vendor not found' }
+  if (!access.canPublish) {
+    return { ok: false, status: 403, error: 'Vendor owner or co-owner access required to unpublish ECKE vendor profile' }
+  }
+
+  const row = await loadVendorProfileTarget(vendorProfileId)
+  if (!row || row.status === 'unpublished') {
+    const preview = await buildVendorProfilePreview(viewer, vendorProfileId, getRegistryEntry('vendor_profile')!)
+    return {
+      ok: true,
+      result: {
+        ok: true,
+        sourceKind: 'vendor_profile',
+        sourceId: vendorProfileId,
+        status: 'unpublished',
+        message: 'Vendor profile is already unpublished on ECKE',
+        preview: preview.ok ? preview.result : undefined,
+      },
+    }
+  }
+
+  const unpublishResult = await executeEckeUnpublishVendorWithTargetUpdate(vendorProfileId, viewer.userId)
+  const preview = await buildVendorProfilePreview(viewer, vendorProfileId, getRegistryEntry('vendor_profile')!)
+
+  if (!unpublishResult.ok) {
+    return {
+      ok: false,
+      status: 502,
+      error: unpublishResult.error,
+      errorCode: 'ecke_unpublish_failed',
+    }
+  }
+
+  return {
+    ok: true,
+    result: {
+      ok: true,
+      sourceKind: 'vendor_profile',
+      sourceId: vendorProfileId,
+      status: preview.ok ? preview.result.status : 'unpublished',
+      message: 'Vendor profile unpublished from ECKE',
+      preview: preview.ok ? preview.result : undefined,
+    },
+  }
+}
+
 export async function publishEckeSource(
   viewer: EckePublishViewer,
   input: {
@@ -1759,6 +2288,11 @@ export async function publishEckeSource(
   if (input.sourceKind === 'education_article') {
     return executeEducationArticlePublish(viewer, input.sourceId, {
       expectedGroupId: input.expectedGroupId,
+      expectedOrgKey: input.expectedOrgKey,
+    })
+  }
+  if (input.sourceKind === 'vendor_profile') {
+    return executeVendorProfilePublish(viewer, input.sourceId, {
       expectedOrgKey: input.expectedOrgKey,
     })
   }
@@ -1794,6 +2328,11 @@ export async function syncEckeSource(
       expectedOrgKey: input.expectedOrgKey,
     })
   }
+  if (input.sourceKind === 'vendor_profile') {
+    return executeVendorProfilePublish(viewer, input.sourceId, {
+      expectedOrgKey: input.expectedOrgKey,
+    })
+  }
   return executeEventListingPublish(viewer, input.sourceId, input.expectedGroupId)
 }
 
@@ -1823,6 +2362,11 @@ export async function unpublishEckeSource(
   if (input.sourceKind === 'education_article') {
     return executeEducationArticleUnpublish(viewer, input.sourceId, {
       expectedGroupId: input.expectedGroupId,
+      expectedOrgKey: input.expectedOrgKey,
+    })
+  }
+  if (input.sourceKind === 'vendor_profile') {
+    return executeVendorProfileUnpublish(viewer, input.sourceId, {
       expectedOrgKey: input.expectedOrgKey,
     })
   }

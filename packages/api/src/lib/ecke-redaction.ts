@@ -168,9 +168,48 @@ export function getEducationDeferredFields(): EckeOmittedField[] {
 
 export function getVendorOmittedFields(): EckeOmittedField[] {
   return [
+    { label: 'Vendor owner legal name', reason: 'Owner identity stays on kink.social unless shown as public shop name.' },
     { label: 'Private owner contact', reason: 'Private contact fields stay on kink.social unless explicitly public.' },
+    { label: 'Private email', reason: 'Owner email is never published to ECKE.' },
+    { label: 'Private phone', reason: 'Phone numbers are omitted unless explicitly marked public on the shop.' },
     { label: 'Internal notes', reason: 'Shop operator notes are never published.' },
     { label: 'Moderation notes', reason: 'Moderation data is never published.' },
+    { label: 'Private inventory data', reason: 'Full inventory and stock levels stay on kink.social.' },
+    { label: 'Order and customer data', reason: 'Commerce transactions are never published.' },
+    { label: 'Payment info', reason: 'Payment methods and billing data are never published.' },
+    { label: 'Payout info', reason: 'Payout and commission settlement data are never published.' },
+    { label: 'API keys and tokens', reason: 'Integration secrets are never published.' },
+    { label: 'OAuth tokens', reason: 'OAuth credentials are never published.' },
+    { label: 'Etsy / Shopify / Woo secrets', reason: 'External store credentials are never published.' },
+    { label: 'Private files', reason: 'Non-public uploads are never published.' },
+    { label: 'Draft or unlisted products', reason: 'Only public-safe vendor profile fields publish today.' },
+    { label: 'Staff-only comments', reason: 'Internal shop discussion is never published.' },
+    { label: 'Reports', reason: 'Moderation reports are never published.' },
+  ]
+}
+
+export function getVendorDeferredFields(): EckeOmittedField[] {
+  return [
+    {
+      label: 'Event appearances',
+      reason: 'Public-safe but ECKE vendor pages may not show event booth modules yet.',
+    },
+    {
+      label: 'Sponsor relationships',
+      reason: 'Public-safe but ECKE may not display sponsor badges on vendor pages yet.',
+    },
+    {
+      label: 'Public product highlights',
+      reason: 'Public-safe but ECKE vendor detail may not embed synced product grids yet.',
+    },
+    {
+      label: 'Public vendor booth locations',
+      reason: 'Public-safe but ECKE may not show convention booth maps yet.',
+    },
+    {
+      label: 'Public reviews / feedback summaries',
+      reason: 'Public-safe but ECKE may not display vendor review modules yet.',
+    },
   ]
 }
 
