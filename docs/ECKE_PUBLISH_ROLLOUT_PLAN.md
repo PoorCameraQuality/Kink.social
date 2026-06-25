@@ -130,3 +130,16 @@ Existing companions: `ECKE_PUBLIC_PUBLISHING_CONTRACT.md`, `ECKE_C2K_ENTITY_MAP.
 - ECKE capability expansion candidates table updated with Priority column
 - **Next pass (Pass 5):** education + vendors in group/org context
 
+---
+
+## Pass 5 Slice 1 Implementation Notes
+
+- `education_article` wired into unified ECKE control plane
+- Uses existing ECKE ingest API transport (not a second path)
+- Preview / status / publish / sync / unpublish supported via `/api/v1/ecke-publish/*`
+- Private / member-only / connection-only / draft restrictions enforced server-side
+- Author-only management; org manager path deferred unless ownership rules expand
+- Writer page `EducationArticleEckePanel` with preview drawer and action buttons
+- Group/org dashboard education cards deferred to **Pass 5 Slice 2**
+- Vendor parity, dungeons, presenters, Dancecard, maps unchanged (out of scope)
+

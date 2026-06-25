@@ -92,7 +92,12 @@ export const ECKE_PUBLISH_REGISTRY: readonly EckeRegistryEntry[] = [
     requiresPermission: 'article.author',
     privacySummary: 'Only published public articles with ECKE opt-in.',
     omittedFields: getEducationOmittedFields().map((f) => f.label),
-    eckeSurfacesAffected: ['ECKE education index', 'ECKE education article page', 'ECKE sitemap'],
+    eckeSurfacesAffected: [
+      'Education article page',
+      'Education index',
+      'Sitemap',
+      'Related education surfaces (when ECKE supports them)',
+    ],
   },
   {
     sourceKind: 'vendor_profile',

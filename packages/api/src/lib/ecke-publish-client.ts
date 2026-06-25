@@ -580,6 +580,14 @@ export function resolveEckePublicBaseUrl(): string {
   return (process.env.ECKE_PUBLIC_BASE_URL?.trim() || 'https://www.eastcoastkinkevents.com').replace(/\/$/, '')
 }
 
+export function resolveEckePublicEducationUrl(slug: string | null | undefined): string | null {
+  const trimmed = slug?.trim()
+  if (!trimmed) return null
+  const cfg = loadEckeIngestApiConfig()
+  const base = cfg?.publicBaseUrl ?? resolveEckePublicBaseUrl()
+  return `${base.replace(/\/$/, '')}/education/${encodeURIComponent(trimmed)}`
+}
+
 export async function publishVendorRowToEcke(cfg: EckePublishClientConfig, row: EckeVendorRow): Promise<EckePublishResult> {
   return upsertEckeRow(cfg, 'vendors', row as unknown as Record<string, unknown>, 'ecke_vendor')
 }

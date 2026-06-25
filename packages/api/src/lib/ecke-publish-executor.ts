@@ -600,6 +600,8 @@ async function markEntityOutcome(input: {
         lastError: null,
         publishedByUserId: input.userId ?? null,
         externalSlug: input.externalSlug ?? undefined,
+        eckePublicUrl: input.eckePublicUrl ?? input.result.eckePublicUrl ?? undefined,
+        eckeRecordId: input.result.eckeRecordId ?? undefined,
         updatedAt: now,
       })
       .where(where)
@@ -625,9 +627,11 @@ export async function markEducationArticleEckeUnpublished(
   await db
     .update(schema.eckePublishTargets)
     .set({
-      status: 'stale',
+      status: 'unpublished',
+      unpublishedAt: now,
       lastAttemptAt: now,
       lastError: null,
+      publishedContentHash: null,
       updatedAt: now,
     })
     .where(

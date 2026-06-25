@@ -410,3 +410,24 @@ Do **not** remove Supabase REST or webhook paths until pilot verification.
 - **29** ECKE publish unit tests passing (was 22 after Pass 3)
 
 ---
+
+## Pass 5 Slice 1: Education Article Existing Path
+
+**Audit date:** 2026-06-25
+
+| Question | Finding |
+|----------|---------|
+| Where does education publish happen today? | Legacy entity routes (`/api/v1/me/education-articles/:id/ecke-publish`) + BullMQ queue + `executeEckePublishArticle` in `ecke-publish-executor.ts` |
+| Transport | **ECKE ingest API** (`loadEckeIngestApiConfig`, `publishEducationArticleEnvelopeToEcke`) — not Supabase REST |
+| Unpublish backend | Yes — `executeEckeUnpublishEducationArticle` + `executeEckeUnpublishEducationArticleWithTargetUpdate`; legacy HTTP only (no unified control plane before Pass 5) |
+| Writes `ecke_publish_targets`? | Yes — `educationArticleId`, `targetKind: ecke_article`, `scopeType: education_article` |
+| Article fields published | title, slug, excerpt, sanitized bodyHtml, author display name, public author/presenter profile URLs, categories, content warnings, difficulty, reading minutes, hero image, published/updated timestamps, SEO title/meta |
+| Visibility/status fields | `publicationStatus` (DRAFT/PUBLISHED/ARCHIVED), `visibility` (PUBLIC/MEMBERS/CONNECTIONS), `eckePublish` opt-in boolean |
+| Ownership model | **Author-only** (`authorUserId`); optional `organizationId` on row but no org-mod ECKE path yet; no `groupId` on articles |
+| ECKE URL returned | Ingest API returns `eckePublicUrl` (e.g. `https://www.eastcoastkinkevents.com/education/{slug}`); Pass 5 fixes persistence to `ecke_publish_targets.ecke_public_url` |
+| Stale detection | Hash of sanitized ingest payload vs `publishedContentHash`; unified preview uses `deriveTargetDisplayStatus` |
+| Writer UI before Pass 5 | `EckeEntityPublishStatus` on `/education/write` calling legacy me-routes only — no preview drawer |
+
+**Pass 5 Slice 1 fixes:** unified preview/status/publish/sync/unpublish via `/api/v1/ecke-publish/*`; unpublish status `unpublished` (was incorrectly `stale`); `EckePublishPanel` on writer page.
+
+---

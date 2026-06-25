@@ -5,12 +5,15 @@ import {
   loadEckeIngestApiConfig,
   loadEckePublishClientConfig,
   publishListingToEcke,
+  resolveEckePublicEducationUrl,
   resolveEckePublicEventUrl,
   unpublishEventRowToEcke,
   unpublishListingToEcke,
 } from './ecke-publish-client.js'
 import {
+  executeEckePublishArticle,
   executeEckePublishStandaloneEvent,
+  executeEckeUnpublishEducationArticleWithTargetUpdate,
 } from './ecke-publish-executor.js'
 import {
   buildGroupListingPayload,
@@ -20,13 +23,26 @@ import {
   type EckeListingPayload,
 } from './ecke-publish-payload.js'
 import {
+  getEducationDeferredFields,
   getEventDeferredFields,
   getEventOmittedFields,
+  getEducationOmittedFields,
   getGroupOmittedFields,
   isGroupListingEntityEligible,
   resolvePublicLocationForEcke,
   type EckeOmittedField,
 } from './ecke-redaction.js'
+import {
+  buildEckePublicEnvelope,
+  buildEducationArticleCanonicalUrl,
+  getEducationArticleIneligibilityReason,
+  type EducationArticleAuthorContext,
+  type EducationArticlePublishRow,
+} from './ecke-public-publish.js'
+import {
+  loadEducationArticleAuthorContextForPublish,
+  loadEducationArticleForPublish,
+} from './ecke-public-publish-executor.js'
 import {
   deriveTargetDisplayStatus,
   ensureEckePublishTargetRow,
@@ -57,7 +73,17 @@ export const PASS4_UNSUPPORTED_ERROR = {
     'Only group listings and public event listings can be published from the unified ECKE control plane in this pass.',
 } as const
 
-const PASS4_SUPPORTED_WRITE_KINDS = new Set<EckeSourceKind>(['group_listing', 'event_listing'])
+export const PASS5_UNSUPPORTED_ERROR = {
+  errorCode: 'unsupported_in_pass_5',
+  message:
+    'Only group listings, public event listings, and education articles can be published from the unified ECKE control plane in this pass.',
+} as const
+
+const PASS5_SUPPORTED_WRITE_KINDS = new Set<EckeSourceKind>([
+  'group_listing',
+  'event_listing',
+  'education_article',
+])
 
 export type EckePublishViewer = {
   userId: string
@@ -173,6 +199,115 @@ export function computeGroupListingActions(input: {
 }
 
 export const computeEventListingActions = computeGroupListingActions
+
+export const computeEducationArticleActions = computeGroupListingActions
+
+export type ArticlePublishAccess = {
+  article: EducationArticlePublishRow
+  author: EducationArticleAuthorContext
+  canManage: boolean
+}
+
+export type EducationArticlePublishContext = {
+  access: ArticlePublishAccess
+  payload: ReturnType<typeof buildEckePublicEnvelope>['payload']
+  contentHash: string
+  eligibility: { eligible: boolean; reason?: string }
+  canonicalKinkSocialUrl: string
+  externalSlug: string
+}
+
+/** Pure permission check — author-only per existing education ECKE routes. */
+export function canViewerManageEducationArticleEckePublish(
+  article: EducationArticlePublishRow,
+  userId: string,
+): boolean {
+  return article.authorUserId === userId
+}
+
+export async function resolveArticlePublishAccess(
+  articleId: string,
+  userId: string,
+): Promise<ArticlePublishAccess | null> {
+  const article = await loadEducationArticleForPublish(articleId)
+  if (!article) return null
+
+  const author = await loadEducationArticleAuthorContextForPublish(article)
+  return {
+    article,
+    author,
+    canManage: canViewerManageEducationArticleEckePublish(article, userId),
+  }
+}
+
+/** Server-side education article payload — never trusts client input. */
+export function buildEducationArticlePublishContext(access: ArticlePublishAccess): EducationArticlePublishContext {
+  const ineligibility = getEducationArticleIneligibilityReason(access.article)
+  const envelope = buildEckePublicEnvelope('education_article', access.article, access.author)
+  const contentHash = hashEckePayload(envelope.payload)
+  return {
+    access,
+    payload: envelope.payload,
+    contentHash,
+    eligibility:
+      ineligibility ?
+        { eligible: false, reason: ineligibility }
+      : { eligible: true },
+    canonicalKinkSocialUrl: buildEducationArticleCanonicalUrl(access.article.slug),
+    externalSlug: envelope.preferredSlug || access.article.slug,
+  }
+}
+
+export function buildEducationArticlePlainFields(
+  ctx: EducationArticlePublishContext,
+  entry: EckeRegistryEntry,
+): EckePublishPlainField[] {
+  const { payload, canonicalKinkSocialUrl } = ctx
+  const bodyPreview =
+    payload.bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 240) ||
+    payload.excerpt?.slice(0, 240) ||
+    null
+
+  return [
+    { label: 'Title', value: payload.title },
+    { label: 'Slug', value: payload.slug },
+    { label: 'Excerpt', value: payload.excerpt ?? null },
+    { label: 'Public body (sanitized preview)', value: bodyPreview },
+    { label: 'Author display name', value: payload.authorDisplayName ?? null },
+    { label: 'Author profile URL', value: payload.authorProfileUrl ?? null },
+    { label: 'Presenter profile URL', value: payload.presenterProfileUrl ?? null },
+    { label: 'Categories', value: payload.categories?.join(', ') ?? null },
+    { label: 'Content warnings', value: payload.contentWarnings?.join(', ') ?? null },
+    { label: 'Difficulty', value: payload.difficulty ?? null },
+    { label: 'Hero image', value: payload.heroImageUrl ?? null },
+    { label: 'Updated', value: payload.updatedAt ?? null },
+    { label: 'Source attribution', value: `${entry.label} via kink.social` },
+    { label: 'Canonical kink.social URL', value: canonicalKinkSocialUrl },
+  ]
+}
+
+export function payloadExcludesPrivateEducationFields(payload: Record<string, unknown>): boolean {
+  if ('email' in payload || 'privateEmail' in payload || 'internalNotes' in payload) {
+    return false
+  }
+  const serialized = JSON.stringify(payload).toLowerCase()
+  const forbidden = ['moderationnotes', 'internalnotes', 'privatecontact', 'memberonlybody', 'draftbody']
+  return !forbidden.some((token) => serialized.includes(token))
+}
+
+async function loadEducationArticleTarget(articleId: string) {
+  const [row] = await db
+    .select()
+    .from(schema.eckePublishTargets)
+    .where(
+      and(
+        eq(schema.eckePublishTargets.educationArticleId, articleId),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_article'),
+      ),
+    )
+    .limit(1)
+  return row
+}
 
 export type GroupListingPublishContext = {
   access: GroupPublishAccess
@@ -380,6 +515,9 @@ export async function getEckePublishPreview(
   if (sourceKind === 'event_listing') {
     return buildEventListingPreview(viewer, sourceId, entry)
   }
+  if (sourceKind === 'education_article') {
+    return buildEducationArticlePreview(viewer, sourceId, entry)
+  }
 
   return {
     ok: false,
@@ -577,6 +715,77 @@ async function buildEventListingPreview(
       canonicalKinkSocialUrl: `${APP_URL}/events/${encodeURIComponent(ev.id)}`,
       locationVisibility: ev.locationVisibility,
       locationHiddenWarning,
+    },
+  }
+}
+
+async function buildEducationArticlePreview(
+  viewer: EckePublishViewer,
+  articleId: string,
+  entry: EckeRegistryEntry,
+): Promise<{ ok: true; result: EckePublishPreviewResult } | { ok: false; status: number; error: string }> {
+  const access = await resolveArticlePublishAccess(articleId, viewer.userId)
+  if (!access) {
+    return { ok: false, status: 404, error: 'Article not found' }
+  }
+  if (!access.canManage) {
+    return { ok: false, status: 403, error: 'Author access required to preview ECKE publish' }
+  }
+
+  if (access.article.publicationStatus === 'ARCHIVED') {
+    return { ok: false, status: 400, error: 'Archived articles cannot be previewed for ECKE publish' }
+  }
+
+  let ctx: EducationArticlePublishContext
+  try {
+    ctx = buildEducationArticlePublishContext(access)
+  } catch (err) {
+    return {
+      ok: false,
+      status: 400,
+      error: err instanceof Error ? err.message : 'Could not build ECKE publish preview',
+    }
+  }
+
+  const row = await loadEducationArticleTarget(articleId)
+  const status = deriveTargetDisplayStatus(ctx.contentHash, row)
+  const bridgeConfigured = loadEckeIngestApiConfig() !== null
+  const eckePublicUrl =
+    row?.eckePublicUrl ?? resolveEckePublicEducationUrl(row?.externalSlug ?? ctx.externalSlug)
+
+  return {
+    ok: true,
+    result: {
+      sourceKind: 'education_article',
+      sourceId: articleId,
+      supportState: entry.supportState,
+      eligible: ctx.eligibility.eligible,
+      reason: ctx.eligibility.reason,
+      status,
+      contentHash: ctx.contentHash,
+      publishedContentHash: row?.publishedContentHash ?? null,
+      lastPublishedAt: row?.lastPublishedAt?.toISOString() ?? null,
+      lastPreviewAt: row?.lastPreviewAt?.toISOString() ?? null,
+      lastError: row?.lastError ?? null,
+      externalSlug: row?.externalSlug ?? ctx.externalSlug,
+      eckePublicUrl,
+      eckePublicUrlKnown: Boolean(row?.eckePublicUrl),
+      currentTransport: entry.currentTransport,
+      eckeSurfacesAffected: entry.eckeSurfacesAffected,
+      actions: computeEducationArticleActions({
+        eligible: ctx.eligibility.eligible,
+        status,
+        bridgeConfigured,
+      }),
+      staleNotice:
+        status === 'stale' ?
+          'This article has changed since it was last published to ECKE. Sync to update the public article.'
+        : null,
+      wouldPublish: buildEducationArticlePlainFields(ctx, entry),
+      wouldPublishDeferred: getEducationDeferredFields(),
+      wouldNotPublish: getEducationOmittedFields(),
+      payload: ctx.payload,
+      canonicalKinkSocialUrl: ctx.canonicalKinkSocialUrl,
     },
   }
 }
@@ -1042,8 +1251,124 @@ async function executeEventListingUnpublish(
   }
 }
 
-function isPass4WriteKind(sourceKind: EckeSourceKind): boolean {
-  return PASS4_SUPPORTED_WRITE_KINDS.has(sourceKind)
+function isPass5WriteKind(sourceKind: EckeSourceKind): boolean {
+  return PASS5_SUPPORTED_WRITE_KINDS.has(sourceKind)
+}
+
+async function executeEducationArticlePublish(
+  viewer: EckePublishViewer,
+  articleId: string,
+): Promise<
+  | { ok: true; result: EckePublishActionResult }
+  | { ok: false; status: number; error: string; errorCode?: string }
+> {
+  const access = await resolveArticlePublishAccess(articleId, viewer.userId)
+  if (!access) return { ok: false, status: 404, error: 'Article not found' }
+  if (!access.canManage) {
+    return { ok: false, status: 403, error: 'Author access required to publish ECKE article' }
+  }
+
+  const previewResult = await buildEducationArticlePreview(
+    viewer,
+    articleId,
+    getRegistryEntry('education_article')!,
+  )
+  if (!previewResult.ok) return previewResult
+  if (!previewResult.result.eligible) {
+    return {
+      ok: false,
+      status: 400,
+      error: previewResult.result.reason ?? 'Article is not eligible for ECKE publish',
+    }
+  }
+  if (!payloadExcludesPrivateEducationFields(previewResult.result.payload as Record<string, unknown>)) {
+    return { ok: false, status: 400, error: 'Payload contains restricted private fields' }
+  }
+  if (!loadEckeIngestApiConfig()) {
+    return { ok: false, status: 503, error: 'ECKE ingest API is not configured' }
+  }
+
+  const publishResult = await executeEckePublishArticle(articleId, viewer.userId)
+  const preview = await buildEducationArticlePreview(viewer, articleId, getRegistryEntry('education_article')!)
+
+  if (!publishResult.ok) {
+    return {
+      ok: false,
+      status: 502,
+      error: publishResult.error,
+      errorCode: 'ecke_publish_failed',
+    }
+  }
+
+  return {
+    ok: true,
+    result: {
+      ok: true,
+      sourceKind: 'education_article',
+      sourceId: articleId,
+      status: preview.ok ? preview.result.status : 'published',
+      message: 'Education article published to ECKE',
+      preview: preview.ok ? preview.result : undefined,
+    },
+  }
+}
+
+async function executeEducationArticleUnpublish(
+  viewer: EckePublishViewer,
+  articleId: string,
+): Promise<
+  | { ok: true; result: EckePublishActionResult }
+  | { ok: false; status: number; error: string; errorCode?: string }
+> {
+  const access = await resolveArticlePublishAccess(articleId, viewer.userId)
+  if (!access) return { ok: false, status: 404, error: 'Article not found' }
+  if (!access.canManage) {
+    return { ok: false, status: 403, error: 'Author access required to unpublish ECKE article' }
+  }
+
+  const row = await loadEducationArticleTarget(articleId)
+  if (!row || row.status === 'unpublished') {
+    const preview = await buildEducationArticlePreview(viewer, articleId, getRegistryEntry('education_article')!)
+    return {
+      ok: true,
+      result: {
+        ok: true,
+        sourceKind: 'education_article',
+        sourceId: articleId,
+        status: 'unpublished',
+        message: 'Education article is already unpublished on ECKE',
+        preview: preview.ok ? preview.result : undefined,
+      },
+    }
+  }
+
+  const unpublishResult = await executeEckeUnpublishEducationArticleWithTargetUpdate(
+    articleId,
+    'opt_out',
+    viewer.userId,
+  )
+  const preview = await buildEducationArticlePreview(viewer, articleId, getRegistryEntry('education_article')!)
+
+  if (!unpublishResult.ok) {
+    return {
+      ok: false,
+      status: 502,
+      error: unpublishResult.error,
+      errorCode: 'ecke_unpublish_failed',
+    }
+  }
+
+  return {
+    ok: true,
+    result: {
+      ok: true,
+      sourceKind: 'education_article',
+      sourceId: articleId,
+      status: preview.ok ? preview.result.status : 'unpublished',
+      message: 'Education article unpublished from ECKE',
+      preview: preview.ok ? preview.result : undefined,
+    },
+  }
 }
 
 export async function publishEckeSource(
@@ -1053,16 +1378,19 @@ export async function publishEckeSource(
   | { ok: true; result: EckePublishActionResult }
   | { ok: false; status: number; error: string; errorCode?: string }
 > {
-  if (!isPass4WriteKind(input.sourceKind)) {
+  if (!isPass5WriteKind(input.sourceKind)) {
     return {
       ok: false,
       status: 501,
-      error: PASS4_UNSUPPORTED_ERROR.message,
-      errorCode: PASS4_UNSUPPORTED_ERROR.errorCode,
+      error: PASS5_UNSUPPORTED_ERROR.message,
+      errorCode: PASS5_UNSUPPORTED_ERROR.errorCode,
     }
   }
   if (input.sourceKind === 'group_listing') {
     return executeGroupListingPublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'education_article') {
+    return executeEducationArticlePublish(viewer, input.sourceId)
   }
   return executeEventListingPublish(viewer, input.sourceId, input.expectedGroupId)
 }
@@ -1074,16 +1402,19 @@ export async function syncEckeSource(
   | { ok: true; result: EckePublishActionResult }
   | { ok: false; status: number; error: string; errorCode?: string }
 > {
-  if (!isPass4WriteKind(input.sourceKind)) {
+  if (!isPass5WriteKind(input.sourceKind)) {
     return {
       ok: false,
       status: 501,
-      error: PASS4_UNSUPPORTED_ERROR.message,
-      errorCode: PASS4_UNSUPPORTED_ERROR.errorCode,
+      error: PASS5_UNSUPPORTED_ERROR.message,
+      errorCode: PASS5_UNSUPPORTED_ERROR.errorCode,
     }
   }
   if (input.sourceKind === 'group_listing') {
     return executeGroupListingPublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'education_article') {
+    return executeEducationArticlePublish(viewer, input.sourceId)
   }
   return executeEventListingPublish(viewer, input.sourceId, input.expectedGroupId)
 }
@@ -1095,16 +1426,19 @@ export async function unpublishEckeSource(
   | { ok: true; result: EckePublishActionResult }
   | { ok: false; status: number; error: string; errorCode?: string }
 > {
-  if (!isPass4WriteKind(input.sourceKind)) {
+  if (!isPass5WriteKind(input.sourceKind)) {
     return {
       ok: false,
       status: 501,
-      error: PASS4_UNSUPPORTED_ERROR.message,
-      errorCode: PASS4_UNSUPPORTED_ERROR.errorCode,
+      error: PASS5_UNSUPPORTED_ERROR.message,
+      errorCode: PASS5_UNSUPPORTED_ERROR.errorCode,
     }
   }
   if (input.sourceKind === 'group_listing') {
     return executeGroupListingUnpublish(viewer, input.sourceId)
+  }
+  if (input.sourceKind === 'education_article') {
+    return executeEducationArticleUnpublish(viewer, input.sourceId)
   }
   return executeEventListingUnpublish(viewer, input.sourceId, input.expectedGroupId)
 }

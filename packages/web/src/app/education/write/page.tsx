@@ -2,7 +2,7 @@ import type { JSONContent } from '@tiptap/core'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import EckeEntityPublishStatus from '@/components/ecke/EckeEntityPublishStatus'
+import EducationArticleEckePanel from '@/components/ecke/EducationArticleEckePanel'
 import EducatorArticleEditor, { type EducatorArticleEditorHandle } from '@/components/editor/EducatorArticleEditor'
 import Button from '@/components/ui/Button'
 import StatusBanner from '@/components/ui/StatusBanner'
@@ -530,12 +530,7 @@ export default function EducationWritePage() {
             </label>
 
             {articleId && eckePublish ?
-              <EckeEntityPublishStatus
-                entityLabel="Education article"
-                loadUrl={`/api/v1/me/education-articles/${encodeURIComponent(articleId)}/ecke-publish`}
-                queueUrl={`/api/v1/me/education-articles/${encodeURIComponent(articleId)}/ecke-publish`}
-                syncUrl={`/api/v1/me/education-articles/${encodeURIComponent(articleId)}/ecke-publish/sync`}
-              />
+              <EducationArticleEckePanel articleId={articleId} />
             : null}
 
             <div>

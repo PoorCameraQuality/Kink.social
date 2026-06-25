@@ -19,6 +19,7 @@ import {
   payloadExcludesPrivateGroupFields,
   PASS3_UNSUPPORTED_ERROR,
   PASS4_UNSUPPORTED_ERROR,
+  PASS5_UNSUPPORTED_ERROR,
 } from './ecke-publish-service.js'
 import { getRegistryEntry, PASS2_DISABLED_ACTIONS } from './ecke-publish-registry.js'
 import { isStandaloneEventEckeEligible } from './ecke-publish-payload.js'
@@ -171,9 +172,13 @@ describe('ecke-publish-service preview helpers', () => {
     assert.equal(PASS3_UNSUPPORTED_ERROR.errorCode, 'unsupported_in_pass_3')
   })
 
-  it('Pass 4 unsupported error covers kinds beyond group_listing and event_listing', () => {
+  it('Pass 5 unsupported error covers kinds beyond group_listing, event_listing, and education_article', () => {
+    assert.equal(PASS5_UNSUPPORTED_ERROR.errorCode, 'unsupported_in_pass_5')
+    assert.match(PASS5_UNSUPPORTED_ERROR.message, /education articles/i)
+  })
+
+  it('Pass 4 unsupported error message remains for historical reference', () => {
     assert.equal(PASS4_UNSUPPORTED_ERROR.errorCode, 'unsupported_in_pass_4')
-    assert.match(PASS4_UNSUPPORTED_ERROR.message, /event listings/i)
   })
 
   it('computeEventListingActions mirrors group listing action rules', () => {
