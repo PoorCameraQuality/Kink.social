@@ -19,9 +19,9 @@ type OverviewCard = {
 }
 
 type OverviewResponse = {
-  organizationId: string
-  organizationSlug: string
-  organizationName: string
+  conventionId: string
+  conventionSlug: string
+  conventionName: string
   bridgeConnected: boolean
   passNotice: string
   cards: OverviewCard[]
@@ -36,34 +36,26 @@ type OverviewResponse = {
 }
 
 type Props = {
-  orgSlug: string
+  conventionSlug: string
 }
 
-const SECTION_ORDER = ['overview', 'organization_listing', 'venues', 'education', 'vendors', 'history'] as const
+const SECTION_ORDER = ['overview', 'convention_listing', 'dancecard', 'history'] as const
 
 const SECTION_HEADINGS: Record<string, string> = {
   overview: 'Overview',
-  organization_listing: 'Organization listing',
-  venues: 'Dungeon / venue',
-  education: 'Education articles',
-  vendors: 'Featured vendors',
+  convention_listing: 'Convention listing',
+  dancecard: 'Dancecard bundle',
   history: 'Publish history',
 }
 
 function cardWriteKind(
   card: OverviewCard,
-): 'education_article' | 'vendor_profile' | 'organization_listing' | 'dungeon_profile' {
-  if (card.sourceKind === 'vendor_profile') return 'vendor_profile'
-  if (card.sourceKind === 'organization_listing') return 'organization_listing'
-  if (card.sourceKind === 'dungeon_profile') return 'dungeon_profile'
-  return 'education_article'
+): 'convention_listing' | 'dancecard_event' {
+  if (card.sourceKind === 'dancecard_event') return 'dancecard_event'
+  return 'convention_listing'
 }
 
-function cardWriteEnabled(card: OverviewCard): boolean {
-  return card.writeEnabled ?? false
-}
-
-export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
+export default function ConventionEckePanel({ conventionSlug }: Props) {
   const [data, setData] = useState<OverviewResponse | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -72,13 +64,13 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
     setLoading(true)
     setLoadError(null)
     try {
-      const r = await fetch(`/api/v1/organizations/${encodeURIComponent(orgSlug)}/ecke-publish`, {
+      const r = await fetch(`/api/v1/conventions/${encodeURIComponent(conventionSlug)}/ecke-publish`, {
         credentials: 'include',
       })
       if (!r.ok) {
         setLoadError(
           r.status === 403 ?
-            'You need moderator access to view ECKE publish.'
+            'You need convention full admin access to view ECKE publish.'
           : 'Could not load ECKE publish overview.',
         )
         setData(null)
@@ -91,7 +83,7 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
     } finally {
       setLoading(false)
     }
-  }, [orgSlug])
+  }, [conventionSlug])
 
   useEffect(() => {
     void loadOverview()
@@ -101,19 +93,19 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
     async (sourceKind: string, sourceId: string): Promise<EckePreviewData | null> => {
       const params = new URLSearchParams({ sourceKind, sourceId })
       const r = await fetch(
-        `/api/v1/organizations/${encodeURIComponent(orgSlug)}/ecke-publish/preview?${params.toString()}`,
+        `/api/v1/conventions/${encodeURIComponent(conventionSlug)}/ecke-publish/preview?${params.toString()}`,
         { credentials: 'include' },
       )
       if (!r.ok) return null
       return (await r.json()) as EckePreviewData
     },
-    [orgSlug],
+    [conventionSlug],
   )
 
   const runWriteAction = useCallback(
     async (action: 'publish' | 'sync' | 'unpublish', sourceKind: string, sourceId: string): Promise<boolean> => {
       const r = await fetch(
-        `/api/v1/organizations/${encodeURIComponent(orgSlug)}/ecke-publish/${action}`,
+        `/api/v1/conventions/${encodeURIComponent(conventionSlug)}/ecke-publish/${action}`,
         {
           method: 'POST',
           credentials: 'include',
@@ -123,7 +115,7 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
       )
       return r.ok
     },
-    [orgSlug],
+    [conventionSlug],
   )
 
   if (loading) {
@@ -155,7 +147,7 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
         <p className="text-xs uppercase tracking-wide text-dc-accent">East Coast Kink Events</p>
         <h2 className="text-2xl font-semibold text-dc-text">ECKE Publish</h2>
         <p className="max-w-2xl text-sm text-dc-text-muted">
-          Preview org-linked education articles and featured vendor profiles for {data.organizationName}.{' '}
+          Preview and publish {data.conventionName} to East Coast Kink Events.{' '}
           <span className="text-amber-200/90">{data.passNotice}</span>
         </p>
         <p className="text-xs text-dc-text-muted">
@@ -169,7 +161,7 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
             <section key={section} className="space-y-3">
               <h3 className="text-lg font-semibold text-dc-text">{SECTION_HEADINGS[section]}</h3>
               {data.history.length === 0 ?
-                <p className="text-sm text-dc-text-muted">No ECKE publish history recorded for this organization yet.</p>
+                <p className="text-sm text-dc-text-muted">No ECKE publish history recorded for this convention yet.</p>
               : (
                 <ul className="divide-y divide-dc-border rounded-xl border border-dc-border">
                   {data.history.map((row) => (
@@ -195,42 +187,46 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
         if (!sectionCards?.length) return null
 
         return (
-          <section key={section} className="space-y-3">
-            {section !== 'overview' ?
-              <h3 className="text-lg font-semibold text-dc-text">{SECTION_HEADINGS[section]}</h3>
-            : null}
-            <div className="space-y-4">
-              {sectionCards.map((card) => {
-                const writeEnabled = cardWriteEnabled(card)
-                const canWrite = writeEnabled && Boolean(card.sourceKind && card.sourceId)
-                return (
-                  <EckePublishPanel
-                    key={`${card.section}-${card.sourceId ?? card.title}`}
-                    title={card.title}
-                    sourceKind={card.sourceKind}
-                    sourceId={card.sourceId}
-                    supportState={card.supportState}
-                    eligible={card.eligible}
-                    reason={card.reason}
-                    status={card.status ?? card.preview?.status}
-                    summary={card.summary}
-                    plannedMessage={card.plannedMessage}
-                    publishRestrictedMessage={card.publishRestrictedMessage}
-                    preview={card.preview}
-                    staleNotice={card.preview?.staleNotice}
-                    eckePublicUrl={card.preview?.eckePublicUrl}
-                    eckePublicUrlKnown={card.preview?.eckePublicUrlKnown}
-                    writeEnabled={writeEnabled}
-                    writeKind={cardWriteKind(card)}
-                    onLoadPreview={card.sourceKind && card.sourceId ? loadPreview : undefined}
-                    onPublish={canWrite ? (sk, sid) => runWriteAction('publish', sk, sid) : undefined}
-                    onSync={canWrite ? (sk, sid) => runWriteAction('sync', sk, sid) : undefined}
-                    onUnpublish={canWrite ? (sk, sid) => runWriteAction('unpublish', sk, sid) : undefined}
-                    onActionComplete={() => void loadOverview()}
-                  />
-                )
-              })}
-            </div>
+          <section key={section} className="space-y-4">
+            <h3 className="text-lg font-semibold text-dc-text">{SECTION_HEADINGS[section] ?? section}</h3>
+            {sectionCards.map((card) => (
+              <EckePublishPanel
+                key={`${card.section}-${card.sourceId ?? card.title}`}
+                title={card.title}
+                sourceKind={card.sourceKind}
+                sourceId={card.sourceId}
+                supportState={card.supportState}
+                eligible={card.eligible}
+                reason={card.reason}
+                status={card.status}
+                summary={card.summary}
+                plannedMessage={card.plannedMessage}
+                publishRestrictedMessage={card.publishRestrictedMessage}
+                preview={card.preview}
+                staleNotice={card.preview?.staleNotice}
+                eckePublicUrl={card.preview?.eckePublicUrl}
+                eckePublicUrlKnown={card.preview?.eckePublicUrlKnown}
+                writeEnabled={card.writeEnabled ?? false}
+                writeKind={card.sourceKind ? cardWriteKind(card) : 'convention_listing'}
+                onLoadPreview={card.sourceKind && card.sourceId ? loadPreview : undefined}
+                onPublish={
+                  card.writeEnabled && card.sourceKind && card.sourceId ?
+                    (sk, sid) => runWriteAction('publish', sk, sid)
+                  : undefined
+                }
+                onSync={
+                  card.writeEnabled && card.sourceKind && card.sourceId ?
+                    (sk, sid) => runWriteAction('sync', sk, sid)
+                  : undefined
+                }
+                onUnpublish={
+                  card.writeEnabled && card.sourceKind && card.sourceId ?
+                    (sk, sid) => runWriteAction('unpublish', sk, sid)
+                  : undefined
+                }
+                onActionComplete={loadOverview}
+              />
+            ))}
           </section>
         )
       })}

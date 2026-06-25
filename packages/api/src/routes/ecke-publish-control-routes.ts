@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import {
+  getConventionEckePublishOverview,
   getEckePublishPreview,
   getEckePublishRegistryForViewer,
   getEckePublishStatus,
@@ -15,7 +16,9 @@ import {
   unpublishEckeSource,
   type EckePublishViewer,
 } from '../lib/ecke-publish-service.js'
+import { loadConventionEckeContext } from '../lib/ecke-publish-org-convention.js'
 import { listAllRegistryEntries } from '../lib/ecke-publish-registry.js'
+import { resolveConventionId } from './conventions-routes.js'
 
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
@@ -247,11 +250,115 @@ export async function registerEckePublishControlRoutes(app: FastifyInstance) {
     if (!sourceKind || !sourceId) {
       return { error: 'sourceKind and sourceId are required' }
     }
-    if (sourceKind !== 'education_article' && sourceKind !== 'vendor_profile') {
+    const allowed = ['education_article', 'vendor_profile', 'organization_listing', 'dungeon_profile'] as const
+    if (!allowed.includes(sourceKind as (typeof allowed)[number])) {
       return { error: 'Unsupported sourceKind for org-scoped ECKE publish' }
     }
     return { sourceKind, sourceId }
   }
+
+  async function resolveConventionScopedWrite(
+    conventionKey: string,
+    body: { sourceKind?: string; sourceId?: string },
+  ): Promise<{ sourceKind: string; sourceId: string } | { error: string }> {
+    const sourceKind = body.sourceKind?.trim()
+    const sourceId = body.sourceId?.trim()
+    if (!sourceKind || !sourceId) {
+      return { error: 'sourceKind and sourceId are required' }
+    }
+    const allowed = [
+      'convention_listing',
+      'dancecard_event',
+      'dancecard_location',
+      'dancecard_program_slot',
+      'dancecard_staff_shift',
+    ] as const
+    if (!allowed.includes(sourceKind as (typeof allowed)[number])) {
+      return { error: 'Unsupported sourceKind for convention-scoped ECKE publish' }
+    }
+    const conventionId = await resolveConventionId(conventionKey)
+    if (!conventionId) return { error: 'Convention not found' }
+    if (conventionId !== sourceId) {
+      return { error: 'sourceId does not match this convention' }
+    }
+    return { sourceKind, sourceId }
+  }
+
+  app.get('/api/v1/conventions/:conventionKey/ecke-publish', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const viewer = requireViewer(req, reply)
+    if (!viewer) return
+    const { conventionKey } = req.params as { conventionKey: string }
+
+    const result = await getConventionEckePublishOverview(viewer, conventionKey)
+    if (!result.ok) {
+      return reply.status(result.status).send({ error: result.error })
+    }
+    return reply.send(result.result)
+  })
+
+  app.get('/api/v1/conventions/:conventionKey/ecke-publish/preview', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const viewer = requireViewer(req, reply)
+    if (!viewer) return
+    const { conventionKey } = req.params as { conventionKey: string }
+    const sourceKind = (req.query as { sourceKind?: string }).sourceKind?.trim()
+    const sourceId = (req.query as { sourceId?: string }).sourceId?.trim()
+
+    if (!sourceKind || !sourceId) {
+      return reply.status(400).send({ error: 'sourceKind and sourceId are required' })
+    }
+    if (!isValidEckeSourceKind(sourceKind)) {
+      return reply.status(400).send({ error: 'Unknown sourceKind' })
+    }
+
+    const conventionId = await resolveConventionId(conventionKey)
+    if (!conventionId) {
+      return reply.status(404).send({ error: 'Convention not found' })
+    }
+    if (conventionId !== sourceId) {
+      return reply.status(400).send({ error: 'sourceId does not match this convention' })
+    }
+
+    const ctx = await loadConventionEckeContext(conventionKey, viewer.userId)
+    if (!ctx?.canManage) {
+      return reply.status(403).send({ error: 'Convention full admin access required to preview ECKE publish' })
+    }
+
+    const result = await getEckePublishPreview(viewer, sourceKind, sourceId)
+    if (!result.ok) {
+      return reply.status(result.status).send({ error: result.error })
+    }
+    return reply.send(result.result)
+  })
+
+  async function handleConventionWrite(
+    req: FastifyRequest,
+    reply: FastifyReply,
+    conventionKey: string,
+    action: 'publish' | 'sync' | 'unpublish',
+  ) {
+    const body = (req.body ?? {}) as { sourceKind?: string; sourceId?: string }
+    const resolved = await resolveConventionScopedWrite(conventionKey, body)
+    if ('error' in resolved) return reply.status(400).send({ error: resolved.error })
+    const result = await handleWriteAction(req, reply, action, resolved.sourceKind, resolved.sourceId)
+    if (result) return reply.send(result)
+  }
+
+  app.post('/api/v1/conventions/:conventionKey/ecke-publish/publish', async (req, reply) => {
+    const { conventionKey } = req.params as { conventionKey: string }
+    await handleConventionWrite(req, reply, conventionKey, 'publish')
+  })
+
+  app.post('/api/v1/conventions/:conventionKey/ecke-publish/sync', async (req, reply) => {
+    const { conventionKey } = req.params as { conventionKey: string }
+    await handleConventionWrite(req, reply, conventionKey, 'sync')
+  })
+
+  app.post('/api/v1/conventions/:conventionKey/ecke-publish/unpublish', async (req, reply) => {
+    const { conventionKey } = req.params as { conventionKey: string }
+    await handleConventionWrite(req, reply, conventionKey, 'unpublish')
+  })
 
   app.post('/api/v1/ecke-publish/publish', async (req, reply) => {
     const body = req.body as { sourceKind?: string; sourceId?: string }

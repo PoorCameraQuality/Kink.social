@@ -82,6 +82,22 @@ Reference: `ecke-public-publish.ts` L67–172.
 - Preview built server-side via `buildVendorProfilePublishContext`; client payload ignored
 - Publish blocked when `visibility !== PUBLIC` or `eckePublish !== true`
 
+### Organization listings
+
+- Only public org listings with org moderator access.
+- Member lists, private staff lists, private addresses, internal notes, moderation data, reports, and private contact never publish.
+- `getOrgOmittedFields()` — member lists, private staff, private addresses, internal/moderation notes, reports, private contact
+- `getOrgDeferredFields()` — public maps, pins, schedules, recurring meetup info, policies, vendor/presenter relationships (public-safe but ECKE may not display yet)
+- Transport: **listing_webhook**; status in `ecke_publish_targets` with `scopeType: organization`
+
+### Convention listings
+
+- Only convention full admins may preview/publish/sync/unpublish.
+- Attendee lists, applications, private staff notes, private locations, volunteer/private shifts, internal room notes, and moderation/safety reports never publish.
+- `getConventionOmittedFields()` — attendee/application data, private staff notes, private locations, volunteer shifts, internal room notes, moderation/safety reports
+- `getConventionDeferredFields()` — full schedule, public maps, vendors, presenters/classes, sponsor blocks, policies/code of conduct
+- Transport: **listing_webhook** for `convention_listing`; legacy bundled route still handles optional `ecke_event` anchor row
+
 ### Dungeons / venues
 
 - Org-flagged public listings only (`isOrgDungeonListing`).
@@ -90,7 +106,7 @@ Reference: `ecke-public-publish.ts` L67–172.
 ### Dancecard
 
 - Staff shifts: display names parsed from titles only — no `user_id`.
-- Access codes may publish (operational); show clearly in preview drawer.
+- Access codes: preview shows **configured** status only (`[configured]`); raw codes visible only to convention full admins via existing management surfaces, not in ECKE outbound payload by default.
 - Program slots filtered for anonymous public view.
 
 Reference: `ecke-dancecard-staff-sync.ts` L5–17; convention routes filter `filterSlotsForPublicProgram(..., 'anonymous')`.

@@ -13,7 +13,7 @@ import { ExhibitorsOrganizerPanel } from '@/components/dancecard/organizer/Exhib
 import { AttendeeGroupsModerationPanel } from '@/components/dancecard/organizer/AttendeeGroupsModerationPanel'
 import { SessionFeedbackConfigPanel } from '@/components/dancecard/organizer/SessionFeedbackConfigPanel'
 import { supportCopy } from '@/lib/dancecard/supportCopy'
-import EckePublishStub from '@/components/organizer/EckePublishStub'
+import ConventionEckePanel from '@/components/organizer/ConventionEckePanel'
 
 const MODULE_KEYS: { key: keyof DancecardModules; label: string }[] = [
   { key: 'schedule_embed', label: 'Schedule embed' },
@@ -289,7 +289,7 @@ export function IntegrationsPanel({
       </p>
 
       {ownerOrAdmin ?
-        <EckePublishStub scopeLabel={eventSlug} scopeType="convention" scopeSlug={eventSlug} />
+        <ConventionEckePanel conventionSlug={eventSlug} />
       : null}
 
       <div className="grid gap-3 sm:grid-cols-3">
