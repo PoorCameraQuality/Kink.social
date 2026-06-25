@@ -32,6 +32,7 @@ export type EducationArticlePublishRow = {
   publicationStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   eckePublish: boolean
   authorUserId: string
+  organizationId: string | null
   presenterProfileUserId: string | null
 }
 

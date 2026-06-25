@@ -20,6 +20,7 @@ type Props = {
   status?: EckePreviewData['status']
   summary?: string
   plannedMessage?: string
+  publishRestrictedMessage?: string
   preview?: EckePreviewData
   staleNotice?: string | null
   eckePublicUrl?: string | null
@@ -60,6 +61,7 @@ export default function EckePublishPanel({
   status = 'never',
   summary,
   plannedMessage,
+  publishRestrictedMessage,
   preview: initialPreview,
   staleNotice,
   eckePublicUrl,
@@ -166,6 +168,11 @@ export default function EckePublishPanel({
         : null}
         {plannedMessage ?
           <p className="mt-3 text-sm text-dc-text-muted">{plannedMessage}</p>
+        : null}
+        {publishRestrictedMessage && !writeEnabled ?
+          <p className="mt-3 rounded-lg border border-dc-border bg-dc-elevated-muted/60 px-3 py-2 text-sm text-dc-text-muted">
+            {publishRestrictedMessage}
+          </p>
         : null}
         {(staleNotice ?? activePreview?.staleNotice) ?
           <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-sm text-amber-100">

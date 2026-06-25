@@ -215,3 +215,14 @@ Registry entries may declare optional `expansionModules[]` (e.g. `schedule`, `ma
 - Unpublish lifecycle: status `unpublished` + `unpublishedAt` + cleared `publishedContentHash`
 - Successful publish persists `eckePublicUrl` and `eckeRecordId` on `ecke_publish_targets`
 
+---
+
+## Pass 5 Slice 2 Implementation Notes
+
+- `GET /api/v1/organizations/:orgKey/ecke-publish` — org moderator overview with org-linked education article cards
+- Group overview education section lists articles where `education_articles.organization_id = groups.organization_id`
+- Org/group moderators: preview + status via scoped preview routes; **publish/sync/unpublish author-only**
+- Dashboard UI: `OrganizerOrgEckePanel` (org `?tab=ecke`), updated `OrganizerGroupEckePanel` education cards
+- Group-scoped writes accept `education_article` when article belongs to parent org
+- Org-scoped writes: `POST /api/v1/organizations/:orgKey/ecke-publish/{publish|sync|unpublish}`
+

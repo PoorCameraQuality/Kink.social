@@ -1,5 +1,5 @@
 import { APP_URL } from '@c2k/shared'
-import { and, asc, eq } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import {
   loadEckeIngestApiConfig,
@@ -145,6 +145,18 @@ export type EckeGroupOverviewCard = {
   summary?: string
   preview?: EckePublishPreviewResult
   plannedMessage?: string
+  writeEnabled?: boolean
+  publishRestrictedMessage?: string
+}
+
+export type EckeOrgOverviewResult = {
+  organizationId: string
+  organizationSlug: string
+  organizationName: string
+  bridgeConnected: boolean
+  passNotice: string
+  cards: EckeGroupOverviewCard[]
+  history: EckeGroupOverviewResult['history']
 }
 
 export type EckeGroupOverviewResult = {
@@ -205,7 +217,230 @@ export const computeEducationArticleActions = computeGroupListingActions
 export type ArticlePublishAccess = {
   article: EducationArticlePublishRow
   author: EducationArticleAuthorContext
+  /** @deprecated Use canPublish — kept for Slice 1 callers */
   canManage: boolean
+  canPreview: boolean
+  canPublish: boolean
+}
+
+export type EducationArticlePreviewScope = {
+  organizationId?: string
+  groupOrganizationId?: string
+  groupModerator?: boolean
+}
+
+export type OrgPublishAccess = {
+  organization: {
+    id: string
+    slug: string
+    displayName: string
+  }
+  canManage: boolean
+  orgRole: string | null
+}
+
+/** Pure permission check — publish writes remain author-only. */
+export function canViewerPublishEducationArticleEcke(
+  article: EducationArticlePublishRow,
+  userId: string,
+): boolean {
+  return article.authorUserId === userId
+}
+
+/** @deprecated Use canViewerPublishEducationArticleEcke */
+export function canViewerManageEducationArticleEckePublish(
+  article: EducationArticlePublishRow,
+  userId: string,
+): boolean {
+  return canViewerPublishEducationArticleEcke(article, userId)
+}
+
+export async function isOrgModeratorForOrganization(orgId: string, userId: string): Promise<boolean> {
+  const [member] = await db
+    .select({ role: schema.organizationMembers.role })
+    .from(schema.organizationMembers)
+    .where(
+      and(eq(schema.organizationMembers.organizationId, orgId), eq(schema.organizationMembers.userId, userId)),
+    )
+    .limit(1)
+  if (!member) return false
+  return (ORG_ROLE_RANK[member.role] ?? 0) >= ORG_ROLE_RANK.MODERATOR
+}
+
+async function resolveOrganizationIdByKey(orgKey: string): Promise<string | null> {
+  const trimmed = orgKey.trim()
+  if (!trimmed) return null
+  const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  if (uuidRe.test(trimmed)) return trimmed
+  const [row] = await db
+    .select({ id: schema.organizations.id })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.slug, trimmed))
+    .limit(1)
+  return row?.id ?? null
+}
+
+export async function resolveOrgPublishAccess(
+  orgKey: string,
+  userId: string,
+): Promise<OrgPublishAccess | null> {
+  const orgId = await resolveOrganizationIdByKey(orgKey)
+  if (!orgId) return null
+
+  const [org] = await db
+    .select({
+      id: schema.organizations.id,
+      slug: schema.organizations.slug,
+      displayName: schema.organizations.displayName,
+    })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.id, orgId))
+    .limit(1)
+  if (!org) return null
+
+  const [member] = await db
+    .select({ role: schema.organizationMembers.role })
+    .from(schema.organizationMembers)
+    .where(
+      and(eq(schema.organizationMembers.organizationId, orgId), eq(schema.organizationMembers.userId, userId)),
+    )
+    .limit(1)
+
+  const orgRole = member?.role ?? null
+  const canManage = orgRole !== null && (ORG_ROLE_RANK[orgRole] ?? 0) >= ORG_ROLE_RANK.MODERATOR
+
+  return {
+    organization: org,
+    canManage,
+    orgRole,
+  }
+}
+
+export async function resolveArticleEckeAccess(
+  articleId: string,
+  userId: string,
+  scope?: EducationArticlePreviewScope,
+): Promise<ArticlePublishAccess | null> {
+  const article = await loadEducationArticleForPublish(articleId)
+  if (!article) return null
+
+  const author = await loadEducationArticleAuthorContextForPublish(article)
+  const isAuthor = canViewerPublishEducationArticleEcke(article, userId)
+
+  if (scope?.organizationId && article.organizationId !== scope.organizationId) {
+    return { article, author, canPreview: false, canPublish: false, canManage: false }
+  }
+  if (
+    scope?.groupOrganizationId &&
+    (!article.organizationId || article.organizationId !== scope.groupOrganizationId)
+  ) {
+    return { article, author, canPreview: false, canPublish: false, canManage: false }
+  }
+
+  let orgModCanPreview = false
+  if (article.organizationId) {
+    if (scope?.organizationId) {
+      orgModCanPreview = await isOrgModeratorForOrganization(scope.organizationId, userId)
+    } else if (!scope?.groupOrganizationId) {
+      orgModCanPreview = await isOrgModeratorForOrganization(article.organizationId, userId)
+    }
+  }
+
+  const groupModCanPreview = Boolean(
+    scope?.groupModerator && scope.groupOrganizationId && article.organizationId === scope.groupOrganizationId,
+  )
+
+  const canPreview = isAuthor || orgModCanPreview || groupModCanPreview
+  const canPublish = isAuthor
+
+  return {
+    article,
+    author,
+    canPreview,
+    canPublish,
+    canManage: canPublish,
+  }
+}
+
+export async function resolveArticlePublishAccess(
+  articleId: string,
+  userId: string,
+  scope?: EducationArticlePreviewScope,
+): Promise<ArticlePublishAccess | null> {
+  return resolveArticleEckeAccess(articleId, userId, scope)
+}
+
+async function loadOrgLinkedEducationArticleSummaries(orgId: string) {
+  return db
+    .select({
+      id: schema.educationArticles.id,
+      title: schema.educationArticles.title,
+      slug: schema.educationArticles.slug,
+    })
+    .from(schema.educationArticles)
+    .where(
+      and(
+        eq(schema.educationArticles.organizationId, orgId),
+        ne(schema.educationArticles.publicationStatus, 'ARCHIVED'),
+      ),
+    )
+    .orderBy(desc(schema.educationArticles.updatedAt))
+}
+
+async function loadEducationArticleEckeHistory(articleIds: string[]) {
+  if (articleIds.length === 0) return []
+  return db
+    .select({
+      targetKind: schema.eckePublishTargets.targetKind,
+      externalSlug: schema.eckePublishTargets.externalSlug,
+      status: schema.eckePublishTargets.status,
+      lastPublishedAt: schema.eckePublishTargets.lastPublishedAt,
+      lastError: schema.eckePublishTargets.lastError,
+      lastPreviewAt: schema.eckePublishTargets.lastPreviewAt,
+    })
+    .from(schema.eckePublishTargets)
+    .where(
+      and(
+        inArray(schema.eckePublishTargets.educationArticleId, articleIds),
+        eq(schema.eckePublishTargets.targetKind, 'ecke_article'),
+      ),
+    )
+    .orderBy(desc(schema.eckePublishTargets.lastAttemptAt))
+}
+
+export const EDUCATION_ECKE_AUTHOR_ONLY_MESSAGE =
+  'Only the article author can publish, sync, or unpublish to ECKE. Open the education writer to manage this article.'
+
+async function buildEducationArticleOverviewCard(
+  viewer: EckePublishViewer,
+  articleId: string,
+  title: string,
+  scope?: EducationArticlePreviewScope,
+): Promise<EckeGroupOverviewCard | null> {
+  const previewResult = await buildEducationArticlePreview(
+    viewer,
+    articleId,
+    getRegistryEntry('education_article')!,
+    scope,
+  )
+  if (!previewResult.ok) return null
+
+  const access = await resolveArticleEckeAccess(articleId, viewer.userId, scope)
+  const writeEnabled = access?.canPublish ?? false
+
+  return {
+    section: 'education',
+    sourceKind: 'education_article',
+    sourceId: articleId,
+    title,
+    supportState: 'active_existing',
+    eligible: previewResult.result.eligible,
+    reason: previewResult.result.reason,
+    status: previewResult.result.status,
+    preview: previewResult.result,
+    writeEnabled,
+    publishRestrictedMessage: writeEnabled ? undefined : EDUCATION_ECKE_AUTHOR_ONLY_MESSAGE,
+  }
 }
 
 export type EducationArticlePublishContext = {
@@ -215,29 +450,6 @@ export type EducationArticlePublishContext = {
   eligibility: { eligible: boolean; reason?: string }
   canonicalKinkSocialUrl: string
   externalSlug: string
-}
-
-/** Pure permission check — author-only per existing education ECKE routes. */
-export function canViewerManageEducationArticleEckePublish(
-  article: EducationArticlePublishRow,
-  userId: string,
-): boolean {
-  return article.authorUserId === userId
-}
-
-export async function resolveArticlePublishAccess(
-  articleId: string,
-  userId: string,
-): Promise<ArticlePublishAccess | null> {
-  const article = await loadEducationArticleForPublish(articleId)
-  if (!article) return null
-
-  const author = await loadEducationArticleAuthorContextForPublish(article)
-  return {
-    article,
-    author,
-    canManage: canViewerManageEducationArticleEckePublish(article, userId),
-  }
 }
 
 /** Server-side education article payload — never trusts client input. */
@@ -503,6 +715,7 @@ export async function getEckePublishPreview(
   viewer: EckePublishViewer,
   sourceKind: EckeSourceKind,
   sourceId: string,
+  educationScope?: EducationArticlePreviewScope,
 ): Promise<{ ok: true; result: EckePublishPreviewResult } | { ok: false; status: number; error: string }> {
   const entry = getRegistryEntry(sourceKind)
   if (!entry) {
@@ -516,7 +729,7 @@ export async function getEckePublishPreview(
     return buildEventListingPreview(viewer, sourceId, entry)
   }
   if (sourceKind === 'education_article') {
-    return buildEducationArticlePreview(viewer, sourceId, entry)
+    return buildEducationArticlePreview(viewer, sourceId, entry, educationScope)
   }
 
   return {
@@ -723,13 +936,14 @@ async function buildEducationArticlePreview(
   viewer: EckePublishViewer,
   articleId: string,
   entry: EckeRegistryEntry,
+  scope?: EducationArticlePreviewScope,
 ): Promise<{ ok: true; result: EckePublishPreviewResult } | { ok: false; status: number; error: string }> {
-  const access = await resolveArticlePublishAccess(articleId, viewer.userId)
+  const access = await resolveArticleEckeAccess(articleId, viewer.userId, scope)
   if (!access) {
     return { ok: false, status: 404, error: 'Article not found' }
   }
-  if (!access.canManage) {
-    return { ok: false, status: 403, error: 'Author access required to preview ECKE publish' }
+  if (!access.canPreview) {
+    return { ok: false, status: 403, error: 'Author or organization moderator access required to preview ECKE publish' }
   }
 
   if (access.article.publicationStatus === 'ARCHIVED') {
@@ -753,6 +967,16 @@ async function buildEducationArticlePreview(
   const eckePublicUrl =
     row?.eckePublicUrl ?? resolveEckePublicEducationUrl(row?.externalSlug ?? ctx.externalSlug)
 
+  const baseActions = computeEducationArticleActions({
+    eligible: ctx.eligibility.eligible,
+    status,
+    bridgeConfigured,
+  })
+  const actions =
+    access.canPublish ?
+      baseActions
+    : { preview: true, publish: false, sync: false, unpublish: false }
+
   return {
     ok: true,
     result: {
@@ -760,7 +984,9 @@ async function buildEducationArticlePreview(
       sourceId: articleId,
       supportState: entry.supportState,
       eligible: ctx.eligibility.eligible,
-      reason: ctx.eligibility.reason,
+      reason:
+        ctx.eligibility.reason ??
+        (!access.canPublish ? 'Only the article author can publish to ECKE' : undefined),
       status,
       contentHash: ctx.contentHash,
       publishedContentHash: row?.publishedContentHash ?? null,
@@ -772,11 +998,7 @@ async function buildEducationArticlePreview(
       eckePublicUrlKnown: Boolean(row?.eckePublicUrl),
       currentTransport: entry.currentTransport,
       eckeSurfacesAffected: entry.eckeSurfacesAffected,
-      actions: computeEducationArticleActions({
-        eligible: ctx.eligibility.eligible,
-        status,
-        bridgeConfigured,
-      }),
+      actions,
       staleNotice:
         status === 'stale' ?
           'This article has changed since it was last published to ECKE. Sync to update the public article.'
@@ -865,12 +1087,34 @@ export async function getGroupEckePublishOverview(
     }
   }
 
-  cards.push({
-    section: 'education',
-    title: 'Education',
-    supportState: 'planned',
-    plannedMessage: 'Group-owned education ECKE publish is planned. Author-owned articles use the education writer today.',
-  })
+  if (!access.group.organizationId) {
+    cards.push({
+      section: 'education',
+      title: 'Education',
+      supportState: 'info',
+      plannedMessage:
+        'This group has no parent organization. Link a group to an org to surface org-linked education articles here, or manage articles from the education writer.',
+    })
+  } else {
+    const orgArticles = await loadOrgLinkedEducationArticleSummaries(access.group.organizationId)
+    if (orgArticles.length === 0) {
+      cards.push({
+        section: 'education',
+        title: 'No org-linked education articles',
+        supportState: 'info',
+        plannedMessage:
+          'No education articles are linked to this group’s parent organization yet. Authors can set organization affiliation in the education writer.',
+      })
+    } else {
+      for (const article of orgArticles) {
+        const card = await buildEducationArticleOverviewCard(viewer, article.id, article.title, {
+          groupOrganizationId: access.group.organizationId,
+          groupModerator: access.canManage,
+        })
+        if (card) cards.push(card)
+      }
+    }
+  }
 
   cards.push({
     section: 'venues',
@@ -913,7 +1157,73 @@ export async function getGroupEckePublishOverview(
       groupName: access.group.name,
       bridgeConnected: isEckeBridgeConfigured(),
       passNotice:
-        'Only public group listings and public group events can be published to East Coast Kink Events. Member lists, RSVP data, and private locations are never sent.',
+        'Only public group listings, public group events, and org-linked education articles (author publish) can be published to East Coast Kink Events. Member lists, RSVP data, and private locations are never sent.',
+      cards,
+      history: historyRows.map((r) => ({
+        targetKind: r.targetKind,
+        externalSlug: r.externalSlug,
+        status: r.status,
+        lastPublishedAt: r.lastPublishedAt?.toISOString() ?? null,
+        lastError: r.lastError ?? null,
+        lastPreviewAt: r.lastPreviewAt?.toISOString() ?? null,
+      })),
+    },
+  }
+}
+
+export async function getOrgEckePublishOverview(
+  viewer: EckePublishViewer,
+  orgKey: string,
+): Promise<{ ok: true; result: EckeOrgOverviewResult } | { ok: false; status: number; error: string }> {
+  const access = await resolveOrgPublishAccess(orgKey, viewer.userId)
+  if (!access) {
+    return { ok: false, status: 404, error: 'Organization not found' }
+  }
+  if (!access.canManage) {
+    return { ok: false, status: 403, error: 'Organization moderator access required' }
+  }
+
+  const cards: EckeGroupOverviewCard[] = []
+
+  cards.push({
+    section: 'overview',
+    title: 'ECKE Publish overview',
+    supportState: 'info',
+    summary: isEckeBridgeConfigured()
+      ? 'Org-linked education articles can be previewed here. Only the article author can publish, sync, or unpublish to East Coast Kink Events.'
+      : 'ECKE publish bridge is not configured on this server. Configure ECKE env vars to publish education articles.',
+  })
+
+  const orgArticles = await loadOrgLinkedEducationArticleSummaries(access.organization.id)
+  if (orgArticles.length === 0) {
+    cards.push({
+      section: 'education',
+      title: 'No org-linked education articles',
+      supportState: 'info',
+      plannedMessage:
+        'No education articles are linked to this organization yet. Authors can set organization affiliation when writing an article.',
+    })
+  } else {
+    for (const article of orgArticles) {
+      const card = await buildEducationArticleOverviewCard(viewer, article.id, article.title, {
+        organizationId: access.organization.id,
+      })
+      if (card) cards.push(card)
+    }
+  }
+
+  const articleIds = orgArticles.map((a) => a.id)
+  const historyRows = await loadEducationArticleEckeHistory(articleIds)
+
+  return {
+    ok: true,
+    result: {
+      organizationId: access.organization.id,
+      organizationSlug: access.organization.slug,
+      organizationName: access.organization.displayName,
+      bridgeConnected: isEckeBridgeConfigured(),
+      passNotice:
+        'Only published public education articles with ECKE opt-in are eligible. Publish actions require the article author; org moderators can preview status and omitted fields.',
       cards,
       history: historyRows.map((r) => ({
         targetKind: r.targetKind,
@@ -1258,13 +1568,39 @@ function isPass5WriteKind(sourceKind: EckeSourceKind): boolean {
 async function executeEducationArticlePublish(
   viewer: EckePublishViewer,
   articleId: string,
+  scope?: { expectedGroupId?: string; expectedOrgKey?: string },
 ): Promise<
   | { ok: true; result: EckePublishActionResult }
   | { ok: false; status: number; error: string; errorCode?: string }
 > {
-  const access = await resolveArticlePublishAccess(articleId, viewer.userId)
+  if (scope?.expectedGroupId) {
+    const groupAccess = await resolveGroupPublishAccess(scope.expectedGroupId, viewer.userId)
+    if (!groupAccess?.canManage) {
+      return { ok: false, status: 403, error: 'Group moderator access required' }
+    }
+    const scopedArticle = await loadEducationArticleForPublish(articleId)
+    if (
+      !scopedArticle?.organizationId ||
+      scopedArticle.organizationId !== groupAccess.group.organizationId
+    ) {
+      return { ok: false, status: 403, error: 'Article is not linked to this group’s parent organization' }
+    }
+  }
+
+  if (scope?.expectedOrgKey) {
+    const orgAccess = await resolveOrgPublishAccess(scope.expectedOrgKey, viewer.userId)
+    if (!orgAccess?.canManage) {
+      return { ok: false, status: 403, error: 'Organization moderator access required' }
+    }
+    const scopedArticle = await loadEducationArticleForPublish(articleId)
+    if (!scopedArticle?.organizationId || scopedArticle.organizationId !== orgAccess.organization.id) {
+      return { ok: false, status: 403, error: 'Article is not linked to this organization' }
+    }
+  }
+
+  const access = await resolveArticleEckeAccess(articleId, viewer.userId)
   if (!access) return { ok: false, status: 404, error: 'Article not found' }
-  if (!access.canManage) {
+  if (!access.canPublish) {
     return { ok: false, status: 403, error: 'Author access required to publish ECKE article' }
   }
 
@@ -1316,13 +1652,39 @@ async function executeEducationArticlePublish(
 async function executeEducationArticleUnpublish(
   viewer: EckePublishViewer,
   articleId: string,
+  scope?: { expectedGroupId?: string; expectedOrgKey?: string },
 ): Promise<
   | { ok: true; result: EckePublishActionResult }
   | { ok: false; status: number; error: string; errorCode?: string }
 > {
-  const access = await resolveArticlePublishAccess(articleId, viewer.userId)
+  if (scope?.expectedGroupId) {
+    const groupAccess = await resolveGroupPublishAccess(scope.expectedGroupId, viewer.userId)
+    if (!groupAccess?.canManage) {
+      return { ok: false, status: 403, error: 'Group moderator access required' }
+    }
+    const scopedArticle = await loadEducationArticleForPublish(articleId)
+    if (
+      !scopedArticle?.organizationId ||
+      scopedArticle.organizationId !== groupAccess.group.organizationId
+    ) {
+      return { ok: false, status: 403, error: 'Article is not linked to this group’s parent organization' }
+    }
+  }
+
+  if (scope?.expectedOrgKey) {
+    const orgAccess = await resolveOrgPublishAccess(scope.expectedOrgKey, viewer.userId)
+    if (!orgAccess?.canManage) {
+      return { ok: false, status: 403, error: 'Organization moderator access required' }
+    }
+    const scopedArticle = await loadEducationArticleForPublish(articleId)
+    if (!scopedArticle?.organizationId || scopedArticle.organizationId !== orgAccess.organization.id) {
+      return { ok: false, status: 403, error: 'Article is not linked to this organization' }
+    }
+  }
+
+  const access = await resolveArticleEckeAccess(articleId, viewer.userId)
   if (!access) return { ok: false, status: 404, error: 'Article not found' }
-  if (!access.canManage) {
+  if (!access.canPublish) {
     return { ok: false, status: 403, error: 'Author access required to unpublish ECKE article' }
   }
 
@@ -1373,7 +1735,12 @@ async function executeEducationArticleUnpublish(
 
 export async function publishEckeSource(
   viewer: EckePublishViewer,
-  input: { sourceKind: EckeSourceKind; sourceId: string; expectedGroupId?: string },
+  input: {
+    sourceKind: EckeSourceKind
+    sourceId: string
+    expectedGroupId?: string
+    expectedOrgKey?: string
+  },
 ): Promise<
   | { ok: true; result: EckePublishActionResult }
   | { ok: false; status: number; error: string; errorCode?: string }
@@ -1390,14 +1757,22 @@ export async function publishEckeSource(
     return executeGroupListingPublish(viewer, input.sourceId)
   }
   if (input.sourceKind === 'education_article') {
-    return executeEducationArticlePublish(viewer, input.sourceId)
+    return executeEducationArticlePublish(viewer, input.sourceId, {
+      expectedGroupId: input.expectedGroupId,
+      expectedOrgKey: input.expectedOrgKey,
+    })
   }
   return executeEventListingPublish(viewer, input.sourceId, input.expectedGroupId)
 }
 
 export async function syncEckeSource(
   viewer: EckePublishViewer,
-  input: { sourceKind: EckeSourceKind; sourceId: string; expectedGroupId?: string },
+  input: {
+    sourceKind: EckeSourceKind
+    sourceId: string
+    expectedGroupId?: string
+    expectedOrgKey?: string
+  },
 ): Promise<
   | { ok: true; result: EckePublishActionResult }
   | { ok: false; status: number; error: string; errorCode?: string }
@@ -1414,14 +1789,22 @@ export async function syncEckeSource(
     return executeGroupListingPublish(viewer, input.sourceId)
   }
   if (input.sourceKind === 'education_article') {
-    return executeEducationArticlePublish(viewer, input.sourceId)
+    return executeEducationArticlePublish(viewer, input.sourceId, {
+      expectedGroupId: input.expectedGroupId,
+      expectedOrgKey: input.expectedOrgKey,
+    })
   }
   return executeEventListingPublish(viewer, input.sourceId, input.expectedGroupId)
 }
 
 export async function unpublishEckeSource(
   viewer: EckePublishViewer,
-  input: { sourceKind: EckeSourceKind; sourceId: string; expectedGroupId?: string },
+  input: {
+    sourceKind: EckeSourceKind
+    sourceId: string
+    expectedGroupId?: string
+    expectedOrgKey?: string
+  },
 ): Promise<
   | { ok: true; result: EckePublishActionResult }
   | { ok: false; status: number; error: string; errorCode?: string }
@@ -1438,7 +1821,10 @@ export async function unpublishEckeSource(
     return executeGroupListingUnpublish(viewer, input.sourceId)
   }
   if (input.sourceKind === 'education_article') {
-    return executeEducationArticleUnpublish(viewer, input.sourceId)
+    return executeEducationArticleUnpublish(viewer, input.sourceId, {
+      expectedGroupId: input.expectedGroupId,
+      expectedOrgKey: input.expectedOrgKey,
+    })
   }
   return executeEventListingUnpublish(viewer, input.sourceId, input.expectedGroupId)
 }

@@ -82,8 +82,8 @@ export const ECKE_PUBLISH_REGISTRY: readonly EckeRegistryEntry[] = [
     label: 'Education article',
     description: 'Public education articles published via ECKE ingest API.',
     ownerKind: 'user',
-    visibleInGroupDashboard: false,
-    visibleInOrgDashboard: false,
+    visibleInGroupDashboard: true,
+    visibleInOrgDashboard: true,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: true,
     supportState: 'active_existing',
@@ -311,6 +311,10 @@ export function getRegistryEntry(sourceKind: EckeSourceKind): EckeRegistryEntry 
 
 export function listRegistryForGroupDashboard(): EckeRegistryEntry[] {
   return ECKE_PUBLISH_REGISTRY.filter((e) => e.visibleInGroupDashboard)
+}
+
+export function listRegistryForOrgDashboard(): EckeRegistryEntry[] {
+  return ECKE_PUBLISH_REGISTRY.filter((e) => e.visibleInOrgDashboard)
 }
 
 export function listAllRegistryEntries(): EckeRegistryEntry[] {
