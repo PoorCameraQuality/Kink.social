@@ -4,6 +4,7 @@ import type { CommandAction } from '@/components/organizer/ui/OrganizerCommandPa
 import OrganizerAppShell from '@/components/organizer/ui/OrganizerAppShell'
 import OrganizerCommunicationsPanel from '@/components/organizer/OrganizerCommunicationsPanel'
 import OrganizerGroupSettingsPanel from '@/components/organizer/OrganizerGroupSettingsPanel'
+import OrganizerGroupEckePanel from '@/components/organizer/OrganizerGroupEckePanel'
 import OrganizerHomePanel from '@/components/organizer/OrganizerHomePanel'
 import OrganizerPeoplePanel from '@/components/organizer/OrganizerPeoplePanel'
 import OrganizerSchedulePanel from '@/components/organizer/OrganizerSchedulePanel'
@@ -189,13 +190,14 @@ export default function OrganizerGroupClient() {
 
   useEffect(() => {
     if (tab === 'settings' && !showSettings) setTab('home')
+    if (tab === 'ecke' && !showSettings) setTab('home')
   }, [tab, showSettings, setTab])
 
   const commandActions = useMemo<CommandAction[]>(() => {
     if (!id) return []
     const base = `/organizer/groups/${encodeURIComponent(id)}`
-    return (['home', 'schedule', 'people', 'communications', 'settings', 'tools'] as OrganizerTab[])
-      .filter((t) => t !== 'settings' || showSettings)
+    return (['home', 'schedule', 'people', 'communications', 'ecke', 'settings', 'tools'] as OrganizerTab[])
+      .filter((t) => (t !== 'settings' && t !== 'ecke') || showSettings)
       .map((t) => ({
         id: `tab-${t}`,
         label: `Go to ${ORGANIZER_TAB_LABELS[t]}`,
@@ -215,9 +217,9 @@ export default function OrganizerGroupClient() {
       },
       {
         id: 'listing',
-        label: 'Prepare ECKE public listing metadata',
+        label: 'Preview ECKE public listing',
         done: false,
-        href: `/organizer/groups/${encodeURIComponent(id)}?tab=settings`,
+        href: `/organizer/groups/${encodeURIComponent(id)}?tab=ecke`,
       },
     ]
   }, [group, id])
@@ -288,6 +290,9 @@ export default function OrganizerGroupClient() {
       : null}
       {tab === 'moderation' ?
         <OrganizerGroupModerationPanel groupId={id} />
+      : null}
+      {tab === 'ecke' && showSettings ?
+        <OrganizerGroupEckePanel groupId={id} />
       : null}
       {tab === 'settings' && showSettings ?
         <OrganizerGroupSettingsPanel

@@ -4,6 +4,7 @@ export const ORGANIZER_TABS = [
   'people',
   'communications',
   'moderation',
+  'ecke',
   'settings',
   'tools',
 ] as const
@@ -16,6 +17,7 @@ export const ORGANIZER_TAB_LABELS: Record<OrganizerTab, string> = {
   people: 'People',
   communications: 'Communications',
   moderation: 'Moderation',
+  ecke: 'ECKE Publish',
   settings: 'Settings',
   tools: 'Tools',
 }

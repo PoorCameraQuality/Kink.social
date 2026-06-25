@@ -26,7 +26,8 @@ export default function OrganizerSidebarNav({
 }: Props) {
 
   const tabs = ORGANIZER_TABS.filter((t) => {
-    if (t === 'settings' && !showSettings) return false
+        if (t === 'settings' && !showSettings) return false
+    if (t === 'ecke' && !showSettings) return false
     if (t === 'moderation' && !showModeration) return false
     return true
   })
