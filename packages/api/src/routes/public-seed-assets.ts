@@ -1,8 +1,7 @@
 import { createReadStream, existsSync, statSync } from 'node:fs'
 import { basename, extname, join, normalize, resolve } from 'node:path'
 import type { FastifyInstance } from 'fastify'
-import { getWebPublicSeedPafDir } from '../db/local-seed-images.js'
-import { getWebPublicSeedEckeDir } from '../db/ecke-seed-images.js'
+import { getWebPublicSeedPafDir, getWebPublicSeedEckeDir } from '../lib/public-seed-paths.js'
 
 const MIME: Record<string, string> = {
   '.png': 'image/png',

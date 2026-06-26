@@ -36,6 +36,11 @@ import {
   assertProfilePhotoContentRatingAllowed,
   isProfileGallerySurface,
 } from './profile-photo-policy.js'
+import {
+  deriveMediaModerationDecision,
+  logMediaModerationDecision,
+  type MediaModerationDecision,
+} from './media-moderation-decision.js'
 
 export class MediaAssetAccessError extends Error {
   constructor(message = 'Forbidden') {
@@ -66,6 +71,10 @@ export type ProfilePhotoMediaDto = {
   isBlurredByDefault: boolean
   pendingReview: boolean
   publishLane: MediaPublishLane | null
+  moderationDecision?: Pick<
+    MediaModerationDecision,
+    'reasonCode' | 'reasonSummary' | 'blockedFromMemberSurfaces' | 'alphaAuthProxyServing'
+  > | null
 }
 
 function mapDbAttestationToShared(row: MediaAsset): MediaAttestationFields {
@@ -114,6 +123,11 @@ export function mediaAssetToPhotoDto(media: MediaAsset | null | undefined): Prof
       status !== MEDIA_UPLOAD_STATUSES.pendingAttestation &&
       status !== MEDIA_UPLOAD_STATUSES.rejected)
 
+  const moderationDecision = deriveMediaModerationDecision({
+    asset: media,
+    publishLane: lane,
+  })
+
   return {
     mediaAssetId: media.id,
     uploadStatus: status,
@@ -122,6 +136,12 @@ export function mediaAssetToPhotoDto(media: MediaAsset | null | undefined): Prof
     isBlurredByDefault: media.isBlurredByDefault,
     pendingReview,
     publishLane: lane,
+    moderationDecision: {
+      reasonCode: moderationDecision.reasonCode,
+      reasonSummary: moderationDecision.reasonSummary,
+      blockedFromMemberSurfaces: moderationDecision.blockedFromMemberSurfaces,
+      alphaAuthProxyServing: moderationDecision.alphaAuthProxyServing,
+    },
   }
 }
 
@@ -236,6 +256,7 @@ export async function submitMediaAttestation(
   storageState?: string
   promoted?: boolean
   contentUrl?: string | null
+  moderationDecision: MediaModerationDecision
 }> {
   const [existing] = await db
     .select()
@@ -384,6 +405,18 @@ export async function submitMediaAttestation(
 
   const scannerSummary = await buildMediaScannerSummary(input.mediaAssetId, pipeline.scanStatus)
 
+  const [finalRow] = await db
+    .select()
+    .from(schema.mediaAssets)
+    .where(eq(schema.mediaAssets.id, input.mediaAssetId))
+    .limit(1)
+
+  const moderationDecision = deriveMediaModerationDecision({
+    asset: finalRow ?? existing,
+    publishLane: lane,
+    scannerResults: pipeline.scannerResults,
+  })
+
   if ((lane === 'YELLOW' || moderationCaseId) && moderationCaseId) {
     const snapshot = await buildContentSnapshot('media_asset', input.mediaAssetId)
     if (snapshot) {
@@ -399,17 +432,21 @@ export async function submitMediaAttestation(
             publishLane: lane,
             promoted: pipeline.promoted,
             scannerSummary,
+            moderationDecision,
           },
         },
       })
     }
   }
 
-  const [finalRow] = await db
-    .select()
-    .from(schema.mediaAssets)
-    .where(eq(schema.mediaAssets.id, input.mediaAssetId))
-    .limit(1)
+  logMediaModerationDecision('media.attestation_decision', {
+    mediaAssetId: input.mediaAssetId,
+    userId: input.userId,
+    mimeType: existing.mimeType,
+    sizeBytes: existing.sizeBytes,
+    sourceSurface: existing.sourceSurface,
+    decision: moderationDecision,
+  })
 
   return {
     lane,
@@ -420,6 +457,7 @@ export async function submitMediaAttestation(
     contentUrl: pipeline.promoted
       ? null
       : mediaContentProxyPath(input.mediaAssetId),
+    moderationDecision,
   }
 }
 
@@ -430,4 +468,15 @@ export async function getMediaAssetById(mediaAssetId: string) {
     .where(eq(schema.mediaAssets.id, mediaAssetId))
     .limit(1)
   return row ?? null
+}
+
+/** Ensure the authenticated user staged or uploaded the asset. */
+export async function assertMediaAssetUploader(userId: string, mediaAssetId: string): Promise<void> {
+  const asset = await getMediaAssetById(mediaAssetId)
+  if (!asset) {
+    throw new MediaAssetNotFoundError()
+  }
+  if (asset.uploaderUserId !== userId) {
+    throw new MediaAssetAccessError()
+  }
 }

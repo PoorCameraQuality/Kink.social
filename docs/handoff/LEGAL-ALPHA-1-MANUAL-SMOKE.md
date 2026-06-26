@@ -18,6 +18,8 @@
 | **RopeDreamer** | `MODERATOR` (not site admin) | `demo` | Non-admin API/UI denial checks |
 | Guest | — | — | Public policy pages, DMCA intake (no login) |
 
+**Production (kink.social):** Brax password **differs** from local seed. Set `BRAX_ADMIN_PASSWORD` in your shell (do not commit). Automated smokes: `SMOKE_BASE=https://kink.social REQUIRE_BRAX_ADMIN_SMOKE=1 BRAX_ADMIN_PASSWORD=... npm run verify:alpha-hardening-prod`
+
 Ensure Brax staff row: `npm run db:ensure-brax-site-admin`
 
 ---

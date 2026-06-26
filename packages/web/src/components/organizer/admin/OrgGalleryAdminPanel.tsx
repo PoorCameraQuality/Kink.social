@@ -1,16 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import OrganizerFormSection from '@/components/organizer/ui/OrganizerFormSection'
 import OrganizerPanel from '@/components/organizer/ui/OrganizerPanel'
+import { resolvePublicSeedDisplayUrl } from '@/lib/public-seed-url'
 
-/** DB may still hold `/seed/paf/*` paths; serve via `/api/public-seed/paf/*` instead. */
 function orgMediaDisplayUrl(url: string | null | undefined): string | undefined {
-  if (!url) return undefined
-  if (url.startsWith('/seed/paf/')) {
-    const tail = url.slice('/seed/paf/'.length).split('/').pop() ?? ''
-    if (!/^[a-zA-Z0-9._-]+$/.test(tail)) return url
-    return `/api/public-seed/paf/${tail}`
-  }
-  return url
+  return resolvePublicSeedDisplayUrl(url)
 }
 
 export type GalleryRow = {

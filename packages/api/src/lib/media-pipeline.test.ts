@@ -6,7 +6,7 @@ import {
   MEDIA_VISIBILITIES,
   SCAN_STATUSES,
 } from '@c2k/shared'
-import { canExposePublicUrl, mediaContentProxyPath, resolveMediaClientUrl } from './media-pipeline.js'
+import { canExposePublicUrl, assertQuarantineStorageKeyOwnedByUser, mediaContentProxyPath, MediaUploadValidationError, resolveMediaClientUrl } from './media-pipeline.js'
 import type { MediaAsset } from '../db/schema.js'
 
 function fakeAsset(overrides: Partial<MediaAsset> = {}): MediaAsset {
@@ -122,5 +122,33 @@ describe('media-pipeline visibility helpers', () => {
     })
     assert.equal(canExposePublicUrl(asset), false)
     assert.equal(resolveMediaClientUrl(asset), mediaContentProxyPath(asset.id))
+  })
+})
+
+describe('assertQuarantineStorageKeyOwnedByUser', () => {
+  const userId = '00000000-0000-4000-8000-0000000000aa'
+
+  test('accepts key under uploader quarantine prefix', () => {
+    assert.doesNotThrow(() =>
+      assertQuarantineStorageKeyOwnedByUser(userId, `quarantine/${userId}/photo.jpg`),
+    )
+  })
+
+  test('rejects another users quarantine prefix', () => {
+    assert.throws(
+      () =>
+        assertQuarantineStorageKeyOwnedByUser(
+          userId,
+          'quarantine/00000000-0000-4000-8000-0000000000bb/photo.jpg',
+        ),
+      MediaUploadValidationError,
+    )
+  })
+
+  test('rejects legacy uploads prefix', () => {
+    assert.throws(
+      () => assertQuarantineStorageKeyOwnedByUser(userId, `uploads/${userId}/photo.jpg`),
+      MediaUploadValidationError,
+    )
   })
 })

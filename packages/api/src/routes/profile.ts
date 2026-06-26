@@ -439,6 +439,10 @@ export async function registerProfileRoutes(app: FastifyInstance) {
     }
     const parsed = patchBody.safeParse(req.body)
     if (!parsed.success) {
+      req.log.warn(
+        { userId, validation: parsed.error.flatten() },
+        'PATCH /api/profile/me validation failed',
+      )
       return reply.status(400).send({ error: 'Invalid body' })
     }
     const [user] = await db.select().from(schema.users).where(eq(schema.users.id, userId)).limit(1)
@@ -477,8 +481,8 @@ export async function registerProfileRoutes(app: FastifyInstance) {
     const nextRoles =
       u.roles !== undefined ? capArray(u.roles, PROFILE_ROLE_MAX) : prof.roles
 
-    if (u.homeZip !== undefined && u.homeZip !== null) {
-      const zipDigits = u.homeZip.trim().replace(/\D/g, '').slice(0, 5)
+    if (u.homeZip !== undefined && u.homeZip !== null && String(u.homeZip).trim() !== '') {
+      const zipDigits = String(u.homeZip).trim().replace(/\D/g, '').slice(0, 5)
       if (zipDigits.length !== 5) {
         return reply.status(400).send({ error: 'homeZip must be a 5-digit US zip' })
       }
@@ -522,38 +526,54 @@ export async function registerProfileRoutes(app: FastifyInstance) {
 
     const legacy = syncLegacyIdentityFields(nextGenders, nextSexual, nextPronounTags)
 
-    const [updated] = await db
-      .update(schema.profiles)
-      .set({
-        bio: u.bio ?? prof.bio,
-        location: loc.location,
-        placeId: loc.placeId,
-        stateId: loc.stateId,
-        customLocation: loc.customLocation,
-        homeZip: resolvedHomeZip,
-        displayName: u.displayName ?? prof.displayName,
-        roles: nextRoles,
-        genders: nextGenders,
-        sexualOrientations: nextSexual,
-        romanticOrientations: nextRomantic,
-        pronounTags: nextPronounTags,
-        lifestyleActivity:
-          u.lifestyleActivity !== undefined ? u.lifestyleActivity : prof.lifestyleActivity,
-        lookingFor: u.lookingFor !== undefined ? capArray(u.lookingFor, 20) : prof.lookingFor,
-        notLookingFor:
-          u.notLookingFor !== undefined ? capArray(u.notLookingFor, 20) : prof.notLookingFor,
-        gender: legacy.gender,
-        sexuality: legacy.sexuality,
-        pronouns: legacy.pronouns,
-        birthDate: nextBirthDate,
-        age: nextAge,
-        discoverableInPeopleSearch:
-          u.discoverableInPeopleSearch !== undefined ? u.discoverableInPeopleSearch : prof.discoverableInPeopleSearch,
-        fieldVisibility: mergedVisibility,
-        updatedAt: new Date(),
-      })
-      .where(eq(schema.profiles.id, prof.id))
-      .returning()
+    let updated
+    try {
+      ;[updated] = await db
+        .update(schema.profiles)
+        .set({
+          bio: u.bio ?? prof.bio,
+          location: loc.location,
+          placeId: loc.placeId,
+          stateId: loc.stateId,
+          customLocation: loc.customLocation,
+          homeZip: resolvedHomeZip,
+          displayName: u.displayName ?? prof.displayName,
+          roles: nextRoles,
+          genders: nextGenders,
+          sexualOrientations: nextSexual,
+          romanticOrientations: nextRomantic,
+          pronounTags: nextPronounTags,
+          lifestyleActivity:
+            u.lifestyleActivity !== undefined ? u.lifestyleActivity : prof.lifestyleActivity,
+          lookingFor: u.lookingFor !== undefined ? capArray(u.lookingFor, 20) : prof.lookingFor,
+          notLookingFor:
+            u.notLookingFor !== undefined ? capArray(u.notLookingFor, 20) : prof.notLookingFor,
+          gender: legacy.gender,
+          sexuality: legacy.sexuality,
+          pronouns: legacy.pronouns,
+          birthDate: nextBirthDate,
+          age: nextAge,
+          discoverableInPeopleSearch:
+            u.discoverableInPeopleSearch !== undefined ?
+              u.discoverableInPeopleSearch
+            : prof.discoverableInPeopleSearch,
+          fieldVisibility: mergedVisibility,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.profiles.id, prof.id))
+        .returning()
+    } catch (err) {
+      req.log.error(
+        {
+          userId,
+          profileId: prof.id,
+          changedKeys: Object.keys(u),
+          err: err instanceof Error ? err.message : String(err),
+        },
+        'PATCH /api/profile/me database update failed',
+      )
+      return reply.status(500).send({ error: 'Could not save profile' })
+    }
     return reply.send({ profile: enrichProfileIdentityRead(updated!) })
   })
 }

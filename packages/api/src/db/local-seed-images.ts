@@ -7,21 +7,16 @@
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { basename, extname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { basename, extname, join } from 'node:path'
+import { getWebPublicSeedPafDir, PAF_PUBLIC_SEED_URL_BASE } from '../lib/public-seed-paths.js'
+
+export { getWebPublicSeedPafDir } from '../lib/public-seed-paths.js'
 
 const IMAGE_RE = /\.(jpe?g|png|gif|webp)$/i
 
-export function getWebPublicSeedPafDir(): string {
-  return join(
-    resolve(fileURLToPath(new URL('.', import.meta.url)), '../../../..'),
-    'packages/web/public/seed/paf',
-  )
-}
-
 const WEB_PUBLIC_PAF = getWebPublicSeedPafDir()
 
-const PUBLIC_SEED_URL_BASE = '/api/public-seed/paf'
+const PUBLIC_SEED_URL_BASE = PAF_PUBLIC_SEED_URL_BASE
 
 function clearMatchingFiles(dir: string, re: RegExp) {
   if (!existsSync(dir)) return

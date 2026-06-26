@@ -96,12 +96,132 @@ describe('T&S-2 media assets API', { skip: !runDbTests }, () => {
           ownerType: 'profile',
           ownerId: profileId,
           sourceSurface: 'profile_photo',
-          storageKey: `uploads/${ownerId}/test.jpg`,
+          storageKey: `quarantine/${ownerId}/test.jpg`,
           mimeType: 'image/jpeg',
           sizeBytes: 1024,
         },
       })
       assert.equal(res.statusCode, 401)
+    } finally {
+      await app.close()
+    }
+  })
+
+  test('POST rejects external url without storageKey', async () => {
+    ensureCiAuthSecret()
+    const app = await buildCookieApp(async (a) => {
+      const { registerMediaAssetRoutes } = await import('../routes/media-assets.js')
+      await registerMediaAssetRoutes(a)
+    })
+    try {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/media/assets',
+        headers: cookieHeader(ownerId, ownerUsername),
+        payload: {
+          ownerType: 'profile',
+          ownerId: profileId,
+          sourceSurface: 'profile_photo',
+          url: 'https://evil.example/photo.jpg',
+          mimeType: 'image/jpeg',
+          sizeBytes: 1024,
+        },
+      })
+      assert.equal(res.statusCode, 400)
+    } finally {
+      await app.close()
+    }
+  })
+
+  test('POST rejects quarantine key outside uploader prefix', async () => {
+    ensureCiAuthSecret()
+    const app = await buildCookieApp(async (a) => {
+      const { registerMediaAssetRoutes } = await import('../routes/media-assets.js')
+      await registerMediaAssetRoutes(a)
+    })
+    try {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/media/assets',
+        headers: cookieHeader(ownerId, ownerUsername),
+        payload: {
+          ownerType: 'profile',
+          ownerId: profileId,
+          sourceSurface: 'profile_photo',
+          storageKey: `quarantine/${otherId}/${tag}-stolen.jpg`,
+          mimeType: 'image/jpeg',
+          sizeBytes: 1024,
+        },
+      })
+      assert.equal(res.statusCode, 400)
+      const body = res.json() as { code?: string }
+      assert.equal(body.code, 'invalid_upload_reference')
+    } finally {
+      await app.close()
+    }
+  })
+
+  test('POST rejects attaching media to another users profile', async () => {
+    ensureCiAuthSecret()
+    const [otherProfile] = await db
+      .insert(schema.profiles)
+      .values({ userId: otherId, displayName: 'Other Profile' })
+      .returning({ id: schema.profiles.id })
+
+    const app = await buildCookieApp(async (a) => {
+      const { registerMediaAssetRoutes } = await import('../routes/media-assets.js')
+      await registerMediaAssetRoutes(a)
+    })
+    try {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/media/assets',
+        headers: cookieHeader(ownerId, ownerUsername),
+        payload: {
+          ownerType: 'profile',
+          ownerId: otherProfile!.id,
+          sourceSurface: 'profile_photo',
+          storageKey: `quarantine/${ownerId}/${tag}-cross-profile.jpg`,
+          mimeType: 'image/jpeg',
+          sizeBytes: 1024,
+        },
+      })
+      assert.equal(res.statusCode, 403)
+      const body = res.json() as { code?: string }
+      assert.equal(body.code, 'profile_owner_mismatch')
+    } finally {
+      await app.close()
+    }
+  })
+
+  test('POST creates pending attestation asset without client ownerId', async () => {
+    ensureCiAuthSecret()
+    const app = await buildCookieApp(async (a) => {
+      const { registerMediaAssetRoutes } = await import('../routes/media-assets.js')
+      await registerMediaAssetRoutes(a)
+    })
+    try {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/media/assets',
+        headers: cookieHeader(ownerId, ownerUsername),
+        payload: {
+          ownerType: 'profile',
+          sourceSurface: 'profile_photo',
+          storageKey: `quarantine/${ownerId}/${tag}-no-owner-id.jpg`,
+          mimeType: 'image/jpeg',
+          sizeBytes: 2048,
+        },
+      })
+      assert.equal(res.statusCode, 201, res.body)
+      const body = res.json() as { asset: { id: string } }
+      assetIds.push(body.asset.id)
+      const [row] = await db
+        .select({ ownerId: schema.mediaAssets.ownerId })
+        .from(schema.mediaAssets)
+        .where(eq(schema.mediaAssets.id, body.asset.id))
+        .limit(1)
+      assert.equal(row?.ownerId, profileId)
     } finally {
       await app.close()
     }
@@ -122,7 +242,7 @@ describe('T&S-2 media assets API', { skip: !runDbTests }, () => {
           ownerType: 'profile',
           ownerId: profileId,
           sourceSurface: 'profile_photo',
-          storageKey: `uploads/${ownerId}/${tag}-solo.jpg`,
+          storageKey: `quarantine/${ownerId}/${tag}-solo.jpg`,
           mimeType: 'image/jpeg',
           sizeBytes: 2048,
           originalFilename: 'solo.jpg',
@@ -236,7 +356,7 @@ describe('T&S-2 media assets API', { skip: !runDbTests }, () => {
         url: '/api/v1/media/assets',
         headers: cookieHeader(ownerId, ownerUsername),
         payload: {
-          storageKey: `uploads/${ownerId}/${tag}-blocked-explicit.jpg`,
+          storageKey: `quarantine/${ownerId}/${tag}-blocked-explicit.jpg`,
           mimeType: 'image/jpeg',
           sizeBytes: 1024,
           ownerType: 'profile',
@@ -286,7 +406,7 @@ describe('T&S-2 media assets API', { skip: !runDbTests }, () => {
           ownerType: 'profile',
           ownerId: profileId,
           sourceSurface: 'profile_photo',
-          storageKey: `uploads/${ownerId}/${tag}-multi.jpg`,
+          storageKey: `quarantine/${ownerId}/${tag}-multi.jpg`,
           mimeType: 'image/jpeg',
           sizeBytes: 4096,
         },
@@ -369,7 +489,7 @@ describe('T&S-2 media assets API', { skip: !runDbTests }, () => {
           ownerType: 'profile',
           ownerId: profileId,
           sourceSurface: 'profile_photo',
-          storageKey: `uploads/${ownerId}/${tag}-bad-vis.jpg`,
+          storageKey: `quarantine/${ownerId}/${tag}-bad-vis.jpg`,
           mimeType: 'image/jpeg',
           sizeBytes: 512,
         },
@@ -413,7 +533,7 @@ describe('T&S-2 media assets API', { skip: !runDbTests }, () => {
           ownerType: 'profile',
           ownerId: profileId,
           sourceSurface: 'profile_photo',
-          storageKey: `uploads/${ownerId}/${tag}-policy-block.jpg`,
+          storageKey: `quarantine/${ownerId}/${tag}-policy-block.jpg`,
           mimeType: 'image/jpeg',
           sizeBytes: 512,
         },

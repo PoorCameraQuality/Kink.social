@@ -2,16 +2,10 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import CommunityHubShell from '@/components/ui/CommunityHubShell'
 import { formatOrgHubMetadata } from '@/components/org/hub/orgHubMeta'
+import { resolvePublicSeedDisplayUrl } from '@/lib/public-seed-url'
 
-/** DB may still hold `/seed/paf/*` paths; serve via `/api/public-seed/paf/*` instead. */
 function orgMediaDisplayUrl(url: string | null | undefined): string | undefined {
-  if (!url) return undefined
-  if (url.startsWith('/seed/paf/')) {
-    const tail = url.slice('/seed/paf/'.length).split('/').pop() ?? ''
-    if (!/^[a-zA-Z0-9._-]+$/.test(tail)) return url
-    return `/api/public-seed/paf/${tail}`
-  }
-  return url
+  return resolvePublicSeedDisplayUrl(url)
 }
 
 function orgInitials(displayName: string): string {

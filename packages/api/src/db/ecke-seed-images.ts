@@ -1,20 +1,16 @@
 /**
  * Copy public assets from the sibling EastCoast repo into the web seed tree
- * and expose them at `/api/public-seed/ecke/...`.
+ * and expose them at `/seed/ecke/...`.
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { ECKE_PUBLIC_SEED_URL_BASE, getWebPublicSeedEckeDir } from '../lib/public-seed-paths.js'
+
+export { getWebPublicSeedEckeDir } from '../lib/public-seed-paths.js'
+export { ECKE_PUBLIC_SEED_URL_BASE }
 
 const ASSET_RE = /\.(jpe?g|png|gif|webp|svg|PNG|JPG|JPEG|SVG)$/i
-export const ECKE_PUBLIC_SEED_URL_BASE = '/api/public-seed/ecke'
-
-export function getWebPublicSeedEckeDir(): string {
-  return join(
-    resolve(fileURLToPath(new URL('.', import.meta.url)), '../../../..'),
-    'packages/web/public/seed/ecke',
-  )
-}
 
 export function resolveEastCoastRepoRoot(): string | null {
   const candidates = [

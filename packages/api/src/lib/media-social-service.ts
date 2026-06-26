@@ -22,11 +22,14 @@ import {
   getMediaAssetById,
   mediaAssetToPhotoDto,
   submitMediaAttestation,
+  assertMediaAssetUploader,
+  MediaAssetAccessError,
+  MediaAssetNotFoundError,
   type SubmitMediaAttestationInput,
 } from './media-asset-service.js'
 import { getMediaAssetForViewer, loadViewerAdultContentPref } from './media-asset-viewer.js'
 import { deliverBlurPreviewUrl, deliverFeedImageUrl } from './image-delivery.js'
-import { mediaContentProxyPath } from './media-pipeline.js'
+import { assertQuarantineStorageKeyOwnedByUser, mediaContentProxyPath, MediaUploadValidationError } from './media-pipeline.js'
 import { autoPublishProfileGalleryPhoto } from './profile-photo-policy.js'
 import { emitActivity } from './feed-activities.js'
 import { canViewerSeeMedia } from './media-visibility.js'
@@ -246,6 +249,14 @@ export async function createMediaUpload(input: CreateMediaUploadInput) {
     let mediaAssetId = rawItem.mediaAssetId
     if (!mediaAssetId) {
       if (!rawItem.quarantineKey) throw new MediaSocialError('mediaAssetId or quarantineKey required')
+      try {
+        assertQuarantineStorageKeyOwnedByUser(input.userId, rawItem.quarantineKey)
+      } catch (err) {
+        if (err instanceof MediaUploadValidationError) {
+          throw new MediaSocialError(err.message, 'invalid_upload_reference')
+        }
+        throw err
+      }
       mediaAssetId = await createMediaAssetForUpload({
         userId: input.userId,
         ownerType: 'profile',
@@ -261,6 +272,18 @@ export async function createMediaUpload(input: CreateMediaUploadInput) {
         videoHeight: rawItem.videoHeight,
         durationSeconds: rawItem.durationSeconds,
       })
+    } else {
+      try {
+        await assertMediaAssetUploader(input.userId, mediaAssetId)
+      } catch (err) {
+        if (err instanceof MediaAssetNotFoundError) {
+          throw new MediaSocialError('Media asset not found', 'media_asset_not_found')
+        }
+        if (err instanceof MediaAssetAccessError) {
+          throw new MediaSocialError('Forbidden', 'media_asset_forbidden')
+        }
+        throw err
+      }
     }
 
     await submitMediaAttestation({

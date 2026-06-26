@@ -46,11 +46,11 @@ export default function CommunityIdentityPanel() {
         icon={<IconUser />}
       >
         <p className="text-xs text-dc-muted mb-4 leading-relaxed">
-          Do not feel pressure to fill every label — share what helps you connect. Sensitive fields respect your{' '}
+          Saved identity fields may be hidden on your public profile depending on{' '}
           <Link to="/profile/edit/privacy" className="text-dc-accent hover:underline">
             privacy settings
           </Link>
-          .
+          . Do not feel pressure to fill every label — share what helps you connect.
         </p>
 
         <div className="space-y-4">

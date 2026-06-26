@@ -17,7 +17,7 @@ export default function ProfileLookingForCard({ lookingFor, viewerIsOwner }: Pro
         <p className={profileStoryBodyText}>
           Share what kinds of connections you are open to — friends, event companions, study partners, and more.
         </p>
-        <Link to="/profile/edit/identity" className="mt-3 inline-block text-sm font-medium text-dc-accent hover:underline">
+        <Link to="/profile/edit/looking-for" className="mt-3 inline-block text-sm font-medium text-dc-accent hover:underline">
           Edit connection goals
         </Link>
       </ProfileCard>

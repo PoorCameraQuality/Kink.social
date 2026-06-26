@@ -32,6 +32,7 @@ import {
 import { getMediaAssetById, MediaAttestationValidationError } from '../lib/media-asset-service.js'
 import { ensureProfileForUserId } from '../lib/ensure-profile.js'
 import { getPersonalPhotoQuota, PersonalPhotoQuotaError } from '../lib/personal-photo-quota.js'
+import { rateLimitRoute } from '../lib/rate-limit-config.js'
 
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
@@ -138,6 +139,7 @@ export async function registerUserMediaRoutes(app: FastifyInstance) {
 
   app.post(
     '/api/v1/me/media/uploads',
+    { ...rateLimitRoute('upload') },
     async (req, reply) => {
       if (!requireDb(reply)) return
       const auth = requireUser(req, reply)
@@ -171,7 +173,8 @@ export async function registerUserMediaRoutes(app: FastifyInstance) {
           return reply.status(400).send({ error: e.message })
         }
         if (e instanceof MediaSocialError) {
-          return reply.status(400).send({ error: e.message, code: e.code })
+          const status = e.code === 'media_asset_forbidden' ? 403 : 400
+          return reply.status(status).send({ error: e.message, code: e.code })
         }
         throw e
       }

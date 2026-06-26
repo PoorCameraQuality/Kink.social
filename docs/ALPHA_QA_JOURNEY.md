@@ -1,6 +1,6 @@
 # Alpha QA journey (kink.social social platform)
 
-**Last updated:** 2026-06-17  
+**Last updated:** 2026-06-25  
 **Audience:** Project owner, alpha testers, moderators  
 **Related:** [`ALPHA_SEED_WORLD.md`](./ALPHA_SEED_WORLD.md) · [`VPS_ALPHA_READINESS.md`](./VPS_ALPHA_READINESS.md) · [`QA_TESTER_GUIDE.md`](./QA_TESTER_GUIDE.md) · [`PILOT_READINESS.md`](./PILOT_READINESS.md) · [`FEATURE_REGISTRY.md`](./FEATURE_REGISTRY.md)
 
@@ -37,6 +37,8 @@ You are testing **real product behavior** with honest empty states, privacy rule
 | **Screenshots** | Blur or crop DMs, notifications, and attendee lists before sharing externally. |
 
 **Operator note:** Run the alpha social seed only on environments where it is intended. Never run it against production without explicit operator approval. See seed doc for guards.
+
+**Automated API privacy subset (Phase 4):** `npm run verify:alpha-hardening-privacy` against kink.social — covers only-me leak, undiscoverable profile, block search, private group forum, media proxy. UI/mobile walkthrough in sections 4–5 below remains manual.
 
 **Visitor vs structured tester:** Casual visitors may already view the site. This journey is for **structured QA** — run internally **before actively promoting alpha testing** or asking people to use the product deeply.
 

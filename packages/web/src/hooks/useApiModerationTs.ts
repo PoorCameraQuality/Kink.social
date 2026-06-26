@@ -200,8 +200,28 @@ export function formatMediaMetadataLines(meta: MediaAssetSnapshotMetadata, asset
       if (s.labels.length) lines.push(`  labels: ${s.labels.join(', ')}`)
     }
     if (meta.scannerSummary.quarantineReason) {
-      lines.push(`Quarantine reason: ${meta.scannerSummary.quarantineReason}`)
+      lines.push(`Scanner hold reason: ${meta.scannerSummary.quarantineReason}`)
     }
+  }
+  const pipeline = meta.pipeline as
+    | {
+        scannerSummary?: { quarantineReason?: string | null }
+        storageState?: string
+        moderationDecision?: { reasonCode?: string; reasonSummary?: string }
+      }
+    | undefined
+  const moderationDecision =
+    pipeline?.moderationDecision ??
+    (meta as { moderationDecision?: { reasonCode?: string; reasonSummary?: string } }).moderationDecision
+  if (moderationDecision?.reasonSummary) {
+    lines.push(`Decision (${moderationDecision.reasonCode ?? 'unknown'}): ${moderationDecision.reasonSummary}`)
+  } else if (pipeline?.scannerSummary?.quarantineReason) {
+    lines.push(`Scanner hold reason: ${pipeline.scannerSummary.quarantineReason}`)
+  }
+  if (pipeline?.storageState === 'VALIDATED_PRIVATE') {
+    lines.push(
+      'Alpha note: VALIDATED_PRIVATE + quarantine/ S3 prefix is intentional auth-proxy serving, not a mod block.',
+    )
   }
   return lines
 }

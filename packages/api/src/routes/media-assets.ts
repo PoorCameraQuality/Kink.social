@@ -7,6 +7,7 @@ import {
 } from '@c2k/shared'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
+import { ensureProfileForUserId } from '../lib/ensure-profile.js'
 import {
   createMediaAssetForProfilePhoto,
   getMediaAssetById,
@@ -16,30 +17,37 @@ import {
   MediaAssetNotFoundError,
   MediaAttestationValidationError,
 } from '../lib/media-asset-service.js'
+import {
+  buildMediaModerationDebugReport,
+  deriveMediaModerationDecision,
+} from '../lib/media-moderation-decision.js'
+import { resolveEffectivePublishLane } from '../lib/media-publish-lane.js'
+import { isPlatformModeratorUser } from '../lib/platform-staff.js'
 import { getMediaAssetForViewer, loadViewerAdultContentPref, streamMediaAssetContent } from '../lib/media-asset-viewer.js'
 import {
   assertMediaContentRatingAllowed,
   MediaPolicyBlockedError,
 } from '../lib/media-policy.js'
+import {
+  assertQuarantineStorageKeyOwnedByUser,
+  MediaUploadValidationError,
+} from '../lib/media-pipeline.js'
+import { rateLimitRoute } from '../lib/rate-limit-config.js'
 
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
 }
 
-const createBodySchema = z
-  .object({
-    url: z.string().min(1).max(2048).optional(),
-    storageKey: z.string().min(1).max(2048).optional(),
-    mimeType: z.string().max(128).optional(),
-    sizeBytes: z.number().int().min(0).optional(),
-    originalFilename: z.string().max(512).optional(),
-    ownerType: z.string().min(1).max(32),
-    ownerId: z.string().uuid(),
-    sourceSurface: z.string().min(1).max(64),
-  })
-  .refine((data) => Boolean(data.url?.trim() || data.storageKey?.trim()), {
-    message: 'url or storageKey is required',
-  })
+const createBodySchema = z.object({
+  storageKey: z.string().min(1).max(2048),
+  mimeType: z.string().max(128).optional(),
+  sizeBytes: z.number().int().min(0).optional(),
+  originalFilename: z.string().max(512).optional(),
+  ownerType: z.string().min(1).max(32),
+  /** Ignored when absent; when present must match the signed-in user's profile. */
+  ownerId: z.string().uuid().optional(),
+  sourceSurface: z.string().min(1).max(64),
+})
 
 const attestationBodySchema = z.object({
   contentRating: mediaContentRatingSchema,
@@ -56,7 +64,7 @@ const attestationBodySchema = z.object({
 })
 
 export async function registerMediaAssetRoutes(app: FastifyInstance) {
-  app.post('/api/v1/media/assets', async (req, reply) => {
+  app.post('/api/v1/media/assets', { ...rateLimitRoute('upload') }, async (req, reply) => {
     if (!useDatabase()) {
       return reply.status(503).send({ error: 'Media assets API requires USE_DATABASE=true' })
     }
@@ -78,12 +86,25 @@ export async function registerMediaAssetRoutes(app: FastifyInstance) {
     if (!allowedSurfaces.has(sourceSurface)) {
       return reply.status(400).send({ error: 'Unsupported owner or surface for this endpoint' })
     }
-    const quarantineKey = parsed.data.storageKey ?? parsed.data.url
+
+    const profile = await ensureProfileForUserId(userId)
+    if (parsed.data.ownerId && parsed.data.ownerId !== profile.id) {
+      return reply.status(403).send({ error: 'Forbidden', code: 'profile_owner_mismatch' })
+    }
+
+    try {
+      assertQuarantineStorageKeyOwnedByUser(userId, parsed.data.storageKey)
+    } catch (err) {
+      if (err instanceof MediaUploadValidationError) {
+        return reply.status(400).send({ error: err.message, code: 'invalid_upload_reference' })
+      }
+      throw err
+    }
+
     const mediaAssetId = await createMediaAssetForProfilePhoto({
       userId,
-      profileId: parsed.data.ownerId,
-      quarantineKey: quarantineKey?.startsWith('http') ? undefined : quarantineKey,
-      url: quarantineKey?.startsWith('http') ? quarantineKey : undefined,
+      profileId: profile.id,
+      quarantineKey: parsed.data.storageKey,
       mimeType: parsed.data.mimeType,
       sizeBytes: parsed.data.sizeBytes,
       originalFilename: parsed.data.originalFilename,
@@ -141,6 +162,7 @@ export async function registerMediaAssetRoutes(app: FastifyInstance) {
         promoted: result.promoted,
         storageState: result.storageState,
         contentUrl: result.contentUrl,
+        moderationDecision: result.moderationDecision,
         mediaAsset: viewed,
         asset: viewed,
       })
@@ -188,5 +210,82 @@ export async function registerMediaAssetRoutes(app: FastifyInstance) {
       return reply.status(404).send({ error: 'Not found' })
     }
     return reply.type(streamed.contentType).send(streamed.body)
+  })
+
+  app.get('/api/v1/media/assets/:mediaAssetId/moderation-debug', async (req, reply) => {
+    if (!useDatabase()) {
+      return reply.status(503).send({ error: 'Media assets API requires USE_DATABASE=true' })
+    }
+    const viewer = resolveViewerFromRequest(req)
+    const userId = getViewerUserId(viewer.payload)
+    if (!userId) {
+      return reply.status(401).send({ error: 'Unauthorized' })
+    }
+    const { mediaAssetId } = req.params as { mediaAssetId: string }
+    const asset = await getMediaAssetById(mediaAssetId)
+    if (!asset) {
+      return reply.status(404).send({ error: 'Media asset not found' })
+    }
+    const isOwner = asset.uploaderUserId === userId
+    const isStaff = await isPlatformModeratorUser(userId)
+    if (!isOwner && !isStaff) {
+      return reply.status(403).send({ error: 'Forbidden' })
+    }
+
+    const { scannerRecords, scannerSummary } = await buildMediaModerationDebugReport(mediaAssetId)
+    const lane =
+      asset.contentRating && asset.depictedPeople
+        ? resolveEffectivePublishLane({
+            contentRating: asset.contentRating as Parameters<typeof resolveEffectivePublishLane>[0]['contentRating'],
+            depictedPeople: asset.depictedPeople as Parameters<typeof resolveEffectivePublishLane>[0]['depictedPeople'],
+            scanStatus: asset.scanStatus as Parameters<typeof resolveEffectivePublishLane>[0]['scanStatus'],
+            attestation: {
+              allDepictedAreAdults:
+                asset.uploaderConfirmedDepictedAdults18 && asset.uploaderConfirmedNoMinors,
+              iAmDepictedOrAuthorizedUploader:
+                asset.uploaderConfirmed18 &&
+                asset.uploaderConfirmedRightToUpload &&
+                asset.uploaderConfirmedConsent,
+              noHiddenCameraOrNonConsensualCapture:
+                asset.uploaderConfirmedNoHiddenCamera && asset.uploaderConfirmedNoNcii,
+              contentRatingAccurate: Boolean(asset.contentRating),
+            },
+          })
+        : null
+
+    const moderationDecision = deriveMediaModerationDecision({
+      asset,
+      publishLane: lane,
+      scannerResults: scannerRecords,
+    })
+
+    return reply.send({
+      mediaAssetId,
+      db: {
+        storageState: asset.storageState,
+        uploadStatus: asset.uploadStatus,
+        scanStatus: asset.scanStatus,
+        visibility: asset.visibility,
+        contentRating: asset.contentRating,
+        sourceSurface: asset.sourceSurface,
+        mimeType: asset.mimeType,
+        sizeBytes: asset.sizeBytes,
+        quarantineStorageKey: isStaff ? asset.quarantineStorageKey : undefined,
+        publicStorageKey: isStaff ? asset.publicStorageKey : undefined,
+        moderationCaseId: asset.moderationCaseId,
+        createdAt: asset.createdAt,
+        attestedAt: asset.attestedAt,
+      },
+      publishLane: lane,
+      moderationDecision,
+      scannerSummary,
+      scannerResults: scannerRecords.map((r) => ({
+        scannerName: r.scannerName,
+        status: r.status,
+        labels: r.labels,
+        userFacingSummary: r.userFacingSummary,
+        simulated: r.simulated,
+      })),
+    })
   })
 }

@@ -200,11 +200,7 @@ export async function deleteObject(
   key: string,
   bucket = defaultBucket(),
 ): Promise<void> {
-  try {
-    await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
-  } catch {
-    // Best-effort cleanup
-  }
+  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
 }
 
 /** Promote quarantined object to public media prefix (dev bucket public-read policy applies). */

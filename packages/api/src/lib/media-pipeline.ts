@@ -32,6 +32,7 @@ import {
   type AllowedImageMime,
 } from './media-upload-validate.js'
 import { explicitMediaAllowsPublicUrl } from './media-visibility.js'
+import { syncProfilePhotoServingUrlsForAsset } from './sync-profile-media-serving-urls.js'
 import type { MediaContentRating, MediaVisibility } from '@c2k/shared'
 
 export class MediaUploadValidationError extends Error {
@@ -209,6 +210,14 @@ export function resolveMediaClientUrl(asset: MediaAsset): string {
   return mediaContentProxyPath(asset.id)
 }
 
+/** Ensure a quarantine key came from this user's `/api/upload` staging path. */
+export function assertQuarantineStorageKeyOwnedByUser(userId: string, storageKey: string): void {
+  const expectedPrefix = `quarantine/${userId}/`
+  if (!storageKey.startsWith(expectedPrefix)) {
+    throw new MediaUploadValidationError('Invalid upload reference')
+  }
+}
+
 /** Promote a quarantined scope-branding upload (group/org banner, logo, share) to a public URL. */
 export async function promoteQuarantineToScopeBrandingUrl(params: {
   userId: string
@@ -216,10 +225,7 @@ export async function promoteQuarantineToScopeBrandingUrl(params: {
   scopePath: string
   assetName: 'banner' | 'logo' | 'share' | 'hero' | 'inline'
 }): Promise<string> {
-  const expectedPrefix = `quarantine/${params.userId}/`
-  if (!params.quarantineKey.startsWith(expectedPrefix)) {
-    throw new MediaUploadValidationError('Invalid upload reference')
-  }
+  assertQuarantineStorageKeyOwnedByUser(params.userId, params.quarantineKey)
   const extMatch = params.quarantineKey.match(/(\.[a-z0-9]+)$/i)
   const ext = extMatch?.[1] ?? '.jpg'
   const objectId = randomUUID()
@@ -288,22 +294,6 @@ export async function promoteMediaAssetToPublic(params: {
   const visibility = asset.visibility as MediaVisibility | null
   const now = new Date()
 
-  async function syncProfilePhotoServingUrls(updated: MediaAsset) {
-    const servingUrl = resolveMediaClientUrl(updated)
-    const photoRows = await db
-      .update(schema.profilePhotos)
-      .set({ url: servingUrl })
-      .where(eq(schema.profilePhotos.mediaAssetId, params.mediaAssetId))
-      .returning({ profileId: schema.profilePhotos.profileId, sortOrder: schema.profilePhotos.sortOrder })
-    const primary = photoRows.find((row) => row.sortOrder === 0) ?? photoRows[0]
-    if (primary?.profileId) {
-      await db
-        .update(schema.profiles)
-        .set({ avatarUrl: servingUrl, updatedAt: new Date() })
-        .where(eq(schema.profiles.id, primary.profileId))
-    }
-  }
-
   /** Restricted visibility: scan-approved but stay in quarantine; serve only via auth proxy. */
   if (!visibilityAllowsAnonymousDirectUrl(visibility)) {
     const [updated] = await db
@@ -316,7 +306,7 @@ export async function promoteMediaAssetToPublic(params: {
       })
       .where(eq(schema.mediaAssets.id, params.mediaAssetId))
       .returning()
-    if (updated) await syncProfilePhotoServingUrls(updated)
+    if (updated) await syncProfilePhotoServingUrlsForAsset(params.mediaAssetId, updated)
     return updated ?? null
   }
 
@@ -357,7 +347,7 @@ export async function promoteMediaAssetToPublic(params: {
     .where(eq(schema.mediaAssets.id, params.mediaAssetId))
     .returning()
 
-  if (updated) await syncProfilePhotoServingUrls(updated)
+  if (updated) await syncProfilePhotoServingUrlsForAsset(params.mediaAssetId, updated)
 
   return updated ?? null
 }
@@ -368,6 +358,12 @@ export type FinalizeAfterAttestationResult = {
   storageState: string
   promoted: boolean
   scannerResults: ScannerResultRecord[]
+  finalizeBranch:
+    | 'lane_red_rejected'
+    | 'scan_error_pending'
+    | 'scan_flagged_quarantined'
+    | 'green_auto_promoted'
+    | 'yellow_or_other_quarantined'
 }
 
 /** Run scan + promotion after T&S-2 attestation lane decision. */
@@ -404,6 +400,7 @@ export async function finalizeMediaAfterAttestation(params: {
       storageState: MEDIA_STORAGE_STATES.rejectedPrivate,
       promoted: false,
       scannerResults: [],
+      finalizeBranch: 'lane_red_rejected',
     }
   }
 
@@ -426,6 +423,7 @@ export async function finalizeMediaAfterAttestation(params: {
       storageState: MEDIA_STORAGE_STATES.quarantinedPrivate,
       promoted: false,
       scannerResults: scanRun.scannerResults,
+      finalizeBranch: 'scan_error_pending',
     }
   }
 
@@ -440,7 +438,14 @@ export async function finalizeMediaAfterAttestation(params: {
         updatedAt: new Date(),
       })
       .where(eq(schema.mediaAssets.id, params.mediaAssetId))
-    return { uploadStatus, scanStatus, storageState, promoted: false, scannerResults: scanRun.scannerResults }
+    return {
+      uploadStatus,
+      scanStatus,
+      storageState,
+      promoted: false,
+      scannerResults: scanRun.scannerResults,
+      finalizeBranch: 'scan_flagged_quarantined',
+    }
   }
 
   if (
@@ -466,6 +471,7 @@ export async function finalizeMediaAfterAttestation(params: {
       storageState: promoted?.storageState ?? MEDIA_STORAGE_STATES.approvedPublic,
       promoted: Boolean(promoted),
       scannerResults: scanRun.scannerResults,
+      finalizeBranch: 'green_auto_promoted',
     }
   }
 
@@ -478,7 +484,14 @@ export async function finalizeMediaAfterAttestation(params: {
     })
     .where(eq(schema.mediaAssets.id, params.mediaAssetId))
 
-  return { uploadStatus, scanStatus, storageState, promoted: false, scannerResults: scanRun.scannerResults }
+  return {
+    uploadStatus,
+    scanStatus,
+    storageState,
+    promoted: false,
+    scannerResults: scanRun.scannerResults,
+    finalizeBranch: 'yellow_or_other_quarantined',
+  }
 }
 
 export function canExposePublicUrl(asset: MediaAsset): boolean {

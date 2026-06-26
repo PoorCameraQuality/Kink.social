@@ -16,6 +16,11 @@ www.{$DOMAIN:localhost} {
         Permissions-Policy "camera=(), microphone=(), geolocation=()"
     }
 
+    handle /api/public-seed/* {
+        uri replace /api/public-seed /seed
+        reverse_proxy web:80
+    }
+
     handle /api/* {
         reverse_proxy api:3001
     }

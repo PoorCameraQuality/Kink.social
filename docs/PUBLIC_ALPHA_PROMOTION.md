@@ -127,23 +127,62 @@ If Playwright cannot attach files against production cookies, run this manually:
 
 **Per-row remediation (operator only):**
 
-1. On VPS: `bash scripts/vps/remote-audit-restricted-public-media.sh` — review JSON (`suspiciousRestrictedPublicPathCount`, uploader usernames, asset IDs). Do not publish raw output publicly.
-2. For each row: confirm uploader, verify separate quarantine/private object exists (`remediate-staff-restricted-public-media.ts` pattern; dry-run first with `APPLY=false`).
-3. Update `media_assets`: `storage_state = VALIDATED_PRIVATE`, `public_storage_key = null`, `storage_key` → private key.
-4. Delete public `media/` MinIO object only after private copy verified.
+1. On VPS (read-only audit):
+   ```bash
+   bash scripts/vps/remote-audit-restricted-public-media.sh
+   # or locally with prod DATABASE_URL:
+   USE_DATABASE=true npm run audit:restricted-public-media -w @c2k/api
+   ```
+   Review JSON (`suspiciousRestrictedPublicPathCount`, uploader usernames, asset IDs). Do not publish raw output publicly.
+
+2. Dry-run remediation (all non-`alpha_*` uploaders by default):
+   ```bash
+   USE_DATABASE=true npm run remediate:restricted-public-media -w @c2k/api
+   ```
+   Per user: `UPLOADER_USERNAME=someuser USE_DATABASE=true npm run remediate:restricted-public-media -w @c2k/api`
+
+3. Apply (after dry-run review): `USE_DATABASE=true APPLY=true npm run remediate:restricted-public-media -w @c2k/api`
+
+4. Legacy staff-only script still available: `USE_DATABASE=true tsx packages/api/scripts/remediate-staff-restricted-public-media.ts`
+
 5. Verify: anonymous GET on old direct URL → **404**; logged-in proxy → **200** when visibility allows.
+
+**Engineering gate (upload hardening):** `npm run verify:alpha-hardening-media` (unit always). With Docker Postgres: `VERIFY_ALPHA_HARDENING_DB=1 npm run verify:alpha-hardening-media`.
+
+**Operator orchestrator (Phases 1–3 automated + 4–6 checklist):**
+
+```bash
+npm run verify:alpha-hardening-operator          # unit + prod HTTP smoke (default https://kink.social)
+npm run verify:alpha-hardening-prod              # HTTP only: health/mail/mod/upload guards
+VERIFY_ALPHA_HARDENING_DB=1 npm run verify:alpha-hardening-operator   # + legacy media audit (local/VPS DB)
+BRAX_ADMIN_PASSWORD=... REQUIRE_BRAX_ADMIN_SMOKE=1 npm run verify:alpha-hardening-prod   # optional owner/mod login
+RUN_LEGAL_ALPHA_SMOKE=1 npm run verify:alpha-hardening-operator       # legal smoke (Brax admin checks optional)
+```
+
+CI runs `verify:alpha-hardening-media` on every PR (`.github/workflows/ci.yml`).
+
+**Full operator gate (Phases 1–6 automated):**
+
+```bash
+npm run verify:alpha-hardening-operator
+RUN_LEGAL_ALPHA_SMOKE=1 npm run verify:alpha-hardening-operator   # + legal routes (Brax optional)
+```
+
+Individual phases: `verify:alpha-hardening-prod`, `verify:alpha-hardening-privacy`, `verify:alpha-hardening-smtp-prod`, `verify:alpha-hardening-pilot-gate`.
 
 ---
 
-## Controlled alpha readiness summary (2026-06-17)
+## Controlled alpha readiness summary (2026-06-25)
 
 | Gate | Status |
 |------|--------|
 | Ready for **controlled** public alpha promotion | **Yes** |
-| Ready for **broad** public promotion | **No** — legacy media review pending |
+| Ready for **broad** public promotion | **Closer** — legacy `media/` leak remediated on prod (2026-06-25); privacy QA + pilot org still open |
 | Ready for **full public launch** | **No** |
 
-**Known limitations:** Demo/seed content, feed upload quarantine messaging, 26 legacy profile photos with possible direct-link exposure, no payments/app-store flows, Node 20 required for full local test suite.
+**Known limitations:** Demo/seed content, feed upload quarantine messaging, no payments/app-store flows, Node 20 required for full local test suite. Legacy imported profile photos: DB + MinIO remediated; direct `/media/...` URLs on kink.social now fall through to SPA (not raw object bytes).
+
+**Phase 2 prod remediation (2026-06-25):** 26 `LOGGED_IN` rows moved to `VALIDATED_PRIVATE`; MinIO `media/` objects purged. Re-audit: `suspiciousRestrictedPublicPathCount: 0`. Operator script: `SSH_PASS='...' APPLY=true npm run remediate:vps:legacy-media`.
 
 **Feedback path:** `/support` (alpha feedback category) and Home activation card links during first session.
 

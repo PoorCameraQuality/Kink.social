@@ -38,6 +38,13 @@
     "check:dc-classes": "npm run check:dc-classes -w web",
     "test": "npm run test -w @c2k/api",
     "verify:prelaunch": "node scripts/verify-prelaunch.mjs",
+    "verify:alpha-hardening-media": "node scripts/verify-alpha-hardening-media.mjs",
+    "verify:alpha-hardening-operator": "node scripts/verify-alpha-hardening-operator.mjs",
+    "verify:alpha-hardening-prod": "node scripts/smoke-alpha-hardening-prod.mjs",
+    "verify:alpha-hardening-privacy": "node scripts/smoke-alpha-hardening-privacy.mjs",
+    "verify:alpha-hardening-smtp-prod": "node scripts/smoke-alpha-hardening-smtp-prod.mjs",
+    "verify:alpha-hardening-pilot-gate": "node scripts/smoke-alpha-hardening-pilot-gate.mjs",
+    "remediate:vps:legacy-media": "node scripts/vps/run-alpha-hardening-media-remediation.mjs",
     "verify:alpha": "node scripts/verify-alpha-local.mjs",
     "verify:alpha:auto": "node scripts/verify-alpha-auto.mjs",
     "verify:alpha:auto:local": "node scripts/verify-alpha-auto-local.mjs",
@@ -67,6 +74,7 @@
     "concurrently": "^9.1.2",
     "drizzle-orm": "^0.40.0",
     "esbuild": "0.27.4",
+    "ssh2": "^1.17.0",
     "typescript": "^5.9.2"
   },
   "engines": {

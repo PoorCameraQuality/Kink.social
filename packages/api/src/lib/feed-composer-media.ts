@@ -22,7 +22,7 @@ import {
   shapeMediaItemPreview,
 } from './media-social-service.js'
 import { ensureProfileForUserId } from './ensure-profile.js'
-import { mediaContentProxyPath } from './media-pipeline.js'
+import { mediaContentProxyPath, assertQuarantineStorageKeyOwnedByUser, MediaUploadValidationError } from './media-pipeline.js'
 import {
   assertPersonalPhotoQuotaRoom,
   PersonalPhotoQuotaError,
@@ -80,6 +80,15 @@ export async function prepareFeedComposerImageAttachment(
   input: PrepareFeedComposerImageInput,
 ): Promise<PrepareFeedComposerImageResult> {
   await assertPersonalPhotoQuotaRoom(input.userId, 1)
+
+  try {
+    assertQuarantineStorageKeyOwnedByUser(input.userId, input.quarantineKey)
+  } catch (err) {
+    if (err instanceof MediaUploadValidationError) {
+      throw new FeedComposerMediaError(err.message, 'invalid_upload_reference')
+    }
+    throw err
+  }
 
   const profile = await ensureProfileForUserId(input.userId)
   await ensureDefaultAlbumsForUser(input.userId)

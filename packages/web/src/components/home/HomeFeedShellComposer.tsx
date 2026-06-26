@@ -57,7 +57,7 @@ export default function HomeFeedShellComposer({
 
   const collapsed = (shell === 'mobile' || shell === 'desktop') && !open
 
-  useFeedComposerEngagement(open)
+  useFeedComposerEngagement(shell === 'mobile' || open)
 
   if (collapsed) {
     return (

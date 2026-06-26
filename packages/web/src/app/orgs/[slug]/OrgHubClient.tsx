@@ -21,6 +21,7 @@ import ForumThreadReplyComposer from '@/components/forum/ForumThreadReplyCompose
 import ReportAction from '@/components/moderation/ReportAction'
 import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
+import { resolvePublicSeedDisplayUrl } from '@/lib/public-seed-url'
 import { orgModeratorUserIds } from '@/lib/forum/forumPostDisplay'
 import { useTabFromUrl } from '@/hooks/useTabFromUrl'
 import {
@@ -38,15 +39,8 @@ import type { CommunityPageModule } from '@/types/org-community-modules'
 
 const ORG_TABS = ['Overview', 'Calendar', 'Forums', 'Chat', 'About', 'FAQ', 'Subgroups', 'Documents'] as const
 
-/** DB may still hold `/seed/paf/*` paths; those files are not exposed by Vite - serve via `/api/public-seed/paf/*` instead. */
 function orgMediaDisplayUrl(url: string | null | undefined): string | undefined {
-  if (!url) return undefined
-  if (url.startsWith('/seed/paf/')) {
-    const tail = url.slice('/seed/paf/'.length).split('/').pop() ?? ''
-    if (!/^[a-zA-Z0-9._-]+$/.test(tail)) return url
-    return `/api/public-seed/paf/${tail}`
-  }
-  return url
+  return resolvePublicSeedDisplayUrl(url)
 }
 
 /** Stable per-username hue for Discord-style name colors and avatars. */

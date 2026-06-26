@@ -21,6 +21,12 @@ import {
 
   mediaAssetToPhotoDto,
 
+  assertMediaAssetUploader,
+
+  MediaAssetAccessError,
+
+  MediaAssetNotFoundError,
+
 } from '../lib/media-asset-service.js'
 
 import {
@@ -33,9 +39,15 @@ import {
   getPersonalPhotoQuota,
   PersonalPhotoQuotaError,
 } from '../lib/personal-photo-quota.js'
-import { mediaContentProxyPath, resolveMediaClientUrl } from '../lib/media-pipeline.js'
+import {
+  assertQuarantineStorageKeyOwnedByUser,
+  mediaContentProxyPath,
+  MediaUploadValidationError,
+  resolveMediaClientUrl,
+} from '../lib/media-pipeline.js'
 import { deliverProfileHeroUrl } from '../lib/image-delivery.js'
 import { isBrowserReachablePublicUrl } from '../lib/s3-upload.js'
+import { rateLimitRoute } from '../lib/rate-limit-config.js'
 
 import type { MediaAsset } from '../db/schema.js'
 
@@ -230,7 +242,6 @@ const profilePhotoDisplaySettingsBody = z.object({
 
 const createBodySchema = z
   .object({
-    url: z.string().min(1).max(2048).optional(),
     quarantineKey: z.string().min(1).max(2048).optional(),
     caption: z.string().max(500).optional().nullable(),
     displaySettings: profilePhotoDisplaySettingsBody.optional().nullable(),
@@ -244,8 +255,8 @@ const createBodySchema = z
     imageHeight: z.number().int().min(0).optional(),
     storageBucket: z.string().max(128).optional(),
   })
-  .refine((data) => Boolean(data.url?.trim() || data.quarantineKey?.trim() || data.mediaAssetId), {
-    message: 'url, quarantineKey, or mediaAssetId is required',
+  .refine((data) => Boolean(data.quarantineKey?.trim() || data.mediaAssetId), {
+    message: 'quarantineKey or mediaAssetId is required',
   })
 
 
@@ -291,7 +302,7 @@ export async function registerProfilePhotosRoutes(app: FastifyInstance) {
 
 
 
-  app.post('/api/profile/me/photos', async (req, reply) => {
+  app.post('/api/profile/me/photos', { ...rateLimitRoute('upload') }, async (req, reply) => {
 
     if (!useDatabase()) {
 
@@ -323,6 +334,29 @@ export async function registerProfilePhotosRoutes(app: FastifyInstance) {
 
     const sortOrder = parsed.data.sortOrder ?? existing.length
 
+    if (parsed.data.mediaAssetId) {
+      try {
+        await assertMediaAssetUploader(userId, parsed.data.mediaAssetId)
+      } catch (err) {
+        if (err instanceof MediaAssetNotFoundError) {
+          return reply.status(404).send({ error: 'Media asset not found' })
+        }
+        if (err instanceof MediaAssetAccessError) {
+          return reply.status(403).send({ error: 'Forbidden', code: 'media_asset_forbidden' })
+        }
+        throw err
+      }
+    } else {
+      try {
+        assertQuarantineStorageKeyOwnedByUser(userId, parsed.data.quarantineKey!)
+      } catch (err) {
+        if (err instanceof MediaUploadValidationError) {
+          return reply.status(400).send({ error: err.message, code: 'invalid_upload_reference' })
+        }
+        throw err
+      }
+    }
+
     try {
       if (parsed.data.mediaAssetId) {
         await assertPersonalPhotoQuotaForAsset(userId, parsed.data.mediaAssetId)
@@ -339,13 +373,10 @@ export async function registerProfilePhotosRoutes(app: FastifyInstance) {
     let mediaAssetId = parsed.data.mediaAssetId ?? null
 
     if (!mediaAssetId) {
-      const quarantineKey = parsed.data.quarantineKey
-      const legacyUrl = parsed.data.url
       mediaAssetId = await createMediaAssetForProfilePhoto({
         userId,
         profileId: prof.id,
-        quarantineKey: quarantineKey ?? undefined,
-        url: legacyUrl ?? undefined,
+        quarantineKey: parsed.data.quarantineKey,
         mimeType: parsed.data.mimeType,
         sizeBytes: parsed.data.sizeBytes,
         originalFilename: parsed.data.originalFilename,
@@ -372,7 +403,7 @@ export async function registerProfilePhotosRoutes(app: FastifyInstance) {
 
     const photoUrl =
       mediaAssetId ? profilePhotoServingUrl(mediaAssetId, publishedMedia ?? null)
-      : parsed.data.url ?? ''
+      : ''
 
 
 

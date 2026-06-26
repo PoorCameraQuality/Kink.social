@@ -82,7 +82,7 @@ describe('media social layer', { skip: !runDbTests }, () => {
           caption: 'Test upload',
           items: [
             {
-              quarantineKey: `uploads/${ownerId}/test-${tag}.jpg`,
+              quarantineKey: `quarantine/${ownerId}/test-${tag}.jpg`,
               mediaKind: 'image',
               mimeType: 'image/jpeg',
               sizeBytes: 1024,
@@ -108,7 +108,7 @@ describe('media social layer', { skip: !runDbTests }, () => {
         payload: {
           items: [
             {
-              quarantineKey: `uploads/${ownerId}/private-${tag}.jpg`,
+              quarantineKey: `quarantine/${ownerId}/private-${tag}.jpg`,
               mediaKind: 'image',
               mimeType: 'image/jpeg',
               sizeBytes: 512,

@@ -16,6 +16,7 @@ import {
   SCANNER_NAMES,
   SCAN_STATUSES,
 } from '@c2k/shared'
+import { MEDIA_MODERATION_REASON_CODES } from '../lib/media-moderation-decision.js'
 import { db, schema } from '../db/index.js'
 import {
   buildCookieApp,
@@ -116,7 +117,11 @@ describe('T&S-4A scanner pipeline DB', { skip: !runDbTests }, () => {
     }
   }
 
-  async function attestAsset(id: string, extraEnv?: Record<string, string>) {
+  async function attestAsset(
+    id: string,
+    extraEnv?: Record<string, string>,
+    payload?: Record<string, unknown>,
+  ) {
     const saved: Record<string, string | undefined> = {}
     if (extraEnv) {
       for (const [k, v] of Object.entries(extraEnv)) {
@@ -138,10 +143,15 @@ describe('T&S-4A scanner pipeline DB', { skip: !runDbTests }, () => {
           depictedPeople: 'ONLY_ME',
           visibility: 'LOGGED_IN',
           ...fullAttestation,
+          ...payload,
         },
       })
       assert.equal(res.statusCode, 200, res.body)
-      return res.json() as { uploadStatus: string; promoted?: boolean }
+      return res.json() as {
+        uploadStatus: string
+        promoted?: boolean
+        moderationDecision?: { reasonCode: string; blockedFromMemberSurfaces: boolean }
+      }
     } finally {
       for (const [k, v] of Object.entries(saved)) {
         if (v === undefined) delete process.env[k]
@@ -150,6 +160,32 @@ describe('T&S-4A scanner pipeline DB', { skip: !runDbTests }, () => {
       await app.close()
     }
   }
+
+  test('SAFE_PUBLIC profile gallery auto-approves without moderation quarantine', async () => {
+    const id = await createAsset()
+    const body = await attestAsset(id, undefined, {
+      contentRating: 'SAFE_PUBLIC',
+      depictedPeople: 'ONLY_ME',
+      visibility: 'LOGGED_IN',
+    })
+
+    assert.equal(body.uploadStatus, MEDIA_UPLOAD_STATUSES.autoApproved)
+    assert.equal(body.moderationDecision?.reasonCode, MEDIA_MODERATION_REASON_CODES.alphaValidatedPrivate)
+    assert.equal(body.moderationDecision?.blockedFromMemberSurfaces, false)
+
+    const [asset] = await db
+      .select()
+      .from(schema.mediaAssets)
+      .where(eq(schema.mediaAssets.id, id))
+    assert.equal(asset!.scanStatus, SCAN_STATUSES.passed)
+    assert.equal(asset!.uploadStatus, MEDIA_UPLOAD_STATUSES.autoApproved)
+    assert.equal(asset!.storageState, MEDIA_STORAGE_STATES.validatedPrivate)
+    assert.notEqual(asset!.uploadStatus, MEDIA_UPLOAD_STATUSES.quarantined)
+    assert.notEqual(asset!.uploadStatus, MEDIA_UPLOAD_STATUSES.pendingScan)
+
+    await db.delete(schema.mediaScannerResults).where(eq(schema.mediaScannerResults.mediaAssetId, id))
+    await db.delete(schema.mediaAssets).where(eq(schema.mediaAssets.id, id))
+  })
 
   test('GREEN attestation stores scanner results and promotes', async () => {
     assetId = await createAsset()
