@@ -1,10 +1,11 @@
-# Deploy to VPS: set secrets VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_DEPLOY_PATH
-# VPS must have Node 20+ and npm for db:migrate-prod (runs on host before compose).
+# Deploy to VPS via tarball extract (prod tree at /opt/c2k is not always a git clone).
+# Required secret: SSH_PASS (root password). Host/user/path are fixed for kink.social prod.
 name: Deploy
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -12,32 +13,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy over SSH
+      - name: Create deploy tarball
+        run: |
+          tar -czf deploy.tgz --exclude-from=.deployignore .
+
+      - name: Upload tarball to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 2.25.196.84
+          username: root
+          password: ${{ secrets.SSH_PASS }}
+          source: deploy.tgz
+          target: /tmp
+
+      - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: 2.25.196.84
+          username: root
+          password: ${{ secrets.SSH_PASS }}
+          command_timeout: 30m
           script: |
-            set -e
-            cd "${{ secrets.VPS_DEPLOY_PATH }}"
-            git pull origin main
+            set -euo pipefail
+            REMOTE=/opt/c2k
+            cd "$REMOTE"
+            stamp=$(date -u +%Y%m%dT%H%M%SZ)
             if [ -f .env.production ]; then
-              set -a
-              . ./.env.production
-              set +a
-            else
-              echo "Fatal: .env.production missing on VPS"
-              exit 1
+              cp -a .env.production ".env.production.bak-${stamp}"
             fi
-            export NODE_ENV=production
-            export USE_DATABASE=true
-            # Host migrations: Postgres is port-mapped to loopback on VPS overlay.
-            export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5432/${POSTGRES_DB}"
-            echo "Running production migrations (no seed)..."
-            npm ci
-            node scripts/migrate-prod.mjs
-            echo "Starting containers (VPS overlay: MinIO, ClamAV, mailserver)..."
-            docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.prod.vps.yml up -d --build
-            bash scripts/vps/fix-minio-public-read.sh
+            COMPOSE="docker compose -f docker-compose.prod.yml -f docker-compose.prod.vps.yml --env-file .env.production"
+            users_before=$($COMPOSE exec -T postgres psql -U c2k -d c2k -t -c "SELECT count(*) FROM users;" 2>/dev/null | tr -d ' ' || echo 0)
+            echo "users_before=${users_before}"
+            tar -xzf /tmp/deploy.tgz -C "$REMOTE"
+            rm -f /tmp/deploy.tgz
+            bash scripts/vps/remote-deploy-steps.sh
+            users_after=$($COMPOSE exec -T postgres psql -U c2k -d c2k -t -c "SELECT count(*) FROM users;" | tr -d ' ')
+            echo "users_after=${users_after}"
+            curl -sf https://kink.social/api/health/ready
             echo "Deploy complete."
