@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import EckePublishPanel from '@/components/ecke/EckePublishPanel'
 import type { EckePreviewData } from '@/components/ecke/EckePublishPreviewDrawer'
+import { ECKE_PANEL_ACCESS_MESSAGES, ECKE_PUBLISH_RESTRICTED_MESSAGES } from '@/components/ecke/ecke-publish-copy'
 
 type Props = {
   presenterUserId: string
@@ -14,19 +15,31 @@ type StatusResponse = {
   eckePublicUrl?: string | null
   eckePublicUrlKnown?: boolean
   staleNotice?: string | null
+  actions?: EckePreviewData['actions']
 }
 
 export default function PresenterEckePanel({ presenterUserId }: Props) {
   const [statusData, setStatusData] = useState<StatusResponse | null>(null)
+  const [accessError, setAccessError] = useState<string | null>(null)
 
   const loadStatus = useCallback(async () => {
+    setAccessError(null)
     const params = new URLSearchParams({
       sourceKind: 'presenter_profile',
       sourceId: presenterUserId,
     })
     const r = await fetch(`/api/v1/ecke-publish/status?${params.toString()}`, { credentials: 'include' })
+    if (r.status === 403) {
+      setStatusData(null)
+      setAccessError(
+        ECKE_PANEL_ACCESS_MESSAGES.presenter_profile ??
+          'Only the presenter owner can publish this presenter profile to ECKE.',
+      )
+      return
+    }
     if (!r.ok) {
       setStatusData(null)
+      setAccessError('Could not load ECKE publish status.')
       return
     }
     setStatusData((await r.json()) as StatusResponse)
@@ -59,6 +72,16 @@ export default function PresenterEckePanel({ presenterUserId }: Props) {
     [],
   )
 
+  if (accessError) {
+    return (
+      <div className="rounded-xl border border-dc-border bg-dc-elevated-muted p-6 text-center">
+        <p className="text-dc-text-muted">{accessError}</p>
+      </div>
+    )
+  }
+
+  const canPublish = statusData?.actions?.publish ?? false
+
   return (
     <EckePublishPanel
       title="East Coast Kink Events"
@@ -71,7 +94,10 @@ export default function PresenterEckePanel({ presenterUserId }: Props) {
       staleNotice={statusData?.staleNotice}
       eckePublicUrl={statusData?.eckePublicUrl}
       eckePublicUrlKnown={statusData?.eckePublicUrlKnown}
-      writeEnabled
+      writeEnabled={canPublish}
+      publishRestrictedMessage={
+        !canPublish ? ECKE_PUBLISH_RESTRICTED_MESSAGES.presenter_profile : undefined
+      }
       writeKind="presenter_profile"
       onLoadPreview={loadPreview}
       onPublish={(sourceKind, sourceId) => runWriteAction('publish', sourceKind, sourceId)}

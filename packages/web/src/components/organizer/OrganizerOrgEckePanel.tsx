@@ -78,7 +78,7 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
       if (!r.ok) {
         setLoadError(
           r.status === 403 ?
-            'You need moderator access to view ECKE publish.'
+            'Organization moderator access is required to manage ECKE publish for this organization.'
           : 'Could not load ECKE publish overview.',
         )
         setData(null)
@@ -155,7 +155,8 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
         <p className="text-xs uppercase tracking-wide text-dc-accent">East Coast Kink Events</p>
         <h2 className="text-2xl font-semibold text-dc-text">ECKE Publish</h2>
         <p className="max-w-2xl text-sm text-dc-text-muted">
-          Preview org-linked education articles and featured vendor profiles for {data.organizationName}.{' '}
+          Manage what this organization publishes to East Coast Kink Events. Preview public org listings, dungeon or
+          venue listings, education, featured vendors, and publish history before anything goes live.{' '}
           <span className="text-amber-200/90">{data.passNotice}</span>
         </p>
         <p className="text-xs text-dc-text-muted">

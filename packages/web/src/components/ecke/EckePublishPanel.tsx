@@ -2,6 +2,7 @@ import { useState } from 'react'
 import EckePublishPreviewDrawer, { type EckePreviewData } from '@/components/ecke/EckePublishPreviewDrawer'
 import EckePublishStatusBadge from '@/components/ecke/EckePublishStatusBadge'
 import EckePublishOmittedFieldsList from '@/components/ecke/EckePublishOmittedFieldsList'
+import { publishWarningFor, unpublishWarningFor } from '@/components/ecke/ecke-publish-copy'
 
 export type EckePublishPanelActions = {
   preview: boolean
@@ -246,29 +247,8 @@ export default function EckePublishPanel({
         {confirmAction ?
           <div className="mt-4 rounded-lg border border-dc-border bg-dc-elevated-muted/60 p-3 text-sm text-dc-text-muted">
             {confirmAction === 'publish' ?
-              <>
-                {writeKind === 'event_listing' ?
-                  <>
-                    This will create or update a public event listing on East Coast Kink Events. Only the public-safe
-                    fields shown in the preview will be sent. RSVP lists, attendee names, private addresses, and staff
-                    notes are never sent.
-                  </>
-                : <>
-                    This will create or update a public listing on East Coast Kink Events. Only the public-safe fields
-                    shown in the preview will be sent. Member lists, hidden membership settings, private addresses, staff
-                    notes, moderation data, and private messages are never sent.
-                  </>
-                }
-              </>
-            : writeKind === 'event_listing' ?
-              <>
-                This will remove or hide the public ECKE event listing. It will not delete the event on kink.social.
-              </>
-            : <>
-                This will remove or hide the public ECKE listing for this group. It will not delete the group on
-                kink.social.
-              </>
-            }
+              publishWarningFor(writeKind)
+            : unpublishWarningFor(writeKind)}
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"

@@ -114,14 +114,27 @@ export default function EckePublishPreviewDrawer({ open, title, preview, onClose
             </p>
           : null}
 
-          <details className="rounded-lg border border-dc-border bg-dc-elevated-muted/50">
-            <summary className="cursor-pointer px-3 py-2 text-sm font-medium text-dc-text-muted hover:text-dc-text">
-              Developer: raw JSON payload
-            </summary>
-            <pre className="max-h-64 overflow-auto border-t border-dc-border px-3 py-2 text-xs text-dc-text-muted">
-              {JSON.stringify(preview.payload, null, 2)}
-            </pre>
-          </details>
+          {preview.eckeSurfacesAffected.length ?
+            <section>
+              <h3 className="text-sm font-semibold text-dc-text">ECKE surfaces affected</h3>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-dc-text-muted">
+                {preview.eckeSurfacesAffected.map((surface) => (
+                  <li key={surface}>{surface}</li>
+                ))}
+              </ul>
+            </section>
+          : null}
+
+          {import.meta.env.DEV ?
+            <details className="rounded-lg border border-dc-border bg-dc-elevated-muted/50">
+              <summary className="cursor-pointer px-3 py-2 text-sm font-medium text-dc-text-muted hover:text-dc-text">
+                Developer details
+              </summary>
+              <pre className="max-h-64 overflow-auto border-t border-dc-border px-3 py-2 text-xs text-dc-text-muted">
+                {JSON.stringify(preview.payload, null, 2)}
+              </pre>
+            </details>
+          : null}
         </div>
       </div>
     </div>

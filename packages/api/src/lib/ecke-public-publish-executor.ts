@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import type { EckeEducationArticlePayload, KinkSocialPublicIngestEnvelope } from '@c2k/shared'
 import { db, schema } from '../db/index.js'
 import {
-  buildEckePublicEnvelope,
+  buildEckePublicEnvelopeAsync,
   buildEducationArticleUnpublishEnvelope,
   getEducationArticleIneligibilityReason,
   type EducationArticleAuthorContext,
@@ -113,7 +113,7 @@ export async function executeEckePublishEntity(
   const author = await loadEducationArticleAuthorContext(article)
   let envelope: KinkSocialPublicIngestEnvelope<EckeEducationArticlePayload>
   try {
-    envelope = buildEckePublicEnvelope(entityType, article, author)
+    envelope = await buildEckePublicEnvelopeAsync(entityType, article, author)
   } catch (err) {
     return {
       ok: false,

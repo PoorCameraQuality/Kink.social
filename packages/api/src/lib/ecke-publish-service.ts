@@ -75,7 +75,7 @@ import {
   type EckeOmittedField,
 } from './ecke-redaction.js'
 import {
-  buildEckePublicEnvelope,
+  buildEckePublicEnvelopeAsync,
   buildEducationArticleCanonicalUrl,
   getEducationArticleIneligibilityReason,
   type EducationArticleAuthorContext,
@@ -781,7 +781,7 @@ async function buildEducationArticleOverviewCard(
 
 export type EducationArticlePublishContext = {
   access: ArticlePublishAccess
-  payload: ReturnType<typeof buildEckePublicEnvelope>['payload']
+  payload: Awaited<ReturnType<typeof buildEckePublicEnvelopeAsync>>['payload']
   contentHash: string
   eligibility: { eligible: boolean; reason?: string }
   canonicalKinkSocialUrl: string
@@ -789,9 +789,11 @@ export type EducationArticlePublishContext = {
 }
 
 /** Server-side education article payload — never trusts client input. */
-export function buildEducationArticlePublishContext(access: ArticlePublishAccess): EducationArticlePublishContext {
+export async function buildEducationArticlePublishContext(
+  access: ArticlePublishAccess,
+): Promise<EducationArticlePublishContext> {
   const ineligibility = getEducationArticleIneligibilityReason(access.article)
-  const envelope = buildEckePublicEnvelope('education_article', access.article, access.author)
+  const envelope = await buildEckePublicEnvelopeAsync('education_article', access.article, access.author)
   const contentHash = hashEckePayload(envelope.payload)
   return {
     access,
@@ -820,7 +822,7 @@ export function buildEducationArticlePlainFields(
     { label: 'Title', value: payload.title },
     { label: 'Slug', value: payload.slug },
     { label: 'Excerpt', value: payload.excerpt ?? null },
-    { label: 'Public body (sanitized preview)', value: bodyPreview },
+    { label: 'Public body (ECKE article page)', value: bodyPreview },
     { label: 'Author display name', value: payload.authorDisplayName ?? null },
     { label: 'Author profile URL', value: payload.authorProfileUrl ?? null },
     { label: 'Presenter profile URL', value: payload.presenterProfileUrl ?? null },
@@ -832,6 +834,38 @@ export function buildEducationArticlePlainFields(
     { label: 'Source attribution', value: `${entry.label} via kink.social` },
     { label: 'Canonical kink.social URL', value: canonicalKinkSocialUrl },
   ]
+}
+
+export function buildEducationArticlePreviewFieldSets(
+  ctx: EducationArticlePublishContext,
+  entry: EckeRegistryEntry,
+): {
+  wouldPublish: EckePublishPlainField[]
+  wouldPublishDeferred: EckeOmittedField[]
+} {
+  const sourceHero = ctx.access.article.heroImageUrl?.trim()
+  const resolvedHero = ctx.payload.heroImageUrl?.trim()
+  let wouldPublish = buildEducationArticlePlainFields(ctx, entry)
+  let deferred = [...getEducationDeferredFields()]
+
+  if (sourceHero && !resolvedHero) {
+    wouldPublish = wouldPublish.filter((field) => field.label !== 'Hero image')
+    deferred.unshift({
+      label: 'Hero image',
+      reason:
+        'Hero image is stored on kink.social but is not reachable on ECKE yet. Promote the upload for anonymous public access or use a public CDN URL, then sync.',
+    })
+  } else if (resolvedHero) {
+    wouldPublish = wouldPublish.map((field) =>
+      field.label === 'Hero image' ?
+        { ...field, label: 'Hero image (shown atop ECKE article page)' }
+      : field,
+    )
+  } else {
+    wouldPublish = wouldPublish.filter((field) => field.label !== 'Hero image')
+  }
+
+  return { wouldPublish, wouldPublishDeferred: deferred }
 }
 
 export function payloadExcludesPrivateEducationFields(payload: Record<string, unknown>): boolean {
@@ -1320,7 +1354,7 @@ async function buildEducationArticlePreview(
 
   let ctx: EducationArticlePublishContext
   try {
-    ctx = buildEducationArticlePublishContext(access)
+    ctx = await buildEducationArticlePublishContext(access)
   } catch (err) {
     return {
       ok: false,
@@ -1344,6 +1378,8 @@ async function buildEducationArticlePreview(
     access.canPublish ?
       baseActions
     : { preview: true, publish: false, sync: false, unpublish: false }
+
+  const previewFields = buildEducationArticlePreviewFieldSets(ctx, entry)
 
   return {
     ok: true,
@@ -1371,8 +1407,8 @@ async function buildEducationArticlePreview(
         status === 'stale' ?
           'This article has changed since it was last published to ECKE. Sync to update the public article.'
         : null,
-      wouldPublish: buildEducationArticlePlainFields(ctx, entry),
-      wouldPublishDeferred: getEducationDeferredFields(),
+      wouldPublish: previewFields.wouldPublish,
+      wouldPublishDeferred: previewFields.wouldPublishDeferred,
       wouldNotPublish: getEducationOmittedFields(),
       payload: ctx.payload,
       canonicalKinkSocialUrl: ctx.canonicalKinkSocialUrl,

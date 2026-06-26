@@ -13,6 +13,7 @@ import {
   type KinkSocialPublicIngestEnvelope,
   type KinkSocialUnpublishEnvelope,
 } from '@c2k/shared'
+import { resolveEckeEducationHeroImageUrl } from './ecke-education-hero.js'
 
 /** Fields loaded from education_articles for ECKE publish eligibility and redaction. */
 export type EducationArticlePublishRow = {
@@ -108,6 +109,7 @@ export function isEntityEckePublishEligible(
 export function redactEducationArticleForEcke(
   article: EducationArticlePublishRow,
   author: EducationArticleAuthorContext,
+  opts?: { resolvedHeroImageUrl?: string | null },
 ): EckeEducationArticlePayload {
   const rawTitle = article.title.trim()
   const rawExcerpt = (article.excerpt ?? article.title).trim()
@@ -138,7 +140,10 @@ export function redactEducationArticleForEcke(
     readingMinutes: article.readingMinutes,
     publishedAt: (article.publishedAt ?? article.updatedAt).toISOString(),
     updatedAt: article.updatedAt.toISOString(),
-    heroImageUrl: sanitizeEckeHeroImageUrl(article.heroImageUrl),
+    heroImageUrl:
+      opts?.resolvedHeroImageUrl !== undefined ?
+        opts.resolvedHeroImageUrl
+      : sanitizeEckeHeroImageUrl(article.heroImageUrl),
     seoTitle: title,
     metaDescription: excerpt.slice(0, 500) || null,
   }
@@ -171,6 +176,27 @@ export function buildEckePublicEnvelope(
   }
 
   const payload = redactEducationArticleForEcke(article, author)
+  return finalizeEckePublicEnvelope(article, payload)
+}
+
+export async function buildEckePublicEnvelopeAsync(
+  entityType: EckePublicPublishEntityType,
+  article: EducationArticlePublishRow,
+  author: EducationArticleAuthorContext,
+): Promise<KinkSocialPublicIngestEnvelope<EckeEducationArticlePayload>> {
+  if (entityType !== 'education_article') {
+    throw new Error(`Unsupported entity type for envelope: ${entityType}`)
+  }
+
+  const resolvedHero = await resolveEckeEducationHeroImageUrl(article.heroImageUrl)
+  const payload = redactEducationArticleForEcke(article, author, { resolvedHeroImageUrl: resolvedHero })
+  return finalizeEckePublicEnvelope(article, payload)
+}
+
+function finalizeEckePublicEnvelope(
+  article: EducationArticlePublishRow,
+  payload: EckeEducationArticlePayload,
+): KinkSocialPublicIngestEnvelope<EckeEducationArticlePayload> {
   const sourceUpdatedAt = article.updatedAt.toISOString()
 
   return {

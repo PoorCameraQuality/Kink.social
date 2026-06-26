@@ -72,7 +72,7 @@ export default function ConventionEckePanel({ conventionSlug }: Props) {
       if (!r.ok) {
         setLoadError(
           r.status === 403 ?
-            'You need convention full admin access to view ECKE publish.'
+            'Convention ECKE controls require full convention admin access.'
           : 'Could not load ECKE publish overview.',
         )
         setData(null)

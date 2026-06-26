@@ -12,6 +12,7 @@ import { getRegistryEntry } from './ecke-publish-registry.js'
 import { deriveTargetDisplayStatus } from './ecke-publish-target-store.js'
 import {
   buildEducationArticlePlainFields,
+  buildEducationArticlePreviewFieldSets,
   buildEducationArticlePublishContext,
   canViewerManageEducationArticleEckePublish,
   computeEducationArticleActions,
@@ -95,8 +96,8 @@ describe('education article eligibility', () => {
 })
 
 describe('education article preview payload', () => {
-  it('builds server-side payload and excludes private author email', () => {
-    const ctx = buildEducationArticlePublishContext({
+  it('builds server-side payload and excludes private author email', async () => {
+    const ctx = await buildEducationArticlePublishContext({
       article: baseArticle(),
       author: { ...authorContext, displayName: 'Educator One' },
       canManage: true,
@@ -107,8 +108,8 @@ describe('education article preview payload', () => {
     assert.match(ctx.payload.bodyHtml, /Public sanitized body/)
   })
 
-  it('draft preview context is ineligible but still builds payload', () => {
-    const ctx = buildEducationArticlePublishContext({
+  it('draft preview context is ineligible but still builds payload', async () => {
+    const ctx = await buildEducationArticlePublishContext({
       article: baseArticle({ publicationStatus: 'DRAFT' }),
       author: authorContext,
       canManage: true,
@@ -137,8 +138,8 @@ describe('education article preview payload', () => {
     assert.equal(actions.unpublish, true)
   })
 
-  it('plain fields include sanitized public body and canonical URL', () => {
-    const ctx = buildEducationArticlePublishContext({
+  it('plain fields include sanitized public body and canonical URL', async () => {
+    const ctx = await buildEducationArticlePublishContext({
       article: baseArticle(),
       author: authorContext,
       canManage: true,
@@ -148,6 +149,23 @@ describe('education article preview payload', () => {
     assert.ok(fields.some((f) => f.label === 'Title' && f.value === 'Safety Basics'))
     assert.ok(fields.some((f) => f.label.includes('Public body')))
     assert.ok(fields.some((f) => f.label.includes('Canonical kink.social URL')))
+  })
+
+  it('defers hero image when kink.social proxy URL cannot reach ECKE', async () => {
+    const ctx = await buildEducationArticlePublishContext({
+      article: baseArticle({
+        heroImageUrl: 'https://kink.social/api/v1/media/assets/11111111-1111-4111-8111-111111111111/content',
+      }),
+      author: authorContext,
+      canManage: true,
+    })
+    const entry = getRegistryEntry('education_article')!
+    const { wouldPublish, wouldPublishDeferred } = buildEducationArticlePreviewFieldSets(ctx, entry)
+    assert.equal(
+      wouldPublish.some((field) => field.label.includes('Hero image')),
+      false,
+    )
+    assert.ok(wouldPublishDeferred.some((field) => field.label === 'Hero image'))
   })
 
   it('omitted fields catalog covers private email and internal notes', () => {
