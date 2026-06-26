@@ -159,8 +159,8 @@ describe('password reset', { skip: !runDbTests }, () => {
     })
     const login = await app.inject({
       method: 'POST',
-      url: '/api/auth/login',
-      payload: { username, password },
+      url: '/api/auth/session',
+      payload: { username, password: 'NewPassword!234567' },
     })
     assert.equal(login.statusCode, 200)
     const cookie = login.headers['set-cookie']

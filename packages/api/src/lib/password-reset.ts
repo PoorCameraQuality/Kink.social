@@ -10,7 +10,7 @@ import {
   passwordResetEmailSubject,
 } from './mail-branding.js'
 import { sendEmail } from './mailer.js'
-import { findUserByEmailLookup, getEmailFromUserRow } from './user-email.js'
+import { findUserByLoginIdentifier, getEmailFromUserRow } from './user-email.js'
 
 export const PASSWORD_RESET_GENERIC_MESSAGE =
   'If an account matches that information, you will receive password recovery instructions shortly.'
@@ -70,24 +70,6 @@ export function buildPasswordChangedEmail(): { subject: string; text: string; ht
   return { subject, text, html }
 }
 
-function normalizeLookup(value: string): string {
-  return value.trim().toLowerCase()
-}
-
-async function findUserByEmailOrUsername(identifier: string) {
-  const normalized = normalizeLookup(identifier)
-  const isEmail = normalized.includes('@')
-  if (isEmail) {
-    return findUserByEmailLookup(normalized)
-  }
-  const [row] = await db
-    .select()
-    .from(schema.users)
-    .where(eq(schema.users.username, identifier.trim()))
-    .limit(1)
-  return row ?? null
-}
-
 export async function requestPasswordReset(input: {
   identifier: string
   req: FastifyRequest
@@ -98,7 +80,7 @@ export async function requestPasswordReset(input: {
     return { ok: true, message: PASSWORD_RESET_GENERIC_MESSAGE }
   }
 
-  const user = await findUserByEmailOrUsername(identifier)
+  const user = await findUserByLoginIdentifier(identifier)
   if (!user) {
     return { ok: true, message: PASSWORD_RESET_GENERIC_MESSAGE }
   }

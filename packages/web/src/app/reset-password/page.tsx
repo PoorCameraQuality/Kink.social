@@ -1,5 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import PasswordField from '@/components/ui/PasswordField'
 
 export default function ResetPasswordPage() {
   const [params] = useSearchParams()
@@ -39,7 +40,7 @@ export default function ResetPasswordPage() {
         setError(typeof data.error === 'string' ? data.error : 'Invalid or expired reset link')
         return
       }
-      setMessage('Password updated. You can log in with your new password.')
+      setMessage('Password updated. You can log in with your username or email and new password.')
     } catch {
       setError('Network error. Try again.')
     } finally {
@@ -55,31 +56,29 @@ export default function ResetPasswordPage() {
       : null}
       <form className="mt-6 space-y-4" onSubmit={onSubmit} noValidate>
         <div>
-          <label htmlFor="new-password" className="sr-only">
+          <label htmlFor="new-password" className="mb-1.5 block text-sm font-medium text-dc-text">
             New password
           </label>
-          <input
+          <PasswordField
             id="new-password"
-            type="password"
             autoComplete="new-password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             placeholder="New password (12+ characters)"
-            className="min-h-11 w-full rounded-xl border border-dc-border bg-dc-surface-muted px-4 py-3 text-dc-text"
+            inputClassName="border border-dc-border bg-dc-surface-muted px-4 py-3 text-dc-text"
           />
         </div>
         <div>
-          <label htmlFor="confirm-password" className="sr-only">
+          <label htmlFor="confirm-password" className="mb-1.5 block text-sm font-medium text-dc-text">
             Confirm password
           </label>
-          <input
+          <PasswordField
             id="confirm-password"
-            type="password"
             autoComplete="new-password"
             value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
+            onChange={setConfirm}
             placeholder="Confirm new password"
-            className="min-h-11 w-full rounded-xl border border-dc-border bg-dc-surface-muted px-4 py-3 text-dc-text"
+            inputClassName="border border-dc-border bg-dc-surface-muted px-4 py-3 text-dc-text"
           />
         </div>
         {message ?

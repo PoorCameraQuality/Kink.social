@@ -29,7 +29,7 @@ import {
 } from '../lib/password-reset.js'
 import { isPasswordResetEnabled } from '../lib/mail-config.js'
 import { sessionPayloadForUser } from '../auth/session-version.js'
-import { getEmailFromUserRow, prepareEmailStorage } from '../lib/user-email.js'
+import { findUserByLoginIdentifier, getEmailFromUserRow, prepareEmailStorage } from '../lib/user-email.js'
 import { sendAccountWelcomeEmail } from '../lib/transactional-email.js'
 import { dbUnavailablePayload, isDbConnectionError } from '../lib/db-connection-error.js'
 
@@ -109,11 +109,11 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       return reply.status(400).send({ error: 'Invalid JSON' })
     }
 
-    const username = typeof body.username === 'string' ? body.username.trim() : ''
+    const loginIdentifier = typeof body.username === 'string' ? body.username.trim() : ''
     const password = typeof body.password === 'string' ? body.password : ''
 
-    if (!username || !password) {
-      return reply.status(400).send({ error: 'Username and password required' })
+    if (!loginIdentifier || !password) {
+      return reply.status(400).send({ error: 'Username or email and password required' })
     }
 
     if (useDatabase()) {
@@ -121,7 +121,7 @@ export async function registerAuthRoutes(app: FastifyInstance) {
         if (await checkIdentityBan(req)) {
           return reply.status(403).send({ error: 'Access denied' })
         }
-        const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username)).limit(1)
+        const user = await findUserByLoginIdentifier(loginIdentifier)
         if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
           return reply.status(401).send({ error: 'Invalid credentials' })
         }
@@ -184,7 +184,7 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       return reply.status(401).send({ error: 'Invalid credentials' })
     }
 
-    const person = getMockPersonByUsername(username)
+    const person = getMockPersonByUsername(loginIdentifier)
     if (!person) {
       return reply.status(400).send({ error: 'Unknown username (demo only allows seed users)' })
     }

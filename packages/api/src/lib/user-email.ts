@@ -68,6 +68,22 @@ export async function findUserByEmailLookup(email: string) {
   return legacy ?? null
 }
 
+/** Resolve a login or password-reset identifier (username or email). */
+export async function findUserByLoginIdentifier(identifier: string) {
+  const trimmed = identifier.trim()
+  if (!trimmed) return null
+  const normalized = normalizeEmail(trimmed)
+  if (normalized.includes('@')) {
+    return findUserByEmailLookup(normalized)
+  }
+  const [row] = await db
+    .select()
+    .from(schema.users)
+    .where(eq(schema.users.username, trimmed))
+    .limit(1)
+  return row ?? null
+}
+
 export async function getUserEmailById(userId: string): Promise<string | null> {
   const [row] = await db
     .select({

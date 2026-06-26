@@ -145,7 +145,7 @@ export default function LoginCard({
   const navigate = useNavigate()
   const { refresh } = useAuth()
   const [activeTab, setActiveTab] = useState<Tab>(defaultTab)
-  const [loginUsername, setLoginUsername] = useState('')
+  const [loginIdentifier, setLoginIdentifier] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loginSubmitting, setLoginSubmitting] = useState(false)
@@ -198,7 +198,7 @@ export default function LoginCard({
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
         body: JSON.stringify({
-          username: loginUsername.trim(),
+          username: loginIdentifier.trim(),
           password: loginPassword,
         }),
       })
@@ -535,14 +535,14 @@ export default function LoginCard({
               </p>
             : null}
             <form className={`space-y-4 ${landing ? 'pt-1' : ''}`} onSubmit={handleLoginSubmit} noValidate>
-              <FormField id="login-email" label="Username or email">
+              <FormField id="login-identifier" label="Username or email">
                 <input
-                  id="login-email"
+                  id="login-identifier"
                   name="username"
                   type="text"
                   autoComplete="username"
-                  value={loginUsername}
-                  onChange={(e) => setLoginUsername(e.target.value)}
+                  value={loginIdentifier}
+                  onChange={(e) => setLoginIdentifier(e.target.value)}
                   aria-invalid={loginError ? true : undefined}
                   aria-describedby={loginError ? 'login-error' : undefined}
                   className={textInputClass}
