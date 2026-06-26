@@ -25,6 +25,9 @@ export type EckeSourceKind =
   | 'venue_profile'
   | 'convention_event_anchor'
 
+/** Four owner-facing ECKE public surfaces (Phase 0 product model). */
+export type EckeOwnerFacingSurface = 'events' | 'places' | 'vendors' | 'education'
+
 export type EckePublishSupportState =
   | 'active_existing'
   | 'preview_only'
@@ -44,6 +47,12 @@ export type EckeRegistryEntry = {
   visibleInOrgDashboard: boolean
   visibleInConventionDashboard: boolean
   visibleInUserDashboard: boolean
+  /** Primary ECKE public surface, when applicable. Null = not a main surface (legacy / internal). */
+  ownerFacingSurface: EckeOwnerFacingSurface | null
+  /** Legacy transport retained internally; hidden from owner-facing publish UI. */
+  deprecated: boolean
+  /** Show publish controls on owner dashboards (respects dashboard visibility flags). */
+  ownerDashboardVisible: boolean
   supportState: EckePublishSupportState
   eckeTargetKind: string
   currentTransport: EckePublishTransport
@@ -66,17 +75,27 @@ export const PASS2_ACTION_LABELS = {
   unpublish: 'Coming in Pass 3',
 } as const
 
+export const ECKE_OWNER_FACING_SURFACES: readonly EckeOwnerFacingSurface[] = [
+  'events',
+  'places',
+  'vendors',
+  'education',
+] as const
+
 const GROUP_LISTING_SURFACES = [
-  'ECKE directory/listing pages',
-  'ECKE sitemap after publish',
-  'ECKE state/location pages if location data exists',
+  'ECKE thin public listing (legacy webhook)',
 ] as const
 
 const EVENT_SURFACES = [
-  'ECKE events index',
-  'ECKE event detail page',
-  'ECKE calendar',
-  'ECKE state pages',
+  'ECKE Events index (/events)',
+  'ECKE event detail (/events/{slug})',
+  'ECKE calendar and state pages',
+  'ECKE sitemap after publish',
+] as const
+
+const PLACE_SURFACES = [
+  'ECKE Places directory (nav: Places, route: /dungeons)',
+  'ECKE place detail (/dungeons/{slug})',
   'ECKE sitemap after publish',
 ] as const
 
@@ -84,12 +103,15 @@ export const ECKE_PUBLISH_REGISTRY: readonly EckeRegistryEntry[] = [
   {
     sourceKind: 'education_article',
     label: 'Education article',
-    description: 'Public education articles published via ECKE ingest API.',
+    description: 'Public education articles on ECKE Education (/education/{slug}).',
     ownerKind: 'user',
     visibleInGroupDashboard: true,
     visibleInOrgDashboard: true,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: true,
+    ownerFacingSurface: 'education',
+    deprecated: false,
+    ownerDashboardVisible: true,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_article',
     currentTransport: 'ingest_api',
@@ -100,18 +122,20 @@ export const ECKE_PUBLISH_REGISTRY: readonly EckeRegistryEntry[] = [
       'Education article page',
       'Education index',
       'Sitemap',
-      'Related education surfaces (when ECKE supports them)',
     ],
   },
   {
     sourceKind: 'vendor_profile',
     label: 'Vendor profile',
-    description: 'Public vendor shop listings on ECKE.',
+    description: 'Public vendor profiles on ECKE Vendors (/vendors/{slug}).',
     ownerKind: 'user',
     visibleInGroupDashboard: false,
     visibleInOrgDashboard: true,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: true,
+    ownerFacingSurface: 'vendors',
+    deprecated: false,
+    ownerDashboardVisible: true,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_vendor',
     currentTransport: 'supabase_rest',
@@ -122,52 +146,60 @@ export const ECKE_PUBLISH_REGISTRY: readonly EckeRegistryEntry[] = [
       'ECKE vendor detail page',
       'ECKE vendors index',
       'ECKE sitemap',
-      'ECKE state/location vendor pages (when supported)',
     ],
   },
   {
     sourceKind: 'organization_listing',
     label: 'Organization listing',
-    description: 'Public organization directory listing on ECKE.',
+    description: 'Deprecated — ECKE does not publish organization profile pages.',
     ownerKind: 'organization',
     visibleInGroupDashboard: false,
-    visibleInOrgDashboard: true,
+    visibleInOrgDashboard: false,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: null,
+    deprecated: true,
+    ownerDashboardVisible: false,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_listing',
     currentTransport: 'listing_webhook',
     requiresPermission: 'org.moderator',
-    privacySummary: 'Only public organizations.',
+    privacySummary: 'Legacy listing webhook only; not a public ECKE org directory surface.',
     omittedFields: getOrgOmittedFields().map((f) => f.label),
-    eckeSurfacesAffected: ['ECKE directory/listing pages'],
+    eckeSurfacesAffected: ['Legacy listing webhook (retired from owner UI)'],
   },
   {
     sourceKind: 'group_listing',
     label: 'Group listing',
-    description: 'Public group directory listing on East Coast Kink Events.',
+    description: 'Low-priority thin public listing when group owner explicitly opts in.',
     ownerKind: 'group',
     visibleInGroupDashboard: true,
     visibleInOrgDashboard: false,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: null,
+    deprecated: false,
+    ownerDashboardVisible: true,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_listing',
     currentTransport: 'listing_webhook',
     requiresPermission: 'group.moderator',
-    privacySummary: 'Only public groups. Member lists never publish.',
+    privacySummary: 'Only public groups with explicit opt-in. Member lists never publish.',
     omittedFields: getGroupOmittedFields().map((f) => f.label),
     eckeSurfacesAffected: GROUP_LISTING_SURFACES,
   },
   {
     sourceKind: 'event_listing',
-    label: 'Public event',
-    description: 'Standalone public events on ECKE events directory.',
+    label: 'Event',
+    description: 'Standalone public events on ECKE Events (/events/{slug}).',
     ownerKind: 'event',
     visibleInGroupDashboard: true,
     visibleInOrgDashboard: true,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: 'events',
+    deprecated: false,
+    ownerDashboardVisible: true,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_event',
     currentTransport: 'supabase_rest',
@@ -179,155 +211,182 @@ export const ECKE_PUBLISH_REGISTRY: readonly EckeRegistryEntry[] = [
   {
     sourceKind: 'convention_listing',
     label: 'Convention listing',
-    description: 'Convention public ECKE listing and event row.',
+    description: 'Deprecated legacy listing webhook — conventions publish to ECKE Events.',
     ownerKind: 'convention',
     visibleInGroupDashboard: false,
     visibleInOrgDashboard: false,
-    visibleInConventionDashboard: true,
+    visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: null,
+    deprecated: true,
+    ownerDashboardVisible: false,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_listing',
     currentTransport: 'listing_webhook',
     requiresPermission: 'convention.full_admin',
-    privacySummary: 'Convention full admin only.',
+    privacySummary: 'Legacy transport only; user-facing outcome is ECKE Events.',
     omittedFields: ['Attendee roster', 'Staff notes', 'Private operational notes'],
-    eckeSurfacesAffected: ['ECKE events index', 'ECKE event detail', 'ECKE sitemap'],
+    eckeSurfacesAffected: ['Legacy listing webhook (superseded by Events surface)'],
   },
   {
     sourceKind: 'dancecard_event',
     label: 'Dancecard event',
-    description: 'Dancecard attendee app program shell.',
+    description: 'Deprecated ECKE sync — Dancecard program stays on kink.social; ECKE may link only.',
     ownerKind: 'convention',
     visibleInGroupDashboard: false,
     visibleInOrgDashboard: false,
-    visibleInConventionDashboard: true,
+    visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: null,
+    deprecated: true,
+    ownerDashboardVisible: false,
     supportState: 'active_existing',
     eckeTargetKind: 'dancecard_event',
     currentTransport: 'supabase_rest',
     requiresPermission: 'convention.full_admin',
-    privacySummary: 'Program data filtered for anonymous public view.',
-    omittedFields: ['Staff user IDs', 'Private operational notes'],
-    eckeSurfacesAffected: ['ECKE Dancecard app', 'Dancecard embed'],
+    privacySummary: 'Program data is not synced to ECKE. Link-only from ECKE event pages when enabled.',
+    omittedFields: ['Staff user IDs', 'Private operational notes', 'Program slots', 'Locations', 'Staff shifts'],
+    eckeSurfacesAffected: ['kink.social Dancecard only'],
   },
   {
     sourceKind: 'dancecard_location',
     label: 'Dancecard locations',
-    description: 'Convention venue rooms synced to Dancecard.',
+    description: 'Deprecated — not an ECKE publish surface.',
     ownerKind: 'convention',
     visibleInGroupDashboard: false,
     visibleInOrgDashboard: false,
-    visibleInConventionDashboard: true,
+    visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: null,
+    deprecated: true,
+    ownerDashboardVisible: false,
     supportState: 'active_existing',
     eckeTargetKind: 'dancecard_event',
     currentTransport: 'supabase_rest',
     requiresPermission: 'convention.full_admin',
-    privacySummary: 'Public program locations only.',
+    privacySummary: 'Dancecard locations are kink.social-only.',
     omittedFields: ['Private address details'],
-    eckeSurfacesAffected: ['ECKE Dancecard map'],
+    eckeSurfacesAffected: ['kink.social Dancecard only'],
   },
   {
     sourceKind: 'dancecard_program_slot',
     label: 'Dancecard program slots',
-    description: 'Published schedule slots on Dancecard.',
+    description: 'Deprecated — not an ECKE publish surface.',
     ownerKind: 'convention',
     visibleInGroupDashboard: false,
     visibleInOrgDashboard: false,
-    visibleInConventionDashboard: true,
+    visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: null,
+    deprecated: true,
+    ownerDashboardVisible: false,
     supportState: 'active_existing',
     eckeTargetKind: 'dancecard_event',
     currentTransport: 'supabase_rest',
     requiresPermission: 'convention.full_admin',
-    privacySummary: 'Anonymous public program filter applied.',
+    privacySummary: 'Dancecard schedule is kink.social-only.',
     omittedFields: ['Staff notes', 'Private slot notes'],
-    eckeSurfacesAffected: ['ECKE Dancecard schedule'],
+    eckeSurfacesAffected: ['kink.social Dancecard only'],
   },
   {
     sourceKind: 'dancecard_staff_shift',
     label: 'Dancecard staff shifts',
-    description: 'Volunteer shift display names on Dancecard.',
+    description: 'Deprecated — not an ECKE publish surface.',
     ownerKind: 'convention',
     visibleInGroupDashboard: false,
     visibleInOrgDashboard: false,
-    visibleInConventionDashboard: true,
+    visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: null,
+    deprecated: true,
+    ownerDashboardVisible: false,
     supportState: 'active_existing',
     eckeTargetKind: 'dancecard_event',
     currentTransport: 'supabase_rest',
     requiresPermission: 'convention.full_admin',
-    privacySummary: 'Display names only; no user IDs.',
+    privacySummary: 'Dancecard staff data is kink.social-only.',
     omittedFields: ['User IDs', 'Private contact info'],
-    eckeSurfacesAffected: ['ECKE Dancecard staff view'],
+    eckeSurfacesAffected: ['kink.social Dancecard only'],
   },
   {
     sourceKind: 'presenter_profile',
     label: 'Presenter profile',
-    description: 'Public presenter directory pages on ECKE.',
+    description: 'Low-priority thin public listing when presenter opts in (legacy webhook).',
     ownerKind: 'user',
     visibleInGroupDashboard: false,
     visibleInOrgDashboard: false,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: true,
+    ownerFacingSurface: null,
+    deprecated: false,
+    ownerDashboardVisible: true,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_listing',
     currentTransport: 'listing_webhook',
     requiresPermission: 'presenter.owner',
     privacySummary: 'Public presenter directory only; private materials omitted.',
     omittedFields: getPresenterOmittedFields().map((f) => f.label),
-    eckeSurfacesAffected: ['ECKE presenters index', 'ECKE presenter detail'],
+    eckeSurfacesAffected: ['ECKE thin presenter listing (legacy)'],
   },
   {
     sourceKind: 'dungeon_profile',
-    label: 'Dungeon listing',
-    description: 'Org-flagged dungeon/venue on ECKE dungeons directory.',
+    label: 'Dungeon listing (legacy org path)',
+    description: 'Deprecated — place listings publish from community_places, not org profile.',
     ownerKind: 'organization',
     visibleInGroupDashboard: false,
-    visibleInOrgDashboard: true,
+    visibleInOrgDashboard: false,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: null,
+    deprecated: true,
+    ownerDashboardVisible: false,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_dungeon',
     currentTransport: 'supabase_rest',
     requiresPermission: 'org.moderator',
-    privacySummary: 'Public-safe venue info only.',
+    privacySummary: 'Legacy org-scoped dungeon row; use place publish instead.',
     omittedFields: getVenueOmittedFields().map((f) => f.label),
-    eckeSurfacesAffected: ['ECKE dungeons index', 'ECKE dungeon detail'],
+    eckeSurfacesAffected: ['Legacy Supabase dungeon_venues (interim)'],
   },
   {
     sourceKind: 'venue_profile',
-    label: 'Venue / place',
-    description: 'Standalone venue or place listing on ECKE.',
+    label: 'Place listing',
+    description: 'Public venue/place on ECKE Places (/dungeons/{slug}).',
     ownerKind: 'organization',
     visibleInGroupDashboard: true,
     visibleInOrgDashboard: true,
     visibleInConventionDashboard: false,
     visibleInUserDashboard: false,
+    ownerFacingSurface: 'places',
+    deprecated: false,
+    ownerDashboardVisible: true,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_listing',
     currentTransport: 'listing_webhook',
     requiresPermission: 'org.moderator',
     privacySummary: 'Published community places only; hidden addresses omitted.',
     omittedFields: getVenueOmittedFields().map((f) => f.label),
-    eckeSurfacesAffected: ['ECKE venues index', 'ECKE venue detail'],
+    eckeSurfacesAffected: PLACE_SURFACES,
   },
   {
     sourceKind: 'convention_event_anchor',
-    label: 'Convention ECKE event row',
-    description: 'Public convention anchor row in ECKE events directory (Supabase).',
+    label: 'Convention event',
+    description: 'Convention on ECKE Events (/events/{slug}) with Convention badge.',
     ownerKind: 'convention',
     visibleInGroupDashboard: false,
     visibleInOrgDashboard: false,
     visibleInConventionDashboard: true,
     visibleInUserDashboard: false,
+    ownerFacingSurface: 'events',
+    deprecated: false,
+    ownerDashboardVisible: true,
     supportState: 'active_existing',
     eckeTargetKind: 'ecke_event',
     currentTransport: 'supabase_rest',
     requiresPermission: 'convention.full_admin',
-    privacySummary: 'Public convention listing fields only; no attendee data.',
+    privacySummary: 'Public convention fields only; c2k_source_type=convention. No attendee data.',
     omittedFields: getConventionOmittedFields().map((f) => f.label),
-    eckeSurfacesAffected: ['ECKE events directory', 'ECKE event detail'],
+    eckeSurfacesAffected: EVENT_SURFACES,
   },
 ] as const
 
@@ -335,12 +394,45 @@ export function getRegistryEntry(sourceKind: EckeSourceKind): EckeRegistryEntry 
   return ECKE_PUBLISH_REGISTRY.find((e) => e.sourceKind === sourceKind)
 }
 
+export function isRegistryEntryOwnerVisible(
+  entry: EckeRegistryEntry,
+  dashboard: 'group' | 'org' | 'convention' | 'user',
+): boolean {
+  if (!entry.ownerDashboardVisible || entry.deprecated) return false
+  switch (dashboard) {
+    case 'group':
+      return entry.visibleInGroupDashboard
+    case 'org':
+      return entry.visibleInOrgDashboard
+    case 'convention':
+      return entry.visibleInConventionDashboard
+    case 'user':
+      return entry.visibleInUserDashboard
+  }
+}
+
 export function listRegistryForGroupDashboard(): EckeRegistryEntry[] {
-  return ECKE_PUBLISH_REGISTRY.filter((e) => e.visibleInGroupDashboard)
+  return ECKE_PUBLISH_REGISTRY.filter(
+    (e) => e.visibleInGroupDashboard && isRegistryEntryOwnerVisible(e, 'group'),
+  )
 }
 
 export function listRegistryForOrgDashboard(): EckeRegistryEntry[] {
-  return ECKE_PUBLISH_REGISTRY.filter((e) => e.visibleInOrgDashboard)
+  return ECKE_PUBLISH_REGISTRY.filter((e) => e.visibleInOrgDashboard && isRegistryEntryOwnerVisible(e, 'org'))
+}
+
+export function listRegistryForConventionDashboard(): EckeRegistryEntry[] {
+  return ECKE_PUBLISH_REGISTRY.filter(
+    (e) => e.visibleInConventionDashboard && isRegistryEntryOwnerVisible(e, 'convention'),
+  )
+}
+
+export function listOwnerFacingRegistryEntries(): EckeRegistryEntry[] {
+  return ECKE_PUBLISH_REGISTRY.filter((e) => e.ownerFacingSurface !== null && !e.deprecated)
+}
+
+export function listDeprecatedRegistryEntries(): EckeRegistryEntry[] {
+  return ECKE_PUBLISH_REGISTRY.filter((e) => e.deprecated)
 }
 
 export function listAllRegistryEntries(): EckeRegistryEntry[] {

@@ -36,6 +36,7 @@ export {
   ECKE_SOURCE_TYPE_BY_ENTITY,
   KINK_SOCIAL_SOURCE_SYSTEM,
   type EckeEducationArticlePayload,
+  type EckeEventPayload,
   type EckePublicEntityType,
   type KinkSocialIngestResponse,
   type KinkSocialPublicIngestEnvelope,

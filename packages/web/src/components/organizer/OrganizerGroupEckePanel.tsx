@@ -56,7 +56,7 @@ const SECTION_HEADINGS: Record<string, string> = {
   group_listing: 'Group listing',
   events: 'Events',
   education: 'Education',
-  venues: 'Venues / Dungeons / Places',
+  venues: 'Places',
   vendors: 'Vendors / Sponsors',
   dancecard: 'Dancecard',
   history: 'Publish history',
@@ -159,9 +159,9 @@ export default function OrganizerGroupEckePanel({ groupId }: Props) {
     <div className="space-y-8">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-wide text-dc-accent">East Coast Kink Events</p>
-        <h2 className="text-2xl font-semibold text-dc-text">ECKE Publish</h2>
+        <h2 className="text-2xl font-semibold text-dc-text">Publish to East Coast Kink Events</h2>
         <p className="max-w-2xl text-sm text-dc-text-muted">
-          Preview exactly what would appear on East Coast Kink Events for {data.groupName}.{' '}
+          Preview public group listings, events, and org-linked education for {data.groupName}.{' '}
           <span className="text-amber-200/90">{data.passNotice}</span>
         </p>
         <p className="text-xs text-dc-text-muted">

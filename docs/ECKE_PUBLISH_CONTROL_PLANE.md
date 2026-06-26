@@ -1,9 +1,9 @@
 # ECKE Publish Control Plane
 
-**Status:** Testing-ready — all registry source kinds including `presenter_profile`, `venue_profile`, and `convention_event_anchor` (see `ECKE_PUBLISH_FINAL_COMPLETION_AUDIT.md`)  
+**Status:** Phase 0 product cleanup shipped — owner UI shows **Events, Places, Vendors, Education** only. See [`KINK_SOCIAL_ECKE_PUBLISH_MIGRATION.md`](./KINK_SOCIAL_ECKE_PUBLISH_MIGRATION.md). Legacy registry kinds remain for transport; deprecated kinds are hidden from dashboards.  
 **Purpose:** Single source of truth for “can publish?”, “who?”, “what payload?”, “what ECKE pages?”
 
-**Product rule:** kink.social is the workflow source of truth; ECKE is the public discovery surface. Do not permanently flatten richer **public-safe** kink.social data — expand ECKE display modules opt-in over time. See `ECKE_PUBLISH_PARITY_AUDIT.md` § *Product rule* and *ECKE Expansion Rule*. Privacy contract unchanged.
+**Product rule:** kink.social is the workflow source of truth; ECKE is the public discovery surface. **ECKE does not publish organization profile pages** — orgs publish events, places, vendors, and education. Do not permanently flatten richer **public-safe** kink.social data — expand ECKE display modules opt-in over time. See `ECKE_PUBLISH_PARITY_AUDIT.md` § *Product rule* and *ECKE Expansion Rule*. Privacy contract unchanged.
 
 ---
 

@@ -85,6 +85,8 @@ export function buildOrgListingPublishContext(org: OrgEckePublishRow) {
 }
 
 export function buildOrgDungeonPublishContext(org: OrgEckePublishRow) {
+  // Legacy interim path: org-flagged dungeon rows via Supabase REST.
+  // Phase 0+: place listings publish from community_places (venue_profile / place ingest), not org profile.
   const payload = buildOrgDungeonEckeRow(org)
   const contentHash = hashEckePayload(payload)
   const reason = getDungeonProfileIneligibilityReason(org)

@@ -27,7 +27,7 @@ export const ECKE_SOURCE_TYPE_BY_ENTITY: Record<EckePublicEntityType, string> = 
   education_path: 'education_path',
   event: 'event',
   convention: 'convention',
-  place: 'organization',
+  place: 'place',
   organization: 'organization',
   presenter: 'presenter_profile',
   vendor: 'vendor_profile',

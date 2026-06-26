@@ -44,12 +44,12 @@ type Props = {
 }
 
 const TARGET_LABELS: Record<PublishTarget['targetKind'], string> = {
-  ecke_listing: 'East Coast Kink Events listing',
-  dancecard_event: 'Dancecard attendee app',
-  ecke_event: 'ECKE events directory (Supabase)',
-  ecke_vendor: 'ECKE vendor directory',
-  ecke_article: 'ECKE education article',
-  ecke_dungeon: 'ECKE dungeon listing',
+  ecke_listing: 'ECKE Events (legacy listing)',
+  dancecard_event: 'Dancecard on kink.social',
+  ecke_event: 'ECKE Events',
+  ecke_vendor: 'ECKE Vendors',
+  ecke_article: 'ECKE Education',
+  ecke_dungeon: 'ECKE Places (legacy)',
 }
 
 const STATUS_LABELS: Record<PublishTarget['status'], string> = {
@@ -165,7 +165,7 @@ export default function EckePublishStub({
     try {
       if (scopeType === 'organization' && !withEcke) {
         setPreviewMessage(
-          'Organization listings on East Coast Kink Events require the ECKE option above. For Kink Social hub visibility only, use Settings → Content.',
+          'Publishing to East Coast Kink Events requires the ECKE option above. Organization profile pages are not an ECKE surface — publish events, places, vendors, or education from their editors. For Kink Social hub visibility only, use Settings → Content.',
         )
         setPreviewMessageKind('error')
         setPublishDialogOpen(false)
@@ -216,8 +216,10 @@ export default function EckePublishStub({
       setPreviewMessage(
         withEcke ?
           eckePublishHadListingWebhookSkip(publishTargets) ?
-            `${scopeLabel} is live on East Coast Kink Events (event + Dancecard). The legacy directory listing webhook is not configured on this server.`
-          : `${scopeLabel} is now public${scopeType === 'convention' ? '' : ' on Kink Social'} and listed on East Coast Kink Events.`
+            `${scopeLabel} is live on ECKE Events. The legacy directory listing webhook is not configured on this server.`
+          : scopeType === 'convention' ?
+            `${scopeLabel} is now public on kink.social and published to ECKE Events.`
+          : `${scopeLabel} is now public on kink.social. Publish events, places, vendors, or education to ECKE from their respective tools.`
         : `${scopeLabel} is now listed for the public to see.`,
       )
       setPreviewMessageKind('success')
@@ -418,9 +420,9 @@ export default function EckePublishStub({
       <OrganizerPublishConfirmDialog
         open={publishDialogOpen}
         title={
-          scopeType === 'convention' ? 'Publish convention?'
+          scopeType === 'convention' ? 'Publish convention to ECKE Events?'
           : scopeType === 'group' ? 'Publish group?'
-          : 'Publish organization?'
+          : 'Publish to East Coast Kink Events?'
         }
         itemLabel={scopeLabel}
         itemKind={scopeType ?? 'convention'}

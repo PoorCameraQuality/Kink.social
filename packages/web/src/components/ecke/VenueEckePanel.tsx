@@ -84,7 +84,7 @@ export default function VenueEckePanel({ placeId }: Props) {
 
   return (
     <EckePublishPanel
-      title="East Coast Kink Events"
+      title="Publish place to ECKE"
       sourceKind="venue_profile"
       sourceId={placeId}
       supportState="active_existing"

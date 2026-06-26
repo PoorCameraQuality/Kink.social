@@ -9,17 +9,21 @@ import {
   buildEckeEventRowFromStandaloneEvent,
   buildEckeVendorRow,
 } from './ecke-directory-sync.js'
+import { isEckePublishEligible } from '@c2k/shared'
+import {
+  publishEckeEventDualWrite,
+  unpublishEckeEventDualWrite,
+} from './ecke-event-ingest-publish.js'
 import {
   loadEckeIngestApiConfig,
   loadEckePublishClientConfig,
-  publishEventRowToEcke,
   publishVendorRowToEcke,
   resolveEckePublicEventUrl,
   resolveEckePublicVendorUrl,
-  unpublishEventRowToEcke,
   unpublishVendorRowToEcke,
   type EckePublishResult,
 } from './ecke-publish-client.js'
+import { isEckeEventPublishBridgeConfigured } from './ecke-publish-config.js'
 import {
   buildConventionListingPayload,
   buildStandaloneEventListingPayload,
@@ -27,7 +31,6 @@ import {
   isStandaloneEventEckeEligible,
   resolveStandaloneEventEckeSlug,
 } from './ecke-publish-payload.js'
-import { isEckePublishEligible } from '@c2k/shared'
 
 export type EckePublishJobName =
   | 'publish-article'
@@ -190,8 +193,7 @@ export async function executeEckePublishConventionEvent(
   conventionId: string,
   userId?: string,
 ): Promise<EckePublishResult> {
-  const cfg = loadEckePublishClientConfig()
-  if (!cfg) {
+  if (!isEckeEventPublishBridgeConfigured()) {
     return { ok: false, targetKind: 'ecke_event', error: 'Publish bridge not configured' }
   }
 
@@ -228,13 +230,16 @@ export async function executeEckePublishConventionEvent(
     userId,
   })
 
-  const result = await publishEventRowToEcke(cfg, row)
+  const result = await publishEckeEventDualWrite({
+    row,
+    canonicalKinkSocialPath: `/conventions/${encodeURIComponent(conv.slug)}`,
+  })
   await markEntityOutcome({
     conventionId: conv.id,
     targetKind: 'ecke_event',
     contentHash,
     externalSlug: result.ok ? row.slug : undefined,
-    eckePublicUrl: result.ok ? resolveEckePublicEventUrl(row.slug) : undefined,
+    eckePublicUrl: result.ok ? (result.eckePublicUrl ?? resolveEckePublicEventUrl(row.slug)) : undefined,
     userId,
     result,
   })
@@ -245,8 +250,7 @@ export async function executeEckeUnpublishConventionEvent(
   conventionId: string,
   userId?: string,
 ): Promise<EckePublishResult> {
-  const cfg = loadEckePublishClientConfig()
-  if (!cfg) {
+  if (!isEckeEventPublishBridgeConfigured()) {
     return { ok: false, targetKind: 'ecke_event', error: 'Publish bridge not configured' }
   }
 
@@ -268,7 +272,11 @@ export async function executeEckeUnpublishConventionEvent(
     return { ok: false, targetKind: 'ecke_event', error: 'No published ECKE event target for this convention' }
   }
 
-  const result = await unpublishEventRowToEcke(cfg, target.externalSlug)
+  const result = await unpublishEckeEventDualWrite({
+    sourceId: conventionId,
+    c2kSourceType: 'convention',
+    externalSlug: target.externalSlug,
+  })
   const now = new Date()
   if (result.ok) {
     await db
@@ -373,8 +381,7 @@ export async function executeEckePublishStandaloneEvent(
   eventId: string,
   userId?: string,
 ): Promise<EckePublishResult> {
-  const cfg = loadEckePublishClientConfig()
-  if (!cfg) {
+  if (!isEckeEventPublishBridgeConfigured()) {
     return { ok: false, targetKind: 'ecke_event', error: 'Publish bridge not configured' }
   }
 
@@ -427,13 +434,16 @@ export async function executeEckePublishStandaloneEvent(
     userId,
   })
 
-  const result = await publishEventRowToEcke(cfg, row)
+  const result = await publishEckeEventDualWrite({
+    row,
+    canonicalKinkSocialPath: `/events/${encodeURIComponent(ev.id)}`,
+  })
   await markEntityOutcome({
     eventId: ev.id,
     targetKind: 'ecke_event',
     contentHash,
     externalSlug: result.ok ? row.slug : undefined,
-    eckePublicUrl: result.ok ? resolveEckePublicEventUrl(row.slug) : undefined,
+    eckePublicUrl: result.ok ? (result.eckePublicUrl ?? resolveEckePublicEventUrl(row.slug)) : undefined,
     userId,
     result,
   })
@@ -444,8 +454,7 @@ export async function executeEckeUnpublishStandaloneEvent(
   eventId: string,
   userId?: string,
 ): Promise<EckePublishResult> {
-  const cfg = loadEckePublishClientConfig()
-  if (!cfg) {
+  if (!isEckeEventPublishBridgeConfigured()) {
     return { ok: false, targetKind: 'ecke_event', error: 'Publish bridge not configured' }
   }
 
@@ -459,7 +468,11 @@ export async function executeEckeUnpublishStandaloneEvent(
     return { ok: false, targetKind: 'ecke_event', error: 'No published ECKE event target for this event' }
   }
 
-  const result = await unpublishEventRowToEcke(cfg, target.externalSlug)
+  const result = await unpublishEckeEventDualWrite({
+    sourceId: eventId,
+    c2kSourceType: 'event',
+    externalSlug: target.externalSlug,
+  })
   const now = new Date()
   if (result.ok) {
     await db

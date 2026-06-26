@@ -39,23 +39,22 @@ type Props = {
   orgSlug: string
 }
 
-const SECTION_ORDER = ['overview', 'organization_listing', 'venues', 'education', 'vendors', 'history'] as const
+const SECTION_ORDER = ['overview', 'events', 'places', 'education', 'vendors', 'history'] as const
 
 const SECTION_HEADINGS: Record<string, string> = {
   overview: 'Overview',
-  organization_listing: 'Organization listing',
-  venues: 'Dungeon / venue',
-  education: 'Education articles',
-  vendors: 'Featured vendors',
+  events: 'Events',
+  places: 'Places',
+  education: 'Education',
+  vendors: 'Vendors',
   history: 'Publish history',
 }
 
 function cardWriteKind(
   card: OverviewCard,
-): 'education_article' | 'vendor_profile' | 'organization_listing' | 'dungeon_profile' {
+): 'education_article' | 'vendor_profile' | 'venue_profile' {
   if (card.sourceKind === 'vendor_profile') return 'vendor_profile'
-  if (card.sourceKind === 'organization_listing') return 'organization_listing'
-  if (card.sourceKind === 'dungeon_profile') return 'dungeon_profile'
+  if (card.sourceKind === 'venue_profile') return 'venue_profile'
   return 'education_article'
 }
 
@@ -153,10 +152,10 @@ export default function OrganizerOrgEckePanel({ orgSlug }: Props) {
     <div className="space-y-8">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-wide text-dc-accent">East Coast Kink Events</p>
-        <h2 className="text-2xl font-semibold text-dc-text">ECKE Publish</h2>
+        <h2 className="text-2xl font-semibold text-dc-text">Publish to East Coast Kink Events</h2>
         <p className="max-w-2xl text-sm text-dc-text-muted">
-          Manage what this organization publishes to East Coast Kink Events. Preview public org listings, dungeon or
-          venue listings, education, featured vendors, and publish history before anything goes live.{' '}
+          Publish public outcomes from this organization to ECKE — Events, Places, Vendors, and Education.
+          Organization profile pages are not published to ECKE.{' '}
           <span className="text-amber-200/90">{data.passNotice}</span>
         </p>
         <p className="text-xs text-dc-text-muted">

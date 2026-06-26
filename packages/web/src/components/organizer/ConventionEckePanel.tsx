@@ -39,22 +39,17 @@ type Props = {
   conventionSlug: string
 }
 
-const SECTION_ORDER = ['overview', 'convention_listing', 'convention_event_anchor', 'dancecard', 'history'] as const
+const SECTION_ORDER = ['overview', 'events', 'dancecard', 'history'] as const
 
 const SECTION_HEADINGS: Record<string, string> = {
   overview: 'Overview',
-  convention_listing: 'Convention listing',
-  convention_event_anchor: 'Event directory anchor',
-  dancecard: 'Dancecard bundle',
+  events: 'Events',
+  dancecard: 'Dancecard',
   history: 'Publish history',
 }
 
-function cardWriteKind(
-  card: OverviewCard,
-): 'convention_listing' | 'convention_event_anchor' | 'dancecard_event' {
-  if (card.sourceKind === 'dancecard_event') return 'dancecard_event'
-  if (card.sourceKind === 'convention_event_anchor') return 'convention_event_anchor'
-  return 'convention_listing'
+function cardWriteKind(_card: OverviewCard): 'convention_event_anchor' {
+  return 'convention_event_anchor'
 }
 
 export default function ConventionEckePanel({ conventionSlug }: Props) {
@@ -147,9 +142,10 @@ export default function ConventionEckePanel({ conventionSlug }: Props) {
     <div className="space-y-8">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-wide text-dc-accent">East Coast Kink Events</p>
-        <h2 className="text-2xl font-semibold text-dc-text">ECKE Publish</h2>
+        <h2 className="text-2xl font-semibold text-dc-text">Publish to East Coast Kink Events</h2>
         <p className="max-w-2xl text-sm text-dc-text-muted">
-          Preview and publish {data.conventionName} to East Coast Kink Events.{' '}
+          Publish {data.conventionName} to ECKE Events. Your convention appears at /events/
+          {'{slug}'} with a Convention badge.{' '}
           <span className="text-amber-200/90">{data.passNotice}</span>
         </p>
         <p className="text-xs text-dc-text-muted">
@@ -209,7 +205,7 @@ export default function ConventionEckePanel({ conventionSlug }: Props) {
                 eckePublicUrl={card.preview?.eckePublicUrl}
                 eckePublicUrlKnown={card.preview?.eckePublicUrlKnown}
                 writeEnabled={card.writeEnabled ?? false}
-                writeKind={card.sourceKind ? cardWriteKind(card) : 'convention_listing'}
+                writeKind={card.sourceKind ? cardWriteKind(card) : 'convention_event_anchor'}
                 onLoadPreview={card.sourceKind && card.sourceId ? loadPreview : undefined}
                 onPublish={
                   card.writeEnabled && card.sourceKind && card.sourceId ?

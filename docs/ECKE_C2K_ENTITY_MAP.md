@@ -1,5 +1,7 @@
 # ECKE ↔ C2K entity map
 
+> **Phase 0 product model:** [`KINK_SOCIAL_ECKE_PUBLISH_MIGRATION.md`](./KINK_SOCIAL_ECKE_PUBLISH_MIGRATION.md) — ECKE does not publish org profiles; four owner-facing surfaces are Events, Places, Vendors, Education.
+
 **Status (2026-06-06):** Outbound publish shipped in `packages/api` — **Phase C verified for conventions → `public.events` only** (`preview-c2k-weekend`). Vendor (`publish-vendor`), article (`publish-article`), and dungeon (`ecke_dungeon` inline on org publish) paths are implemented but not yet operator-piloted. Runbook: [`ECKE_C2K_HOOKUP_MASTER.md`](./ECKE_C2K_HOOKUP_MASTER.md)  
 **Vision:** [`PLATFORM_VISION.md`](./PLATFORM_VISION.md) · **Organizer:** [`ORGANIZER_CONSOLE.md`](./ORGANIZER_CONSOLE.md) · **Identity ADR:** [`EVENT_SYSTEMS_IDENTITY.md`](./EVENT_SYSTEMS_IDENTITY.md)
 

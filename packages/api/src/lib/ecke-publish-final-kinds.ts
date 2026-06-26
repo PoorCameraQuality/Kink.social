@@ -13,7 +13,8 @@ import {
   unpublishListingToEcke,
 } from './ecke-publish-client.js'
 import { buildEckeEventRowFromListing } from './ecke-directory-sync.js'
-import { executeEckePublishConventionEvent } from './ecke-publish-executor.js'
+import { executeEckePublishConventionEvent, executeEckeUnpublishConventionEvent } from './ecke-publish-executor.js'
+import { isEckeEventPublishBridgeConfigured } from './ecke-publish-config.js'
 import {
   getConventionDeferredFields,
   getConventionOmittedFields,
@@ -783,7 +784,7 @@ export async function buildConventionEventAnchorPreview(
   const contentHash = pub.contentHash
   const row = await loadConventionEventAnchorTarget(ctx.conv.id)
   const status = deriveTargetDisplayStatus(contentHash, row)
-  const bridgeConfigured = loadEckePublishClientConfig() !== null
+  const bridgeConfigured = isEckeEventPublishBridgeConfigured()
 
   return {
     ok: true,
@@ -856,6 +857,12 @@ export async function executeConventionEventAnchorUnpublish(viewer: EckePublishV
   if (!ctx?.canManage) {
     return { ok: false as const, status: 403, error: 'Convention full admin access required' }
   }
+
+  const result = await executeEckeUnpublishConventionEvent(conventionId, viewer.userId)
+  if (!result.ok) {
+    return { ok: false as const, status: 502, error: result.error ?? 'ECKE event unpublish failed', errorCode: 'ecke_publish_failed' }
+  }
+
   const preview = await buildConventionEventAnchorPreview(
     viewer,
     conventionId,
@@ -868,7 +875,7 @@ export async function executeConventionEventAnchorUnpublish(viewer: EckePublishV
       sourceKind: 'convention_event_anchor' as const,
       sourceId: conventionId,
       status: preview.ok ? preview.result.status : 'unpublished',
-      message: 'Use legacy convention unpublish for remote ecke_event draft flip; local status unchanged in this pass.',
+      message: 'Convention removed from ECKE Events',
       preview: preview.ok ? preview.result : undefined,
     },
   }

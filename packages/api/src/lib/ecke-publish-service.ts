@@ -33,8 +33,9 @@ import {
   executeVenueProfilePublish,
   executeVenueProfileUnpublish,
 } from './ecke-publish-presenter-venue.js'
-import { isOrgDungeonListing } from './ecke-directory-sync.js'
-import { loadConventionEckeContext, loadOrgEckePublishRow } from './ecke-publish-org-convention.js'
+import { loadConventionEckeContext } from './ecke-publish-org-convention.js'
+import { isEckeEventPublishBridgeConfigured } from './ecke-publish-config.js'
+import { isDancecardPublishEnabled } from './ecke-publish-payload.js'
 import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import {
@@ -180,6 +181,7 @@ export type EckeGroupOverviewCard = {
     | 'convention_event_anchor'
     | 'events'
     | 'education'
+    | 'places'
     | 'venues'
     | 'vendors'
     | 'dancecard'
@@ -1608,9 +1610,10 @@ export async function getGroupEckePublishOverview(
 
   cards.push({
     section: 'venues',
-    title: 'Venues / Dungeons / Places',
-    supportState: 'planned',
-    plannedMessage: 'Group-owned venue publishing requires ECKE table mapping confirmation (Pass 6).',
+    title: 'Places',
+    supportState: 'info',
+    plannedMessage:
+      'Publish place listings from community place settings. Places appear on ECKE Places (/dungeons/{slug}) and are separate from group or org profiles.',
   })
 
   cards.push({
@@ -1624,8 +1627,9 @@ export async function getGroupEckePublishOverview(
   cards.push({
     section: 'dancecard',
     title: 'Dancecard',
-    supportState: 'planned',
-    plannedMessage: 'Dancecard publish is managed from the convention organizer dashboard when your org runs a convention.',
+    supportState: 'info',
+    plannedMessage:
+      'Dancecard program data is not synced to ECKE. When your org runs a convention with Dancecard enabled, manage the attendee app from the convention organizer dashboard.',
   })
 
   const historyRows = await db
@@ -1648,7 +1652,7 @@ export async function getGroupEckePublishOverview(
       groupName: access.group.name,
       bridgeConnected: isEckeBridgeConfigured(),
       passNotice:
-        'Only public group listings, public group events, and org-linked education articles (author publish) can be published to East Coast Kink Events. Member lists, RSVP data, and private locations are never sent.',
+        'ECKE publishes four public surfaces from kink.social: Events, Places, Vendors, and Education. Group listings are low-priority thin listings only. Member lists, RSVP data, and private locations are never sent.',
       cards,
       history: historyRows.map((r) => ({
         targetKind: r.targetKind,
@@ -1678,55 +1682,28 @@ export async function getOrgEckePublishOverview(
 
   cards.push({
     section: 'overview',
-    title: 'ECKE Publish overview',
+    title: 'Publish to East Coast Kink Events',
     supportState: 'info',
     summary: isEckeBridgeConfigured()
-      ? 'Organization listing, dungeon/venue (when configured), education, and featured vendors can be managed here. Vendor and article writes follow owner/author rules.'
+      ? 'Organizations publish public outcomes to ECKE — not org profile pages. Use Events, Places, Vendors, and Education from their respective editors. Publish events and conventions to ECKE Events; publish place listings when this org manages a public venue.'
       : 'ECKE publish bridge is not configured on this server.',
   })
 
-  const orgListingPreview = await buildOrganizationListingPreview(
-    viewer,
-    access.organization.id,
-    getRegistryEntry('organization_listing')!,
-  )
-  if (orgListingPreview.ok) {
-    cards.push({
-      section: 'organization_listing',
-      sourceKind: 'organization_listing',
-      sourceId: access.organization.id,
-      title: `${access.organization.displayName} listing`,
-      supportState: 'active_existing',
-      eligible: orgListingPreview.result.eligible,
-      reason: orgListingPreview.result.reason,
-      status: orgListingPreview.result.status,
-      preview: orgListingPreview.result,
-      writeEnabled: true,
-    })
-  }
+  cards.push({
+    section: 'events',
+    title: 'Events & conventions',
+    supportState: 'info',
+    plannedMessage:
+      'Publish standalone events from the event host tools. Publish conventions from the convention ECKE panel — they appear on ECKE under Events (/events/{slug}) with a Convention badge.',
+  })
 
-  const orgRow = await loadOrgEckePublishRow(access.organization.id)
-  if (orgRow && isOrgDungeonListing(orgRow.featureFlags)) {
-    const dungeonPreview = await buildDungeonProfilePreview(
-      viewer,
-      access.organization.id,
-      getRegistryEntry('dungeon_profile')!,
-    )
-    if (dungeonPreview.ok) {
-      cards.push({
-        section: 'venues',
-        sourceKind: 'dungeon_profile',
-        sourceId: access.organization.id,
-        title: `${access.organization.displayName} dungeon/venue`,
-        supportState: 'active_existing',
-        eligible: dungeonPreview.result.eligible,
-        reason: dungeonPreview.result.reason,
-        status: dungeonPreview.result.status,
-        preview: dungeonPreview.result,
-        writeEnabled: true,
-      })
-    }
-  }
+  cards.push({
+    section: 'places',
+    title: 'Places',
+    supportState: 'info',
+    plannedMessage:
+      'Publish a place listing when this organization manages a public venue. Place listings are separate from the organization profile and appear on ECKE Places (/dungeons/{slug}). Manage places from community place settings when linked to this org.',
+  })
 
   const orgArticles = await loadOrgLinkedEducationArticleSummaries(access.organization.id)
   if (orgArticles.length === 0) {
@@ -1783,7 +1760,7 @@ export async function getOrgEckePublishOverview(
       organizationName: access.organization.displayName,
       bridgeConnected: isEckeBridgeConfigured(),
       passNotice:
-        'Public org listings and dungeon profiles publish via org moderators. Education articles and featured vendors follow author/owner rules.',
+        'ECKE publishes public outcomes from this organization — events, place listings, vendor profiles, and education. Organization profile pages are not published to ECKE.',
       cards,
       history: historyRows.map((r) => ({
         targetKind: r.targetKind,
@@ -1813,32 +1790,12 @@ export async function getConventionEckePublishOverview(
 
   cards.push({
     section: 'overview',
-    title: 'ECKE Publish overview',
+    title: 'Publish to East Coast Kink Events',
     supportState: 'info',
     summary: isEckeBridgeConfigured()
-      ? 'Convention listing, event directory anchor, and Dancecard bundle publish separately. Full admins control each target from this panel.'
+      ? 'Publish this convention to ECKE Events. Your convention appears at /events/{slug} with a Convention badge. Dancecard program data stays on kink.social — ECKE event pages may link to Dancecard when enabled.'
       : 'ECKE publish bridge is not configured on this server.',
   })
-
-  const listingPreview = await buildConventionListingPreview(
-    viewer,
-    ctx.conv.id,
-    getRegistryEntry('convention_listing')!,
-  )
-  if (listingPreview.ok) {
-    cards.push({
-      section: 'convention_listing',
-      sourceKind: 'convention_listing',
-      sourceId: ctx.conv.id,
-      title: `${ctx.conv.name} listing`,
-      supportState: 'active_existing',
-      eligible: listingPreview.result.eligible,
-      reason: listingPreview.result.reason,
-      status: listingPreview.result.status,
-      preview: listingPreview.result,
-      writeEnabled: true,
-    })
-  }
 
   const anchorPreview = await buildConventionEventAnchorPreview(
     viewer,
@@ -1847,10 +1804,10 @@ export async function getConventionEckePublishOverview(
   )
   if (anchorPreview.ok) {
     cards.push({
-      section: 'convention_event_anchor',
+      section: 'events',
       sourceKind: 'convention_event_anchor',
       sourceId: ctx.conv.id,
-      title: `${ctx.conv.name} event directory anchor`,
+      title: `Publish event to ECKE — ${ctx.conv.name}`,
       supportState: 'active_existing',
       eligible: anchorPreview.result.eligible,
       reason: anchorPreview.result.reason,
@@ -1858,38 +1815,19 @@ export async function getConventionEckePublishOverview(
       preview: anchorPreview.result,
       writeEnabled: true,
       summary:
-        'Publishes the ECKE events directory row (ecke_event) for this convention. Listing and Dancecard are separate targets.',
+        'Your convention appears on ECKE under Events (/events/{slug}) with Convention metadata. Legacy listing webhook may still run in the background during migration.',
     })
   }
 
-  const dancecardPreview = await buildDancecardEventPreview(
-    viewer,
-    ctx.conv.id,
-    getRegistryEntry('dancecard_event')!,
-  )
-  if (dancecardPreview.ok) {
-    cards.push({
-      section: 'dancecard',
-      sourceKind: 'dancecard_event',
-      sourceId: ctx.conv.id,
-      title: `${ctx.conv.name} Dancecard bundle`,
-      supportState: 'active_existing',
-      eligible: dancecardPreview.result.eligible,
-      reason: dancecardPreview.result.reason,
-      status: dancecardPreview.result.status,
-      preview: dancecardPreview.result,
-      writeEnabled: true,
-      summary:
-        'Locations, program slots, and staff shifts publish together in the Dancecard bundle. Access codes appear as configured in preview, not raw values.',
-    })
-  } else {
-    cards.push({
-      section: 'dancecard',
-      title: 'Dancecard bundle',
-      supportState: 'info',
-      plannedMessage: dancecardPreview.error,
-    })
-  }
+  const dancecardEnabled = isDancecardPublishEnabled(ctx.conv.settings)
+  cards.push({
+    section: 'dancecard',
+    title: 'Dancecard',
+    supportState: 'info',
+    plannedMessage: dancecardEnabled
+      ? 'Dancecard program data is not synced to ECKE. When this convention is published to ECKE Events, public ECKE pages may link to your Dancecard at /dancecard/{slug} on kink.social.'
+      : 'Enable Dancecard in convention settings if attendees should use the kink.social Dancecard app. Program data is not synced to ECKE.',
+  })
 
   const historyRows = await loadConventionEckeHistory(ctx.conv.id)
 
@@ -1901,7 +1839,7 @@ export async function getConventionEckePublishOverview(
       conventionName: ctx.conv.name,
       bridgeConnected: isEckeBridgeConfigured(),
       passNotice:
-        'Convention full admins can preview and publish the ECKE listing webhook, event directory anchor, and Dancecard bundle. Private staff notes, volunteer assignments, and attendee data never publish.',
+        'Publish this convention to ECKE Events. Dancecard program slots, locations, and staff are not synced to ECKE — public ECKE pages may link to Dancecard when enabled.',
       cards,
       history: historyRows.map((r) => ({
         targetKind: r.targetKind,
@@ -2128,7 +2066,7 @@ async function executeEventListingPublish(
     return { ok: false, status: 400, error: previewResult.result.reason ?? 'Event is not eligible for ECKE publish' }
   }
 
-  if (!loadEckePublishClientConfig()) {
+  if (!isEckeEventPublishBridgeConfigured()) {
     return { ok: false, status: 503, error: 'ECKE publish bridge is not configured' }
   }
 

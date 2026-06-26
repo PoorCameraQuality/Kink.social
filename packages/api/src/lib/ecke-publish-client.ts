@@ -94,6 +94,29 @@ export function loadEckeIngestApiConfig(): EckeIngestApiConfig | null {
   }
 }
 
+function defaultEckePublicUrlForIngest(
+  cfg: EckeIngestApiConfig,
+  eckeSlug: string,
+  body: KinkSocialPublicIngestEnvelope | KinkSocialUnpublishEnvelope,
+): string {
+  if (!eckeSlug) return cfg.publicBaseUrl
+  const base = cfg.publicBaseUrl.replace(/\/$/, '')
+  if (body.action === 'unpublish') return base
+  switch (body.entityType) {
+    case 'education_article':
+      return `${base}/education/${encodeURIComponent(eckeSlug)}`
+    case 'event':
+    case 'convention':
+      return `${base}/events/${encodeURIComponent(eckeSlug)}`
+    case 'place':
+      return `${base}/dungeons/${encodeURIComponent(eckeSlug)}`
+    case 'vendor':
+      return `${base}/vendors/${encodeURIComponent(eckeSlug)}`
+    default:
+      return base
+  }
+}
+
 async function postEckeIngestEnvelope(
   cfg: EckeIngestApiConfig,
   endpoint: string,
@@ -141,7 +164,7 @@ async function postEckeIngestEnvelope(
     const eckeSlug = parsed.eckeSlug ?? ''
     const eckePublicUrl =
       parsed.eckePublicUrl ||
-      (eckeSlug ? `${cfg.publicBaseUrl}/education/${eckeSlug}` : cfg.publicBaseUrl)
+      defaultEckePublicUrlForIngest(cfg, eckeSlug, body)
 
     return {
       ok: true,
@@ -202,6 +225,53 @@ export async function unpublishEducationArticleEnvelopeToEcke(
   return {
     ok: true,
     targetKind: 'ecke_article',
+    detail: result.eckePublicUrl || 'unpublished',
+  }
+}
+
+const EVENT_INGEST_ENTITY_TYPES = new Set(['event', 'convention'])
+
+export async function publishEventIngestEnvelopeToEcke(
+  cfg: EckeIngestApiConfig,
+  envelope: KinkSocialPublicIngestEnvelope,
+): Promise<EckePublishResult> {
+  if (!EVENT_INGEST_ENTITY_TYPES.has(envelope.entityType)) {
+    return { ok: false, targetKind: 'ecke_event', error: 'Event ingest requires entityType event or convention' }
+  }
+  if (eckePayloadContainsPrivateAppUrls(envelope.payload as Record<string, unknown>)) {
+    return { ok: false, targetKind: 'ecke_event', error: 'ECKE payload must not contain private kink.social URLs' }
+  }
+
+  const result = await postEckeIngestEnvelope(cfg, cfg.publishEndpoint, envelope)
+  if (!result.ok) {
+    return { ok: false, targetKind: 'ecke_event', error: result.error }
+  }
+
+  return {
+    ok: true,
+    targetKind: 'ecke_event',
+    detail: result.eckePublicUrl,
+    eckeSlug: result.eckeSlug,
+    eckePublicUrl: result.eckePublicUrl,
+  }
+}
+
+export async function unpublishEventIngestEnvelopeToEcke(
+  cfg: EckeIngestApiConfig,
+  envelope: KinkSocialUnpublishEnvelope,
+): Promise<EckePublishResult> {
+  if (!EVENT_INGEST_ENTITY_TYPES.has(envelope.entityType)) {
+    return { ok: false, targetKind: 'ecke_event', error: 'Event unpublish requires entityType event or convention' }
+  }
+
+  const result = await postEckeIngestEnvelope(cfg, cfg.unpublishEndpoint, envelope)
+  if (!result.ok) {
+    return { ok: false, targetKind: 'ecke_event', error: result.error }
+  }
+
+  return {
+    ok: true,
+    targetKind: 'ecke_event',
     detail: result.eckePublicUrl || 'unpublished',
   }
 }

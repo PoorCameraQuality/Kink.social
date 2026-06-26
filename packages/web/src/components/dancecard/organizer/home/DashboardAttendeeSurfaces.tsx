@@ -20,9 +20,9 @@ type PublishResponse = {
 }
 
 const TARGET_LABELS: Record<string, string> = {
-  dancecard_event: 'Dancecard attendee app',
-  ecke_listing: 'ECKE listing',
-  ecke_event: 'ECKE events directory',
+  dancecard_event: 'Dancecard on kink.social',
+  ecke_listing: 'ECKE Events',
+  ecke_event: 'ECKE Events',
 }
 
 function statusRow(status: PublishTarget['status'] | 'unknown'): { label: string; tone: string } {
@@ -98,15 +98,15 @@ export function DashboardAttendeeSurfaces({
       status: eventPagePublished ? ('published' as const) : ('never' as const),
     },
     {
+      label: TARGET_LABELS.ecke_event,
+      status: ecke?.status ?? (publish?.bridgeConnected ? 'never' : 'unknown'),
+    },
+    {
       label: TARGET_LABELS.dancecard_event,
       status: dancecard?.status ?? 'unknown',
     },
     {
-      label: 'ECKE listing',
-      status: ecke?.status ?? (publish?.bridgeConnected ? 'never' : 'unknown'),
-    },
-    {
-      label: 'Program visibility',
+      label: 'Program visibility (kink.social)',
       status: programVisibilityStatus(slotStats),
     },
   ]
