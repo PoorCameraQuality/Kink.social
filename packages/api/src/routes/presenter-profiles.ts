@@ -1008,6 +1008,10 @@ export async function registerPresenterProfileRoutes(app: FastifyInstance) {
     const viewerId = optionalViewerId(req)
     const isOwner = viewerId === user.id
     const showRunner = await canAccessPresenterRunnerMaterials(viewerId, user.id)
+    if (prof.directoryVisibility === 'UNLISTED' && !isOwner && !showRunner) {
+      return reply.status(404).send({ error: 'Not found' })
+    }
+
     const canSeeOrganizerFields = canSeePresenterOrganizerFields(isOwner, showRunner)
     const includeRunnerMaterials = showRunner
     const offeringsWhere =

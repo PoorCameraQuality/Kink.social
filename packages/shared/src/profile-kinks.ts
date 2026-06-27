@@ -1,3 +1,6 @@
+/** Max kink rows per profile (PUT /api/profile/me/kinks). */
+export const PROFILE_KINK_MAX = 50
+
 /** Interest statuses shown on public profiles (non-owner API filter). */
 export const PUBLIC_PROFILE_KINK_STATUSES = ['into', 'curious'] as const
 

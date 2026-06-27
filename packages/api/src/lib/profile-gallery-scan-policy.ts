@@ -27,7 +27,7 @@ export function isInfraOnlyMalwareScannerFailure(
   })
 }
 
-/** Profile headshots: do not block publish when only ClamAV infra failed and content scanners passed. */
+/** Profile headshots: do not block publish when only ClamAV infra failed and content scanners passed (safe public only). */
 export function softenProfileGalleryScanAggregate(params: {
   sourceSurface: string | null | undefined
   contentRating: string | null | undefined
@@ -38,6 +38,7 @@ export function softenProfileGalleryScanAggregate(params: {
     return params.aggregateScannerStatus
   }
   if (!isProfileGallerySurface(params.sourceSurface)) return params.aggregateScannerStatus
+  // Explicit or non-safe ratings must not auto-publish when malware scan is unavailable.
   if (params.contentRating !== MEDIA_CONTENT_RATINGS.safePublic) return params.aggregateScannerStatus
   if (!isInfraOnlyMalwareScannerFailure(params.scannerResults)) return params.aggregateScannerStatus
   return SCANNER_RESULT_STATUSES.passed

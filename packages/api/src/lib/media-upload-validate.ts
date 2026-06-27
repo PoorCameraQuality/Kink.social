@@ -9,7 +9,9 @@ export const ALLOWED_IMAGE_MIMES = [
 
 export type AllowedImageMime = (typeof ALLOWED_IMAGE_MIMES)[number]
 
-export const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024
+import { MAX_IMAGE_UPLOAD_BYTES } from '@c2k/shared'
+
+export { MAX_IMAGE_UPLOAD_BYTES }
 
 export type MediaUploadValidationResult =
   | {

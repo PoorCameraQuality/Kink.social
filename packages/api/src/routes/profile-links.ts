@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { db, schema } from '../db/index.js'
+import { rejectIfUserIdentityBanned } from '../lib/moderation-route-auth.js'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -13,6 +14,15 @@ function useDatabase(): boolean {
 }
 
 type LinkRow = typeof schema.profileLinks.$inferSelect
+
+function isAllowedProfileLinkUrl(raw: string): boolean {
+  try {
+    const url = new URL(raw.trim())
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
 
 function mapLink(row: LinkRow) {
   return {
@@ -66,8 +76,12 @@ export async function registerProfileLinkRoutes(app: FastifyInstance) {
     const viewer = resolveViewerFromRequest(req)
     const userId = getViewerUserId(viewer.payload)
     if (!userId) return reply.status(401).send({ error: 'Unauthorized' })
+    if (await rejectIfUserIdentityBanned(userId, reply)) return
     const parsed = createBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    if (!isAllowedProfileLinkUrl(parsed.data.url)) {
+      return reply.status(400).send({ error: 'Link URL must use http or https' })
+    }
 
     const existing = await loadLinksForUser(userId)
     const sortOrder = parsed.data.sortOrder ?? existing.length
@@ -90,10 +104,14 @@ export async function registerProfileLinkRoutes(app: FastifyInstance) {
     const viewer = resolveViewerFromRequest(req)
     const userId = getViewerUserId(viewer.payload)
     if (!userId) return reply.status(401).send({ error: 'Unauthorized' })
+    if (await rejectIfUserIdentityBanned(userId, reply)) return
     const { id } = req.params as { id: string }
     if (!UUID_RE.test(id)) return reply.status(400).send({ error: 'Invalid id' })
     const parsed = patchBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    if (parsed.data.url !== undefined && !isAllowedProfileLinkUrl(parsed.data.url)) {
+      return reply.status(400).send({ error: 'Link URL must use http or https' })
+    }
 
     const [existing] = await db
       .select()
@@ -138,6 +156,7 @@ export async function registerProfileLinkRoutes(app: FastifyInstance) {
     const viewer = resolveViewerFromRequest(req)
     const userId = getViewerUserId(viewer.payload)
     if (!userId) return reply.status(401).send({ error: 'Unauthorized' })
+    if (await rejectIfUserIdentityBanned(userId, reply)) return
     const parsed = reorderBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
 

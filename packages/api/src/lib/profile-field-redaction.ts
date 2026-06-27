@@ -161,6 +161,7 @@ export function redactProfileForViewer<
     fieldVisibility: unknown
     discoverableInPeopleSearch: boolean
     location?: string | null
+    geoJson?: unknown
   },
 >(
   prof: T,
@@ -196,6 +197,8 @@ export function redactProfileForViewer<
     sexualOrientations: visible.sexualOrientations,
     romanticOrientations: visible.romanticOrientations,
     pronounTags: visible.pronounTags,
+    geoJson: null,
+    lookingFor: isOwner && !options?.asPublicProfileView ? extended.lookingFor : [],
   }
   if (isOwner && options?.asPublicProfileView) {
     return {
@@ -205,6 +208,7 @@ export function redactProfileForViewer<
       placeId: null,
       stateId: null,
       customLocation: null,
+      lookingFor: [],
       fieldVisibility: prof.fieldVisibility,
       discoverableInPeopleSearch: prof.discoverableInPeopleSearch,
     }

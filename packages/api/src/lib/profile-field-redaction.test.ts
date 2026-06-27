@@ -22,6 +22,7 @@ const baseProfile = {
   customLocation: null,
   lookingFor: ['Friends', 'Play partners'],
   notLookingFor: ['One-night stands'],
+  geoJson: { type: 'Point', coordinates: [-122.67, 45.52] },
   fieldVisibility: {
     gender: 'hidden',
     age: 'hidden',
@@ -80,7 +81,8 @@ describe('redactProfileForViewer', () => {
     assert.equal(out.stateId, null)
     assert.equal(out.customLocation, null)
     assert.deepEqual(out.notLookingFor, [])
-    assert.deepEqual(out.lookingFor, ['Friends', 'Play partners'])
+    assert.deepEqual(out.lookingFor, [])
+    assert.equal(out.geoJson, null)
     assert.equal('fieldVisibility' in out, false)
     assert.equal('discoverableInPeopleSearch' in out, false)
   })

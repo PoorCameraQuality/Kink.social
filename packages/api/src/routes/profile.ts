@@ -24,6 +24,8 @@ import { loadAcceptedFriendUserIds } from '../lib/accepted-friends.js'
 import { redactProfileForViewer } from '../lib/profile-field-redaction.js'
 import { canViewerReadIsoVisibility } from '../lib/iso-access.js'
 import { canViewerReadProfile, canViewerReadProfileEmail } from '../lib/profile-access.js'
+import { isBlockedPair } from '../lib/blocks.js'
+import { rejectIfUserIdentityBanned } from '../lib/moderation-route-auth.js'
 import { ensureProfileForUserId } from '../lib/ensure-profile.js'
 import { resolveZipPlace } from '../lib/zip-place-lookup.js'
 import { loadProfilePhotos, loadPublicProfilePhotos } from './profile-photos.js'
@@ -68,9 +70,9 @@ const fieldVisibilityPatchSchema = z
   .optional()
 
 const patchBody = z.object({
-  bio: z.string().optional(),
-  location: z.string().optional(),
-  displayName: z.string().optional(),
+  bio: z.union([z.string(), z.null()]).optional(),
+  location: z.union([z.string(), z.null()]).optional(),
+  displayName: z.union([z.string(), z.null()]).optional(),
   roles: z.array(z.string()).optional(),
   gender: z.union([z.string().max(64), z.null()]).optional(),
   sexuality: z.string().max(128).optional(),
@@ -87,6 +89,7 @@ const patchBody = z.object({
   age: z.number().int().min(18).max(120).optional(),
   birthDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/), z.null()]).optional(),
   discoverableInPeopleSearch: z.boolean().optional(),
+  visibility: z.enum(['PUBLIC', 'MEMBERS', 'PRIVATE']).optional(),
   fieldVisibility: fieldVisibilityPatchSchema,
   placeId: z.union([z.string().uuid(), z.null()]).optional(),
   stateId: z.union([z.string().uuid(), z.null()]).optional(),
@@ -270,6 +273,9 @@ export async function registerProfileRoutes(app: FastifyInstance) {
     const viewer = resolveViewerFromRequest(req)
     const viewerId = getViewerUserId(viewer.payload)
     const isOwner = viewerId !== null && viewerId === user.id
+    if (!isOwner && viewerId && (await isBlockedPair(viewerId, user.id))) {
+      return reply.status(404).send({ error: 'Not found' })
+    }
     let profile = (
       await db.select().from(schema.profiles).where(eq(schema.profiles.userId, user.id)).limit(1)
     )[0]
@@ -437,13 +443,14 @@ export async function registerProfileRoutes(app: FastifyInstance) {
     if (!userId) {
       return reply.status(401).send({ error: 'Unauthorized' })
     }
+    if (await rejectIfUserIdentityBanned(userId, reply)) return
     const parsed = patchBody.safeParse(req.body)
     if (!parsed.success) {
       req.log.warn(
         { userId, validation: parsed.error.flatten() },
         'PATCH /api/profile/me validation failed',
       )
-      return reply.status(400).send({ error: 'Invalid body' })
+      return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() })
     }
     const [user] = await db.select().from(schema.users).where(eq(schema.users.id, userId)).limit(1)
     if (!user) {
@@ -451,6 +458,10 @@ export async function registerProfileRoutes(app: FastifyInstance) {
     }
     const prof = enrichProfileIdentityRead(await ensureProfileForUserId(user.id))
     const u = parsed.data
+
+    if (u.age !== undefined && u.birthDate === undefined) {
+      return reply.status(400).send({ error: 'Age cannot be set directly; provide birthDate instead' })
+    }
 
     let nextGenders = prof.genders
     if (u.genders !== undefined) {
@@ -531,13 +542,13 @@ export async function registerProfileRoutes(app: FastifyInstance) {
       ;[updated] = await db
         .update(schema.profiles)
         .set({
-          bio: u.bio ?? prof.bio,
+          ...(u.bio !== undefined ? { bio: u.bio } : {}),
           location: loc.location,
           placeId: loc.placeId,
           stateId: loc.stateId,
           customLocation: loc.customLocation,
-          homeZip: resolvedHomeZip,
-          displayName: u.displayName ?? prof.displayName,
+          ...(u.homeZip !== undefined ? { homeZip: resolvedHomeZip } : {}),
+          ...(u.displayName !== undefined ? { displayName: u.displayName } : {}),
           roles: nextRoles,
           genders: nextGenders,
           sexualOrientations: nextSexual,
@@ -557,6 +568,7 @@ export async function registerProfileRoutes(app: FastifyInstance) {
             u.discoverableInPeopleSearch !== undefined ?
               u.discoverableInPeopleSearch
             : prof.discoverableInPeopleSearch,
+          ...(u.visibility !== undefined ? { visibility: u.visibility } : {}),
           fieldVisibility: mergedVisibility,
           updatedAt: new Date(),
         })

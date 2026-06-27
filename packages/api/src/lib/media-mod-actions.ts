@@ -111,6 +111,17 @@ export async function approveMediaAssetByModerator(
       updatedAt: new Date(),
     })
     .where(eq(schema.mediaAssets.id, mediaAssetId))
+
+  if (asset.ownerType === 'profile' && asset.ownerId) {
+    const [linkedPhoto] = await db
+      .select({ profileId: schema.profilePhotos.profileId })
+      .from(schema.profilePhotos)
+      .where(eq(schema.profilePhotos.mediaAssetId, mediaAssetId))
+      .limit(1)
+    const profileId = linkedPhoto?.profileId ?? asset.ownerId
+    const { syncProfileAvatarUrl } = await import('../routes/profile-photos.js')
+    await syncProfileAvatarUrl(profileId)
+  }
 }
 
 export async function restoreMediaAssetByModerator(

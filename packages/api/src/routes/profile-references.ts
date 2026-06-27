@@ -4,10 +4,12 @@ import { z } from 'zod'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { db, schema } from '../db/index.js'
+import { canViewerReadProfile } from '../lib/profile-access.js'
 import {
   evaluateReferenceCountsTowardLevel,
   referrerMeetsEstablishedFloor,
 } from '../lib/reference-trust.js'
+import { rejectIfUserIdentityBanned } from '../lib/moderation-route-auth.js'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -42,6 +44,7 @@ export async function registerProfileReferenceRoutes(app: FastifyInstance) {
     if (!requireDb(reply)) return
     const user = requireUser(req, reply)
     if (!user) return
+    if (await rejectIfUserIdentityBanned(user.userId, reply)) return
     const parsed = offerBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
     const [subject] = await db
@@ -102,6 +105,7 @@ export async function registerProfileReferenceRoutes(app: FastifyInstance) {
     if (!requireDb(reply)) return reply
     const user = requireUser(req, reply)
     if (!user) return reply
+    if (await rejectIfUserIdentityBanned(user.userId, reply)) return reply
     const { id } = req.params as { id: string }
     if (!UUID_RE.test(id)) return reply.status(400).send({ error: 'Invalid id' })
     const [ref] = await db.select().from(schema.profileReferences).where(eq(schema.profileReferences.id, id)).limit(1)
@@ -186,6 +190,7 @@ export async function registerProfileReferenceRoutes(app: FastifyInstance) {
     if (!requireDb(reply)) return reply
     const user = requireUser(req, reply)
     if (!user) return reply
+    if (await rejectIfUserIdentityBanned(user.userId, reply)) return reply
     const { id } = req.params as { id: string }
     if (!UUID_RE.test(id)) return reply.status(400).send({ error: 'Invalid id' })
     const [ref] = await db.select().from(schema.profileReferences).where(eq(schema.profileReferences.id, id)).limit(1)
@@ -199,6 +204,7 @@ export async function registerProfileReferenceRoutes(app: FastifyInstance) {
     if (!requireDb(reply)) return
     const user = requireUser(req, reply)
     if (!user) return
+    if (await rejectIfUserIdentityBanned(user.userId, reply)) return
     const { id } = req.params as { id: string }
     if (!UUID_RE.test(id)) return reply.status(400).send({ error: 'Invalid id' })
     const [ref] = await db.select().from(schema.profileReferences).where(eq(schema.profileReferences.id, id)).limit(1)
@@ -214,6 +220,21 @@ export async function registerProfileReferenceRoutes(app: FastifyInstance) {
     const { username } = req.params as { username: string }
     const [subj] = await db.select({ id: schema.users.id }).from(schema.users).where(eq(schema.users.username, username)).limit(1)
     if (!subj) return reply.status(404).send({ error: 'Not found' })
+
+    const [profile] = await db
+      .select({ visibility: schema.profiles.visibility })
+      .from(schema.profiles)
+      .where(eq(schema.profiles.userId, subj.id))
+      .limit(1)
+    if (!profile) return reply.status(404).send({ error: 'Not found' })
+
+    const viewer = resolveViewerFromRequest(req)
+    const viewerId = getViewerUserId(viewer.payload)
+    const isOwner = viewerId !== null && viewerId === subj.id
+    if (!canViewerReadProfile(profile.visibility, { viewerId, isOwner })) {
+      return reply.status(404).send({ error: 'Not found' })
+    }
+
     const rows = await db
       .select({
         id: schema.profileReferences.id,

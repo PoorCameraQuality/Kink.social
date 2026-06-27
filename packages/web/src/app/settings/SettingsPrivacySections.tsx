@@ -215,6 +215,8 @@ type SearchDiscoveryProps = {
   onPrivacyChange: (next: UserSettingsBundle['privacy']) => void
   profDiscoverable: boolean
   onProfDiscoverableChange: (value: boolean) => void
+  profVisibility: 'PUBLIC' | 'MEMBERS' | 'PRIVATE'
+  onProfVisibilityChange: (value: 'PUBLIC' | 'MEMBERS' | 'PRIVATE') => void
   profSectionLoading: boolean
 }
 
@@ -223,6 +225,8 @@ export function SettingsSearchDiscoveryPanel({
   onPrivacyChange,
   profDiscoverable,
   onProfDiscoverableChange,
+  profVisibility,
+  onProfVisibilityChange,
   profSectionLoading,
 }: SearchDiscoveryProps) {
   return (
@@ -237,6 +241,26 @@ export function SettingsSearchDiscoveryPanel({
           <DancecardPanelSkeleton lines={2} />
         </div>
       : <div className="mt-4 space-y-4">
+          <div>
+            <label htmlFor="profile-overall-visibility" className="block text-sm font-medium text-dc-text mb-1">
+              Overall profile visibility
+            </label>
+            <p className="text-xs text-dc-muted mb-2">
+              Controls who can open your profile page. Field-level visibility below still applies to individual details.
+            </p>
+            <select
+              id="profile-overall-visibility"
+              className={settingsSelectClass}
+              value={profVisibility}
+              onChange={(e) =>
+                onProfVisibilityChange(e.target.value as 'PUBLIC' | 'MEMBERS' | 'PRIVATE')
+              }
+            >
+              <option value="PUBLIC">Public — anyone can view</option>
+              <option value="MEMBERS">Members — signed-in members only</option>
+              <option value="PRIVATE">Private — only you</option>
+            </select>
+          </div>
           <label className="flex cursor-pointer items-center justify-between gap-4">
             <div>
               <span className="block text-sm text-dc-text-muted">Appear in Find people search</span>

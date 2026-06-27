@@ -5,6 +5,9 @@ import { z } from 'zod'
  * Shared contract for API, workers, and web (browser-safe).
  */
 
+/** Max image upload size (profile photos, quarantine pipeline). */
+export const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024
+
 export const MEDIA_UPLOAD_STATUSES = {
   pendingUpload: 'PENDING_UPLOAD',
   pendingAttestation: 'PENDING_ATTESTATION',

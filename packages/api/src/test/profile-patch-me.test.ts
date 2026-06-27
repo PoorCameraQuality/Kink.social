@@ -71,6 +71,56 @@ describe('PATCH /api/profile/me', { skip: !runDbTests }, () => {
     }
   })
 
+  test('PATCH rejects standalone age without birthDate', async () => {
+    ensureCiAuthSecret()
+    const app = await buildCookieApp(async (a) => {
+      const { registerProfileRoutes } = await import('../routes/profile.js')
+      await registerProfileRoutes(a)
+    })
+    try {
+      const res = await app.inject({
+        method: 'PATCH',
+        url: '/api/profile/me',
+        headers: { ...cookieHeader(userId, username), 'content-type': 'application/json' },
+        payload: { age: 25 },
+      })
+      assert.equal(res.statusCode, 400, res.body)
+      const body = res.json() as { error?: string }
+      assert.match(body.error ?? '', /birthDate/i)
+    } finally {
+      await app.close()
+    }
+  })
+
+  test('PATCH allows null bio to clear about text', async () => {
+    ensureCiAuthSecret()
+    const app = await buildCookieApp(async (a) => {
+      const { registerProfileRoutes } = await import('../routes/profile.js')
+      await registerProfileRoutes(a)
+    })
+    try {
+      const setRes = await app.inject({
+        method: 'PATCH',
+        url: '/api/profile/me',
+        headers: { ...cookieHeader(userId, username), 'content-type': 'application/json' },
+        payload: { bio: 'Temporary bio' },
+      })
+      assert.equal(setRes.statusCode, 200, setRes.body)
+
+      const clearRes = await app.inject({
+        method: 'PATCH',
+        url: '/api/profile/me',
+        headers: { ...cookieHeader(userId, username), 'content-type': 'application/json' },
+        payload: { bio: null },
+      })
+      assert.equal(clearRes.statusCode, 200, clearRes.body)
+      const cleared = clearRes.json() as { profile?: { bio?: string | null } }
+      assert.equal(cleared.profile?.bio, null)
+    } finally {
+      await app.close()
+    }
+  })
+
   test('PATCH rejects partial invalid homeZip without blocking null zip', async () => {
     ensureCiAuthSecret()
     const app = await buildCookieApp(async (a) => {

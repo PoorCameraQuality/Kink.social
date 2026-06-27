@@ -1,10 +1,12 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
+import { PROFILE_KINK_MAX } from '@c2k/shared'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { db, schema } from '../db/index.js'
 import { ensureProfileForUserId } from '../lib/ensure-profile.js'
+import { rejectIfUserIdentityBanned } from '../lib/moderation-route-auth.js'
 
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
@@ -55,9 +57,13 @@ export async function registerProfileKinksRoutes(app: FastifyInstance) {
     if (!userId) {
       return reply.status(401).send({ error: 'Unauthorized' })
     }
+    if (await rejectIfUserIdentityBanned(userId, reply)) return
     const parsed = putBodySchema.safeParse(req.body)
     if (!parsed.success) {
       return reply.status(400).send({ error: 'Invalid body' })
+    }
+    if (parsed.data.length > PROFILE_KINK_MAX) {
+      return reply.status(400).send({ error: `At most ${PROFILE_KINK_MAX} kinks allowed` })
     }
     const seen = new Set<string>()
     const deduped = parsed.data.filter((row) => {

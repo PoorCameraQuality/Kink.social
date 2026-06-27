@@ -33,7 +33,7 @@ const baseContext: MediaScanContext = {
 }
 
 describe('T&S-4A scanner adapters (unit)', () => {
-  test('profile gallery infra-only malware error softens to passed', () => {
+  test('profile gallery infra-only malware error softens to passed for safe public', () => {
     const results = [
       {
         scannerName: SCANNER_NAMES.malwareClamav,
@@ -57,6 +57,32 @@ describe('T&S-4A scanner adapters (unit)', () => {
         scannerResults: results,
       }),
       SCANNER_RESULT_STATUSES.passed,
+    )
+  })
+
+  test('profile gallery explicit content does not soften infra-only malware error', () => {
+    const results = [
+      {
+        scannerName: SCANNER_NAMES.malwareClamav,
+        status: SCANNER_RESULT_STATUSES.error,
+        labels: ['scanner_unavailable'],
+      },
+      { scannerName: SCANNER_NAMES.exactHash, status: SCANNER_RESULT_STATUSES.passed, labels: [] },
+      {
+        scannerName: SCANNER_NAMES.adultClassifier,
+        status: SCANNER_RESULT_STATUSES.passed,
+        labels: [],
+      },
+      { scannerName: SCANNER_NAMES.ocrRisk, status: SCANNER_RESULT_STATUSES.passed, labels: [] },
+    ]
+    assert.equal(
+      softenProfileGalleryScanAggregate({
+        sourceSurface: 'profile_gallery',
+        contentRating: 'EXPLICIT_ADULT',
+        aggregateScannerStatus: SCANNER_RESULT_STATUSES.error,
+        scannerResults: results,
+      }),
+      SCANNER_RESULT_STATUSES.error,
     )
   })
 

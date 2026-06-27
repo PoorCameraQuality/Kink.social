@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom'
-import { useId } from 'react'
+import { useId, useMemo } from 'react'
 import {
+  MAX_IMAGE_UPLOAD_BYTES,
   PROFILE_PHOTO_PENDING_REVIEW_DETAIL,
   PROFILE_PHOTO_PENDING_REVIEW_MESSAGE,
   PROFILE_PHOTO_PENDING_REVIEW_SHORT,
   PROFILE_PRONOUN_MAX,
   PROFILE_HERO_PHOTO_FRAME_CLASS,
+  ageFromBirthDate,
+  formatProfileBirthDateForInput,
+  profileBirthDateInputBounds,
 } from '@c2k/shared'
 import ProfilePhotoImage from '@/components/profile/ProfilePhotoImage'
 import ProfilePhotoCredit from '@/components/profile/ProfilePhotoCredit'
@@ -33,6 +37,21 @@ export default function ProfileBasicsPanel() {
     ctx.profileMe.data?.user.username ||
     ctx.viewerUsername ||
     ''
+  const birthDateBounds = useMemo(() => profileBirthDateInputBounds(), [])
+  const maxPhotoMb = Math.round(MAX_IMAGE_UPLOAD_BYTES / 1024 / 1024)
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !file.type.startsWith('image/')) {
+      e.target.value = ''
+      return
+    }
+    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      e.target.value = ''
+      return
+    }
+    ctx.handleFileChange(e)
+  }
 
   return (
     <ProfileStudioSectionCard
@@ -64,6 +83,29 @@ export default function ProfileBasicsPanel() {
           suggestions={PRONOUN_PRESETS}
           maxCount={PROFILE_PRONOUN_MAX}
         />
+
+        <div>
+          <label htmlFor="profile-birth-date" className="block text-sm font-medium text-dc-text mb-1">
+            Date of birth
+          </label>
+          <p className="text-xs text-dc-text-muted mb-2">
+            Required for age verification. Never shown on your public profile — only your age may appear when visibility allows.
+          </p>
+          <input
+            id="profile-birth-date"
+            type="date"
+            value={ctx.birthDate}
+            min={birthDateBounds.min}
+            max={birthDateBounds.max}
+            onChange={(e) => ctx.setBirthDate(e.target.value)}
+            className="w-full max-w-xs px-4 py-3 bg-dc-surface-muted border border-dc-border rounded-lg text-dc-text"
+          />
+          {ctx.birthDate.trim() && ageFromBirthDate(ctx.birthDate) != null && ageFromBirthDate(ctx.birthDate)! < 18 ?
+            <p className="mt-2 text-sm text-red-400" role="alert">
+              Birth date must indicate you are at least 18 years old.
+            </p>
+          : null}
+        </div>
 
         <div className="rounded-lg border border-dc-border/60 bg-dc-surface-muted/30 px-4 py-3">
           <p className="text-sm text-dc-text-muted leading-relaxed">
@@ -169,7 +211,9 @@ export default function ProfileBasicsPanel() {
         <ProfileStudioInsetCard className="space-y-4">
           <div>
             <h3 className="text-sm font-semibold text-dc-text">Profile photo</h3>
-            <p className="text-xs text-dc-muted mt-1">Your avatar on cards, search, and your public profile hero.</p>
+            <p className="text-xs text-dc-muted mt-1">
+              Your avatar on cards, search, and your public profile hero. JPG, PNG, or WebP up to {maxPhotoMb}MB.
+            </p>
           </div>
         {ctx.photoUploadStage ?
           <MediaUploadStatusRow
@@ -187,7 +231,7 @@ export default function ProfileBasicsPanel() {
           type="file"
           accept="image/*"
           className="sr-only"
-          onChange={ctx.handleFileChange}
+          onChange={handlePhotoChange}
           disabled={ctx.photoUploading}
         />
         <label

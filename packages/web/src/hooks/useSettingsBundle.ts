@@ -26,6 +26,7 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
   const [profLocationLabel, setProfLocationLabel] = useState<string | null>(null)
   const [profDisplayName, setProfDisplayName] = useState<string | null>(null)
   const [profDiscoverable, setProfDiscoverable] = useState(true)
+  const [profVisibility, setProfVisibility] = useState<'PUBLIC' | 'MEMBERS' | 'PRIVATE'>('MEMBERS')
   const [fvGender, setFvGender] = useState<ProfileFieldVisibilityLevel>('public')
   const [fvAge, setFvAge] = useState<ProfileFieldVisibilityLevel>('public')
   const [fvSexuality, setFvSexuality] = useState<ProfileFieldVisibilityLevel>('public')
@@ -112,6 +113,7 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
             gender?: string | null
             discoverableInPeopleSearch?: boolean
             fieldVisibility?: unknown
+            visibility?: 'PUBLIC' | 'MEMBERS' | 'PRIVATE'
             location?: string | null
             customLocation?: string | null
             displayName?: string | null
@@ -126,6 +128,9 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
           setProfLocationLabel(p.customLocation ?? data.customLocation ?? p.location ?? data.location ?? null)
           setProfDisplayName(p.displayName ?? data.displayName ?? null)
           setProfDiscoverable(p.discoverableInPeopleSearch !== false)
+          if (p.visibility === 'PUBLIC' || p.visibility === 'MEMBERS' || p.visibility === 'PRIVATE') {
+            setProfVisibility(p.visibility)
+          }
           const m = parseProfileFieldVisibility(p.fieldVisibility)
           setFvGender(m.gender ?? 'public')
           setFvAge(m.age ?? 'public')
@@ -151,6 +156,7 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
       credentials: 'include',
       body: JSON.stringify({
         discoverableInPeopleSearch: profDiscoverable,
+        visibility: profVisibility,
         fieldVisibility: {
           gender: fvGender,
           age: fvAge,
@@ -166,7 +172,7 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
     }
     window.dispatchEvent(new Event('c2k:profile-privacy-saved'))
     return null
-  }, [profDiscoverable, fvGender, fvAge, fvSexuality, fvPronouns, fvLocation])
+  }, [profDiscoverable, profVisibility, fvGender, fvAge, fvSexuality, fvPronouns, fvLocation])
 
   useEffect(() => {
     if (loadState !== 'ready' || !enabled) {
@@ -286,6 +292,8 @@ export function useSettingsBundle({ enabled, viewerUsername }: UseSettingsBundle
     profDisplayName,
     profDiscoverable,
     setProfDiscoverable,
+    profVisibility,
+    setProfVisibility,
     fvGender,
     setFvGender,
     fvAge,

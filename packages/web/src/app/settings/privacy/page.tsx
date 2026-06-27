@@ -40,6 +40,8 @@ export default function SettingsPrivacyPage() {
           onPrivacyChange={onPrivacyChange}
           profDiscoverable={ctx.profDiscoverable}
           onProfDiscoverableChange={ctx.setProfDiscoverable}
+          profVisibility={ctx.profVisibility}
+          onProfVisibilityChange={ctx.setProfVisibility}
           profSectionLoading={ctx.profSectionLoading}
         />
         <SettingsLocationVisibilityPanel

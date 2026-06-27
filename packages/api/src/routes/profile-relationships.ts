@@ -6,7 +6,9 @@ import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { db, schema } from '../db/index.js'
 import { loadAcceptedFriendUserIds } from '../lib/accepted-friends.js'
+import { canViewerReadProfile } from '../lib/profile-access.js'
 import { createNotification } from '../lib/create-notification.js'
+import { rejectIfUserIdentityBanned } from '../lib/moderation-route-auth.js'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -236,6 +238,7 @@ export async function registerProfileRelationshipRoutes(app: FastifyInstance) {
     }
     const user = requireUser(req, reply)
     if (!user) return
+    if (await rejectIfUserIdentityBanned(user.userId, reply)) return
     const parsed = relationshipBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
 
@@ -308,6 +311,7 @@ export async function registerProfileRelationshipRoutes(app: FastifyInstance) {
     }
     const user = requireUser(req, reply)
     if (!user) return
+    if (await rejectIfUserIdentityBanned(user.userId, reply)) return
     const { id } = req.params as { id: string }
     if (!UUID_RE.test(id)) return reply.status(400).send({ error: 'Invalid id' })
     const parsed = respondBody.safeParse(req.body)
@@ -385,6 +389,7 @@ export async function registerProfileRelationshipRoutes(app: FastifyInstance) {
     }
     const user = requireUser(req, reply)
     if (!user) return
+    if (await rejectIfUserIdentityBanned(user.userId, reply)) return
     const { id } = req.params as { id: string }
     if (!UUID_RE.test(id)) return reply.status(400).send({ error: 'Invalid id' })
     const parsed = patchRelationshipBody.safeParse(req.body)
@@ -429,6 +434,7 @@ export async function registerProfileRelationshipRoutes(app: FastifyInstance) {
     }
     const user = requireUser(req, reply)
     if (!user) return
+    if (await rejectIfUserIdentityBanned(user.userId, reply)) return
     const { id } = req.params as { id: string }
     if (!UUID_RE.test(id)) return reply.status(400).send({ error: 'Invalid id' })
 
@@ -455,6 +461,7 @@ export async function registerProfileRelationshipRoutes(app: FastifyInstance) {
     }
     const user = requireUser(req, reply)
     if (!user) return
+    if (await rejectIfUserIdentityBanned(user.userId, reply)) return
     const parsed = reorderBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
 
@@ -488,9 +495,20 @@ export async function registerProfileRelationshipRoutes(app: FastifyInstance) {
     const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username)).limit(1)
     if (!user) return reply.status(404).send({ error: 'Not found' })
 
+    const [profile] = await db
+      .select()
+      .from(schema.profiles)
+      .where(eq(schema.profiles.userId, user.id))
+      .limit(1)
+    if (!profile) return reply.status(404).send({ error: 'Not found' })
+
     const viewer = resolveViewerFromRequest(req)
     const viewerId = getViewerUserId(viewer.payload)
-    const isOwner = viewerId === user.id
+    const isOwner = viewerId !== null && viewerId === user.id
+    if (!canViewerReadProfile(profile.visibility, { viewerId, isOwner })) {
+      return reply.status(404).send({ error: 'Not found' })
+    }
+
     const friendIds =
       viewerId && !isOwner ? await loadAcceptedFriendUserIds(viewerId) : new Set<string>()
 

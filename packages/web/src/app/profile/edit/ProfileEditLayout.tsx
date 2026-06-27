@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link, Navigate, Outlet, useLocation, useSearchParams } from 'react-router-dom'
+import { useMemo, useState, useEffect, useCallback } from 'react'
+import { Link, Navigate, Outlet, useBlocker, useLocation, useSearchParams } from 'react-router-dom'
 import { TabContentTransition } from '@/components/dancecard/ui/TabContentTransition'
 import ProfileEditTabNav from '@/components/profile/edit/ProfileEditTabNav'
 import ProfileStudioCoachRail from '@/components/profile/studio/ProfileStudioCoachRail'
@@ -13,11 +13,7 @@ import { formatPronounDisplay, parseProfileFieldVisibility } from '@c2k/shared'
 import { DancecardPanelSkeleton } from '@/components/ui/skeleton'
 import { MOCK_VIEWER_USERNAME } from '@/data/mock-data'
 import {
-  deriveStudioBoosters,
-  deriveStudioEssentials,
   deriveStudioSectionStatus,
-  deriveStudioStrengthScore,
-  deriveStudioNextSteps,
   deriveVisitorReadout,
 } from '@/lib/profile-studio/completion'
 
@@ -28,6 +24,28 @@ function ProfileEditLayoutInner() {
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false)
   const redirectAfter = searchParams.get('redirect')
   const ctx = useProfileEdit()
+
+  useEffect(() => {
+    if (!ctx.hasUnsavedChanges) return
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [ctx.hasUnsavedChanges])
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      ctx.hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname,
+  )
+
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return
+    const leave = window.confirm('You have unsaved profile changes. Leave without saving?')
+    if (leave) blocker.proceed()
+    else blocker.reset()
+  }, [blocker])
 
   const publicProfileHref = ctx.viewerUsername ?
     `/profile/${encodeURIComponent(ctx.viewerUsername)}`
@@ -51,10 +69,6 @@ function ProfileEditLayoutInner() {
   )
 
   const sectionStatus = useMemo(() => deriveStudioSectionStatus(completionInput), [completionInput])
-  const essentials = useMemo(() => deriveStudioEssentials(completionInput), [completionInput])
-  const boosters = useMemo(() => deriveStudioBoosters(completionInput), [completionInput])
-  const strengthScore = useMemo(() => deriveStudioStrengthScore(essentials, boosters), [essentials, boosters])
-  const nextSteps = useMemo(() => deriveStudioNextSteps(boosters), [boosters])
   const visitorReadout = useMemo(() => deriveVisitorReadout(completionInput), [completionInput])
 
   const previewDraft = useMemo(
@@ -90,10 +104,6 @@ function ProfileEditLayoutInner() {
       publicProfileHref={publicProfileHref}
       hasUnsavedChanges={ctx.hasUnsavedChanges}
       photoUploadStage={ctx.photoUploadStage === 'idle' ? null : ctx.photoUploadStage}
-      score={strengthScore}
-      essentials={essentials}
-      boosters={boosters}
-      nextSteps={nextSteps}
       visitorReadout={visitorReadout}
     />
   )
@@ -146,9 +156,6 @@ function ProfileEditLayoutInner() {
       <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
           <h1 className="text-xl font-bold text-dc-text sm:text-2xl lg:text-3xl">Profile Studio</h1>
-          <p className="mt-1 max-w-prose text-sm leading-relaxed text-dc-text-muted lg:mt-2">
-            Build a trust-centered community profile. You choose what is public, connections-only, or private.
-          </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           {publicProfileHref ?

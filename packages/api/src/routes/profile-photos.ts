@@ -1,10 +1,10 @@
-import { and, asc, eq, ne } from 'drizzle-orm'
+import { and, asc, eq } from 'drizzle-orm'
 
 import type { FastifyInstance } from 'fastify'
 
 import { z } from 'zod'
 
-import { isMediaPublishedStatus, MEDIA_UPLOAD_STATUSES, normalizeProfilePhotoDisplaySettings } from '@c2k/shared'
+import { isMediaPublishedStatus, MEDIA_UPLOAD_STATUSES, MEDIA_VISIBILITIES, normalizeProfilePhotoDisplaySettings } from '@c2k/shared'
 import type { ProfilePhotoDisplaySettings } from '@c2k/shared'
 
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
@@ -48,6 +48,7 @@ import {
 import { deliverProfileHeroUrl } from '../lib/image-delivery.js'
 import { isBrowserReachablePublicUrl } from '../lib/s3-upload.js'
 import { rateLimitRoute } from '../lib/rate-limit-config.js'
+import { rejectIfUserIdentityBanned } from '../lib/moderation-route-auth.js'
 
 import type { MediaAsset } from '../db/schema.js'
 
@@ -153,9 +154,13 @@ function mapPhotoRow(
 
 
 
+const ANONYMOUS_PROFILE_PHOTO_VISIBILITIES = new Set<string>([
+  MEDIA_VISIBILITIES.publicPreview,
+])
+
 function isPhotoPubliclyVisible(photo: ProfilePhotoDto): boolean {
 
-  if (!photo.mediaAssetId) return true
+  if (!photo.mediaAssetId) return false
 
   if (!photo.uploadStatus) return false
 
@@ -163,7 +168,15 @@ function isPhotoPubliclyVisible(photo: ProfilePhotoDto): boolean {
 
   if (photo.pendingReview) return false
 
-  return isMediaPublishedStatus(photo.uploadStatus as Parameters<typeof isMediaPublishedStatus>[0])
+  if (!isMediaPublishedStatus(photo.uploadStatus as Parameters<typeof isMediaPublishedStatus>[0])) {
+    return false
+  }
+
+  if (photo.visibility && !ANONYMOUS_PROFILE_PHOTO_VISIBILITIES.has(photo.visibility)) {
+    return false
+  }
+
+  return true
 
 }
 
@@ -320,6 +333,8 @@ export async function registerProfilePhotosRoutes(app: FastifyInstance) {
 
     }
 
+    if (await rejectIfUserIdentityBanned(userId, reply)) return
+
     const parsed = createBodySchema.safeParse(req.body)
 
     if (!parsed.success) {
@@ -407,41 +422,56 @@ export async function registerProfilePhotosRoutes(app: FastifyInstance) {
 
 
 
-    const [row] = await db
+    const [row] = await db.transaction(async (tx) => {
+      if (sortOrder === 0) {
+        const atZero = await tx
+          .select({ id: schema.profilePhotos.id, sortOrder: schema.profilePhotos.sortOrder })
+          .from(schema.profilePhotos)
+          .where(
+            and(
+              eq(schema.profilePhotos.profileId, prof.id),
+              eq(schema.profilePhotos.sortOrder, 0),
+            ),
+          )
+        if (atZero.length > 0) {
+          const allOrders = await tx
+            .select({ sortOrder: schema.profilePhotos.sortOrder })
+            .from(schema.profilePhotos)
+            .where(eq(schema.profilePhotos.profileId, prof.id))
+          const maxOrder = allOrders.reduce((max, r) => Math.max(max, r.sortOrder), 0)
+          let nextOrder = maxOrder + 1
+          for (const prior of atZero) {
+            await tx
+              .update(schema.profilePhotos)
+              .set({ sortOrder: nextOrder })
+              .where(eq(schema.profilePhotos.id, prior.id))
+            nextOrder += 1
+          }
+        }
+      }
 
-      .insert(schema.profilePhotos)
+      const [inserted] = await tx
+        .insert(schema.profilePhotos)
+        .values({
+          profileId: prof.id,
+          mediaAssetId,
+          url: photoUrl,
+          caption: parsed.data.caption ?? null,
+          displaySettings: parsed.data.displaySettings
+            ? normalizeProfilePhotoDisplaySettings(parsed.data.displaySettings)
+            : null,
+          sortOrder,
+        })
+        .returning()
 
-      .values({
-
-        profileId: prof.id,
-
-        mediaAssetId,
-
-        url: photoUrl,
-
-        caption: parsed.data.caption ?? null,
-
-        displaySettings: parsed.data.displaySettings
-          ? normalizeProfilePhotoDisplaySettings(parsed.data.displaySettings)
-          : null,
-
-        sortOrder,
-
-      })
-
-      .returning()
+      return [inserted]
+    })
 
     if (sortOrder === 0) {
-      await db
-        .delete(schema.profilePhotos)
-        .where(
-          and(
-            eq(schema.profilePhotos.profileId, prof.id),
-            eq(schema.profilePhotos.sortOrder, 0),
-            ne(schema.profilePhotos.id, row!.id),
-          ),
-        )
+      await syncProfileAvatarUrl(prof.id)
     }
+
+
 
     const [media] = mediaAssetId
       ? await db
@@ -452,16 +482,6 @@ export async function registerProfilePhotosRoutes(app: FastifyInstance) {
       : publishedMedia
         ? [publishedMedia]
         : []
-
-
-
-    if (sortOrder === 0) {
-
-      await syncProfileAvatarUrl(prof.id)
-
-    }
-
-
 
     return reply.status(201).send({ photo: mapPhotoRow(row!, media ?? null) })
 

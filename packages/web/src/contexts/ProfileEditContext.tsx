@@ -428,13 +428,35 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
   }, [profileMe.status, profileMe.data, profileMe.reloadToken, reloadLinks, reloadRelationships])
 
   useEffect(() => {
-    const onPrivacySaved = () => {
-      photoOnlyReloadRef.current = false
-      profileMe.reload()
+    const onPrivacySaved = async () => {
+      try {
+        const r = await fetch('/api/profile/me', { credentials: 'include' })
+        if (!r.ok) return
+        const data = (await r.json()) as {
+          profile?: {
+            fieldVisibility?: unknown
+            discoverableInPeopleSearch?: boolean | null
+            visibility?: string | null
+          }
+        }
+        if (data.profile) {
+          profileMe.applyProfilePatch({
+            fieldVisibility: data.profile.fieldVisibility,
+            discoverableInPeopleSearch: data.profile.discoverableInPeopleSearch ?? null,
+            ...(data.profile.visibility === 'PUBLIC' ||
+            data.profile.visibility === 'MEMBERS' ||
+            data.profile.visibility === 'PRIVATE' ?
+              { visibility: data.profile.visibility }
+            : {}),
+          })
+        }
+      } catch {
+        /* ignore */
+      }
     }
     window.addEventListener('c2k:profile-privacy-saved', onPrivacySaved)
     return () => window.removeEventListener('c2k:profile-privacy-saved', onPrivacySaved)
-  }, [profileMe.reload])
+  }, [profileMe.applyProfilePatch])
 
   useEffect(() => {
     if (authStatus !== 'ready' || !isAuthenticated || isFallback || profileMe.status !== 'ready') return
@@ -732,6 +754,8 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
 
   const handleSaveRef = useRef<() => Promise<void>>(async () => {})
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** Serializes concurrent save attempts so autosaves cannot clobber dirty fields. */
+  const saveChainRef = useRef(Promise.resolve())
   /** True while focus is in a text field — autosave waits until blur to avoid interrupting typing. */
   const autosavePausedRef = useRef(false)
 
@@ -805,6 +829,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
 
     setSaving(true)
     let profileSaved = !hasUnsavedProfileChanges
+    let profileSaveError: string | null = null
     let profileSyncedFromResponse = false
     let kinksSaved = !hasUnsavedKinkChanges
     try {
@@ -814,7 +839,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
         const draftZip = homeZip.replace(/\D/g, '').slice(0, 5)
         const payload: Record<string, unknown> = {
           displayName: displayName.trim() || null,
-          bio,
+          bio: bio ?? '',
           birthDate: birthDate.trim() ? birthDate.trim() : null,
           lifestyleActivity: lifestyleActivity || null,
           genders,
@@ -825,7 +850,8 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
           lookingFor,
         }
         if (draftZip !== savedZip) {
-          payload.homeZip = draftZip || null
+          if (draftZip.length === 0) payload.homeZip = null
+          else if (draftZip.length === 5) payload.homeZip = draftZip
         }
         if (placeSelect === PLACE_CUSTOM) {
           payload.placeId = null
@@ -853,6 +879,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
         if (!r.ok) {
           const data = (await r.json().catch(() => ({}))) as { error?: string }
           const message = data.error ?? `Could not save profile (${r.status}).`
+          profileSaveError = message
           setSaveNotice(message)
           profileSaved = false
         } else {
@@ -923,7 +950,11 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
 
       if (!profileSaved && !kinksSaved) return
       if (!profileSaved && kinksSaved) {
-        setSaveNotice('Interests saved. Fix profile fields above, then save again for the rest.')
+        setSaveNotice(
+          profileSaveError ?
+            `Interests saved. ${profileSaveError}`
+          : 'Interests saved. Fix profile fields above, then save again for the rest.',
+        )
       } else if (profileSaved && !kinksSaved) {
         setSaveNotice('Profile saved, but interests did not sync.')
         return
@@ -988,6 +1019,17 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
     hasUnsavedKinkChanges,
   ])
 
+  const runSerializedSave = useCallback(() => {
+    saveChainRef.current = saveChainRef.current
+      .then(async () => {
+        await handleSaveRef.current()
+      })
+      .catch(() => {
+        /* handleSave sets user-visible errors */
+      })
+    return saveChainRef.current
+  }, [])
+
   handleSaveRef.current = handleSave
 
   useEffect(() => {
@@ -1001,7 +1043,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
         autoSaveTimerRef.current = setTimeout(attemptAutoSave, 800)
         return
       }
-      void handleSaveRef.current()
+      void runSerializedSave()
     }, 2500)
     return () => {
       if (autoSaveTimerRef.current) {
@@ -1030,6 +1072,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
     customLocation,
     location,
     kinks,
+    runSerializedSave,
   ])
 
   const uploadProfilePhotoFromFile = useCallback(
@@ -1266,7 +1309,7 @@ export function ProfileEditProvider({ children }: { children: ReactNode }) {
     setPhotoDisplaySettings,
     photoMetaSaving,
     handleFileChange,
-    handleSave,
+    handleSave: () => runSerializedSave(),
     discardChanges: () => {
       setZipLocationHint(null)
       setZipCandidates([])

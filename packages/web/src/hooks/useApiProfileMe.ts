@@ -46,6 +46,7 @@ export type ProfileMeData = {
     homeZip?: string | null
     discoverableInPeopleSearch: boolean | null
     fieldVisibility: unknown
+    visibility?: 'PUBLIC' | 'MEMBERS' | 'PRIVATE' | null
   }
   kinks: ProfileMeKink[]
   photos: ProfileMePhoto[]
