@@ -1,4 +1,5 @@
-import { hashMediaManifest, type EckePhotosManifest } from '@c2k/shared'
+import type { EckePhotosManifest } from '@c2k/shared'
+import { hashMediaManifest } from './ecke-media-manifest-hash.js'
 import { and, eq } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { listPersistablePhotoAssets } from './ecke-photo-manifest.js'

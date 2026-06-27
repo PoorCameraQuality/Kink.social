@@ -1,7 +1,11 @@
 -- Milestone alpha: ECKE publish target photo manifest (publisher side)
 -- Apply via drizzle push or operator migration on staging before ECKE_PUBLISH_PHOTOS_ENABLED=true
 
-CREATE TYPE IF NOT EXISTS ecke_publish_target_media_role AS ENUM ('hero', 'gallery', 'logo', 'thumbnail');
+DO $$ BEGIN
+  CREATE TYPE ecke_publish_target_media_role AS ENUM ('hero', 'gallery', 'logo', 'thumbnail');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 ALTER TABLE ecke_publish_targets
   ADD COLUMN IF NOT EXISTS media_hash varchar(64),

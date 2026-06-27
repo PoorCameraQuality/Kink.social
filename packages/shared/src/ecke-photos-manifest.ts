@@ -1,5 +1,3 @@
-import { createHash } from 'node:crypto'
-
 export type EckePhotoRole = 'hero' | 'gallery' | 'logo' | 'thumbnail'
 
 /** Placeholder when hero is a legacy external URL without a media_assets row. */
@@ -24,17 +22,6 @@ export type EckePhotosManifest = {
 
 export function emptyEckePhotosManifest(): EckePhotosManifest {
   return { manifestVersion: 1, hero: null, gallery: [] }
-}
-
-/** Stable hash for change detection on publish targets. */
-export function hashMediaManifest(manifest: EckePhotosManifest | null | undefined): string | null {
-  if (!manifest) return null
-  const normalized = {
-    manifestVersion: manifest.manifestVersion,
-    hero: manifest.hero,
-    gallery: [...manifest.gallery].sort((a, b) => a.ordinal - b.ordinal || a.role.localeCompare(b.role)),
-  }
-  return createHash('sha256').update(JSON.stringify(normalized)).digest('hex')
 }
 
 /** Prefer manifest hero URL, then legacy field. */

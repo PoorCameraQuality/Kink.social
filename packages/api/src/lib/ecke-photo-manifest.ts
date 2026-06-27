@@ -1,12 +1,12 @@
 import {
   ECKE_LEGACY_HERO_MEDIA_ASSET_ID,
   emptyEckePhotosManifest,
-  hashMediaManifest,
   resolveEckePayloadHeroUrl,
   sanitizeEckeHeroImageUrl,
   type EckePhotoAsset,
   type EckePhotosManifest,
 } from '@c2k/shared'
+import { hashMediaManifest } from './ecke-media-manifest-hash.js'
 import type { EckeListingPayload } from './ecke-publish-payload.js'
 import type { MediaAsset } from '../db/schema.js'
 import { parseMediaAssetIdFromHeroUrl, resolveEckeEducationHeroImageUrl } from './ecke-education-hero.js'

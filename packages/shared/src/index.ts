@@ -45,7 +45,6 @@ export {
 export {
   ECKE_LEGACY_HERO_MEDIA_ASSET_ID,
   emptyEckePhotosManifest,
-  hashMediaManifest,
   resolveEckePayloadHeroUrl,
   type EckePhotoAsset,
   type EckePhotoRole,
