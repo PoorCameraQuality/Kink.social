@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import {
+  buildKinkSocialCsafProviderMetadata,
   buildKinkSocialRobotsTxt,
   buildKinkSocialSecurityTxt,
   buildKinkSocialSitemapXml,
@@ -24,6 +25,7 @@ function kinkSocialCrawlPolicy(mode: string) {
   const siteUrl = resolveSiteUrl(env)
   const robotsTxt = buildKinkSocialRobotsTxt(publicLaunch)
   const securityTxt = buildKinkSocialSecurityTxt(siteUrl)
+  const csafProviderMetadata = JSON.stringify(buildKinkSocialCsafProviderMetadata(siteUrl), null, 2)
   const sitemapXml = buildKinkSocialSitemapXml(siteUrl)
   const xRobotsTag = publicLaunch ? 'index, follow' : KINK_SOCIAL_X_ROBOTS_TAG
 
@@ -79,6 +81,12 @@ function kinkSocialCrawlPolicy(mode: string) {
           return
         }
 
+        if (urlPath === '/.well-known/csaf/provider-metadata.json') {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.end(csafProviderMetadata)
+          return
+        }
+
         const acceptsHtml = req.headers?.accept?.includes('text/html')
         if (req.method === 'GET' && acceptsHtml && !urlPath.startsWith('/api')) {
           res.setHeader('X-Robots-Tag', xRobotsTag)
@@ -94,6 +102,9 @@ function kinkSocialCrawlPolicy(mode: string) {
       const wellKnownDir = path.join(outDir, '.well-known')
       mkdirSync(wellKnownDir, { recursive: true })
       writeFileSync(path.join(wellKnownDir, 'security.txt'), securityTxt, 'utf8')
+      const csafDir = path.join(wellKnownDir, 'csaf')
+      mkdirSync(csafDir, { recursive: true })
+      writeFileSync(path.join(csafDir, 'provider-metadata.json'), csafProviderMetadata, 'utf8')
       if (publicLaunch) {
         writeFileSync(path.join(outDir, 'sitemap.xml'), sitemapXml, 'utf8')
       }

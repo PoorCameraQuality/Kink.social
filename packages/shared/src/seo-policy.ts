@@ -42,6 +42,8 @@ export const KINK_SOCIAL_PUBLIC_SITEMAP_PATHS = [
 
   '/policies',
 
+  '/security',
+
 ] as const
 
 
@@ -112,6 +114,74 @@ export const KINK_SOCIAL_SECURITY_TXT_CONTACT = 'mailto:sheldonkinneymmo.tm@gmai
 
 export const KINK_SOCIAL_SECURITY_TXT_EXPIRES = '2027-06-30T09:27:00.000Z'
 
+export const KINK_SOCIAL_SECURITY_POLICY_PATH = '/security'
+
+
+
+export type KinkSocialCsafProviderMetadata = {
+
+  canonical_url: string
+
+  last_updated: string
+
+  list_on_CSAF_aggregators: boolean
+
+  mirror_on_CSAF_aggregators: boolean
+
+  metadata_version: '2.0'
+
+  publisher: {
+
+    category: 'vendor'
+
+    contact_details: string
+
+    name: string
+
+    namespace: string
+
+  }
+
+  role: 'csaf_trusted_provider'
+
+}
+
+
+
+export function buildKinkSocialCsafProviderMetadata(siteUrl: string): KinkSocialCsafProviderMetadata {
+
+  const base = siteUrl.replace(/\/$/, '')
+
+  return {
+
+    canonical_url: `${base}/.well-known/csaf/provider-metadata.json`,
+
+    last_updated: new Date().toISOString(),
+
+    list_on_CSAF_aggregators: false,
+
+    mirror_on_CSAF_aggregators: false,
+
+    metadata_version: '2.0',
+
+    publisher: {
+
+      category: 'vendor',
+
+      contact_details: KINK_SOCIAL_SECURITY_TXT_CONTACT,
+
+      name: 'Kink Social',
+
+      namespace: base,
+
+    },
+
+    role: 'csaf_trusted_provider',
+
+  }
+
+}
+
 
 
 export function buildKinkSocialSecurityTxt(siteUrl: string): string {
@@ -125,6 +195,10 @@ export function buildKinkSocialSecurityTxt(siteUrl: string): string {
     `Expires: ${KINK_SOCIAL_SECURITY_TXT_EXPIRES}`,
 
     'Preferred-Languages: en',
+
+    `Policy: ${base}${KINK_SOCIAL_SECURITY_POLICY_PATH}`,
+
+    `CSAF: ${base}/.well-known/csaf/provider-metadata.json`,
 
     `Canonical: ${base}/.well-known/security.txt`,
 

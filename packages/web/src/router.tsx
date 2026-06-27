@@ -73,6 +73,7 @@ import TagsPage from './app/tags/[tag]/page'
 import TermsPage from './app/terms/page'
 import AdultContentConsentPage from './app/adult-content-consent/page'
 import LawEnforcementPage from './app/law-enforcement/page'
+import SecurityDisclosurePage from './app/security/page'
 import DmcaPage from './app/dmca/page'
 import NciiPage from './app/ncii/page'
 import VendorOrganizerTermsPage from './app/vendor-organizer-terms/page'
@@ -339,6 +340,7 @@ export const router = createBrowserRouter([
       { path: 'guidelines', element: <GuidelinesPage /> },
       { path: 'adult-content-consent', element: <AdultContentConsentPage /> },
       { path: 'law-enforcement', element: <LawEnforcementPage /> },
+      { path: 'security', element: <SecurityDisclosurePage /> },
       { path: 'dmca', element: <DmcaPage /> },
       { path: 'ncii', element: <NciiPage /> },
       { path: 'vendor-organizer-terms', element: <VendorOrganizerTermsPage /> },

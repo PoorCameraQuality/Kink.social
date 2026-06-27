@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, it } from 'node:test'
 import {
+  buildKinkSocialCsafProviderMetadata,
   buildKinkSocialRobotsTxt,
   buildKinkSocialSecurityTxt,
   buildKinkSocialSitemapXml,
@@ -143,9 +144,18 @@ describe('kink.social crawl policy (source files)', () => {
   it('security.txt is served at /.well-known with legacy redirect', () => {
     assert.match(nginxConf, /location\s*=\s*\/\.well-known\/security\.txt/)
     assert.match(nginxConf, /location\s*=\s*\/security\.txt/)
+    assert.match(nginxConf, /location\s*=\s*\/\.well-known\/csaf\/provider-metadata\.json/)
     assert.match(viteConfigSrc, /\.well-known\/security\.txt/)
-    assert.match(buildKinkSocialSecurityTxt('https://kink.social'), /Contact: mailto:sheldonkinneymmo\.tm@gmail\.com/)
-    assert.match(buildKinkSocialSecurityTxt('https://kink.social'), /Expires: 2027-06-30T09:27:00\.000Z/)
+    assert.match(viteConfigSrc, /provider-metadata\.json/)
+    const securityTxt = buildKinkSocialSecurityTxt('https://kink.social')
+    assert.match(securityTxt, /Contact: mailto:sheldonkinneymmo\.tm@gmail\.com/)
+    assert.match(securityTxt, /Expires: 2027-06-30T09:27:00\.000Z/)
+    assert.match(securityTxt, /Policy: https:\/\/kink\.social\/security/)
+    assert.match(securityTxt, /CSAF: https:\/\/kink\.social\/\.well-known\/csaf\/provider-metadata\.json/)
+    const csaf = buildKinkSocialCsafProviderMetadata('https://kink.social')
+    assert.equal(csaf.list_on_CSAF_aggregators, false)
+    assert.equal(csaf.mirror_on_CSAF_aggregators, false)
+    assert.equal(csaf.metadata_version, '2.0')
   })
 
   it('share crawler HTML is noindex with X-Robots-Tag header', () => {

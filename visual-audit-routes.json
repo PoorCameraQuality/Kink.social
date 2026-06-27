@@ -24,6 +24,8 @@
     { "id": "public-contact", "path": "/contact", "category": "public", "authRole": null },
     { "id": "public-robots", "path": "/robots.txt", "category": "public", "authRole": null, "contentType": "text" },
     { "id": "public-security-txt", "path": "/.well-known/security.txt", "category": "public", "authRole": null, "contentType": "text" },
+    { "id": "public-security-policy", "path": "/security", "category": "public", "authRole": null },
+    { "id": "public-csaf-metadata", "path": "/.well-known/csaf/provider-metadata.json", "category": "public", "authRole": null, "contentType": "json" },
     { "id": "public-sitemap", "path": "/sitemap.xml", "category": "public", "authRole": null, "optional": true },
 
     { "id": "auth-home", "path": "/home", "category": "auth", "authRole": "member" },
