@@ -95,3 +95,5 @@ k8s/base/secret.yaml
 
 # Local audit credentials (never commit)
 .kink-social-audit.local
+.qa-audit-assets/
+deploy-log.txt
