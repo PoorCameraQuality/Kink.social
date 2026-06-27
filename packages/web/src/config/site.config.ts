@@ -135,6 +135,7 @@ export const siteConfig = {
       { href: '/dmca', label: 'DMCA' },
       { href: '/ncii', label: 'NCII' },
       { href: '/law-enforcement', label: 'Law enforcement' },
+      { href: '/.well-known/security.txt', label: 'Security contact' },
       { href: '/minor-safety', label: 'Minor safety' },
       { href: '/vendor-organizer-terms', label: 'Vendor & organizer' },
     ],

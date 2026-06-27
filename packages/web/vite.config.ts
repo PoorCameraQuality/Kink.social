@@ -4,6 +4,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import {
   buildKinkSocialRobotsTxt,
+  buildKinkSocialSecurityTxt,
   buildKinkSocialSitemapXml,
   isKinkSocialPublicLaunchEnabled,
   KINK_SOCIAL_X_ROBOTS_TAG,
@@ -22,6 +23,7 @@ function kinkSocialCrawlPolicy(mode: string) {
   const publicLaunch = isKinkSocialPublicLaunchEnabled(env.VITE_PUBLIC_LAUNCH)
   const siteUrl = resolveSiteUrl(env)
   const robotsTxt = buildKinkSocialRobotsTxt(publicLaunch)
+  const securityTxt = buildKinkSocialSecurityTxt(siteUrl)
   const sitemapXml = buildKinkSocialSitemapXml(siteUrl)
   const xRobotsTag = publicLaunch ? 'index, follow' : KINK_SOCIAL_X_ROBOTS_TAG
 
@@ -64,6 +66,19 @@ function kinkSocialCrawlPolicy(mode: string) {
           return
         }
 
+        if (urlPath === '/security.txt') {
+          res.statusCode = 301
+          res.setHeader('Location', '/.well-known/security.txt')
+          res.end()
+          return
+        }
+
+        if (urlPath === '/.well-known/security.txt') {
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+          res.end(securityTxt)
+          return
+        }
+
         const acceptsHtml = req.headers?.accept?.includes('text/html')
         if (req.method === 'GET' && acceptsHtml && !urlPath.startsWith('/api')) {
           res.setHeader('X-Robots-Tag', xRobotsTag)
@@ -76,6 +91,9 @@ function kinkSocialCrawlPolicy(mode: string) {
       const outDir = path.resolve(__dirname, 'dist')
       mkdirSync(outDir, { recursive: true })
       writeFileSync(path.join(outDir, 'robots.txt'), robotsTxt, 'utf8')
+      const wellKnownDir = path.join(outDir, '.well-known')
+      mkdirSync(wellKnownDir, { recursive: true })
+      writeFileSync(path.join(wellKnownDir, 'security.txt'), securityTxt, 'utf8')
       if (publicLaunch) {
         writeFileSync(path.join(outDir, 'sitemap.xml'), sitemapXml, 'utf8')
       }

@@ -18,6 +18,7 @@ export {
   KINK_SOCIAL_ROBOTS_META,
   KINK_SOCIAL_X_ROBOTS_TAG,
   buildKinkSocialRobotsTxt,
+  buildKinkSocialSecurityTxt,
   buildKinkSocialSitemapXml,
   eckePayloadContainsPrivateAppUrls,
   educationEckePayloadContainsLeakedPrivateUrls,

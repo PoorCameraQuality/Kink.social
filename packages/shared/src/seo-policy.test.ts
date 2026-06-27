@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, it } from 'node:test'
 import {
   buildKinkSocialRobotsTxt,
+  buildKinkSocialSecurityTxt,
   buildKinkSocialSitemapXml,
   ECKE_URL,
   KINK_SOCIAL_ROBOTS_META,
@@ -137,6 +138,14 @@ describe('kink.social crawl policy (source files)', () => {
     assert.match(viteConfigSrc, /\/sitemap\.xml/)
     assert.match(viteConfigSrc, /VITE_PUBLIC_LAUNCH/)
     assert.doesNotMatch(footerSrc, /to="\/sitemap\.xml"/)
+  })
+
+  it('security.txt is served at /.well-known with legacy redirect', () => {
+    assert.match(nginxConf, /location\s*=\s*\/\.well-known\/security\.txt/)
+    assert.match(nginxConf, /location\s*=\s*\/security\.txt/)
+    assert.match(viteConfigSrc, /\.well-known\/security\.txt/)
+    assert.match(buildKinkSocialSecurityTxt('https://kink.social'), /Contact: mailto:sheldonkinneymmo\.tm@gmail\.com/)
+    assert.match(buildKinkSocialSecurityTxt('https://kink.social'), /Expires: 2027-06-30T09:27:00\.000Z/)
   })
 
   it('share crawler HTML is noindex with X-Robots-Tag header', () => {

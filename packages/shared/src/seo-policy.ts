@@ -106,6 +106,36 @@ export function buildKinkSocialRobotsTxt(publicLaunch: boolean): string {
 
 
 
+/** RFC 9116 security contact file for kink.social (/.well-known/security.txt). */
+
+export const KINK_SOCIAL_SECURITY_TXT_CONTACT = 'mailto:sheldonkinneymmo.tm@gmail.com'
+
+export const KINK_SOCIAL_SECURITY_TXT_EXPIRES = '2027-06-30T09:27:00.000Z'
+
+
+
+export function buildKinkSocialSecurityTxt(siteUrl: string): string {
+
+  const base = siteUrl.replace(/\/$/, '')
+
+  return [
+
+    `Contact: ${KINK_SOCIAL_SECURITY_TXT_CONTACT}`,
+
+    `Expires: ${KINK_SOCIAL_SECURITY_TXT_EXPIRES}`,
+
+    'Preferred-Languages: en',
+
+    `Canonical: ${base}/.well-known/security.txt`,
+
+    '',
+
+  ].join('\n')
+
+}
+
+
+
 export function buildKinkSocialSitemapXml(siteUrl: string): string {
 
   const base = siteUrl.replace(/\/$/, '')
