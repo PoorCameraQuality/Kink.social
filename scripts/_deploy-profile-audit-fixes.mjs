@@ -58,26 +58,26 @@ function exec(conn, cmd, label = '') {
   })
 }
 
-function uploadFile(conn, local, remote) {
+function withSftp(conn) {
   return new Promise((resolve, reject) => {
-    conn.sftp((err, sftp) => {
-      if (err) return reject(err)
-      sftp.createWriteStream(remote).on('error', reject).on('close', resolve).end(readFileSync(local))
-    })
+    conn.sftp((err, sftp) => (err ? reject(err) : resolve(sftp)))
   })
 }
 
-function uploadTar(conn, local, remote) {
+function uploadBuffer(sftp, remote, data) {
   return new Promise((resolve, reject) => {
-    conn.sftp((err, sftp) => {
-      if (err) return reject(err)
-      const rs = createReadStream(local)
-      const ws = sftp.createWriteStream(remote)
-      ws.on('close', resolve)
-      ws.on('error', reject)
-      rs.on('error', reject)
-      rs.pipe(ws)
-    })
+    sftp.createWriteStream(remote).on('error', reject).on('close', resolve).end(data)
+  })
+}
+
+function uploadStream(sftp, local, remote) {
+  return new Promise((resolve, reject) => {
+    const rs = createReadStream(local)
+    const ws = sftp.createWriteStream(remote)
+    ws.on('close', resolve)
+    ws.on('error', reject)
+    rs.on('error', reject)
+    rs.pipe(ws)
   })
 }
 
@@ -92,12 +92,13 @@ if (!existsSync(TAR_LOCAL)) {
 const conn = await connect()
 console.log('Connected to VPS')
 
+const sftp = await withSftp(conn)
 for (const rel of files) {
   console.log('Upload', rel)
-  await uploadFile(conn, join(root, rel), `/opt/c2k/${rel.replace(/\\/g, '/')}`)
+  await uploadBuffer(sftp, `/opt/c2k/${rel.replace(/\\/g, '/')}`, readFileSync(join(root, rel)))
 }
-
-await uploadTar(conn, TAR_LOCAL, '/opt/c2k/_deploy-ui.tar.gz')
+console.log('Upload _deploy-ui.tar.gz')
+await uploadStream(sftp, TAR_LOCAL, '/opt/c2k/_deploy-ui.tar.gz')
 await exec(conn, 'cd /opt/c2k && tar -xzf _deploy-ui.tar.gz && rm -f _deploy-ui.tar.gz', 'Extract web')
 await exec(conn, `cd /opt/c2k && ${compose} build api web 2>&1`, 'Build api+web')
 await exec(conn, `cd /opt/c2k && ${compose} up -d api web 2>&1`, 'Restart api+web')
