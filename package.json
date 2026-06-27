@@ -69,7 +69,8 @@
     "smoke:domain-routing": "node scripts/vps/smoke-domain-routing.mjs",
     "verify:ecke-photo-bridge-contract": "node --import tsx/esm --test packages/shared/src/ecke-photos-manifest.test.ts packages/api/src/lib/ecke-photo-manifest.test.ts packages/api/src/lib/ecke-media-manifest-hash.test.ts",
     "verify:ecke-ingest-with-media": "node scripts/verify-ecke-ingest-with-media.mjs",
-    "apply:ecke-photo-bridge-c2k": "node scripts/apply-ecke-photo-bridge-c2k.mjs"
+    "apply:ecke-photo-bridge-c2k": "node scripts/apply-ecke-photo-bridge-c2k.mjs",
+    "backfill:ecke-publish-media": "node --import tsx/esm scripts/backfill-ecke-publish-target-media.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
