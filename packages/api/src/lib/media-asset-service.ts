@@ -180,9 +180,7 @@ export async function createMediaAssetForUpload(params: {
       storageKey,
       originalStorageKey: quarantineKey ?? legacyUrl,
       quarantineStorageKey: quarantineKey,
-      storageState: quarantineKey
-        ? MEDIA_STORAGE_STATES.validatedPrivate
-        : MEDIA_STORAGE_STATES.quarantinedPrivate,
+      storageState: MEDIA_STORAGE_STATES.quarantinedPrivate,
       storageProvider: 's3',
       storageBucket: params.storageBucket ?? null,
       mimeType: params.mimeType ?? 'image/jpeg',

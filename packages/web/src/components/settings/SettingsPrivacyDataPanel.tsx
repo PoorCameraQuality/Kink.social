@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useApiLegalAlpha } from '@/hooks/useApiLegalAlpha'
-
+import AccountDeleteButton from '@/components/settings/AccountDeleteButton'
 const DELETION_DISCLAIMER =
   'Deleting something removes it from ordinary use and starts the deletion or anonymization process. Some data may be retained temporarily for safety, abuse prevention, backups, legal compliance, or active reports. Legal holds pause deletion where required.'
 
@@ -40,31 +40,7 @@ export default function SettingsPrivacyDataPanel() {
     }
   }
 
-  async function requestDelete() {
-    if (!window.confirm('Request account deletion? You will be signed out and your profile hidden. Private data is purged after the retention window.')) {
-      return
-    }
-    setBusy(true)
-    setMsg(null)
-    try {
-      const result = await api.createPrivacyRequest('DELETE')
-      if (result.blocked) {
-        setMsg(
-          'Deletion request recorded but blocked by an active legal hold. We cannot delete data under preservation.'
-        )
-      } else {
-        setMsg('Deletion request submitted. Your account is now disabled; private data will be purged on schedule.')
-      }
-      await api.loadPrivacyRequests()
-    } catch (e) {
-      setMsg(e instanceof Error ? e.message : 'Request failed')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  async function requestManualReview() {
-    setBusy(true)
+  async function requestManualReview() {    setBusy(true)
     setMsg(null)
     try {
       const r = await fetch('/api/v1/me/privacy/manual-review', {
@@ -103,15 +79,7 @@ export default function SettingsPrivacyDataPanel() {
         >
           Download my data
         </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void requestDelete()}
-          className="rounded-xl border border-red-500/40 bg-red-950/20 px-4 py-2 text-sm text-red-100 disabled:opacity-60"
-        >
-          Delete account
-        </button>
-      </div>
+        <AccountDeleteButton disabled={busy} onResult={setMsg} />      </div>
       <div className="space-y-2">
         <label className="block text-sm text-dc-text" htmlFor="privacy-review-note">
           Request manual privacy review

@@ -10,6 +10,7 @@ import {
 import { and, desc, eq } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { getMediaAssetById } from './media-asset-service.js'
+import { syncProfilePhotoServingUrlsForAsset } from './sync-profile-media-serving-urls.js'
 
 export async function assetHasMalwareBlock(mediaAssetId: string): Promise<boolean> {
   const [row] = await db
@@ -102,15 +103,18 @@ export async function approveMediaAssetByModerator(
   const { promoteMediaAssetToPublic } = await import('./media-pipeline.js')
   await promoteMediaAssetToPublic({ mediaAssetId, promotedByUserId: actorUserId })
 
+  const promoted = await getMediaAssetById(mediaAssetId)
   await db
     .update(schema.mediaAssets)
     .set({
       uploadStatus: MEDIA_UPLOAD_STATUSES.autoApproved,
       scanStatus: SCAN_STATUSES.passed,
-      storageState: MEDIA_STORAGE_STATES.approvedPublic,
+      storageState: promoted?.storageState ?? MEDIA_STORAGE_STATES.validatedPrivate,
       updatedAt: new Date(),
     })
     .where(eq(schema.mediaAssets.id, mediaAssetId))
+
+  await syncProfilePhotoServingUrlsForAsset(mediaAssetId, promoted)
 
   if (asset.ownerType === 'profile' && asset.ownerId) {
     const [linkedPhoto] = await db

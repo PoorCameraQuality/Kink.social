@@ -158,19 +158,17 @@ const ANONYMOUS_PROFILE_PHOTO_VISIBILITIES = new Set<string>([
   MEDIA_VISIBILITIES.publicPreview,
 ])
 
+/** Published profile photo eligible for denormalized avatar_url (any logged-in visibility). */
+function isPhotoAvatarEligible(photo: ProfilePhotoDto): boolean {
+  if (!photo.mediaAssetId || !photo.uploadStatus) return false
+  if (photo.uploadStatus === MEDIA_UPLOAD_STATUSES.pendingAttestation) return false
+  if (photo.pendingReview) return false
+  return isMediaPublishedStatus(photo.uploadStatus as Parameters<typeof isMediaPublishedStatus>[0])
+}
+
 function isPhotoPubliclyVisible(photo: ProfilePhotoDto): boolean {
 
-  if (!photo.mediaAssetId) return false
-
-  if (!photo.uploadStatus) return false
-
-  if (photo.uploadStatus === MEDIA_UPLOAD_STATUSES.pendingAttestation) return false
-
-  if (photo.pendingReview) return false
-
-  if (!isMediaPublishedStatus(photo.uploadStatus as Parameters<typeof isMediaPublishedStatus>[0])) {
-    return false
-  }
+  if (!isPhotoAvatarEligible(photo)) return false
 
   if (photo.visibility && !ANONYMOUS_PROFILE_PHOTO_VISIBILITIES.has(photo.visibility)) {
     return false
@@ -237,8 +235,11 @@ async function resolveOwnProfile(userId: string) {
 
 
 async function syncProfileAvatarUrl(profileId: string): Promise<void> {
-  const published = await loadPublicProfilePhotos(profileId)
-  const avatarUrl = published[0]?.url?.trim() ?? null
+  const rows = await loadProfilePhotosJoined(profileId)
+  const primary =
+    rows.find((p) => p.order === 0 && isPhotoAvatarEligible(p))
+    ?? rows.find((p) => isPhotoAvatarEligible(p))
+  const avatarUrl = primary?.url?.trim() ?? null
   await db
     .update(schema.profiles)
     .set({ avatarUrl, updatedAt: new Date() })

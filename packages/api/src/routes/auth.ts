@@ -11,7 +11,7 @@ import {
   type SessionPayload,
 } from '@c2k/shared/session-token'
 import bcrypt from 'bcryptjs'
-import { count, eq } from 'drizzle-orm'
+import { count, eq, isNull } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { z } from 'zod'
 import { validatePublicUsername } from '@c2k/shared'
@@ -78,11 +78,22 @@ export async function registerAuthRoutes(app: FastifyInstance) {
             emailCiphertext: schema.users.emailCiphertext,
             emailKeyVersion: schema.users.emailKeyVersion,
             displayName: schema.profiles.displayName,
+            deletedAt: schema.users.deletedAt,
           })
           .from(schema.users)
           .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.users.id))
           .where(eq(schema.users.id, uid))
           .limit(1)
+        if (row?.deletedAt) {
+          return reply.send({
+            authenticated: false,
+            username: null,
+            fallback: r.fallback,
+            userId: null,
+            email: null,
+            displayName: null,
+          })
+        }
         if (row) {
           email = getEmailFromUserRow(row)
           displayName = row.displayName ?? null
@@ -124,6 +135,12 @@ export async function registerAuthRoutes(app: FastifyInstance) {
         const user = await findUserByLoginIdentifier(loginIdentifier)
         if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
           return reply.status(401).send({ error: 'Invalid credentials' })
+        }
+        if (user.deletedAt) {
+          return reply.status(403).send({
+            error: 'This account has been deleted.',
+            code: 'account_deleted',
+          })
         }
         if (await isUserIdentityBanned(user.id)) {
           return reply.status(403).send({ error: 'Access denied' })

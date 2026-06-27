@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom'
 import { Panel } from '@/components/dancecard/ui/Panel'
 import SectionHeader from '@/components/ui/SectionHeader'
 import StatusBanner from '@/components/ui/StatusBanner'
+import AccountDeleteButton from '@/components/settings/AccountDeleteButton'
 import SettingsAccountRow, {
   SettingsAccountActionLink,
 } from '@/components/settings/SettingsAccountRow'
 import { clearProfileEditLocalOverrides, hasProfileEditLocalOverrides } from '@/lib/profileEditLocalStorage'
+import { useSettingsContext } from '@/app/settings/SettingsContext'
 
 type Props = {
   viewerUsername: string | null
@@ -130,24 +132,38 @@ export default function SettingsAccountSection({
 }
 
 export function SettingsAccountDangerPanel() {
+  const { settingsEnabled } = useSettingsContext()
+  const [msg, setMsg] = useState<string | null>(null)
+
   return (
     <Panel className="scroll-mt-24">
       <SectionHeader
         eyebrow="Account"
         title="Deactivate or delete"
-        description="There is no going back once your account is deleted. Deactivation and self-service deletion are not available yet."
+        description="There is no going back once your account is deleted. Self-service deletion disables your account immediately and schedules private data for purge."
       />
       <div className="mt-4 space-y-3 text-sm">
         <p className="text-dc-muted">
-          Need to leave the community?{' '}
+          Export your data first if you need a copy.{' '}
+          <Link to="/settings/privacy" className="text-dc-accent hover:underline">
+            Privacy settings
+          </Link>{' '}
+          has download and full data controls.
+        </p>
+        {settingsEnabled ?
+          <AccountDeleteButton onResult={setMsg} />
+        : <p className="text-dc-muted">Sign in with a live account to delete from here.</p>}
+        {msg ?
+          <p className="text-dc-text-muted" role="status">
+            {msg}
+          </p>
+        : null}
+        <p className="text-dc-muted">
+          Need help?{' '}
           <Link to="/support" className="text-dc-accent hover:underline">
             Contact support
-          </Link>{' '}
-          and we will walk you through options.
-        </p>
-        <p className="text-dc-muted">
-          <span className="text-dc-text-muted">Export your data</span>. A downloadable archive of your profile and
-          content is planned; request an export via support in the meantime.
+          </Link>
+          .
         </p>
       </div>
     </Panel>

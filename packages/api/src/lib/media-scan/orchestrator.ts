@@ -113,8 +113,8 @@ export async function runMediaScanOrchestration(
   let aggregateScannerStatus = aggregateScannerResults(records)
   aggregateScannerStatus = applyLegacySimulateOverride(aggregateScannerStatus)
   aggregateScannerStatus = softenProfileGalleryScanAggregate({
-    sourceSurface: asset.sourceSurface,
-    contentRating: asset.contentRating,
+    sourceSurface: scanAsset.sourceSurface,
+    contentRating: scanAsset.contentRating,
     aggregateScannerStatus,
     scannerResults: records,
   })

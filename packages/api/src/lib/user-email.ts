@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
 import { decryptField, encryptField, hmacLookup } from './field-encryption.js'
 
@@ -57,13 +57,13 @@ export async function findUserByEmailLookup(email: string) {
   const [byHash] = await db
     .select()
     .from(schema.users)
-    .where(eq(schema.users.emailLookupHash, hash))
+    .where(and(eq(schema.users.emailLookupHash, hash), isNull(schema.users.deletedAt)))
     .limit(1)
   if (byHash) return byHash
   const [legacy] = await db
     .select()
     .from(schema.users)
-    .where(eq(schema.users.email, normalized))
+    .where(and(eq(schema.users.email, normalized), isNull(schema.users.deletedAt)))
     .limit(1)
   return legacy ?? null
 }
@@ -79,7 +79,7 @@ export async function findUserByLoginIdentifier(identifier: string) {
   const [row] = await db
     .select()
     .from(schema.users)
-    .where(eq(schema.users.username, trimmed))
+    .where(and(eq(schema.users.username, trimmed), isNull(schema.users.deletedAt)))
     .limit(1)
   return row ?? null
 }
