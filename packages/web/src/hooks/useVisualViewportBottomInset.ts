@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
 
+function inAppBrowserExtraInset(): number {
+  if (typeof document === 'undefined') return 0
+  return document.documentElement.classList.contains('browser-in-app') ? 8 : 0
+}
+
 /** Pixels obscured at the bottom by the on-screen keyboard (mobile browsers). */
 export function useVisualViewportBottomInset(enabled: boolean): number {
   const [inset, setInset] = useState(0)
@@ -14,7 +19,7 @@ export function useVisualViewportBottomInset(enabled: boolean): number {
 
     const update = () => {
       const next = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop))
-      setInset(next)
+      setInset(next + inAppBrowserExtraInset())
     }
 
     update()

@@ -900,7 +900,7 @@ export default function MessagingPage() {
 
               <div
                 className={cn(
-                  'flex-1 min-h-0 overflow-y-auto p-4 space-y-4',
+                  'flex-1 min-h-0 overflow-y-auto p-4 space-y-4 c2k-thread-scroll',
                   inMobileThread && 'pb-4',
                 )}
                 aria-live="polite"
@@ -961,7 +961,7 @@ export default function MessagingPage() {
 
               <div
                 className={cn(
-                  'shrink-0 border-t border-dc-border bg-dc-elevated-solid',
+                  'c2k-fixed-composer shrink-0 border-t border-dc-border bg-dc-elevated-solid',
                   inMobileThread ?
                     'fixed inset-x-0 z-30 shadow-[0_-8px_24px_rgba(0,0,0,0.35)]'
                   : '',

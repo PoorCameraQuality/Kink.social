@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { preprocessVendorWriteBody } from '@c2k/shared'
 import { z } from 'zod'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
@@ -68,8 +69,8 @@ export async function registerVendorEtsyRoutes(app: FastifyInstance) {
     const userId = getViewerUserId(v.payload)
     if (!userId) return reply.status(401).send({ error: 'Valid session required' })
 
-    const parsed = patchEtsyBody.safeParse(req.body)
-    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    const parsed = patchEtsyBody.safeParse(preprocessVendorWriteBody(req.body))
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() })
 
     const vendorOrErr = await resolveVendorForEtsyRoute(req, userId, vendorProfileId)
     if ('error' in vendorOrErr) {

@@ -1,3 +1,4 @@
+import { normalizeVendorWebsite } from '@c2k/shared'
 import { useEffect, useState } from 'react'
 import {
   shopifyInstallPath,
@@ -117,7 +118,7 @@ export default function VendorExternalStorePanel({
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopUrl: trimmed }),
+        body: JSON.stringify({ shopUrl: normalizeVendorWebsite(trimmed) ?? trimmed }),
       })
       const j = (await r.json().catch(() => ({}))) as { error?: string }
       if (!r.ok) {
@@ -177,7 +178,7 @@ export default function VendorExternalStorePanel({
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'link_only', storeUrl: u }),
+        body: JSON.stringify({ provider: 'link_only', storeUrl: normalizeVendorWebsite(u) ?? u }),
       })
       const j = (await r.json().catch(() => ({}))) as { error?: string }
       if (!r.ok) {
@@ -209,7 +210,7 @@ export default function VendorExternalStorePanel({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           provider: 'woocommerce',
-          siteUrl: wooSite.trim(),
+          siteUrl: normalizeVendorWebsite(wooSite.trim()) ?? wooSite.trim(),
           consumerKey: wooKey.trim(),
           consumerSecret: wooSecret.trim(),
         }),
@@ -323,6 +324,7 @@ export default function VendorExternalStorePanel({
         <form onSubmit={(e) => void saveEtsy(e)} className="space-y-3">
           <p className="text-sm text-dc-text-muted">{TAB_DESCRIPTIONS.etsy.body}</p>
           <p className="text-xs text-dc-muted">{TAB_DESCRIPTIONS.etsy.setup}</p>
+          <p className="text-xs text-dc-text-muted">We&apos;ll add https:// if you paste a link without it.</p>
           <input
             type="text"
             value={etsyUrl}
@@ -366,11 +368,12 @@ export default function VendorExternalStorePanel({
         <form onSubmit={(e) => void saveWoo(e)} className="space-y-3">
           <p className="text-sm text-dc-text-muted">{TAB_DESCRIPTIONS.woocommerce.body}</p>
           <p className="text-xs text-dc-muted">{TAB_DESCRIPTIONS.woocommerce.setup}</p>
+          <p className="text-xs text-dc-text-muted">We&apos;ll add https:// if you paste a link without it.</p>
           <input
-            type="url"
+            type="text"
             value={wooSite}
             onChange={(e) => setWooSite(e.target.value)}
-            placeholder="https://your-wordpress-site.com"
+            placeholder="your-wordpress-site.com"
             className="w-full bg-dc-elevated-solid border border-dc-border rounded-xl px-3 py-2 text-dc-text text-sm"
           />
           <input
@@ -402,11 +405,12 @@ export default function VendorExternalStorePanel({
       {tab === 'link' && (
         <form onSubmit={(e) => void saveLinkOnly(e)} className="space-y-3">
           <p className="text-sm text-dc-text-muted">{TAB_DESCRIPTIONS.link.body}</p>
+          <p className="text-xs text-dc-text-muted">We&apos;ll add https:// if you paste a link without it.</p>
           <input
-            type="url"
+            type="text"
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
-            placeholder="https://your-store.com"
+            placeholder="your-store.com"
             className="w-full bg-dc-elevated-solid border border-dc-border rounded-xl px-3 py-2 text-dc-text text-sm"
           />
           <button

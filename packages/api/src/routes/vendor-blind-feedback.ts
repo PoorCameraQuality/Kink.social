@@ -81,7 +81,7 @@ export async function registerVendorBlindFeedbackRoutes(app: FastifyInstance) {
     const vid = await resolveVendorProfileId(vendorId)
     if (!vid) return reply.status(404).send({ error: 'Vendor not found' })
     const parsed = postBody.safeParse(req.body)
-    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() })
     if (!isValidPurchaseProofKey(parsed.data.purchaseProofKey, user.userId)) {
       return reply.status(400).send({ error: 'Invalid purchase proof upload' })
     }

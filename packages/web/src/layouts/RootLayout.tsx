@@ -14,6 +14,7 @@ import ScrollToTopOnNavigate from '@/components/ScrollToTopOnNavigate'
 import AppShell from '@/components/shell/AppShell'
 import CreateFab from '@/components/shell/CreateFab'
 import CreateSheet from '@/components/shell/CreateSheet'
+import InAppBrowserBanner from '@/components/shell/InAppBrowserBanner'
 import { CreateSheetProvider } from '@/contexts/CreateSheetContext'
 import { FeedComposerUiProvider, useFeedComposerEngaged } from '@/contexts/FeedComposerUiContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -61,6 +62,7 @@ function RootLayoutInner() {
   return (
     <>
       <AppRobotsMeta />
+      <InAppBrowserBanner />
       <a
         href="#main-content"
         className="fixed left-4 top-4 z-[500] -translate-y-[200%] rounded-lg bg-dc-accent px-4 py-2 text-sm font-medium text-dc-accent-foreground shadow-[var(--dc-shadow-soft)] outline-none ring-2 ring-dc-surface ring-offset-2 ring-offset-dc-accent transition-transform focus-visible:translate-y-0"

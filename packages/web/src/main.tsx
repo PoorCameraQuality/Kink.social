@@ -6,6 +6,7 @@ import RootErrorBoundary from '@/components/RootErrorBoundary'
 import { initErrorTracking, captureClientException } from '@/lib/error-tracking'
 import { clearStaleLocalServiceWorkers } from '@/dev-sw-cleanup'
 import { disableBrowserScrollRestoration } from '@/lib/scroll-app-to-top'
+import { applyBrowserDocumentClasses } from '@/lib/apply-browser-document-classes'
 import { router } from './router'
 import './app/globals.css'
 
@@ -20,6 +21,7 @@ async function bootstrap() {
   })
 
   disableBrowserScrollRestoration()
+  applyBrowserDocumentClasses()
   await clearStaleLocalServiceWorkers()
 
   const rootEl = document.getElementById('root')

@@ -1,6 +1,7 @@
 import {
   VENDOR_TAG_MAX,
   normalizeVendorTags,
+  normalizeVendorWebsite,
   vendorCategoriesFromRow,
   type VendorCategory,
 } from '@c2k/shared'
@@ -214,7 +215,10 @@ export default function VendorOnboardingWizard() {
       const s = slug.trim()
       if (s) body.slug = s
       const w = website.trim()
-      if (w) body.website = w
+      if (w) {
+        const normalized = normalizeVendorWebsite(w)
+        if (normalized) body.website = normalized
+      }
       const r = await fetch('/api/v1/vendors', {
         method: 'POST',
         credentials: 'include',
@@ -262,7 +266,7 @@ export default function VendorOnboardingWizard() {
             displayName: displayName.trim(),
             bio: bio.trim() || null,
             makerStory: makerStory.trim() || null,
-            website: website.trim() || null,
+            website: website.trim() ? normalizeVendorWebsite(website) : null,
             shipsTo,
             categories,
             tags,
@@ -493,11 +497,11 @@ export default function VendorOnboardingWizard() {
               name="von-web"
               label="Main shop or website"
               optional
-              type="url"
-              hint="Your main storefront, portfolio, or business website. You can connect inventory on the next step."
+              type="text"
+              hint="We'll add https:// if you paste a link without it. Your main storefront, portfolio, or business website."
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
-              placeholder="https://"
+              placeholder="etsy.com/shop/your-shop"
               aria-invalid={basicsFieldErrors.website ? true : undefined}
               className={fieldErrorClass(Boolean(basicsFieldErrors.website))}
             />

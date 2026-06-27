@@ -1,6 +1,7 @@
 import {
   VENDOR_TAG_MAX,
   normalizeVendorTags,
+  normalizeVendorWebsite,
   vendorCategoriesFromRow,
   type VendorCategory,
 } from '@c2k/shared'
@@ -219,7 +220,7 @@ export default function VendorShopSection() {
             leadTime: policyLeadTime.trim() || null,
             shippingNotes: policyShipping.trim() || null,
           },
-          website: website.trim() || null,
+          website: website.trim() ? normalizeVendorWebsite(website) : null,
           shipsTo,
           categories,
           tags,
@@ -453,9 +454,10 @@ export default function VendorShopSection() {
           <label htmlFor="vs-web" className="block text-xs text-dc-muted mb-1">
             Website
           </label>
+          <p className="mb-1 text-xs text-dc-text-muted">We&apos;ll add https:// if you paste a link without it.</p>
           <input
             id="vs-web"
-            type="url"
+            type="text"
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
             aria-invalid={fieldErrors.website ? true : undefined}

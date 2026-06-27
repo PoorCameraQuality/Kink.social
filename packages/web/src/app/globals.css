@@ -4,6 +4,7 @@
 @import '../styles/shared-surfaces.css';
 @import '../styles/premium-surfaces.css';
 @import '../styles/mobile-polish.css';
+@import '../styles/browser-compat.css';
 @import '../styles/desktop-surfaces.css';
 @import '../styles/education-hub.css';
 @import '../styles/explore-hub.css';

@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <script>
+      (function () {
+        var ua = navigator.userAgent || '';
+        var html = document.documentElement;
+        html.classList.add('browser-env-ready');
+        if (/iPhone|iPad|iPod/i.test(ua)) html.classList.add('browser-ios');
+        if (/Android/i.test(ua)) html.classList.add('browser-android');
+        if (/SamsungBrowser/i.test(ua)) html.classList.add('browser-samsung');
+        if (/FBAN|FBAV|Instagram|Messenger|Twitter|LinkedInApp|TikTok|Line\//i.test(ua)) html.classList.add('browser-in-app');
+      })();
+    </script>
     <meta name="theme-color" content="#0f0f0f" />
     <meta name="description" content="A consent-centered community platform for kink events, education, groups, and organizers." />
     <meta name="mobile-web-app-capable" content="yes" />
