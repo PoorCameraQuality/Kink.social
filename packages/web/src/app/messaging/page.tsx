@@ -98,6 +98,7 @@ export default function MessagingPage() {
   const [apiMessagesByConv, setApiMessagesByConv] = useState<Record<string, ChatMsg[]>>({})
   const [messagesFetchByConv, setMessagesFetchByConv] = useState<Record<string, 'loading' | 'loaded'>>({})
   const [partnerUsernameByConvId, setPartnerUsernameByConvId] = useState<Record<string, string>>({})
+  const [pendingConversation, setPendingConversation] = useState<ConvRow | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const openedUserRef = useRef<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -331,12 +332,29 @@ export default function MessagingPage() {
           setDeepLinkError(j.error ?? 'Could not open conversation with that member.')
           return
         }
-        const data = (await r.json()) as { conversation: { id: string } }
+        const data = (await r.json()) as { conversation: { id: string; title?: string } }
         if (cancelled) return
-        selectConversation(data.conversation.id)
-        setPartnerUsernameByConvId((prev) => ({ ...prev, [data.conversation.id]: username }))
+        const convId = data.conversation.id
+        const title = data.conversation.title?.trim() || username
+        const placeholder: ConvRow = {
+          id: convId,
+          name: title,
+          partnerUsername: username,
+          partnerAvatarUrl: null,
+          lastMessage: 'No messages yet',
+          date: '',
+          unread: false,
+        }
+        setPendingConversation(placeholder)
+        setApiConversations((prev) => {
+          if (prev?.some((row) => row.id === convId)) return prev
+          return prev ? [placeholder, ...prev] : [placeholder]
+        })
+        selectConversation(convId)
+        setPartnerUsernameByConvId((prev) => ({ ...prev, [convId]: username }))
         setFolderInUrl('main', false)
         await loadConversations()
+        setPendingConversation(null)
       } catch {
         if (!cancelled) setDeepLinkError('Could not open conversation. Check your connection and try again.')
       } finally {
@@ -346,7 +364,7 @@ export default function MessagingPage() {
     return () => {
       cancelled = true
     }
-  }, [searchParams, isAuthenticated, status, loadConversations])
+  }, [searchParams, isAuthenticated, status, loadConversations, selectConversation, setFolderInUrl])
 
   const loadMessagesFor = useCallback(
     async (convId: string) => {
@@ -410,7 +428,23 @@ export default function MessagingPage() {
     setThreadMenuOpen(false)
   }, [selectedConversation])
 
-  const activeConv = selectedConversation ? conversationRows.find((c) => c.id === selectedConversation) : null
+  const activeConv = useMemo(() => {
+    if (!selectedConversation) return null
+    const fromList = conversationRows.find((c) => c.id === selectedConversation)
+    if (fromList) return fromList
+    if (pendingConversation?.id === selectedConversation) return pendingConversation
+    const partnerUsername = partnerUsernameByConvId[selectedConversation]?.trim()
+    if (!partnerUsername) return null
+    return {
+      id: selectedConversation,
+      name: partnerUsername,
+      partnerUsername,
+      partnerAvatarUrl: null,
+      lastMessage: 'No messages yet',
+      date: '',
+      unread: false,
+    } satisfies ConvRow
+  }, [selectedConversation, conversationRows, pendingConversation, partnerUsernameByConvId])
   const activePartnerUsername = activeConv ?
     activeConv.partnerUsername?.trim() ||
     partnerUsernameByConvId[activeConv.id]?.trim() ||
@@ -929,7 +963,7 @@ export default function MessagingPage() {
                 className={cn(
                   'shrink-0 border-t border-dc-border bg-dc-elevated-solid',
                   inMobileThread ?
-                    'fixed inset-x-0 z-20 shadow-[0_-8px_24px_rgba(0,0,0,0.35)]'
+                    'fixed inset-x-0 z-30 shadow-[0_-8px_24px_rgba(0,0,0,0.35)]'
                   : '',
                 )}
                 style={inMobileThread ? { bottom: keyboardInset } : undefined}

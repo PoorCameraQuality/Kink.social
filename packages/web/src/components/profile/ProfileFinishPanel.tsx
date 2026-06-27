@@ -21,6 +21,7 @@ import {
 } from '@c2k/shared'
 
 import TagMultiSelect from '@/components/ui/TagMultiSelect'
+import ProfileBirthDateField from '@/components/profile/ProfileBirthDateField'
 import ZipLocationCandidatePicker from '@/components/profile/ZipLocationCandidatePicker'
 import type { ZipPlaceCandidate } from '@/lib/profile-edit-location'
 import { uploadProfilePhotoFile, attachUploadedProfilePhoto } from '@/lib/profile-photo-upload'
@@ -485,22 +486,12 @@ export default function ProfileFinishPanel({ redirectAfter, onCompleted }: Props
 
           </label>
 
-          <input
-
+          <ProfileBirthDateField
             id={birthId}
-
-            type="date"
-
             value={birthDate}
-
-            min={bounds.min}
-
-            max={bounds.max}
-
-            onChange={(e) => setBirthDate(e.target.value)}
-
-            className="w-full max-w-xs min-h-11 px-4 py-2 bg-dc-surface-muted border border-dc-border rounded-lg text-dc-text [color-scheme:dark]"
-
+            bounds={bounds}
+            onChange={setBirthDate}
+            className="max-w-md"
           />
 
         </div>

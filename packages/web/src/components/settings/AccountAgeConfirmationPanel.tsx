@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ageFromBirthDate, formatProfileBirthDateForInput, profileBirthDateInputBounds } from '@c2k/shared'
+import ProfileBirthDateField from '@/components/profile/ProfileBirthDateField'
 import { Panel } from '@/components/dancecard/ui/Panel'
 import SectionHeader from '@/components/ui/SectionHeader'
 import StatusBanner from '@/components/ui/StatusBanner'
-import { premiumInputClass } from '@/lib/card-surface'
-import { cn } from '@/lib/cn'
 
 export default function AccountAgeConfirmationPanel() {
   const [birthDate, setBirthDate] = useState('')
@@ -74,15 +73,13 @@ export default function AccountAgeConfirmationPanel() {
         <label htmlFor="account-age-dob" className="block text-sm font-medium text-dc-text">
           Date of birth
         </label>
-        <input
+        <ProfileBirthDateField
           id="account-age-dob"
-          type="date"
           value={birthDate}
-          min={birthDateBounds.min}
-          max={birthDateBounds.max}
+          bounds={birthDateBounds}
           disabled={loading || saving}
-          onChange={(e) => setBirthDate(e.target.value)}
-          className={cn('mt-2 w-full text-sm [color-scheme:dark] disabled:opacity-60', premiumInputClass)}
+          onChange={setBirthDate}
+          className="mt-2 max-w-md"
         />
         {age != null ?
           <p className="mt-2 text-xs text-dc-muted">

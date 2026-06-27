@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   profilePhotoImageStyle,
   type ProfilePhotoDisplaySettings,
@@ -23,6 +23,10 @@ export default function ProfilePhotoImage({
 }: Props) {
   const [failed, setFailed] = useState(false)
   const resolvedSrc = mediaDisplayUrl(src)
+
+  useEffect(() => {
+    setFailed(false)
+  }, [resolvedSrc])
 
   if (!resolvedSrc || failed) {
     return (

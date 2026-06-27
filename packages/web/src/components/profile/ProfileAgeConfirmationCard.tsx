@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { ageFromBirthDate, profileBirthDateInputBounds } from '@c2k/shared'
+import ProfileBirthDateField from '@/components/profile/ProfileBirthDateField'
 import Card from '@/components/ui/Card'
 import { useProfileEdit } from '@/contexts/ProfileEditContext'
 
@@ -18,14 +19,12 @@ export default function ProfileAgeConfirmationCard() {
       <label htmlFor="profile-age-dob" className="mt-3 block text-xs font-medium text-dc-text">
         Date of birth
       </label>
-      <input
+      <ProfileBirthDateField
         id="profile-age-dob"
-        type="date"
         value={ctx.birthDate}
-        min={birthDateBounds.min}
-        max={birthDateBounds.max}
-        onChange={(e) => ctx.setBirthDate(e.target.value)}
-        className="mt-1 w-full px-3 py-2.5 bg-dc-surface-muted border border-dc-border rounded-lg text-dc-text text-sm [color-scheme:dark]"
+        bounds={birthDateBounds}
+        onChange={ctx.setBirthDate}
+        className="mt-1"
       />
       {age != null ?
         <p className="mt-2 text-xs text-dc-muted">

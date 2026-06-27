@@ -7,6 +7,7 @@ import {
 import { FormStatusMessage, WizardField, WizardStepHeader, WizardTextarea } from '@/components/ui/primitives'
 import Button from '@/components/ui/Button'
 import TagMultiSelect from '@/components/ui/TagMultiSelect'
+import ProfileBirthDateField from '@/components/profile/ProfileBirthDateField'
 import ZipLocationCandidatePicker from '@/components/profile/ZipLocationCandidatePicker'
 import type { ZipPlaceCandidate } from '@/lib/profile-edit-location'
 
@@ -102,18 +103,23 @@ export default function ProfileBasicsStep(props: ProfileBasicsStepProps) {
           ) : null}
         </div>
 
-        <WizardField
-          name="onboarding-birth-date"
-          type="date"
-          label="Date of birth"
-          optional
-          hint="Stored privately for eligibility checks. Never shown on your public profile."
-          value={props.birthDate}
-          min={props.birthDateBounds.min}
-          max={props.birthDateBounds.max}
-          onChange={(e) => props.onBirthDateChange(e.target.value)}
-          className="max-w-xs [color-scheme:dark]"
-        />
+        <div>
+          <p className="text-sm font-medium text-dc-text">
+            Date of birth{' '}
+            <span className="font-normal text-dc-text-muted">(optional)</span>
+          </p>
+          <p id="onboarding-birth-date-hint" className="mt-1 text-xs leading-relaxed text-dc-text-muted">
+            Stored privately for eligibility checks. Never shown on your public profile.
+          </p>
+          <ProfileBirthDateField
+            id="onboarding-birth-date"
+            value={props.birthDate}
+            bounds={props.birthDateBounds}
+            onChange={props.onBirthDateChange}
+            aria-describedby="onboarding-birth-date-hint"
+            className="mt-2 max-w-md"
+          />
+        </div>
 
         <TagMultiSelect
           label="Gender (optional)"

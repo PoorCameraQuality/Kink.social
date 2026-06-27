@@ -401,8 +401,13 @@ export default function ProfileUsernamePage() {
 
   useEffect(() => {
     const onPrivacySaved = () => void loadPublicProfile()
+    const onProfileSaved = () => void loadPublicProfile()
     window.addEventListener('c2k:profile-privacy-saved', onPrivacySaved)
-    return () => window.removeEventListener('c2k:profile-privacy-saved', onPrivacySaved)
+    window.addEventListener('c2k:profile-saved', onProfileSaved)
+    return () => {
+      window.removeEventListener('c2k:profile-privacy-saved', onPrivacySaved)
+      window.removeEventListener('c2k:profile-saved', onProfileSaved)
+    }
   }, [loadPublicProfile])
 
   useEffect(() => {
@@ -547,16 +552,17 @@ export default function ProfileUsernamePage() {
   }, [apiProfileStatus, publicProfile, username, viewerUsername, storedPhotos, profileData, isAuthenticated, isFallback])
 
   const primaryPhoto = pickPrimaryProfilePhoto(displayPhotos) ?? displayPhotos[0]
-  const primaryPhotoUrl =
+  const primaryPhotoBlurred =
     primaryPhoto &&
-    !shouldBlurMediaForViewer(mediaViewer, {
+    !viewerIsSelf &&
+    shouldBlurMediaForViewer(mediaViewer, {
       contentRating: primaryPhoto.contentRating ?? null,
       visibility: primaryPhoto.visibility ?? null,
       uploadStatus: primaryPhoto.uploadStatus ?? null,
       isBlurredByDefault: primaryPhoto.isBlurredByDefault ?? false,
     })
-      ? primaryPhoto.url
-      : undefined
+  const primaryPhotoUrl =
+    primaryPhoto && !primaryPhotoBlurred && primaryPhoto.url?.trim() ? primaryPhoto.url : undefined
   const primaryPhotoCaption = primaryPhotoUrl ? primaryPhoto?.caption : undefined
   const primaryPhotoDisplaySettings =
     primaryPhotoUrl ? primaryPhoto?.displaySettings : undefined

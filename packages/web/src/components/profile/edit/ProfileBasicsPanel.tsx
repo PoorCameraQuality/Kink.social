@@ -8,10 +8,10 @@ import {
   PROFILE_PRONOUN_MAX,
   PROFILE_HERO_PHOTO_FRAME_CLASS,
   ageFromBirthDate,
-  formatProfileBirthDateForInput,
   profileBirthDateInputBounds,
 } from '@c2k/shared'
 import ProfilePhotoImage from '@/components/profile/ProfilePhotoImage'
+import ProfileBirthDateField from '@/components/profile/ProfileBirthDateField'
 import ProfilePhotoCredit from '@/components/profile/ProfilePhotoCredit'
 import TagMultiSelect from '@/components/ui/TagMultiSelect'
 import { FormStatusMessage } from '@/components/ui/primitives/layout'
@@ -91,14 +91,12 @@ export default function ProfileBasicsPanel() {
           <p className="text-xs text-dc-text-muted mb-2">
             Required for age verification. Never shown on your public profile — only your age may appear when visibility allows.
           </p>
-          <input
+          <ProfileBirthDateField
             id="profile-birth-date"
-            type="date"
             value={ctx.birthDate}
-            min={birthDateBounds.min}
-            max={birthDateBounds.max}
-            onChange={(e) => ctx.setBirthDate(e.target.value)}
-            className="w-full max-w-xs px-4 py-3 bg-dc-surface-muted border border-dc-border rounded-lg text-dc-text"
+            bounds={birthDateBounds}
+            onChange={ctx.setBirthDate}
+            className="max-w-md"
           />
           {ctx.birthDate.trim() && ageFromBirthDate(ctx.birthDate) != null && ageFromBirthDate(ctx.birthDate)! < 18 ?
             <p className="mt-2 text-sm text-red-400" role="alert">
