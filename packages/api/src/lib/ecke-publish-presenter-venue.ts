@@ -114,7 +114,8 @@ function venueEligibility(row: NonNullable<Awaited<ReturnType<typeof loadVenueRo
 
 function buildPresenterContext(row: NonNullable<Awaited<ReturnType<typeof loadPresenterRow>>>) {
   const displayName = row.displayName?.trim() || row.headline?.trim() || row.username
-  const avatarUrl = deliverProfileHeroUrl(row.avatarUrl?.trim() || null) ?? row.avatarUrl?.trim() || null
+  const avatarUrl =
+    deliverProfileHeroUrl(row.avatarUrl?.trim() || null) ?? (row.avatarUrl?.trim() || null)
   const listingPayload = buildPresenterListingPayload({
     username: row.username,
     displayName,
