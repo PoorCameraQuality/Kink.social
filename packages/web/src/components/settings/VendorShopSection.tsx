@@ -1,18 +1,71 @@
-import { VENDOR_CATEGORY_DESCRIPTIONS, normalizeVendorTags, type VendorCategory } from '@c2k/shared'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  VENDOR_TAG_MAX,
+  normalizeVendorTags,
+  vendorCategoriesFromRow,
+  type VendorCategory,
+} from '@c2k/shared'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import VendorEckePanel from '@/components/ecke/VendorEckePanel'
 import VendorExternalStorePanel from '@/components/VendorExternalStorePanel'
+import VendorCategoryPicker from '@/components/vendors/VendorCategoryPicker'
 import VendorIntegrationGuide from '@/components/vendors/VendorIntegrationGuide'
+import StatusBanner from '@/components/ui/StatusBanner'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePersistFormDraft, useSessionFormDraft } from '@/hooks/useSessionFormDraft'
 import { useApiVendorMe } from '@/hooks/useApiVendorMe'
-import { VENDOR_CATEGORY_VALUES } from '@/lib/vendor-onboarding'
+import {
+  fieldErrorClass,
+  focusFirstInvalidField,
+  formatVendorProfileSaveError,
+  type ApiErrorBody,
+} from '@/lib/api-errors'
+
+const VENDOR_SHOP_DRAFT_KEY = 'c2k:vendor-shop-draft'
+
+type VendorShopDraft = {
+  displayName: string
+  bio: string
+  makerStory: string
+  policyReturns: string
+  policyCustomOrders: string
+  policyLeadTime: string
+  policyShipping: string
+  website: string
+  shipsTo: 'US' | 'Canada' | 'International'
+  categories: VendorCategory[]
+  tags: string[]
+  visibility: 'PUBLIC' | 'MEMBERS' | 'HIDDEN'
+  commissionStatus: 'OPEN' | 'LIMITED' | 'CLOSED'
+  commissionNotes: string
+  eckePublish: boolean
+  coOwnerInput: string
+}
+
+const VENDOR_FIELD_IDS: Record<string, string> = {
+  displayName: 'vs-name',
+  bio: 'vs-bio',
+  makerStory: 'vs-maker',
+  website: 'vs-web',
+  shipsTo: 'vs-ships',
+  categories: 'vs-categories',
+  tags: 'vs-tags',
+  visibility: 'vs-vis',
+  commissionStatus: 'vs-comm',
+  commissionNotes: 'vs-comm-notes',
+  'shopPolicies.returns': 'vs-pol-returns',
+  'shopPolicies.customOrders': 'vs-pol-custom',
+  'shopPolicies.leadTime': 'vs-pol-lead',
+  'shopPolicies.shippingNotes': 'vs-pol-ship',
+}
 
 export default function VendorShopSection() {
   const { isAuthenticated } = useAuth()
   const { status, vendor, reload } = useApiVendorMe(isAuthenticated)
+  const { restore, clear, markRestored, hasRestored } = useSessionFormDraft<VendorShopDraft>(VENDOR_SHOP_DRAFT_KEY)
   const [msg, setMsg] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
@@ -23,7 +76,7 @@ export default function VendorShopSection() {
   const [policyShipping, setPolicyShipping] = useState('')
   const [website, setWebsite] = useState('')
   const [shipsTo, setShipsTo] = useState<'US' | 'Canada' | 'International'>('US')
-  const [category, setCategory] = useState<VendorCategory | null>(null)
+  const [categories, setCategories] = useState<VendorCategory[]>([])
   const [tagInput, setTagInput] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [visibility, setVisibility] = useState<'PUBLIC' | 'MEMBERS' | 'HIDDEN'>('HIDDEN')
@@ -32,7 +85,70 @@ export default function VendorShopSection() {
   const [eckePublish, setEckePublish] = useState(false)
   const [coOwnerInput, setCoOwnerInput] = useState('')
 
+  const draftSnapshot = useMemo(
+    (): VendorShopDraft => ({
+      displayName,
+      bio,
+      makerStory,
+      policyReturns,
+      policyCustomOrders,
+      policyLeadTime,
+      policyShipping,
+      website,
+      shipsTo,
+      categories,
+      tags,
+      visibility,
+      commissionStatus,
+      commissionNotes,
+      eckePublish,
+      coOwnerInput,
+    }),
+    [
+      bio,
+      categories,
+      coOwnerInput,
+      commissionNotes,
+      commissionStatus,
+      displayName,
+      eckePublish,
+      makerStory,
+      policyCustomOrders,
+      policyLeadTime,
+      policyReturns,
+      policyShipping,
+      shipsTo,
+      tags,
+      visibility,
+      website,
+    ],
+  )
+
+  usePersistFormDraft(VENDOR_SHOP_DRAFT_KEY, draftSnapshot, Boolean(vendor))
+
   useEffect(() => {
+    if (hasRestored()) return
+    const draft = restore()
+    if (draft) {
+      setDisplayName(draft.displayName)
+      setBio(draft.bio)
+      setMakerStory(draft.makerStory)
+      setPolicyReturns(draft.policyReturns)
+      setPolicyCustomOrders(draft.policyCustomOrders)
+      setPolicyLeadTime(draft.policyLeadTime)
+      setPolicyShipping(draft.policyShipping)
+      setWebsite(draft.website)
+      setShipsTo(draft.shipsTo)
+      setCategories(draft.categories)
+      setTags(draft.tags)
+      setVisibility(draft.visibility)
+      setCommissionStatus(draft.commissionStatus)
+      setCommissionNotes(draft.commissionNotes)
+      setEckePublish(draft.eckePublish)
+      setCoOwnerInput(draft.coOwnerInput)
+      markRestored()
+      return
+    }
     if (!vendor) return
     setDisplayName(vendor.displayName ?? '')
     setBio(vendor.bio ?? '')
@@ -44,13 +160,14 @@ export default function VendorShopSection() {
     setPolicyShipping(p?.shippingNotes ?? '')
     setWebsite(vendor.website ?? '')
     setShipsTo((vendor.shipsTo as typeof shipsTo) ?? 'US')
-    setCategory((vendor.category as VendorCategory | null) ?? null)
+    setCategories(vendorCategoriesFromRow({ category: vendor.category, categories: vendor.categories }))
     setTags(vendor.tags ?? [])
     setTagInput('')
     setVisibility(vendor.visibility ?? 'HIDDEN')
     setCommissionStatus(vendor.commissionStatus ?? 'OPEN')
     setCommissionNotes(vendor.commissionNotes ?? '')
     setEckePublish(Boolean(vendor.eckePublish))
+    markRestored()
     void (async () => {
       try {
         const r = await fetch('/api/v1/vendors/me/co-owners', { credentials: 'include' })
@@ -61,7 +178,7 @@ export default function VendorShopSection() {
         /* ignore */
       }
     })()
-  }, [vendor])
+  }, [vendor, restore, markRestored, hasRestored])
 
   const addTagsFromInput = () => {
     const parts = tagInput.split(/[,]+/).map((s) => s.trim()).filter(Boolean)
@@ -74,11 +191,19 @@ export default function VendorShopSection() {
     setTags((prev) => prev.filter((t) => t !== tag))
   }
 
+  const applySaveError = useCallback((body: ApiErrorBody) => {
+    const parsed = formatVendorProfileSaveError(body)
+    setErr(parsed.message)
+    setFieldErrors(parsed.fieldErrors)
+    focusFirstInvalidField(parsed.fieldErrors, VENDOR_FIELD_IDS)
+  }, [])
+
   const saveProfile = useCallback(async () => {
     if (!vendor) return
     setSaving(true)
     setErr(null)
     setMsg(null)
+    setFieldErrors({})
     try {
       const r = await fetch('/api/v1/me/vendor-profile', {
         method: 'PUT',
@@ -96,7 +221,7 @@ export default function VendorShopSection() {
           },
           website: website.trim() || null,
           shipsTo,
-          category,
+          categories,
           tags,
           visibility,
           commissionStatus,
@@ -104,9 +229,9 @@ export default function VendorShopSection() {
           eckePublish,
         }),
       })
-      const j = (await r.json().catch(() => ({}))) as { error?: string }
+      const j = (await r.json().catch(() => ({}))) as ApiErrorBody
       if (!r.ok) {
-        setErr(j.error ?? 'Could not save')
+        applySaveError(j)
         return
       }
       const coUsernames = coOwnerInput
@@ -119,12 +244,13 @@ export default function VendorShopSection() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ usernames: coUsernames }),
       })
-      const cj = (await cr.json().catch(() => ({}))) as { error?: string }
+      const cj = (await cr.json().catch(() => ({}))) as ApiErrorBody
       if (!cr.ok) {
         setErr(cj.error ?? 'Shop saved but shop runners could not be updated')
         reload()
         return
       }
+      clear()
       setMsg('Shop settings saved.')
       reload()
     } catch {
@@ -133,8 +259,10 @@ export default function VendorShopSection() {
       setSaving(false)
     }
   }, [
+    applySaveError,
     bio,
-    category,
+    categories,
+    clear,
     tags,
     commissionNotes,
     commissionStatus,
@@ -184,6 +312,7 @@ export default function VendorShopSection() {
   const wooPub = vendor.externalStorePublic as { wooSiteUrl?: string } | undefined
   const syncedAt = vendor.externalListingsSyncedAt ?? vendor.etsyListingsSyncedAt ?? null
   const syncError = vendor.externalSyncError ?? vendor.etsySyncError ?? null
+  const tagsAtCap = tags.length >= VENDOR_TAG_MAX
 
   return (
     <section className="rounded-2xl border border-dc-border bg-dc-elevated/40 p-6 space-y-6">
@@ -211,7 +340,8 @@ export default function VendorShopSection() {
             id="vs-name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+            aria-invalid={fieldErrors.displayName ? true : undefined}
+            className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors.displayName))}`}
           />
         </div>
         <div>
@@ -222,7 +352,8 @@ export default function VendorShopSection() {
             id="vs-vis"
             value={visibility}
             onChange={(e) => setVisibility(e.target.value as typeof visibility)}
-            className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+            aria-invalid={fieldErrors.visibility ? true : undefined}
+            className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors.visibility))}`}
           >
             <option value="PUBLIC">Public. Listed in vendor directory</option>
             <option value="MEMBERS">Members only</option>
@@ -240,7 +371,8 @@ export default function VendorShopSection() {
           rows={3}
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+          aria-invalid={fieldErrors.bio ? true : undefined}
+          className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors.bio))}`}
         />
       </div>
 
@@ -254,7 +386,8 @@ export default function VendorShopSection() {
           value={makerStory}
           onChange={(e) => setMakerStory(e.target.value)}
           placeholder="One sentence: who you make for (rope, leather, art prints…)"
-          className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+          aria-invalid={fieldErrors.makerStory ? true : undefined}
+          className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors.makerStory))}`}
         />
       </div>
 
@@ -270,7 +403,8 @@ export default function VendorShopSection() {
             rows={2}
             value={policyReturns}
             onChange={(e) => setPolicyReturns(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+            aria-invalid={fieldErrors['shopPolicies.returns'] ? true : undefined}
+            className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors['shopPolicies.returns']))}`}
           />
         </div>
         <div>
@@ -282,7 +416,8 @@ export default function VendorShopSection() {
             rows={2}
             value={policyCustomOrders}
             onChange={(e) => setPolicyCustomOrders(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+            aria-invalid={fieldErrors['shopPolicies.customOrders'] ? true : undefined}
+            className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors['shopPolicies.customOrders']))}`}
           />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -294,7 +429,8 @@ export default function VendorShopSection() {
               id="vs-pol-lead"
               value={policyLeadTime}
               onChange={(e) => setPolicyLeadTime(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+              aria-invalid={fieldErrors['shopPolicies.leadTime'] ? true : undefined}
+              className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors['shopPolicies.leadTime']))}`}
             />
           </div>
           <div>
@@ -305,7 +441,8 @@ export default function VendorShopSection() {
               id="vs-pol-ship"
               value={policyShipping}
               onChange={(e) => setPolicyShipping(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+              aria-invalid={fieldErrors['shopPolicies.shippingNotes'] ? true : undefined}
+              className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors['shopPolicies.shippingNotes']))}`}
             />
           </div>
         </div>
@@ -321,7 +458,8 @@ export default function VendorShopSection() {
             type="url"
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+            aria-invalid={fieldErrors.website ? true : undefined}
+            className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors.website))}`}
           />
         </div>
         <div>
@@ -332,7 +470,8 @@ export default function VendorShopSection() {
             id="vs-ships"
             value={shipsTo}
             onChange={(e) => setShipsTo(e.target.value as typeof shipsTo)}
-            className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+            aria-invalid={fieldErrors.shipsTo ? true : undefined}
+            className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors.shipsTo))}`}
           >
             <option value="US">US</option>
             <option value="Canada">Canada</option>
@@ -341,30 +480,16 @@ export default function VendorShopSection() {
         </div>
       </div>
 
-      <div>
-        <p className="text-xs text-dc-muted mb-2">Shop category</p>
-        <div className="flex flex-wrap gap-2">
-          {VENDOR_CATEGORY_VALUES.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              title={VENDOR_CATEGORY_DESCRIPTIONS[cat]}
-              onClick={() => setCategory(category === cat ? null : cat)}
-              className={`px-3 py-1.5 rounded-full text-xs border ${
-                category === cat ?
-                  'border-dc-accent bg-dc-accent/15 text-dc-accent'
-                : 'border-dc-border text-dc-text-muted'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
+      <VendorCategoryPicker
+        id="vs-categories"
+        selected={categories}
+        onChange={setCategories}
+        error={fieldErrors.categories ?? fieldErrors.category ?? null}
+      />
 
       <div>
         <label htmlFor="vs-tags" className="block text-xs text-dc-muted mb-1">
-          Specialty tags
+          Specialty tags <span className="text-dc-text-muted">(up to {VENDOR_TAG_MAX})</span>
         </label>
         <div className="flex gap-2">
           <input
@@ -377,17 +502,25 @@ export default function VendorShopSection() {
                 addTagsFromInput()
               }
             }}
-            placeholder="rope, commissions"
-            className="flex-1 px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+            disabled={tagsAtCap}
+            placeholder={tagsAtCap ? 'Tag limit reached' : 'rope, commissions'}
+            aria-invalid={fieldErrors.tags ? true : undefined}
+            className={`flex-1 px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors.tags))}`}
           />
           <button
             type="button"
             onClick={addTagsFromInput}
-            className="px-3 rounded-lg border border-dc-border text-sm text-dc-text-muted"
+            disabled={tagsAtCap}
+            className="px-3 rounded-lg border border-dc-border text-sm text-dc-text-muted disabled:opacity-50"
           >
             Add
           </button>
         </div>
+        {fieldErrors.tags ?
+          <p className="mt-1 text-xs text-red-200" role="alert">
+            {fieldErrors.tags}
+          </p>
+        : null}
         {tags.length > 0 ?
           <div className="mt-2 flex flex-wrap gap-2">
             {tags.map((tag) => (
@@ -413,7 +546,8 @@ export default function VendorShopSection() {
             id="vs-comm"
             value={commissionStatus}
             onChange={(e) => setCommissionStatus(e.target.value as typeof commissionStatus)}
-            className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+            aria-invalid={fieldErrors.commissionStatus ? true : undefined}
+            className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors.commissionStatus))}`}
           >
             <option value="OPEN">Open to commissions</option>
             <option value="LIMITED">Limited availability</option>
@@ -429,7 +563,8 @@ export default function VendorShopSection() {
             value={commissionNotes}
             onChange={(e) => setCommissionNotes(e.target.value)}
             placeholder="Lead time, minimums, etc."
-            className="w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm"
+            aria-invalid={fieldErrors.commissionNotes ? true : undefined}
+            className={`w-full px-3 py-2 rounded-lg bg-dc-surface-muted border border-dc-border text-dc-text text-sm ${fieldErrorClass(Boolean(fieldErrors.commissionNotes))}`}
           />
         </div>
       </div>
@@ -477,9 +612,7 @@ export default function VendorShopSection() {
       : null}
 
       {err ?
-        <p className="text-sm text-red-200" role="alert">
-          {err}
-        </p>
+        <StatusBanner tone="error">{err}</StatusBanner>
       : null}
       {msg ?
         <p className="text-sm text-emerald-300" role="status">

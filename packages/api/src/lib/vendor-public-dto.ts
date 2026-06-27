@@ -1,8 +1,10 @@
 import {
   inferVendorCategoryFromLegacy,
+  normalizeVendorCategories,
   normalizeVendorCategory,
   normalizeVendorTags,
   vendorCategoriesCompat,
+  vendorCategoriesFromRow,
   type VendorCategory,
 } from '@c2k/shared'
 
@@ -17,24 +19,38 @@ export function resolveVendorCategoryTags(input: {
   tags?: readonly string[] | null
   categories?: readonly string[] | null
 }): { category: VendorCategory | null; tags: string[]; categories: string[] } {
-  let category: VendorCategory | null = null
-  if (input.category?.trim()) {
-    category = normalizeVendorCategory(input.category)
-  }
   const legacy = input.categories ?? []
-  if (!category && legacy.length > 0) {
-    category = inferVendorCategoryFromLegacy(legacy)
+  let purposeCategories = normalizeVendorCategories(legacy)
+
+  if (input.category?.trim()) {
+    const primary = normalizeVendorCategory(input.category)
+    if (primary) {
+      purposeCategories = [primary, ...purposeCategories.filter((c) => c !== primary)]
+    }
   }
+
+  if (purposeCategories.length === 0 && legacy.length > 0) {
+    const inferred = inferVendorCategoryFromLegacy(legacy)
+    if (inferred) purposeCategories = [inferred]
+  }
+
+  const category = purposeCategories[0] ?? null
+  const purposeSet = new Set(purposeCategories)
 
   const tagSources: string[] = []
   if (input.tags?.length) tagSources.push(...input.tags)
   for (const c of legacy) {
     const normalized = normalizeVendorCategory(c)
-    if (normalized && normalized === category) continue
+    if (normalized && purposeSet.has(normalized)) continue
     tagSources.push(c)
   }
   const tags = normalizeVendorTags(tagSources)
-  const categories = category ? vendorCategoriesCompat(category, tags) : legacy.length ? [...legacy] : []
+  const categories =
+    purposeCategories.length > 0 ?
+      vendorCategoriesCompat(purposeCategories, tags)
+    : legacy.length ?
+      [...legacy]
+    : []
   return { category, tags, categories }
 }
 
@@ -95,10 +111,17 @@ export type PublicVendorListItem = {
 }
 
 export function toPublicVendorListItem(row: VendorProfileRow): PublicVendorListItem {
-  const category = row.category ?? inferVendorCategoryFromLegacy(row.categories ?? []) ?? null
+  const purposeCategories = vendorCategoriesFromRow({ category: row.category, categories: row.categories })
+  const category = purposeCategories[0] ?? row.category ?? inferVendorCategoryFromLegacy(row.categories ?? []) ?? null
   const tags = row.tags?.length ? row.tags : normalizeVendorTags(row.categories ?? [])
   const categories =
-    row.categories?.length ? row.categories : category ? vendorCategoriesCompat(category, tags) : []
+    row.categories?.length ?
+      row.categories
+    : purposeCategories.length ?
+      vendorCategoriesCompat(purposeCategories, tags)
+    : category ?
+      vendorCategoriesCompat([category as VendorCategory], tags)
+    : []
   return {
     id: row.id,
     slug: row.slug,

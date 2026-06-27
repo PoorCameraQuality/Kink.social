@@ -1,17 +1,28 @@
-import { VENDOR_CATEGORY_DESCRIPTIONS, normalizeVendorTags, type VendorCategory } from '@c2k/shared'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  VENDOR_TAG_MAX,
+  normalizeVendorTags,
+  vendorCategoriesFromRow,
+  type VendorCategory,
+} from '@c2k/shared'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import VendorExternalStorePanel from '@/components/VendorExternalStorePanel'
+import VendorCategoryPicker from '@/components/vendors/VendorCategoryPicker'
 import VendorIntegrationGuide from '@/components/vendors/VendorIntegrationGuide'
 import VendorShopAppearancePanel from '@/components/vendors/VendorShopAppearancePanel'
 import { useAuth } from '@/contexts/AuthContext'
 import { buildLoginHref } from '@/lib/auth-links'
 import { useApiVendorMe } from '@/hooks/useApiVendorMe'
+import { usePersistFormDraft, useSessionFormDraft } from '@/hooks/useSessionFormDraft'
 import type { ApiVendorRow } from '@/lib/api-vendor-mapper'
 import {
+  fieldErrorClass,
+  focusFirstInvalidField,
+  formatVendorProfileSaveError,
+  type ApiErrorBody,
+} from '@/lib/api-errors'
+import {
   FormStatusMessage,
-  WizardChoiceCard,
-  WizardChoiceGrid,
   WizardField,
   WizardFooter,
   WizardSelect,
@@ -25,7 +36,6 @@ import {
   VENDOR_BASICS_CONTINUE_LABEL,
   VENDOR_BASICS_HEADING,
   VENDOR_BASICS_INTRO,
-  VENDOR_CATEGORY_VALUES,
   VENDOR_CONNECTOR_PREVIEW,
   VENDOR_INVENTORY_HEADING,
   VENDOR_INVENTORY_INTRO,
@@ -35,6 +45,30 @@ import {
   vendorHasStoreConnector,
   vendorIsPublished,
 } from '@/lib/vendor-onboarding'
+
+const VENDOR_ONBOARDING_DRAFT_KEY = 'c2k:vendor-onboarding-draft'
+
+type VendorOnboardingDraft = {
+  step: VendorOnboardingStep
+  displayName: string
+  slug: string
+  bio: string
+  makerStory: string
+  website: string
+  shipsTo: 'US' | 'Canada' | 'International'
+  categories: VendorCategory[]
+  tags: string[]
+}
+
+const ONBOARDING_FIELD_IDS: Record<string, string> = {
+  displayName: 'wf-von-name',
+  bio: 'wf-von-bio',
+  makerStory: 'wf-von-maker',
+  website: 'wf-von-web',
+  shipsTo: 'wf-von-ships',
+  categories: 'vendor-categories',
+  tags: 'von-tags',
+}
 
 const vicon = (path: string) => (
   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -59,6 +93,9 @@ const STEPS: WizardStepMeta[] = VENDOR_ONBOARDING_STEPS.map((id) => ({
 export default function VendorOnboardingWizard() {
   const { isAuthenticated } = useAuth()
   const { status, vendor, reload } = useApiVendorMe(isAuthenticated)
+  const { restore, clear, markRestored, hasRestored } = useSessionFormDraft<VendorOnboardingDraft>(
+    VENDOR_ONBOARDING_DRAFT_KEY,
+  )
   const [step, setStep] = useState<VendorOnboardingStep>('welcome')
   const [resumeApplied, setResumeApplied] = useState(false)
   const [inventorySkipped, setInventorySkipped] = useState(false)
@@ -69,30 +106,70 @@ export default function VendorOnboardingWizard() {
   const [makerStory, setMakerStory] = useState('')
   const [website, setWebsite] = useState('')
   const [shipsTo, setShipsTo] = useState<'US' | 'Canada' | 'International'>('US')
-  const [category, setCategory] = useState<VendorCategory | null>(null)
+  const [categories, setCategories] = useState<VendorCategory[]>([])
   const [tagInput, setTagInput] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [basicsErr, setBasicsErr] = useState<string | null>(null)
+  const [basicsFieldErrors, setBasicsFieldErrors] = useState<Record<string, string>>({})
   const [basicsBusy, setBasicsBusy] = useState(false)
 
   const [publishBusy, setPublishBusy] = useState(false)
   const [publishErr, setPublishErr] = useState<string | null>(null)
   const [publishMsg, setPublishMsg] = useState<string | null>(null)
 
+  const draftSnapshot = useMemo(
+    (): VendorOnboardingDraft => ({
+      step,
+      displayName,
+      slug,
+      bio,
+      makerStory,
+      website,
+      shipsTo,
+      categories,
+      tags,
+    }),
+    [bio, categories, displayName, makerStory, shipsTo, slug, step, tags, website],
+  )
+
+  usePersistFormDraft(VENDOR_ONBOARDING_DRAFT_KEY, draftSnapshot, isAuthenticated && step !== 'welcome')
+
+  useEffect(() => {
+    if (hasRestored()) return
+    const draft = restore()
+    if (draft) {
+      setStep(draft.step)
+      setDisplayName(draft.displayName)
+      setSlug(draft.slug)
+      setBio(draft.bio)
+      setMakerStory(draft.makerStory)
+      setWebsite(draft.website)
+      setShipsTo(draft.shipsTo)
+      setCategories(draft.categories)
+      setTags(draft.tags)
+      markRestored()
+      setResumeApplied(true)
+    }
+  }, [hasRestored, markRestored, restore])
+
   useEffect(() => {
     if (status !== 'ready' || resumeApplied || !vendor) return
+    if (hasRestored()) {
+      setResumeApplied(true)
+      return
+    }
     setDisplayName(vendor.displayName ?? '')
     setSlug(vendor.slug ?? '')
     setBio(vendor.bio ?? '')
     setMakerStory(vendor.makerStory ?? '')
     setWebsite(vendor.website ?? '')
     setShipsTo((vendor.shipsTo as typeof shipsTo) ?? 'US')
-    setCategory((vendor.category as VendorCategory | null) ?? null)
+    setCategories(vendorCategoriesFromRow({ category: vendor.category, categories: vendor.categories }))
     setTags(vendor.tags ?? [])
     setTagInput('')
     setStep(initialOnboardingStep(vendor))
     setResumeApplied(true)
-  }, [status, vendor, resumeApplied])
+  }, [status, vendor, resumeApplied, hasRestored])
 
   const activeVendor = vendor
   const connectorReady = vendorHasStoreConnector(activeVendor) || inventorySkipped
@@ -114,8 +191,16 @@ export default function VendorOnboardingWizard() {
     setTags((prev) => prev.filter((t) => t !== tag))
   }
 
+  const applyBasicsError = useCallback((body: ApiErrorBody) => {
+    const parsed = formatVendorProfileSaveError(body)
+    setBasicsErr(parsed.message)
+    setBasicsFieldErrors(parsed.fieldErrors)
+    focusFirstInvalidField(parsed.fieldErrors, ONBOARDING_FIELD_IDS)
+  }, [])
+
   const createShop = useCallback(async () => {
     setBasicsErr(null)
+    setBasicsFieldErrors({})
     setBasicsBusy(true)
     try {
       const body: Record<string, unknown> = {
@@ -123,7 +208,7 @@ export default function VendorOnboardingWizard() {
         bio: bio.trim() || undefined,
         makerStory: makerStory.trim() || undefined,
         shipsTo,
-        category: category ?? undefined,
+        categories: categories.length ? categories : undefined,
         tags: tags.length ? tags : undefined,
       }
       const s = slug.trim()
@@ -136,16 +221,18 @@ export default function VendorOnboardingWizard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const j = (await r.json().catch(() => ({}))) as { vendor?: ApiVendorRow; error?: string }
+      const j = (await r.json().catch(() => ({}))) as ApiErrorBody & { vendor?: ApiVendorRow }
       if (r.status === 409 && j.vendor?.slug) {
+        clear()
         reload()
         setStep('inventory')
         return
       }
       if (!r.ok) {
-        setBasicsErr(j.error ?? 'Could not create vendor shop')
+        applyBasicsError(j)
         return
       }
+      clear()
       reload()
       setStep('inventory')
     } catch {
@@ -153,16 +240,19 @@ export default function VendorOnboardingWizard() {
     } finally {
       setBasicsBusy(false)
     }
-  }, [bio, category, displayName, makerStory, reload, shipsTo, slug, tags, website])
+  }, [applyBasicsError, bio, categories, clear, displayName, makerStory, reload, shipsTo, slug, tags, website])
 
   const submitBasics = useCallback(async () => {
     if (!displayName.trim()) {
       setBasicsErr('Add a shop name to continue.')
+      setBasicsFieldErrors({ displayName: 'Required' })
+      focusFirstInvalidField({ displayName: 'Required' }, ONBOARDING_FIELD_IDS)
       return
     }
     if (activeVendor) {
       setBasicsBusy(true)
       setBasicsErr(null)
+      setBasicsFieldErrors({})
       try {
         const r = await fetch('/api/v1/me/vendor-profile', {
           method: 'PUT',
@@ -174,15 +264,16 @@ export default function VendorOnboardingWizard() {
             makerStory: makerStory.trim() || null,
             website: website.trim() || null,
             shipsTo,
-            category,
+            categories,
             tags,
           }),
         })
-        const j = (await r.json().catch(() => ({}))) as { error?: string }
+        const j = (await r.json().catch(() => ({}))) as ApiErrorBody
         if (!r.ok) {
-          setBasicsErr(j.error ?? 'Could not save shop details')
+          applyBasicsError(j)
           return
         }
+        clear()
         reload()
         setStep('inventory')
       } catch {
@@ -193,7 +284,7 @@ export default function VendorOnboardingWizard() {
       return
     }
     await createShop()
-  }, [activeVendor, bio, category, createShop, displayName, makerStory, reload, shipsTo, tags, website])
+  }, [activeVendor, applyBasicsError, bio, categories, clear, createShop, displayName, makerStory, reload, shipsTo, tags, website])
 
   async function publishShop() {
     if (!activeVendor) return
@@ -212,6 +303,7 @@ export default function VendorOnboardingWizard() {
         setPublishErr(j.error ?? 'Could not publish shop')
         return
       }
+      clear()
       setPublishMsg('Your shop is live in the vendor directory.')
       reload()
     } catch {
@@ -223,6 +315,7 @@ export default function VendorOnboardingWizard() {
 
   const published = vendorIsPublished(activeVendor)
   const finishHref = activeVendor?.slug ? `/vendors/${encodeURIComponent(activeVendor.slug)}` : '/vendors'
+  const tagsAtCap = tags.length >= VENDOR_TAG_MAX
 
   if (!isAuthenticated) {
     return (
@@ -365,6 +458,8 @@ export default function VendorOnboardingWizard() {
               required
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
+              aria-invalid={basicsFieldErrors.displayName ? true : undefined}
+              className={fieldErrorClass(Boolean(basicsFieldErrors.displayName))}
             />
             {!activeVendor ? (
               <WizardField
@@ -403,27 +498,20 @@ export default function VendorOnboardingWizard() {
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="https://"
+              aria-invalid={basicsFieldErrors.website ? true : undefined}
+              className={fieldErrorClass(Boolean(basicsFieldErrors.website))}
+            />
+
+            <VendorCategoryPicker
+              variant="cards"
+              selected={categories}
+              onChange={setCategories}
+              error={basicsFieldErrors.categories ?? basicsFieldErrors.category ?? null}
             />
 
             <div>
-              <p className="text-sm font-medium text-dc-text">Shop category</p>
-              <p className="mt-1 text-xs text-dc-text-muted">Choose the category that best describes your shop.</p>
-              <WizardChoiceGrid label="Shop category" className="mt-3">
-                {VENDOR_CATEGORY_VALUES.map((cat) => (
-                  <WizardChoiceCard
-                    key={cat}
-                    title={cat}
-                    description={VENDOR_CATEGORY_DESCRIPTIONS[cat]}
-                    selected={category === cat}
-                    onSelect={() => setCategory(category === cat ? null : cat)}
-                  />
-                ))}
-              </WizardChoiceGrid>
-            </div>
-
-            <div>
               <label htmlFor="von-tags" className="block text-sm font-medium text-dc-text">
-                Specialty tags <span className="font-normal text-dc-text-muted">(optional)</span>
+                Specialty tags <span className="font-normal text-dc-text-muted">(optional, up to {VENDOR_TAG_MAX})</span>
               </label>
               <p className="mt-1 text-xs text-dc-text-muted">
                 Add searchable tags like rope, leather, commissions, pup gear, impact toys, aftercare, custom sizing.
@@ -439,17 +527,25 @@ export default function VendorOnboardingWizard() {
                       addTagsFromInput()
                     }
                   }}
-                  placeholder="rope, commissions, pup-play"
-                  className="flex-1 rounded-xl border border-dc-border bg-dc-elevated px-3 py-2.5 text-base text-dc-text sm:text-sm"
+                  disabled={tagsAtCap}
+                  placeholder={tagsAtCap ? 'Tag limit reached' : 'rope, commissions, pup-play'}
+                  aria-invalid={basicsFieldErrors.tags ? true : undefined}
+                  className={`flex-1 rounded-xl border border-dc-border bg-dc-elevated px-3 py-2.5 text-base text-dc-text sm:text-sm ${fieldErrorClass(Boolean(basicsFieldErrors.tags))}`}
                 />
                 <button
                   type="button"
                   onClick={addTagsFromInput}
-                  className="min-h-touch rounded-xl border border-dc-border px-3 text-sm text-dc-text-muted hover:text-dc-text"
+                  disabled={tagsAtCap}
+                  className="min-h-touch rounded-xl border border-dc-border px-3 text-sm text-dc-text-muted hover:text-dc-text disabled:opacity-50"
                 >
                   Add
                 </button>
               </div>
+              {basicsFieldErrors.tags ? (
+                <p className="mt-1 text-xs text-red-200" role="alert">
+                  {basicsFieldErrors.tags}
+                </p>
+              ) : null}
               {tags.length > 0 ? (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {tags.map((tag) => (

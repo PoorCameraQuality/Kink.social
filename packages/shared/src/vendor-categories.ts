@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-/** Purpose-based vendor discovery categories. Stored in `vendor_profiles.category`. */
+/** Purpose-based vendor discovery categories. Primary stored in `vendor_profiles.category`; multi-select in `categories`. */
 export const VENDOR_CATEGORIES = {
   ropeRigging: 'Rope & rigging',
   impactSensation: 'Impact & sensation',
@@ -9,11 +9,19 @@ export const VENDOR_CATEGORIES = {
   artLifestyle: 'Art & lifestyle',
   services: 'Services',
   aftercareWellness: 'Aftercare & wellness',
+  booksEducation: 'Books & education',
+  electroTech: 'Electro & tech',
 } as const
 
 export type VendorCategory = (typeof VENDOR_CATEGORIES)[keyof typeof VENDOR_CATEGORIES]
 
 export const VENDOR_CATEGORY_VALUES: readonly VendorCategory[] = Object.values(VENDOR_CATEGORIES)
+
+/** Max purpose categories a shop may select (prevents directory spam). */
+export const VENDOR_CATEGORY_SELECT_MAX = 4
+
+/** Max freeform specialty tags (separate from purpose categories). */
+export const VENDOR_TAG_MAX = 8
 
 /** Short helper copy for onboarding, settings, and filter tooltips. */
 export const VENDOR_CATEGORY_DESCRIPTIONS: Record<VendorCategory, string> = {
@@ -24,10 +32,12 @@ export const VENDOR_CATEGORY_DESCRIPTIONS: Record<VendorCategory, string> = {
   [VENDOR_CATEGORIES.artLifestyle]: 'Art prints, decor, lifestyle goods, and mixed media',
   [VENDOR_CATEGORIES.services]: 'Photography, commissions, and professional services',
   [VENDOR_CATEGORIES.aftercareWellness]: 'Safety gear, aftercare, wellness, and care products',
+  [VENDOR_CATEGORIES.booksEducation]: 'Books, zines, classes, and educational media',
+  [VENDOR_CATEGORIES.electroTech]: 'E-stim, violet wands, and specialty electronics',
 }
 
 const CANONICAL_BY_LOWER = new Map<string, VendorCategory>(
-  VENDOR_CATEGORY_VALUES.map((c) => [c.toLowerCase(), c])
+  VENDOR_CATEGORY_VALUES.map((c) => [c.toLowerCase(), c]),
 )
 
 /** Legacy free-form labels and old filter chips → canonical purpose category. */
@@ -63,6 +73,13 @@ const LEGACY_VENDOR_CATEGORY_ALIASES: Record<string, VendorCategory> = {
   safety: VENDOR_CATEGORIES.aftercareWellness,
   aftercare: VENDOR_CATEGORIES.aftercareWellness,
   wellness: VENDOR_CATEGORIES.aftercareWellness,
+  books: VENDOR_CATEGORIES.booksEducation,
+  education: VENDOR_CATEGORIES.booksEducation,
+  zines: VENDOR_CATEGORIES.booksEducation,
+  electro: VENDOR_CATEGORIES.electroTech,
+  'e-stim': VENDOR_CATEGORIES.electroTech,
+  estim: VENDOR_CATEGORIES.electroTech,
+  'violet wand': VENDOR_CATEGORIES.electroTech,
 }
 
 /** Map legacy or alias input to a canonical category, or null when unrecognized. */
@@ -73,6 +90,34 @@ export function normalizeVendorCategory(raw: string): VendorCategory | null {
   const canonical = CANONICAL_BY_LOWER.get(lower)
   if (canonical) return canonical
   return LEGACY_VENDOR_CATEGORY_ALIASES[lower] ?? null
+}
+
+/** Normalize multi-select purpose categories: deduped, canonical, capped. */
+export function normalizeVendorCategories(raw: readonly string[]): VendorCategory[] {
+  const seen = new Set<VendorCategory>()
+  const out: VendorCategory[] = []
+  for (const c of raw) {
+    const normalized = normalizeVendorCategory(c)
+    if (!normalized || seen.has(normalized)) continue
+    seen.add(normalized)
+    out.push(normalized)
+    if (out.length >= VENDOR_CATEGORY_SELECT_MAX) break
+  }
+  return out
+}
+
+/** Read selected purpose categories from API row fields. */
+export function vendorCategoriesFromRow(input: {
+  category?: string | null
+  categories?: readonly string[] | null
+}): VendorCategory[] {
+  const fromColumn = normalizeVendorCategories(input.categories ?? [])
+  if (fromColumn.length > 0) return fromColumn
+  if (input.category?.trim()) {
+    const single = normalizeVendorCategory(input.category)
+    return single ? [single] : []
+  }
+  return []
 }
 
 /** Infer primary category from a legacy categories array (first mappable entry). */
@@ -92,9 +137,11 @@ export const vendorCategorySchema = z.enum([
   VENDOR_CATEGORIES.artLifestyle,
   VENDOR_CATEGORIES.services,
   VENDOR_CATEGORIES.aftercareWellness,
+  VENDOR_CATEGORIES.booksEducation,
+  VENDOR_CATEGORIES.electroTech,
 ])
 
-/** Normalize and validate tags: lowercase, trimmed, deduped, max 20. */
+/** Normalize and validate tags: lowercase, trimmed, deduped, max {@link VENDOR_TAG_MAX}. */
 export function normalizeVendorTags(raw: readonly string[]): string[] {
   const seen = new Set<string>()
   const out: string[] = []
@@ -103,15 +150,20 @@ export function normalizeVendorTags(raw: readonly string[]): string[] {
     if (!normalized || normalized.length > 64 || seen.has(normalized)) continue
     seen.add(normalized)
     out.push(normalized)
-    if (out.length >= 20) break
+    if (out.length >= VENDOR_TAG_MAX) break
   }
   return out
 }
 
-/** Build legacy categories[] from category + tags for backward compat. */
-export function vendorCategoriesCompat(category: string | null | undefined, tags: readonly string[]): string[] {
+/** Build legacy categories[] from purpose categories + tags for backward compat. */
+export function vendorCategoriesCompat(
+  purposeCategories: readonly VendorCategory[],
+  tags: readonly string[],
+): string[] {
   const out: string[] = []
-  if (category?.trim()) out.push(category.trim())
+  for (const cat of purposeCategories) {
+    if (!out.some((c) => c.toLowerCase() === cat.toLowerCase())) out.push(cat)
+  }
   for (const t of tags) {
     const label = t.trim()
     if (!label) continue

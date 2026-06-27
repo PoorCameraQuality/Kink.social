@@ -15,6 +15,8 @@ import {
   normalizeGroupTags,
   normalizeVendorCategory,
   vendorCategorySchema,
+  VENDOR_CATEGORY_SELECT_MAX,
+  VENDOR_TAG_MAX,
   normalizePrivacySettings,
   mergePrivacySettings,
   groupMemberListVisibilitySchema,
@@ -2779,8 +2781,8 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     website: z.union([z.string().url(), z.literal('')]).optional(),
     shipsTo: z.enum(['US', 'Canada', 'International']).optional(),
     category: vendorCategorySchema.optional(),
-    tags: z.array(z.string().min(1).max(64)).max(20).optional(),
-    categories: z.array(z.string().min(1).max(64)).max(32).optional(),
+    tags: z.array(z.string().min(1).max(64)).max(VENDOR_TAG_MAX).optional(),
+    categories: z.array(vendorCategorySchema).max(VENDOR_CATEGORY_SELECT_MAX).optional(),
   })
 
   const vendorProfileBody = z.object({
@@ -2791,8 +2793,8 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     website: z.union([z.string().url(), z.literal(''), z.null()]).optional(),
     shipsTo: z.enum(['US', 'Canada', 'International']).optional(),
     category: vendorCategorySchema.optional().nullable(),
-    tags: z.array(z.string().min(1).max(64)).max(20).optional().nullable(),
-    categories: z.array(z.string().min(1).max(64)).max(32).optional(),
+    tags: z.array(z.string().min(1).max(64)).max(VENDOR_TAG_MAX).optional().nullable(),
+    categories: z.array(vendorCategorySchema).max(VENDOR_CATEGORY_SELECT_MAX).optional(),
     bannerUrl: z.union([z.string().url(), z.literal(''), z.null()]).optional(),
     logoUrl: z.union([z.string().url(), z.literal(''), z.null()]).optional(),
     shopHeaderLayout: z.enum(['OVERLAY', 'BELOW']).optional(),
@@ -3003,8 +3005,8 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     website: z.union([z.string().url(), z.literal('')]).optional(),
     shipsTo: z.enum(['US', 'Canada', 'International']).optional(),
     category: vendorCategorySchema.optional().nullable(),
-    tags: z.array(z.string().min(1).max(64)).max(20).optional(),
-    categories: z.array(z.string().min(1).max(64)).max(32).optional(),
+    tags: z.array(z.string().min(1).max(64)).max(VENDOR_TAG_MAX).optional(),
+    categories: z.array(vendorCategorySchema).max(VENDOR_CATEGORY_SELECT_MAX).optional(),
     bannerUrl: z.union([z.string().url(), z.literal('')]).optional(),
     logoUrl: z.union([z.string().url(), z.literal('')]).optional(),
     shopHeaderLayout: z.enum(['OVERLAY', 'BELOW']).optional(),
@@ -3051,7 +3053,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       return reply.status(401).send({ error: 'Valid session required' })
     }
     const parsed = patchVendorMeBody.safeParse(req.body)
-    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() })
     const vendorIdHint = (req.query as { vendorId?: string }).vendorId?.trim()
     const gate = await resolveManagedVendorForMeRoutes(userId, vendorIdHint)
     if (!gate.ok) return reply.status(gate.status).send({ error: gate.error })
@@ -3070,7 +3072,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     if (!userId) return reply.status(401).send({ error: 'Valid session required' })
     const { vendorId } = req.params as { vendorId: string }
     const parsed = patchVendorMeBody.safeParse(req.body)
-    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() })
     const gate = await requireVendorShopManager(vendorId, userId)
     if (!gate.ok) {
       return reply.status(gate.status).send({ error: gate.status === 404 ? 'Vendor not found' : 'Forbidden' })
@@ -3087,7 +3089,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     const userId = getViewerUserId(v.payload)
     if (!userId) return reply.status(401).send({ error: 'Valid session required' })
     const parsed = vendorProfileBody.safeParse(req.body)
-    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() })
     const [row] = await db
       .select()
       .from(schema.vendorProfiles)
@@ -3146,7 +3148,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
       return reply.status(401).send({ error: 'Valid session required to create a vendor shop' })
     }
     const parsed = createVendorBody.safeParse(req.body)
-    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() })
 
     const [existing] = await db
       .select({ id: schema.vendorProfiles.id, slug: schema.vendorProfiles.slug })
