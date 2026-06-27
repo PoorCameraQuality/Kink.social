@@ -88,7 +88,10 @@ export default function VendorDirectoryCard({ vendor, compact = false }: Props) 
   )
 
   const subtleActionClass =
-    'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-dc-border bg-dc-elevated-solid px-4 text-sm font-semibold text-dc-text transition-colors hover:border-dc-accent-border hover:text-dc-accent'
+    'inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 text-sm font-semibold text-dc-text transition-colors hover:border-dc-accent-border hover:text-dc-accent sm:px-4'
+
+  const secondaryActionClass =
+    'inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl border border-dc-border bg-transparent px-3 text-sm font-medium text-dc-text-muted transition-colors hover:border-dc-accent-border hover:text-dc-accent sm:px-4'
 
   return (
     <article
@@ -204,8 +207,8 @@ export default function VendorDirectoryCard({ vendor, compact = false }: Props) 
           </p>
         : null}
 
-        <div className={cn('mt-auto flex items-center gap-2 pt-1', compact && 'flex-col')}>
-          <Link to={vendorHref} className={cn(subtleActionClass, 'flex-1', compact && 'w-full')}>
+        <div className="mt-auto flex items-stretch gap-2 pt-1">
+          <Link to={vendorHref} className={subtleActionClass}>
             View vendor
           </Link>
           {shopUrl ?
@@ -213,10 +216,7 @@ export default function VendorDirectoryCard({ vendor, compact = false }: Props) 
               href={shopUrl}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className={cn(
-                'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-dc-border bg-transparent px-4 text-sm font-medium text-dc-text-muted transition-colors hover:border-dc-accent-border hover:text-dc-accent',
-                compact && 'w-full',
-              )}
+              className={secondaryActionClass}
             >
               Visit shop
               <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

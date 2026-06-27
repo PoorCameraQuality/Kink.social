@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/cn'
+import { railNavShellClass } from '@/lib/card-surface'
 
 export type SettingsTabId =
   | 'account'
@@ -30,23 +31,21 @@ const TABS: { id: SettingsTabId; label: string; path: string }[] = [
 
 export default function SettingsTabNav() {
   return (
-    <nav aria-label="Settings sections" className="lg:mb-0">
-      <ul
-        className={cn(
-          'flex gap-1 overflow-x-auto pb-1 c2k-no-scrollbar',
-          'lg:w-44 lg:shrink-0 lg:flex-col lg:space-y-1 lg:overflow-visible lg:pb-0',
-        )}
-      >
+    <nav aria-label="Settings sections" className={cn(railNavShellClass, 'lg:mb-0 lg:w-44 lg:shrink-0 lg:p-3')}>
+      <p className="mb-3 hidden px-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dc-muted lg:block">
+        Settings
+      </p>
+      <ul className="flex gap-1 overflow-x-auto pb-1 c2k-no-scrollbar lg:flex-col lg:space-y-1 lg:overflow-visible lg:pb-0">
         {TABS.map((tab) => (
           <li key={tab.id} className="shrink-0 lg:shrink">
             <NavLink
               to={tab.path}
               className={({ isActive }) =>
                 cn(
-                  'flex min-h-11 items-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  'flex min-h-11 items-center whitespace-nowrap rounded-xl border px-3 py-2 text-sm font-medium transition-colors',
                   isActive ?
-                    'bg-dc-elevated-muted text-dc-text'
-                  : 'text-dc-muted hover:bg-dc-elevated/60 hover:text-dc-text',
+                    'border-dc-accent/30 bg-dc-accent/10 text-dc-text'
+                  : 'border-transparent text-dc-muted hover:bg-dc-elevated-muted hover:text-dc-text',
                 )
               }
             >

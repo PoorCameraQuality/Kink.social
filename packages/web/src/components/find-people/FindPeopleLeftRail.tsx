@@ -1,7 +1,5 @@
 import { Link } from 'react-router-dom'
 
-import DiscoveryBrowseLinks from '@/components/discovery/DiscoveryBrowseLinks'
-
 import FindPeopleFiltersPanel, { type FindPeopleFilterDraft } from '@/components/find-people/FindPeopleFiltersPanel'
 
 import type { CommunityRoleFilterId } from '@/lib/people-search-constants'
@@ -117,9 +115,6 @@ export default function FindPeopleLeftRail(props: Props) {
         </div>
 
       </div>
-
-      <DiscoveryBrowseLinks className="px-1" />
-
     </aside>
 
   )

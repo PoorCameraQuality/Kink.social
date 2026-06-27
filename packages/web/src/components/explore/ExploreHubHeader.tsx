@@ -50,8 +50,8 @@ export default function ExploreHubHeader({
       </div>
 
       <div className="xpl-search-panel">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1">
             <label htmlFor={searchId} className="sr-only">
               Search the community
             </label>
@@ -64,12 +64,9 @@ export default function ExploreHubHeader({
               className="xpl-search-input"
               autoComplete="off"
             />
-            <p className="text-xs text-dc-muted">
-              Matches titles and descriptions across every content type on this page.
-            </p>
           </div>
           <button type="button" onClick={onOpenFilters} className="xpl-filter-btn">
-            <svg className="h-4 w-4 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <svg className="h-3.5 w-3.5 text-dc-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

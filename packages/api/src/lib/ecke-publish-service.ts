@@ -35,6 +35,7 @@ import {
 } from './ecke-publish-presenter-venue.js'
 import { loadConventionEckeContext } from './ecke-publish-org-convention.js'
 import { isEckeEventPublishBridgeConfigured } from './ecke-publish-config.js'
+import { buildPhotosPreview } from './ecke-photo-manifest.js'
 import { isDancecardPublishEnabled } from './ecke-publish-payload.js'
 import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
@@ -170,6 +171,11 @@ export type EckePublishPreviewResult = EckePublishStatusResult & {
   canonicalKinkSocialUrl: string | null
   locationVisibility?: string
   locationHiddenWarning?: string | null
+  photosPreview?: {
+    hero: { publicUrl: string; sourceMediaAssetId: string } | null
+    galleryCount: number
+    mediaHash: string | null
+  }
 }
 
 export type EckeGroupOverviewCard = {
@@ -910,6 +916,8 @@ export type GroupPublishAccess = {
     visibility: string
     organizationId: string | null
     disbandedAt: Date | null
+    bannerUrl: string | null
+    logoUrl: string | null
   }
   org: { slug: string; displayName: string } | null
   canManage: boolean
@@ -925,6 +933,7 @@ export function buildGroupListingPublishContext(access: GroupPublishAccess): Gro
     visibility: access.group.visibility,
     orgSlug: access.org?.slug ?? null,
     orgDisplayName: access.org?.displayName ?? null,
+    imageUrl: access.group.bannerUrl ?? access.group.logoUrl ?? null,
   })
   const eligibility = isGroupListingEntityEligible({
     visibility: access.group.visibility,
@@ -971,6 +980,8 @@ export async function resolveGroupPublishAccess(
       visibility: schema.groups.visibility,
       organizationId: schema.groups.organizationId,
       disbandedAt: schema.groups.disbandedAt,
+      bannerUrl: schema.groups.bannerUrl,
+      logoUrl: schema.groups.logoUrl,
     })
     .from(schema.groups)
     .where(eq(schema.groups.id, groupId))
@@ -1414,6 +1425,9 @@ async function buildEducationArticlePreview(
       wouldNotPublish: getEducationOmittedFields(),
       payload: ctx.payload,
       canonicalKinkSocialUrl: ctx.canonicalKinkSocialUrl,
+      photosPreview: buildPhotosPreview(
+        (ctx.payload as { photos?: import('@c2k/shared').EckePhotosManifest }).photos,
+      ),
     },
   }
 }

@@ -24,7 +24,7 @@ export default function EducationDiscoverHero({ stats, onBrowseTopics, apiBacked
         <p className="text-xs font-semibold uppercase tracking-widest text-dc-accent">Education Hub</p>
         <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-dc-text sm:text-4xl">Learn. Practice. Grow.</h1>
         <p className="mt-1.5 max-w-xl text-sm text-dc-text-muted">
-          Trusted articles, video walkthroughs, and curated paths from educators in our community.
+          User Submitted article, video walkthroughs, and self curated paths from other members.
           {stats.articles > 0 ?
             <span className="text-dc-muted"> · {stats.articles.toLocaleString()} articles</span>
           : null}

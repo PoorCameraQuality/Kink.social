@@ -206,8 +206,11 @@ describe('owner investigation API', { skip: !runDbTests }, () => {
     const reason = 'Investigating harassment report for alpha'
     const res = await app.inject({
       method: 'GET',
-      url: `/api/v1/admin/owner/investigations/users/${targetId}/dms/${conversationId}/messages?reason=${encodeURIComponent(reason)}`,
-      headers: cookieHeader(ownerId, ownerUsername),
+      url: `/api/v1/admin/owner/investigations/users/${targetId}/dms/${conversationId}/messages`,
+      headers: {
+        ...cookieHeader(ownerId, ownerUsername),
+        'x-c2k-investigation-reason': reason,
+      },
     })
     assert.equal(res.statusCode, 200)
 

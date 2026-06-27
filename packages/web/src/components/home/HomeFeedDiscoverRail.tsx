@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import HomeFeedSuggestedPerson from '@/components/home/HomeFeedSuggestedPerson'
@@ -33,30 +32,6 @@ function EmptyHint({ message }: { message: string }) {
   return <p className="text-xs leading-relaxed text-dc-muted">{message}</p>
 }
 
-function RailGroup({
-  label,
-  helper,
-  children,
-  showHeader = true,
-}: {
-  label: string
-  helper: string
-  children: ReactNode
-  showHeader?: boolean
-}) {
-  return (
-    <section className="space-y-3" aria-label={label}>
-      {showHeader ?
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-dc-muted">{label}</p>
-          <p className="mt-0.5 text-xs leading-relaxed text-dc-text-muted">{helper}</p>
-        </div>
-      : null}
-      <div className="space-y-4">{children}</div>
-    </section>
-  )
-}
-
 export default function HomeFeedDiscoverRail({
   suggestions,
   upcomingNearYou = [],
@@ -77,11 +52,7 @@ export default function HomeFeedDiscoverRail({
   if (mobileSupplement) {
     return (
       <aside className={className} aria-label="Suggested next steps">
-        <RailGroup
-          label="Events that can turn online connections into real community"
-          helper="Events and gatherings based on your area and RSVPs."
-          showHeader
-        >
+        <section className="space-y-3" aria-label="Upcoming events">
           <RailCard title="Upcoming near you" footerHref="/events" footerLabel="Browse events →">
             {upcomingNearYou.length > 0 ?
               <ul className="space-y-2.5">
@@ -96,7 +67,7 @@ export default function HomeFeedDiscoverRail({
               </ul>
             : <EmptyHint message="No events near you yet. Browse events to RSVP." />}
           </RailCard>
-        </RailGroup>
+        </section>
       </aside>
     )
   }
@@ -106,15 +77,8 @@ export default function HomeFeedDiscoverRail({
       className={`dc-rail-aside sticky top-[7.5rem] space-y-6 ${className}`.trim()}
       aria-label="Discovery"
     >
-      <RailGroup
-        label="Events that can turn online connections into real community"
-        helper="Events and gatherings based on your area and RSVPs."
-        showHeader
-      >
+      <section className="space-y-3" aria-label="Upcoming events">
         <RailCard title="Upcoming near you" footerHref="/events" footerLabel="Browse events →">
-          <p className="mb-2.5 text-xs leading-relaxed text-dc-muted">
-            From events near your saved location.
-          </p>
           {upcomingNearYou.length > 0 ?
             <ul className="space-y-2.5">
               {upcomingNearYou.slice(0, 4).map((e) => (
@@ -128,10 +92,11 @@ export default function HomeFeedDiscoverRail({
             </ul>
           : <EmptyHint message="No events near you yet. Browse events to RSVP." />}
         </RailCard>
-      </RailGroup>
+      </section>
 
-      <RailGroup label="Groups to start finding your people" helper="People and profiles surfaced from your area and shared communities.">
-        <RailCard title="People you may know" footerHref="/people" footerLabel="Find people →">
+      <section className="space-y-3" aria-label="People suggestions">
+        <div className="space-y-4">
+          <RailCard title="People you may know" footerHref="/people" footerLabel="Find people →">
           <p className="mb-2.5 text-xs leading-relaxed text-dc-muted">
             Suggested from shared communities and geography — dismiss anyone you are not interested in.
           </p>
@@ -169,10 +134,11 @@ export default function HomeFeedDiscoverRail({
             </Link>
           </RailCard>
         : null}
-      </RailGroup>
+        </div>
+      </section>
 
       {myGroups.length > 0 ?
-        <RailGroup label="Groups to start finding your people" helper="Communities you belong to with recent discussion activity.">
+        <section className="space-y-3" aria-label="Your groups">
           <RailCard title="Groups you are in" footerHref="/groups" footerLabel="Explore groups →">
             <ul className="space-y-2">
               {myGroups.slice(0, 4).map((g) => (
@@ -189,10 +155,10 @@ export default function HomeFeedDiscoverRail({
               ))}
             </ul>
           </RailCard>
-        </RailGroup>
+        </section>
       : null}
 
-      <RailGroup label="Explore further" helper="Posts, events, and conversations across the community.">
+      <section className="space-y-3" aria-label="Trending in the community">
         <RailCard title="Trending in the community" footerHref="/explore" footerLabel="Browse trending →">
           <p className="mb-2.5 text-xs leading-relaxed text-dc-muted">
             Open the Trending tab for the full list.
@@ -217,8 +183,7 @@ export default function HomeFeedDiscoverRail({
             </ul>
           : <EmptyHint message="No trending activity yet." />}
         </RailCard>
-      </RailGroup>
-
+      </section>
       {alphaMode ?
         <AlphaNotice />
       : null}

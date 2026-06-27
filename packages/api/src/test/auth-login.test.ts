@@ -110,6 +110,36 @@ describe('auth login identifier', { skip: !runDbTests }, () => {
     await app.close()
   })
 
+  test('dormant account returns 403 without deleting user', async () => {
+    const dormantId = randomUUID()
+    const dormantUsername = `dormant_${tag}`
+    userIds.push(dormantId)
+    const hash = await bcrypt.hash(password, 12)
+    const threeYearsAgo = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000)
+    await db.insert(schema.users).values({
+      id: dormantId,
+      username: dormantUsername,
+      ...prepareEmailStorage(`${dormantUsername}@ci.c2k.test`),
+      passwordHash: hash,
+    })
+    await db.insert(schema.profiles).values({ userId: dormantId, updatedAt: threeYearsAgo })
+
+    const app = await buildAuthApp()
+    const res = await login(app, dormantUsername, password)
+    assert.equal(res.statusCode, 403)
+    const body = res.json() as { error?: string; code?: string }
+    assert.equal(body.code, 'account_dormant')
+    assert.match(body.error ?? '', /inactive/i)
+
+    const [stillThere] = await db
+      .select({ id: schema.users.id })
+      .from(schema.users)
+      .where(eq(schema.users.id, dormantId))
+      .limit(1)
+    assert.ok(stillThere, 'dormant login must not delete the user row')
+    await app.close()
+  })
+
   test('reset by email then login by username and email with new password', async () => {
     await db.delete(schema.passwordResetTokens).where(eq(schema.passwordResetTokens.userId, userId))
     const newPassword = 'NewPassword!234567'

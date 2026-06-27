@@ -42,6 +42,15 @@ export {
   type KinkSocialPublicIngestEnvelope,
   type KinkSocialUnpublishEnvelope,
 } from './ecke-public-ingest-envelope.js'
+export {
+  ECKE_LEGACY_HERO_MEDIA_ASSET_ID,
+  emptyEckePhotosManifest,
+  hashMediaManifest,
+  resolveEckePayloadHeroUrl,
+  type EckePhotoAsset,
+  type EckePhotoRole,
+  type EckePhotosManifest,
+} from './ecke-photos-manifest.js'
 export { buildCanonicalUrl, copyCanonicalLink, formatMemberSinceMonthYear } from './canonical-link.js'
 export { isPublicPath } from './public-paths.js'
 export { safeInternalPath } from './safe-redirect.js'

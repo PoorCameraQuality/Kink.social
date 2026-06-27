@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import CreateGroupModal from '@/components/group/CreateGroupModal'
 import GroupDiscoverListCard from '@/components/groups/GroupDiscoverListCard'
 import GroupsPersonalLeftRail from '@/components/groups/GroupsPersonalLeftRail'
 import GroupsSectionTabs from '@/components/groups/GroupsSectionTabs'
@@ -95,7 +94,6 @@ export default function GroupsPersonalLibraryPage({ mode }: Props) {
   const [invitationsTab, setInvitationsTab] = useState<InvitationsTab>('invites')
   const [postsTab, setPostsTab] = useState<PostsTab>('published')
   const [navDrawerOpen, setNavDrawerOpen] = useState(false)
-  const [createOpen, setCreateOpen] = useState(false)
 
   const meta = META[mode]
 
@@ -185,13 +183,12 @@ export default function GroupsPersonalLibraryPage({ mode }: Props) {
               >
                 Discover groups
               </Link>
-              <button
-                type="button"
-                onClick={() => setCreateOpen(true)}
+              <Link
+                to="/groups/onboarding"
                 className="inline-flex min-h-11 items-center rounded-xl border border-dc-border px-4 text-sm text-dc-text-muted hover:text-dc-text"
               >
                 Create a group
-              </button>
+              </Link>
             </div>
           </div>
         )
@@ -345,16 +342,6 @@ export default function GroupsPersonalLibraryPage({ mode }: Props) {
           : null}
         </main>
       </div>
-
-      {createOpen ?
-        <CreateGroupModal
-          onClose={() => setCreateOpen(false)}
-          onCreated={() => {
-            setCreateOpen(false)
-            void myGroups.reload()
-          }}
-        />
-      : null}
     </div>
   )
 }

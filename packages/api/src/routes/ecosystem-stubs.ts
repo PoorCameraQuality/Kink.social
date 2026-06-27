@@ -56,6 +56,7 @@ import {
   virtualJoinLinkVisibleEventIds,
   viewerCanPatchEvent,
 } from '../lib/virtual-event-join-visibility.js'
+import { loadDiscoveryProfileStats, mergeDiscoveryProfileStats } from '../lib/discovery-profile-stats.js'
 import { passesGenderDiscoveryFilter, passesLocationDiscoveryFilter, redactListProfileIdentityFields, toDiscoveryProfileCard } from '../lib/profile-field-redaction.js'
 import { alphaUploadDisabledResponse, isAlphaUploadDisabled } from '../lib/alpha-upload-policy.js'
 import { touchGroupActivity } from '../lib/group-activity.js'
@@ -288,7 +289,7 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         .filter((r) => passesGenderDiscoveryFilter(r, genderTrim, viewerId, friendIds)),
     )
 
-    const items = filtered
+    const cards = filtered
       .map((r) =>
         toDiscoveryProfileCard(
           {
@@ -313,6 +314,18 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
         )
       )
       .slice(0, limit)
+
+    const statsMap = await loadDiscoveryProfileStats(cards.map((c) => c.userId))
+    const items = cards.map((card) => {
+      const stats = mergeDiscoveryProfileStats(card, statsMap)
+      return {
+        ...card,
+        photoCount: stats.photoCount,
+        videoCount: stats.videoCount,
+        writingCount: stats.writingCount,
+        groupsLedCount: stats.groupsLedCount,
+      }
+    })
 
     return reply.send({ items })
   })
@@ -2549,6 +2562,57 @@ export async function registerEcosystemStubRoutes(app: FastifyInstance) {
     return reply.send({
       event: {
         ...updated,
+        featuredUntil: updated.featuredUntil?.toISOString?.() ?? updated.featuredUntil ?? null,
+        isFeatured: isEventFeatured(updated),
+      },
+    })
+  })
+
+  const eventCoverAttachBody = z.object({
+    quarantineKey: z.string().min(1).max(2048),
+  })
+
+  app.post('/api/v1/events/:eventId/cover/attach', async (req, reply) => {
+    if (!requireDb(reply)) return
+    if (isAlphaUploadDisabled('event_cover')) {
+      return alphaUploadDisabledResponse(reply, 'event_cover')
+    }
+    const user = requireUser(req, reply)
+    if (!user) return
+    const { eventId } = req.params as { eventId: string }
+    const [ev] = await db.select().from(schema.events).where(eq(schema.events.id, eventId)).limit(1)
+    if (!ev) return reply.status(404).send({ error: 'Not found' })
+    if (!(await viewerCanPatchEvent(user.userId, ev))) {
+      return reply.status(403).send({ error: 'Only the host or an org moderator can update this event' })
+    }
+    const parsed = eventCoverAttachBody.safeParse(req.body)
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+    let publicUrl: string
+    try {
+      publicUrl = await promoteQuarantineToScopeBrandingUrl({
+        userId: user.userId,
+        quarantineKey: parsed.data.quarantineKey,
+        scopePath: `events/${eventId}`,
+        assetName: 'cover',
+      })
+    } catch (err) {
+      if (err instanceof MediaUploadValidationError) {
+        return reply.status(400).send({ error: err.message })
+      }
+      const e = err as { message?: string }
+      req.log?.error({ err }, 'event cover attach failed')
+      return reply.status(502).send({ error: e.message ?? 'Could not attach event cover' })
+    }
+    const [updated] = await db
+      .update(schema.events)
+      .set({ imageUrl: publicUrl })
+      .where(eq(schema.events.id, eventId))
+      .returning()
+    return reply.send({
+      url: publicUrl,
+      event: {
+        ...updated,
+        imageUrl: deliverCardImageUrl(updated.imageUrl),
         featuredUntil: updated.featuredUntil?.toISOString?.() ?? updated.featuredUntil ?? null,
         isFeatured: isEventFeatured(updated),
       },

@@ -1,11 +1,14 @@
-import multipart from '@fastify/multipart'
+import multipart, { type MultipartFile } from '@fastify/multipart'
 import type { FastifyInstance } from 'fastify'
+import { MAX_IMAGE_UPLOAD_BYTES } from '@c2k/shared'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
 import {
   alphaUploadDisabledResponse,
   isAlphaUploadDisabled,
   parseUploadPurpose,
+  type AlphaUploadCategory,
 } from '../lib/alpha-upload-policy.js'
+import { readMultipartFileWithLimit } from '../lib/multipart-read-limit.js'
 import { rateLimitRoute } from '../lib/rate-limit-config.js'
 import {
   MediaUploadValidationError,
@@ -13,12 +16,26 @@ import {
   processIncomingVideoUpload,
 } from '../lib/media-pipeline.js'
 
+const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024
+
 function useDatabase(): boolean {
   return process.env.USE_DATABASE === 'true'
 }
 
+function isVideoUpload(
+  purpose: AlphaUploadCategory | null,
+  declaredMime: string | undefined,
+  filename: string,
+): boolean {
+  return (
+    (declaredMime ?? '').startsWith('video/') ||
+    purpose === 'feed_video' ||
+    /\.(mp4|webm)$/i.test(filename)
+  )
+}
+
 export async function registerUploadRoutes(app: FastifyInstance) {
-  await app.register(multipart, { limits: { fileSize: 100 * 1024 * 1024 } })
+  await app.register(multipart, { limits: { fileSize: MAX_VIDEO_UPLOAD_BYTES } })
 
   app.post('/api/upload', { ...rateLimitRoute('upload') }, async (req, reply) => {
     if (!useDatabase()) {
@@ -33,15 +50,22 @@ export async function registerUploadRoutes(app: FastifyInstance) {
     let buffer: Buffer | null = null
     let filename = 'upload.jpg'
     let declaredMime: string | undefined
+    let filePart: MultipartFile | null = null
+    let readBeforePurpose = false
 
-    const parts = req.parts()
-    for await (const part of parts) {
+    for await (const part of req.parts()) {
       if (part.type === 'field' && part.fieldname === 'purpose') {
         purposeRaw = part.value
       } else if (part.type === 'file' && part.fieldname === 'file') {
-        buffer = await part.toBuffer()
         filename = part.filename || filename
         declaredMime = part.mimetype
+        if (parseUploadPurpose(purposeRaw)) {
+          filePart = part
+        } else {
+          // Purpose field may arrive after file — read with video cap so the iterator can continue.
+          buffer = await readMultipartFileWithLimit(part, MAX_VIDEO_UPLOAD_BYTES)
+          readBeforePurpose = true
+        }
       }
     }
 
@@ -56,15 +80,22 @@ export async function registerUploadRoutes(app: FastifyInstance) {
       return alphaUploadDisabledResponse(reply, purpose)
     }
 
+    const isVideo = isVideoUpload(purpose, declaredMime, filename)
+
+    if (!buffer && filePart) {
+      const maxBytes = isVideo ? MAX_VIDEO_UPLOAD_BYTES : MAX_IMAGE_UPLOAD_BYTES
+      buffer = await readMultipartFileWithLimit(filePart, maxBytes)
+    } else if (buffer && readBeforePurpose && !isVideo && buffer.length > MAX_IMAGE_UPLOAD_BYTES) {
+      return reply.status(400).send({
+        error: `File exceeds maximum size (${MAX_IMAGE_UPLOAD_BYTES} bytes)`,
+      })
+    }
+
     if (!buffer) {
       return reply.status(400).send({ error: 'No file' })
     }
 
     try {
-      const isVideo =
-        (declaredMime ?? '').startsWith('video/') ||
-        purpose === 'feed_video' ||
-        /\.(mp4|webm)$/i.test(filename)
       const processed = isVideo
         ? await processIncomingVideoUpload({
             userId: viewer.payload.sub,

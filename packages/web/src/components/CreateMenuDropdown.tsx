@@ -130,7 +130,7 @@ function useCreateMenuSections(): CreateSection[] {
       id: 'group',
       label: 'Group',
       description: 'Start a local or interest-based community',
-      to: '/groups?create=group',
+      to: '/groups/onboarding',
       icon: <UsersIcon />,
     },
   ]

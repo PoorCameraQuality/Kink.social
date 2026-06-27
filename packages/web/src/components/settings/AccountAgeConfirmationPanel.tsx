@@ -4,6 +4,8 @@ import { ageFromBirthDate, formatProfileBirthDateForInput, profileBirthDateInput
 import { Panel } from '@/components/dancecard/ui/Panel'
 import SectionHeader from '@/components/ui/SectionHeader'
 import StatusBanner from '@/components/ui/StatusBanner'
+import { premiumInputClass } from '@/lib/card-surface'
+import { cn } from '@/lib/cn'
 
 export default function AccountAgeConfirmationPanel() {
   const [birthDate, setBirthDate] = useState('')
@@ -80,7 +82,7 @@ export default function AccountAgeConfirmationPanel() {
           max={birthDateBounds.max}
           disabled={loading || saving}
           onChange={(e) => setBirthDate(e.target.value)}
-          className="mt-2 w-full px-3 py-2.5 bg-dc-surface-muted border border-dc-border rounded-lg text-dc-text text-sm [color-scheme:dark] disabled:opacity-60"
+          className={cn('mt-2 w-full text-sm [color-scheme:dark] disabled:opacity-60', premiumInputClass)}
         />
         {age != null ?
           <p className="mt-2 text-xs text-dc-muted">

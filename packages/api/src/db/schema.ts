@@ -3823,6 +3823,8 @@ export const eckePublishTargets = pgTable(
     publishedByUserId: uuid('published_by_user_id').references(() => users.id, { onDelete: 'set null' }),
     eckePublicUrl: text('ecke_public_url'),
     eckeRecordId: uuid('ecke_record_id'),
+    mediaHash: varchar('media_hash', { length: 64 }),
+    mediaManifestVersion: integer('media_manifest_version').notNull().default(1),
     unpublishedAt: timestamp('unpublished_at', { withTimezone: true }),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -3838,6 +3840,40 @@ export const eckePublishTargets = pgTable(
     uniqueIndex('ecke_publish_targets_place_kind_uq').on(t.communityPlaceId, t.targetKind),
     index('ecke_publish_targets_external_slug_idx').on(t.externalSlug),
   ]
+)
+
+export const eckePublishTargetMediaRoleEnum = pgEnum('ecke_publish_target_media_role', [
+  'hero',
+  'gallery',
+  'logo',
+  'thumbnail',
+])
+
+/** Persisted photo manifest rows for an ECKE publish target (publisher side). */
+export const eckePublishTargetMedia = pgTable(
+  'ecke_publish_target_media',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    targetId: uuid('target_id')
+      .notNull()
+      .references(() => eckePublishTargets.id, { onDelete: 'cascade' }),
+    sourceMediaAssetId: uuid('source_media_asset_id')
+      .notNull()
+      .references(() => mediaAssets.id, { onDelete: 'restrict' }),
+    role: eckePublishTargetMediaRoleEnum('role').notNull(),
+    ordinal: integer('ordinal').notNull().default(0),
+    width: integer('width'),
+    height: integer('height'),
+    sha256Hash: varchar('sha256_hash', { length: 128 }),
+    sourceUrl: text('source_url'),
+    altText: text('alt_text'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('ecke_publish_target_media_target_asset_uq').on(t.targetId, t.sourceMediaAssetId),
+    uniqueIndex('ecke_publish_target_media_target_role_ord_uq').on(t.targetId, t.role, t.ordinal),
+  ],
 )
 
 /* --- In-app notifications --- */

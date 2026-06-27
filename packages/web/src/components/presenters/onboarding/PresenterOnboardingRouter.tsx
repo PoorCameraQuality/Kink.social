@@ -320,7 +320,12 @@ export default function PresenterOnboardingRouter() {
         ← Community professionals directory
       </Link>
 
-      <OnboardingShell track={track} step={step} hybridFocuses={hybridFocuses}>
+      <OnboardingShell
+        track={track}
+        step={step}
+        hybridFocuses={hybridFocuses}
+        onStepSelect={(id) => setStep(id)}
+      >
         <OnboardingError message={error} />
 
           {step === 'chooseTrack' ?

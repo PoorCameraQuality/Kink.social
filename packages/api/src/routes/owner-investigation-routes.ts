@@ -13,18 +13,26 @@ import { requireDb, requireUser } from '../lib/moderation-route-auth.js'
 import { isSiteOwner } from '../lib/platform-staff.js'
 import { rateLimitRoute } from '../lib/rate-limit-config.js'
 
+export const INVESTIGATION_REASON_HEADER = 'x-c2k-investigation-reason'
+
 function parseReason(req: FastifyRequest, reply: FastifyReply): string | null {
+  const header = req.headers[INVESTIGATION_REASON_HEADER]
+  const fromHeader = typeof header === 'string' ? header.trim() : ''
+  if (fromHeader.length >= 10 && fromHeader.length <= 500) return fromHeader
+
   const q = req.query as { reason?: string }
-  const reason = typeof q.reason === 'string' ? q.reason.trim() : ''
-  if (reason.length < 10) {
-    reply.status(400).send({ error: 'Query parameter reason is required (minimum 10 characters)' })
-    return null
+  const fromQuery = typeof q.reason === 'string' ? q.reason.trim() : ''
+  if (fromQuery.length >= 10 && fromQuery.length <= 500) {
+    reply
+      .header('Deprecation', 'true')
+      .header('Link', '</docs/LEGAL_REQUEST_AND_DATA_MINIMIZATION.md>; rel="deprecation"')
+    return fromQuery
   }
-  if (reason.length > 500) {
-    reply.status(400).send({ error: 'Reason too long' })
-    return null
-  }
-  return reason
+
+  reply.status(400).send({
+    error: `Header ${INVESTIGATION_REASON_HEADER} is required (minimum 10 characters)`,
+  })
+  return null
 }
 
 async function requireOwnerActor(req: FastifyRequest, reply: FastifyReply): Promise<{ userId: string } | null> {

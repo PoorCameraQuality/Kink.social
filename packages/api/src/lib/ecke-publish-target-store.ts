@@ -1,5 +1,7 @@
+import { hashMediaManifest, type EckePhotosManifest } from '@c2k/shared'
 import { and, eq } from 'drizzle-orm'
 import { db, schema } from '../db/index.js'
+import { listPersistablePhotoAssets } from './ecke-photo-manifest.js'
 import { derivePublishStatus } from './ecke-publish-payload.js'
 import type { EckePublishResult } from './ecke-publish-client.js'
 
@@ -107,6 +109,43 @@ export async function touchEckePublishPreview(input: {
   return status
 }
 
+export async function syncEckePublishTargetMedia(
+  targetId: string,
+  photos: EckePhotosManifest | null | undefined,
+): Promise<void> {
+  const now = new Date()
+  const mediaHash = hashMediaManifest(photos)
+
+  await db
+    .update(schema.eckePublishTargets)
+    .set({
+      mediaHash,
+      mediaManifestVersion: photos?.manifestVersion ?? 1,
+      updatedAt: now,
+    })
+    .where(eq(schema.eckePublishTargets.id, targetId))
+
+  await db.delete(schema.eckePublishTargetMedia).where(eq(schema.eckePublishTargetMedia.targetId, targetId))
+
+  const assets = listPersistablePhotoAssets(photos)
+  if (assets.length === 0) return
+
+  await db.insert(schema.eckePublishTargetMedia).values(
+    assets.map((asset) => ({
+      targetId,
+      sourceMediaAssetId: asset.sourceMediaAssetId,
+      role: asset.role,
+      ordinal: asset.ordinal,
+      width: asset.width,
+      height: asset.height,
+      sha256Hash: asset.sha256Hash,
+      sourceUrl: asset.publicUrl,
+      altText: asset.altText,
+      updatedAt: now,
+    })),
+  )
+}
+
 export async function markEckePublishSuccess(input: {
   scope: EckeTargetScope
   targetKind: EckeTargetKind
@@ -114,9 +153,13 @@ export async function markEckePublishSuccess(input: {
   contentHash: string
   userId: string
   result: EckePublishResult
+  photos?: EckePhotosManifest | null
 }): Promise<EckeTargetStatus> {
   const now = new Date()
   const where = scopeWhere(input.scope, input.targetKind)
+  const photos =
+    input.photos ??
+    (input.result.ok && 'photosManifest' in input.result ? input.result.photosManifest : undefined)
 
   if (input.result.ok) {
     await db
@@ -136,6 +179,12 @@ export async function markEckePublishSuccess(input: {
         updatedAt: now,
       })
       .where(where)
+
+    if (photos !== undefined) {
+      const row = await loadEckePublishTarget(input.scope, input.targetKind)
+      if (row) await syncEckePublishTargetMedia(row.id, photos)
+    }
+
     return 'published'
   }
 

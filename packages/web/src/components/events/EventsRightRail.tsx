@@ -5,6 +5,10 @@ import { railAsideClass } from '@/lib/card-surface'
 import { EVENT_CATEGORY_VALUES } from '@c2k/shared'
 import type { MockEvent } from '@/data/types'
 import { countEventsByCategory, resolveEventHeroUrl } from '@/lib/events-page-utils'
+import EventsDisplayControls, {
+  type EventsSortMode,
+  type EventsViewMode,
+} from '@/components/events/EventsDisplayControls'
 
 /** Curated regions shown only when we cannot derive real cities from the data. */
 const FALLBACK_REGIONS = ['Philadelphia, PA', 'New York, NY', 'Baltimore, MD', 'Pittsburgh, PA', 'Washington, DC']
@@ -32,15 +36,41 @@ function deriveCityCounts(events: MockEvent[]): { city: string; count: number }[
 type Props = {
   allEvents: MockEvent[]
   suggested: MockEvent[]
+  sortMode?: EventsSortMode
+  onSortModeChange?: (mode: EventsSortMode) => void
+  viewMode?: EventsViewMode
+  onViewModeChange?: (mode: EventsViewMode) => void
+  sortId?: string
 }
 
-export default function EventsRightRail({ allEvents, suggested }: Props) {
+export default function EventsRightRail({
+  allEvents,
+  suggested,
+  sortMode,
+  onSortModeChange,
+  viewMode,
+  onViewModeChange,
+  sortId = 'events-sort-rail',
+}: Props) {
   const categoryCounts = countEventsByCategory(allEvents)
   const picks = suggested.length > 0 ? suggested.slice(0, 3) : allEvents.slice(3, 6)
   const cityCounts = deriveCityCounts(allEvents)
 
   return (
     <aside className={railAsideClass} aria-label="Events discovery">
+      {sortMode && onSortModeChange && viewMode && onViewModeChange ?
+        <RailCard title="Sort & view">
+          <EventsDisplayControls
+            sortId={sortId}
+            sortMode={sortMode}
+            onSortModeChange={onSortModeChange}
+            viewMode={viewMode}
+            onViewModeChange={onViewModeChange}
+            layout="stacked"
+          />
+        </RailCard>
+      : null}
+
       <RailCard title="Host a gathering" emphasize>
         <p className="text-xs leading-relaxed text-dc-text-muted">
           Bring your community together. Use <strong className="font-medium text-dc-text">+ Create</strong> in the

@@ -1,11 +1,15 @@
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import Button from '@/components/ui/Button'
-import { uploadMediaFileLegacyUrl } from '@/lib/upload-media'
+import { uploadEventCoverFile } from '@/lib/event-cover-upload'
 import { mediaDisplayUrl } from '@/lib/media-display-url'
 
 type Props = {
   imageUrl: string | null
   onChange: (url: string | null) => void
+  /** Staged upload key when cover is chosen before an event id exists (create flow). */
+  onQuarantineKeyChange?: (key: string | null) => void
+  /** When set, upload promotes and attaches to this event immediately. */
+  eventId?: string
   disabled?: boolean
   /** When false, show login hint instead of upload controls. */
   canUpload?: boolean
@@ -17,6 +21,8 @@ const ACCEPT = 'image/png,image/jpeg,image/webp'
 export default function EventCoverPhotoControl({
   imageUrl,
   onChange,
+  onQuarantineKeyChange,
+  eventId,
   disabled = false,
   canUpload = true,
   compact = false,
@@ -25,9 +31,26 @@ export default function EventCoverPhotoControl({
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [localPreview, setLocalPreview] = useState<string | null>(null)
 
-  const display = mediaDisplayUrl(imageUrl)
+  useEffect(() => {
+    return () => {
+      if (localPreview) URL.revokeObjectURL(localPreview)
+    }
+  }, [localPreview])
+
+  const display = mediaDisplayUrl(imageUrl) ?? localPreview
   const blocked = disabled || uploading
+
+  const clearCover = () => {
+    setError(null)
+    onChange(null)
+    onQuarantineKeyChange?.(null)
+    setLocalPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev)
+      return null
+    })
+  }
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -35,10 +58,27 @@ export default function EventCoverPhotoControl({
     if (!file) return
     setError(null)
     setUploading(true)
+    const objectPreview = URL.createObjectURL(file)
     try {
-      const url = await uploadMediaFileLegacyUrl(file, 'event_cover')
-      onChange(url)
+      const result = await uploadEventCoverFile(file, eventId)
+      if (result.url) {
+        URL.revokeObjectURL(objectPreview)
+        onChange(result.url)
+        onQuarantineKeyChange?.(null)
+        setLocalPreview((prev) => {
+          if (prev) URL.revokeObjectURL(prev)
+          return null
+        })
+      } else if (result.quarantineKey) {
+        onQuarantineKeyChange?.(result.quarantineKey)
+        onChange(null)
+        setLocalPreview((prev) => {
+          if (prev) URL.revokeObjectURL(prev)
+          return objectPreview
+        })
+      }
     } catch (err) {
+      URL.revokeObjectURL(objectPreview)
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
       setUploading(false)
@@ -90,16 +130,7 @@ export default function EventCoverPhotoControl({
             {uploading ? 'Uploading…' : display ? 'Replace photo' : 'Upload photo'}
           </Button>
           {display ?
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={blocked}
-              onClick={() => {
-                setError(null)
-                onChange(null)
-              }}
-            >
+            <Button type="button" variant="ghost" size="sm" disabled={blocked} onClick={clearCover}>
               Remove
             </Button>
           : null}

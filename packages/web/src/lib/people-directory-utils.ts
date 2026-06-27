@@ -107,6 +107,12 @@ export function getPersonCommunityBadges(person: MockPerson): PersonCommunityBad
 
   }
 
+  if ((person.groupsLedCount ?? 0) > 0) {
+
+    badges.push({ id: 'group_leader', label: 'Group leader', tone: 'green' })
+
+  }
+
   if (person.badges?.includes('education_completed') || person.badges?.includes('community_contributor')) {
 
     badges.push({ id: 'education', label: 'Education contributor', tone: 'blue' })
@@ -115,6 +121,27 @@ export function getPersonCommunityBadges(person: MockPerson): PersonCommunityBad
 
   return badges
 
+}
+
+
+
+export type PersonDirectoryStat = { key: string; label: string; value: number }
+
+
+
+/** Compact activity counts for people directory cards. */
+export function getPersonDirectoryStats(person: MockPerson): PersonDirectoryStat[] {
+  const photos =
+    person.photoCount ??
+    person.profilePhotos?.length ??
+    (person.avatarUrl?.trim() ? 1 : 0)
+  const writings = person.writingCount ?? person.publishedArticlesCount ?? 0
+  const videos = person.videoCount ?? 0
+  const stats: PersonDirectoryStat[] = []
+  if (photos > 0) stats.push({ key: 'photos', label: 'Photos', value: photos })
+  if (writings > 0) stats.push({ key: 'writings', label: 'Writings', value: writings })
+  if (videos > 0) stats.push({ key: 'videos', label: 'Videos', value: videos })
+  return stats
 }
 
 

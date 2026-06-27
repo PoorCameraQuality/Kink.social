@@ -12,8 +12,11 @@ import {
   type EckeEducationArticlePayload,
   type KinkSocialPublicIngestEnvelope,
   type KinkSocialUnpublishEnvelope,
+  resolveEckePayloadHeroUrl,
 } from '@c2k/shared'
 import { resolveEckeEducationHeroImageUrl } from './ecke-education-hero.js'
+import { buildEducationArticlePhotosManifest } from './ecke-photo-manifest.js'
+import { isEckePhotosPublishEnabled } from './ecke-publish-config.js'
 
 /** Fields loaded from education_articles for ECKE publish eligibility and redaction. */
 export type EducationArticlePublishRow = {
@@ -189,7 +192,15 @@ export async function buildEckePublicEnvelopeAsync(
   }
 
   const resolvedHero = await resolveEckeEducationHeroImageUrl(article.heroImageUrl)
+  const photos = await buildEducationArticlePhotosManifest({ heroImageUrl: article.heroImageUrl })
   const payload = redactEducationArticleForEcke(article, author, { resolvedHeroImageUrl: resolvedHero })
+  if (isEckePhotosPublishEnabled() && (photos.hero || photos.gallery.length > 0)) {
+    payload.photos = photos
+    payload.heroImageUrl = resolveEckePayloadHeroUrl({
+      photos,
+      legacyHeroUrl: payload.heroImageUrl,
+    })
+  }
   return finalizeEckePublicEnvelope(article, payload)
 }
 

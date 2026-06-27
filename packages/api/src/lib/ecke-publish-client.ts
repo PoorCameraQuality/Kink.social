@@ -1,6 +1,12 @@
 import { eckePayloadContainsPrivateAppUrls, educationEckePayloadContainsLeakedPrivateUrls } from '@c2k/shared'
-import type { KinkSocialIngestResponse, KinkSocialPublicIngestEnvelope, KinkSocialUnpublishEnvelope } from '@c2k/shared'
+import type {
+  EckePhotosManifest,
+  KinkSocialIngestResponse,
+  KinkSocialPublicIngestEnvelope,
+  KinkSocialUnpublishEnvelope,
+} from '@c2k/shared'
 import type { EckeDancecardEventPayload, EckeListingPayload } from './ecke-publish-payload.js'
+import { enrichEckeListingPayloadWithPhotos } from './ecke-photo-manifest.js'
 import type { EckeArticleRow, EckeDungeonRow, EckeEventRow, EckeVendorRow } from './ecke-directory-sync.js'
 import {
   buildDancecardLocationRows,
@@ -200,12 +206,14 @@ export async function publishEducationArticleEnvelopeToEcke(
     return { ok: false, targetKind: 'ecke_article', error: result.error }
   }
 
+  const payload = envelope.payload as { photos?: EckePhotosManifest | null }
   return {
     ok: true,
     targetKind: 'ecke_article',
     detail: result.eckePublicUrl,
     eckeSlug: result.eckeSlug,
     eckePublicUrl: result.eckePublicUrl,
+    ...(payload.photos !== undefined ? { photosManifest: payload.photos } : {}),
   }
 }
 
@@ -291,6 +299,7 @@ export type EckePublishResult =
       eckePublicUrl?: string
       eckePublicUrlKnown?: boolean
       eckeRecordId?: string
+      photosManifest?: EckePhotosManifest | null
     }
   | {
       ok: false
@@ -530,6 +539,8 @@ export async function publishListingToEcke(
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (cfg.listingWebhookSecret) headers.Authorization = `Bearer ${cfg.listingWebhookSecret}`
 
+    const enrichedPayload = await enrichEckeListingPayloadWithPhotos(payload)
+
     const res = await fetch(cfg.listingWebhookUrl, {
       method: 'POST',
       headers,
@@ -540,7 +551,7 @@ export async function publishListingToEcke(
         sourceSystem: meta?.sourceSystem ?? 'kink.social',
         sourceId: meta?.sourceId,
         canonicalKinkSocialUrl: meta?.canonicalKinkSocialUrl,
-        payload,
+        payload: enrichedPayload,
       }),
     })
 
@@ -549,7 +560,7 @@ export async function publishListingToEcke(
       return { ok: false, targetKind: 'ecke_listing', error: `listing webhook ${res.status}: ${text.slice(0, 500)}` }
     }
 
-    const parsed = parseListingWebhookResponse(text, payload.slug)
+    const parsed = parseListingWebhookResponse(text, enrichedPayload.slug)
     const eckePublicUrl =
       parsed.eckePublicUrl ??
       (parsed.eckePublicUrlKnown ? null : resolveEckePublicGroupListingUrl(parsed.eckeSlug))
@@ -562,6 +573,7 @@ export async function publishListingToEcke(
       eckePublicUrlKnown: parsed.eckePublicUrlKnown,
       eckeRecordId: parsed.eckeRecordId,
       detail: eckePublicUrl ?? parsed.eckeSlug,
+      photosManifest: enrichedPayload.photos ?? null,
     }
   } catch (e) {
     return { ok: false, targetKind: 'ecke_listing', error: e instanceof Error ? e.message : 'Unknown error' }

@@ -609,12 +609,12 @@ export default function Header() {
                       setNotifOpen(false)
                       setIsProfileOpen((open) => !open)
                     }}
-                    className="flex min-h-11 items-center gap-0.5 rounded-full bg-dc-surface-muted p-1 transition-colors hover:ring-2 hover:ring-dc-accent/50"
+                    className="flex min-h-11 items-center gap-1 rounded-full transition-colors hover:ring-2 hover:ring-dc-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent focus-visible:ring-offset-2 focus-visible:ring-offset-dc-surface"
                     aria-expanded={isProfileOpen}
                     aria-haspopup="true"
                     aria-label={viewerUsername ? `Account menu for ${viewerUsername}` : 'Account menu'}
                   >
-                    <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full" aria-hidden>
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full lg:h-11 lg:w-11" aria-hidden>
                       {headerAvatarUrl ?
                         <ProfilePhotoImage
                           src={headerAvatarUrl}
@@ -624,14 +624,14 @@ export default function Header() {
                               ? headerPrimaryPhoto.displaySettings
                               : undefined
                           }
-                          className="h-full w-full"
+                          className="h-full w-full rounded-full object-cover"
                         />
                       : viewerUsername ?
-                        <div className="flex h-full w-full items-center justify-center bg-dc-accent/30 text-sm font-medium uppercase text-dc-accent">
+                        <div className="flex h-full w-full items-center justify-center rounded-full bg-dc-accent/30 text-sm font-medium uppercase text-dc-accent">
                           {viewerUsername.charAt(0).toUpperCase()}
                         </div>
                       : (
-                        <PlaceholderAvatar size="sm" className="!rounded-full !bg-dc-surface-muted" />
+                        <PlaceholderAvatar size="xl" className="!h-full !w-full !rounded-full !bg-dc-surface-muted" />
                       )}
                     </div>
                     <svg

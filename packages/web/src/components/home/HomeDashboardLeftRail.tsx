@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { PEOPLE_DIRECTORY_PATH } from '@/lib/app-routes'
 import { isHomeLeftRailHomeActive, isHomeLeftRailLinkActive } from '@/lib/home-left-rail-nav'
 import { useAuth } from '@/contexts/AuthContext'
+import { useHomeTrustRailPrefs } from '@/hooks/useHomeTrustRailPrefs'
 import { useConversationsPreview } from '@/hooks/useConversationsPreview'
 import { useNotificationsList } from '@/hooks/useNotificationsList'
 import { useApiProfileMe } from '@/hooks/useApiProfileMe'
@@ -71,10 +72,11 @@ function ChecklistIcon({ done }: { done: boolean }) {
 
 export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHomeLink?: boolean }) {
   const { pathname, search } = useLocation()
-  const { isAuthenticated, isFallback } = useAuth()
+  const { isAuthenticated, isFallback, viewerUsername } = useAuth()
   const { unreadCount: msgUnread } = useConversationsPreview()
   const { unreadCount: notifUnread } = useNotificationsList()
   const signedIn = isAuthenticated && !isFallback
+  const trustRail = useHomeTrustRailPrefs(signedIn ? viewerUsername : null)
   const profileMe = useApiProfileMe(signedIn)
 
   const profileState = useMemo(() => {
@@ -141,9 +143,6 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
     <nav className="sticky top-[7.5rem] space-y-1" aria-label="Home shortcuts">
       <div className={railNavShellClass}>
         <p className="mb-1 text-sm font-semibold text-dc-text">Shortcuts</p>
-        <p className="mb-3 hidden text-xs leading-relaxed text-dc-text-muted lg:block">
-          Jump to messages, connections, and discovery without leaving Home.
-        </p>
         <ul className="space-y-0.5">
           {navItems.map((item) => (
             <NavLink
@@ -174,9 +173,18 @@ export default function HomeDashboardLeftRail({ omitHomeLink = false }: { omitHo
               Support kink.social
             </button>
           </div>
-        : signedIn ?
+        : signedIn && trustRail.visible ?
           <div className="mt-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-dc-muted">Trust</p>
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-dc-muted">Trust</p>
+              <button
+                type="button"
+                onClick={trustRail.dismiss}
+                className="shrink-0 text-xs font-medium text-dc-muted transition-colors hover:text-dc-text"
+              >
+                Hide
+              </button>
+            </div>
             <p className="mt-1.5 text-sm font-semibold text-dc-text">Help people recognize you</p>
             <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">
               {loading ?

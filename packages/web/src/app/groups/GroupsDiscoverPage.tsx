@@ -1,11 +1,9 @@
-import { useEffect, useId, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import CreateGroupModal from '@/components/group/CreateGroupModal'
+import { useId, useMemo, useState } from 'react'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import GroupDiscoverListCard from '@/components/groups/GroupDiscoverListCard'
 import GroupsDiscoverLeftRail from '@/components/groups/GroupsDiscoverLeftRail'
 import GroupsPurposeChips from '@/components/groups/GroupsPurposeChips'
 import GroupsRightRail from '@/components/groups/GroupsRightRail'
-import GroupsScopeTabs from '@/components/groups/GroupsScopeTabs'
 import EmptyState from '@/components/ui/EmptyState'
 import { GroupSkeleton } from '@/components/ui/skeleton'
 import DirectoryTemplate, { DirectoryFilterButton } from '@/components/templates/DirectoryTemplate'
@@ -26,7 +24,6 @@ import {
   mockFriendsHereCount,
   sortGroupsForDiscover,
   type GroupPurposeFilter,
-  type GroupsScopeTab,
   type GroupsSortMode,
 } from '@/lib/groups-page-utils'
 
@@ -55,7 +52,6 @@ function mapApiGroup(row: ApiGroupListItem): MockGroup {
 function countGroupsActiveFilters(args: {
   searchQuery: string
   selectedPurposes: GroupPurposeFilter[]
-  scopeTab: GroupsScopeTab
   distance: number
   country: string
   city: string
@@ -63,7 +59,6 @@ function countGroupsActiveFilters(args: {
   let count = 0
   if (args.searchQuery.trim()) count++
   count += args.selectedPurposes.length
-  if (args.scopeTab !== 'all') count++
   if (args.distance < MAX_DISTANCE_MI) count++
   if (args.country.trim()) count++
   if (args.city.trim()) count++
@@ -73,7 +68,7 @@ function countGroupsActiveFilters(args: {
 export default function GroupsDiscoverPage() {
   const searchId = useId()
   const mainSearchId = useId()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
 
   const { isAuthenticated } = useAuth()
   const homeDemoFallbackEnv = import.meta.env.VITE_HOME_DEMO_FALLBACK === 'true'
@@ -83,66 +78,12 @@ export default function GroupsDiscoverPage() {
   const [morePurposeOpen, setMorePurposeOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPurposes, setSelectedPurposes] = useState<GroupPurposeFilter[]>([])
-  const [scopeTab, setScopeTab] = useState<GroupsScopeTab>('all')
   const [sortMode, setSortMode] = useState<GroupsSortMode>('recommended')
   const [distance, setDistance] = useState(MAX_DISTANCE_MI)
   const { country, setCountry, city, setCity } = usePersistedGeoText()
-  const [createOpen, setCreateOpen] = useState(false)
-
-  useEffect(() => {
-    if (searchParams.get('create') === 'group') {
-      setCreateOpen(true)
-      const next = new URLSearchParams(searchParams)
-      next.delete('create')
-      setSearchParams(next, { replace: true })
-    }
-  }, [searchParams, setSearchParams])
 
   const apiCategory = selectedPurposes.length === 1 && selectedPurposes[0] !== 'Support' ? selectedPurposes[0] : null
   const apiGroups = useApiGroups(!useDemoFallback, apiCategory)
-  const [nearbyGroups, setNearbyGroups] = useState<MockGroup[] | null>(null)
-  const [nearbyLoading, setNearbyLoading] = useState(false)
-  const [nearbyError, setNearbyError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (scopeTab !== 'near-you' || useDemoFallback || apiGroups.status !== 'ready') {
-      setNearbyGroups(null)
-      setNearbyError(null)
-      return
-    }
-    let cancelled = false
-    setNearbyLoading(true)
-    setNearbyError(null)
-    ;(async () => {
-      try {
-        const radius = distance >= MAX_DISTANCE_MI ? 200 : distance
-        const r = await fetch(
-          `/api/v1/groups/nearby?radius=${encodeURIComponent(String(radius))}&limit=48`,
-          { credentials: 'include' },
-        )
-        if (!r.ok) {
-          const j = (await r.json().catch(() => ({}))) as { error?: string }
-          if (!cancelled) {
-            setNearbyError(j.error ?? 'Could not load nearby groups.')
-            setNearbyGroups([])
-          }
-          return
-        }
-        const j = (await r.json()) as { items?: ApiGroupListItem[] }
-        if (!cancelled) setNearbyGroups((j.items ?? []).map(mapApiGroup))
-      } catch {
-        if (!cancelled) {
-          setNearbyError('Network error loading nearby groups.')
-          setNearbyGroups([])
-        }
-      } finally {
-        if (!cancelled) setNearbyLoading(false)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [scopeTab, distance, apiGroups.status, useDemoFallback])
 
   const dbGroups = useMemo(() => {
     if (apiGroups.status !== 'ready') return null
@@ -153,10 +94,9 @@ export default function GroupsDiscoverPage() {
 
   const groupSource = useMemo(() => {
     if (useDemoFallback) return mockGroups
-    if (apiBackedGroups && scopeTab === 'near-you' && nearbyGroups !== null) return nearbyGroups
     if (apiBackedGroups) return dbGroups
     return []
-  }, [useDemoFallback, apiBackedGroups, dbGroups, scopeTab, nearbyGroups])
+  }, [useDemoFallback, apiBackedGroups, dbGroups])
 
   const purposeCounts = useMemo(() => countGroupsByPurpose(groupSource), [groupSource])
 
@@ -172,13 +112,9 @@ export default function GroupsDiscoverPage() {
       category: undefined,
       cityFilter: city,
       countryFilter: country,
-      sortBy:
-        scopeTab === 'near-you' ? ('nearby' as const)
-        : scopeTab === 'new' ? ('new' as const)
-        : scopeTab === 'popular' || scopeTab === 'suggested' ? ('relevance' as const)
-        : ('diverse' as const),
+      sortBy: distance < MAX_DISTANCE_MI ? ('nearby' as const) : ('diverse' as const),
     }),
-    [searchQuery, distance, city, country, scopeTab],
+    [searchQuery, distance, city, country],
   )
 
   const filteredGroups = useMemo(() => {
@@ -186,16 +122,12 @@ export default function GroupsDiscoverPage() {
     if (selectedPurposes.length > 0) {
       list = filterGroupsByPurpose(list, selectedPurposes)
     }
-    if (scopeTab === 'suggested') {
-      list = [...list].sort((a, b) => (b.members ?? 0) - (a.members ?? 0)).slice(0, 24)
-    }
     return sortGroupsForDiscover(list, sortMode)
-  }, [groupSource, rankOptions, selectedPurposes, scopeTab, sortMode])
+  }, [groupSource, rankOptions, selectedPurposes, sortMode])
 
   const hasActiveFilters =
     Boolean(searchQuery.trim()) ||
     selectedPurposes.length > 0 ||
-    scopeTab !== 'all' ||
     distance < MAX_DISTANCE_MI ||
     Boolean(country.trim()) ||
     Boolean(city.trim())
@@ -203,7 +135,6 @@ export default function GroupsDiscoverPage() {
   const activeFilterCount = countGroupsActiveFilters({
     searchQuery,
     selectedPurposes,
-    scopeTab,
     distance,
     country,
     city,
@@ -212,7 +143,6 @@ export default function GroupsDiscoverPage() {
   const clearFilters = () => {
     setSearchQuery('')
     setSelectedPurposes([])
-    setScopeTab('all')
     setSortMode('recommended')
     setDistance(MAX_DISTANCE_MI)
     setCountry('')
@@ -235,8 +165,7 @@ export default function GroupsDiscoverPage() {
     clearFilters,
   }
 
-  const loading =
-    (!useDemoFallback && apiGroups.status === 'loading') || (scopeTab === 'near-you' && nearbyLoading)
+  const loading = !useDemoFallback && apiGroups.status === 'loading'
 
   const sparse = filteredGroups.length > 0 && filteredGroups.length <= 3
 
@@ -247,7 +176,11 @@ export default function GroupsDiscoverPage() {
       togglePurpose(p as GroupPurposeFilter)
       setMorePurposeOpen(false)
     },
-    onNearYou: () => setScopeTab('near-you'),
+    onNearYou: () => setDistance(50),
+  }
+
+  if (searchParams.get('create') === 'group') {
+    return <Navigate to="/groups/onboarding" replace />
   }
 
   return (
@@ -264,16 +197,15 @@ export default function GroupsDiscoverPage() {
                 Find your people, munches, classes, and local scenes.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
+            <Link
+              to="/groups/onboarding"
               className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-dc-accent px-4 text-sm font-semibold text-dc-accent-foreground transition-colors hover:bg-dc-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dc-accent focus-visible:ring-offset-2 focus-visible:ring-offset-dc-bg"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               Create group
-            </button>
+            </Link>
           </div>
         }
         toolbar={
@@ -335,26 +267,12 @@ export default function GroupsDiscoverPage() {
         }
         desktopAside={<GroupsRightRail {...rightRailProps} />}
       >
-        <GroupsScopeTabs active={scopeTab} onChange={setScopeTab} />
         <GroupsPurposeChips
           selected={selectedPurposes}
           onToggle={togglePurpose}
           moreOpen={morePurposeOpen}
           onMoreToggle={() => setMorePurposeOpen((o) => !o)}
         />
-
-        {nearbyError && scopeTab === 'near-you' ?
-          <p
-            className="mb-4 rounded-xl border border-amber-500/30 bg-amber-950/25 px-3 py-2 text-sm text-amber-200/90"
-            role="status"
-          >
-            {nearbyError}{' '}
-            <Link to="/profile/edit" className="text-dc-accent hover:underline">
-              Set your location in profile settings
-            </Link>{' '}
-            to use Near you.
-          </p>
-        : null}
 
         {loading ?
           <GroupSkeleton count={4} />
@@ -378,8 +296,8 @@ export default function GroupsDiscoverPage() {
           : <EmptyState
               title="No groups found"
               message="Try widening your location or start a new community."
-              actionLabel="Create a group"
-              onAction={() => setCreateOpen(true)}
+              ctaLabel="Create a group"
+              ctaHref="/groups/onboarding"
               secondaryCtaLabel="Organizations"
               secondaryCtaHref="/orgs"
             />
@@ -393,9 +311,9 @@ export default function GroupsDiscoverPage() {
                 <li key={g.id}>
                   <GroupDiscoverListCard
                     group={g}
-                    badge={deriveGroupDiscoverBadge(g, index, scopeTab)}
+                    badge={deriveGroupDiscoverBadge(g, index, 'all')}
                     friendsHere={useDemoFallback ? mockFriendsHereCount(g.id) : undefined}
-                    recommendation={deriveGroupRecommendation(g, scopeTab)}
+                    recommendation={deriveGroupRecommendation(g, 'all')}
                   />
                 </li>
               ))}
@@ -409,7 +327,7 @@ export default function GroupsDiscoverPage() {
                     togglePurpose(p as GroupPurposeFilter)
                     setMorePurposeOpen(false)
                   }}
-                  onNearYou={() => setScopeTab('near-you')}
+                  onNearYou={() => setDistance(50)}
                 />
               </div>
             : null}
@@ -432,17 +350,6 @@ export default function GroupsDiscoverPage() {
           />
         </FilterSheet>
       </DirectoryTemplate>
-
-      {createOpen ?
-        <CreateGroupModal
-          onClose={() => setCreateOpen(false)}
-          onCreated={() => {
-            setCreateOpen(false)
-            clearFilters()
-            apiGroups.reload()
-          }}
-        />
-      : null}
     </div>
   )
 }

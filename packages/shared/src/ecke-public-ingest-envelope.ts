@@ -4,6 +4,8 @@
  * @see docs/ECKE_PUBLIC_PUBLISHING_CONTRACT.md
  */
 
+import type { EckePhotosManifest } from './ecke-photos-manifest.js'
+
 export const KINK_SOCIAL_SOURCE_SYSTEM = 'kink.social' as const
 
 /** Entity types eligible for public SEO ingest. `group` deferred pending privacy ADR. */
@@ -90,6 +92,7 @@ export type EckeEducationArticlePayload = {
   heroImageUrl?: string | null
   seoTitle?: string | null
   metaDescription?: string | null
+  photos?: EckePhotosManifest
 }
 
 /** event payload — see contract §4.4 */

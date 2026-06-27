@@ -18,7 +18,7 @@ export default function SettingsAccountPage() {
         <AccountAgeConfirmationPanel />
         <SettingsAppearanceSection />
       </div>
-      <aside className="lg:pt-0">
+      <aside className="lg:sticky lg:top-24 lg:self-start">
         <SettingsAccountDangerPanel />
       </aside>
     </div>

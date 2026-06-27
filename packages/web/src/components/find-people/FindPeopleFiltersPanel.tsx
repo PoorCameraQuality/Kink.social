@@ -153,12 +153,6 @@ export default function FindPeopleFiltersPanel({
         <h4 id={`${idPrefix}-location-heading`} className="mb-3 text-xs font-semibold uppercase tracking-wide text-dc-muted">
           Location
         </h4>
-        {peopleApiBacked ?
-          <p className="mb-3 text-[11px] leading-snug text-dc-muted">
-            Country and city match text in profile locations. Use the <strong className="font-medium text-dc-text">Near you</strong>{' '}
-            tab for distance sorting.
-          </p>
-        : null}
         <div className="space-y-3">
 
           <div>

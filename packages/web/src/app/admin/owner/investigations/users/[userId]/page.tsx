@@ -90,8 +90,11 @@ export default function OwnerInvestigationUserPage() {
     setBusy(true)
     setError(null)
     try {
-      const url = `/api/v1/admin/owner/investigations/users/${encodeURIComponent(userId)}/${path}?reason=${encodeURIComponent(reason)}`
-      const r = await fetch(url, { credentials: 'include' })
+      const url = `/api/v1/admin/owner/investigations/users/${encodeURIComponent(userId)}/${path}`
+      const r = await fetch(url, {
+        credentials: 'include',
+        headers: { 'X-C2K-Investigation-Reason': reason },
+      })
       if (!r.ok) {
         setError(`Request failed (${r.status})`)
         return

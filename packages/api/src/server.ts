@@ -94,6 +94,8 @@ import { resolveViewerFromRequest } from './auth/resolve-viewer.js'
 import { getViewerUserId } from './auth/viewer-user-id.js'
 import { loadUserSessionVersion, sessionVersionMatches } from './auth/session-version.js'
 import { isUserIdentityBanned } from './lib/peer-reputation.js'
+import { isTrustProxyEnabled } from './lib/client-ip.js'
+import { enforceCookieCsrf } from './lib/csrf-guard.js'
 
 initErrorTracking()
 
@@ -110,7 +112,7 @@ const app = Fastify({
       censor: '[REDACTED]',
     },
   },
-  trustProxy: process.env.C2K_TRUST_PROXY !== 'false',
+  trustProxy: isTrustProxyEnabled(),
 })
 
 setupFastifyErrorTracking(app)
@@ -130,6 +132,10 @@ await app.register(cookie, {
 await registerApiRateLimit(app)
 
 app.addHook('preHandler', async (req, reply) => {
+  if (!enforceCookieCsrf(req, reply)) return
+})
+
+app.addHook('preHandler', async (req, reply) => {
   if (process.env.USE_DATABASE !== 'true') return
   const path = (req.url.split('?')[0] ?? '').replace(/\/+$/, '') || '/'
   if (path.startsWith('/api/health') || path.startsWith('/api/auth/')) return
@@ -144,6 +150,9 @@ app.addHook('preHandler', async (req, reply) => {
     return reply.status(401).send({ error: 'Session expired', code: 'session_revoked' })
   }
 })
+
+const WS_MAX_MESSAGE_BYTES = 16 * 1024
+const WS_MAX_SCOPES_PER_SOCKET = 32
 
 await app.register(websocket)
 app.get('/api/ws', { websocket: true }, (connection, req) => {
@@ -170,6 +179,10 @@ app.get('/api/ws', { websocket: true }, (connection, req) => {
     } catch {
       text = ''
     }
+    if (Buffer.byteLength(text, 'utf8') > WS_MAX_MESSAGE_BYTES) {
+      sendEvent({ type: 'error', code: 'message_too_large' })
+      return
+    }
     const trimmed = text.trim()
     if (trimmed === 'ping' || trimmed === '{"type":"ping"}') {
       socket.send(JSON.stringify({ type: 'pong' }))
@@ -187,6 +200,10 @@ app.get('/api/ws', { websocket: true }, (connection, req) => {
         } catch (err) {
           app.log.warn({ err }, 'ws subscribe authorize failed')
           sendEvent({ type: 'error', code: 'authorize_failed', scope: parsed.scope })
+          return
+        }
+        if (unsubs.length >= WS_MAX_SCOPES_PER_SOCKET) {
+          sendEvent({ type: 'error', code: 'too_many_subscriptions' })
           return
         }
         const unsub = subscribeToScope(parsed.scope, (event) => sendEvent({ type: 'event', ...event }))
@@ -207,9 +224,8 @@ app.get('/api/ws', { websocket: true }, (connection, req) => {
         return
       }
     } catch {
-      /* non-JSON fallback */
+      /* non-JSON fallback — ignore unknown payloads (no echo ack) */
     }
-    socket.send(JSON.stringify({ type: 'ack', echo: trimmed }))
   })
   socket.on('close', () => {
     for (const unsub of unsubs) unsub()

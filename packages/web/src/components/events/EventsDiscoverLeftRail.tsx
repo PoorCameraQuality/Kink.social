@@ -71,8 +71,7 @@ export default function EventsDiscoverLeftRail({
 
       {showAgenda ?
         <div className="rounded-2xl border border-dc-border bg-dc-elevated-solid p-4 shadow-[var(--dc-shadow-soft)]">
-          <h3 className="text-sm font-semibold text-dc-text">My agenda</h3>
-          <p className="mb-3 text-xs text-dc-text-muted">Upcoming RSVPs and events you are organizing.</p>
+          <h3 className="mb-3 text-sm font-semibold text-dc-text">My agenda</h3>
           {agendaLoading ?
             <ul className="space-y-2" aria-busy="true">
               {[1, 2, 3].map((i) => (

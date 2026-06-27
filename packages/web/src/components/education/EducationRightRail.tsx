@@ -42,12 +42,6 @@ export default function EducationRightRail({
             <dd className="mt-1 text-lg font-semibold tabular-nums text-dc-text">{pathCount}</dd>
           </div>
         </dl>
-        <p className="mt-3 text-xs leading-relaxed text-dc-text-muted">
-          <Link to="/education?view=paths" className="font-medium text-dc-accent hover:underline">
-            Learning paths
-          </Link>{' '}
-          group ECKE safety fundamentals with demo Kink 101 modules.
-        </p>
       </RailCard>
 
       <RailCard title="Progress &amp; saved">
@@ -145,19 +139,6 @@ export default function EducationRightRail({
           </ul>
         </RailCard>
       : null}
-
-      <div className="rounded-2xl border border-dc-accent-border/50 bg-dc-accent-muted/25 p-4">
-        <p className="text-lg" aria-hidden>
-          ✨
-        </p>
-        <p className="mt-1 text-sm font-semibold text-dc-text">Reputation tip</p>
-        <p className="mt-1 text-xs leading-relaxed text-dc-text-muted">
-          Thoughtful articles and peer endorsements raise your educator score over time.
-        </p>
-        <Link to="/guidelines" className="mt-3 inline-flex text-xs font-medium text-dc-accent hover:underline">
-          How reputation works
-        </Link>
-      </div>
     </aside>
   )
 }

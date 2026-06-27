@@ -1,5 +1,6 @@
 import {
   APP_URL,
+  type EckePhotosManifest,
   sanitizeEckeArticleSlug,
   sanitizeEckeExternalUrl,
   sanitizeEckeHeroImageUrl,
@@ -20,6 +21,7 @@ export type EckeListingPayload = {
   orgSlug?: string | null
   orgDisplayName?: string | null
   visibility: 'public' | 'hidden'
+  photos?: EckePhotosManifest
   /** C2K member action URL (registration, etc.) — surfaced as ECKE event `website` CTA. */
   memberActionUrl?: string | null
   /** Organizer-authored "what to expect" highlights for the public ECKE event page. */
@@ -137,12 +139,14 @@ export function buildGroupListingPayload(input: {
   visibility: string
   orgSlug?: string | null
   orgDisplayName?: string | null
+  imageUrl?: string | null
 }): EckeListingPayload {
   const hidden = input.visibility !== 'public'
   return {
     slug: input.slug.toLowerCase(),
     title: input.name,
     description: input.description ?? null,
+    imageUrl: sanitizeEckeHeroImageUrl(input.imageUrl) ?? null,
     orgSlug: input.orgSlug ?? null,
     orgDisplayName: input.orgDisplayName ?? null,
     visibility: hidden ? 'hidden' : 'public',
@@ -383,6 +387,7 @@ export function buildPresenterListingPayload(input: {
   directoryVisibility: string
   eckePublish: boolean
   websiteUrl?: string | null
+  imageUrl?: string | null
 }): EckeListingPayload {
   const hidden = input.directoryVisibility !== 'PUBLIC' || !input.eckePublish
   return {
@@ -390,6 +395,7 @@ export function buildPresenterListingPayload(input: {
     title: input.displayName.trim(),
     description: input.bioShort?.trim() || null,
     websiteUrl: input.websiteUrl ?? null,
+    imageUrl: sanitizeEckeHeroImageUrl(input.imageUrl) ?? null,
     visibility: hidden ? 'hidden' : 'public',
   }
 }

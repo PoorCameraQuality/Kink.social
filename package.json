@@ -66,7 +66,10 @@
     "test:e2e:pass4": "playwright test e2e/ui-home-feed.spec.ts e2e/ui-home-feed.mobile.spec.ts e2e/ui-feed-reactions.spec.ts e2e/ui-menus-layering.spec.ts e2e/ui-directories.spec.ts e2e/ui-profile.spec.ts e2e/ui-privacy-api.spec.ts e2e/accessibility.spec.ts",
     "test:e2e:pass4:full": "npm run test:e2e:pass4 && playwright test e2e/smoke.spec.ts",
     "test:e2e:a11y": "playwright test e2e/accessibility.spec.ts",
-    "smoke:domain-routing": "node scripts/vps/smoke-domain-routing.mjs"
+    "smoke:domain-routing": "node scripts/vps/smoke-domain-routing.mjs",
+    "verify:ecke-photo-bridge-contract": "node --import tsx/esm --test packages/shared/src/ecke-photos-manifest.test.ts packages/api/src/lib/ecke-photo-manifest.test.ts",
+    "verify:ecke-ingest-with-media": "node scripts/verify-ecke-ingest-with-media.mjs",
+    "apply:ecke-photo-bridge-c2k": "node scripts/apply-ecke-photo-bridge-c2k.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",

@@ -1,7 +1,5 @@
 import ProfileStudioLivePreview, { type ProfileStudioPreviewDraft } from './ProfileStudioLivePreview'
-import ProfileStudioStrengthCard from './ProfileStudioStrengthCard'
 import ProfileStudioVisitorReadout from './ProfileStudioVisitorReadout'
-import type { StudioCheckItem } from '@/lib/profile-studio/completion'
 import type { MediaUploadStage } from '@/components/media/MediaUploadProgress'
 
 type Props = {
@@ -9,10 +7,6 @@ type Props = {
   publicProfileHref: string | null
   hasUnsavedChanges?: boolean
   photoUploadStage?: MediaUploadStage | null
-  score: number
-  essentials: StudioCheckItem[]
-  boosters: StudioCheckItem[]
-  nextSteps: string[]
   visitorReadout: string
 }
 
@@ -21,10 +15,6 @@ export default function ProfileStudioCoachRail({
   publicProfileHref,
   hasUnsavedChanges,
   photoUploadStage = null,
-  score,
-  essentials,
-  boosters,
-  nextSteps,
   visitorReadout,
 }: Props) {
   return (
@@ -34,12 +24,6 @@ export default function ProfileStudioCoachRail({
         publicProfileHref={publicProfileHref}
         hasUnsavedChanges={hasUnsavedChanges}
         photoUploadStage={photoUploadStage}
-      />
-      <ProfileStudioStrengthCard
-        score={score}
-        essentials={essentials}
-        boosters={boosters}
-        nextSteps={nextSteps}
       />
       <ProfileStudioVisitorReadout readout={visitorReadout} />
     </div>

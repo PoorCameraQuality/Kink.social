@@ -25,6 +25,7 @@ import CreatePage from './app/create/page'
 import EventsPage from './app/events/page'
 import EventDetailPage from './app/events/[id]/page'
 import GroupsPage from './app/groups/page'
+import GroupOnboardingPage from './app/groups/onboarding/page'
 import GroupDetailPage from './app/groups/[id]/page'
 import GuidelinesPage from './app/guidelines/page'
 import HomePage from './app/home/page'
@@ -176,6 +177,7 @@ export const router = createBrowserRouter([
       { path: 'events', element: <EventsPage /> },
       { path: 'events/:id', element: <EventDetailPage /> },
       { path: 'groups', element: <GroupsPage /> },
+      { path: 'groups/onboarding', element: <GroupOnboardingPage /> },
       { path: 'groups/:id', element: <GroupDetailPage /> },
       { path: 'places/:slug', element: <PlaceDetailPage /> },
       { path: 'places', element: <PlacesPage /> },

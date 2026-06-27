@@ -302,11 +302,6 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.events, 'third', !showFeatured)}
         title={events.length > 0 ? 'Upcoming events' : 'Start exploring'}
-        description={
-          events.length > 0 ?
-            'Time-and-place decisions. Open the events directory for filters and RSVP.'
-          : 'No events match right now — jump into community infrastructure or learning paths.'
-        }
         href="/events"
         linkLabel={events.length > 0 ? 'Browse all events' : 'Open events directory'}
       >
@@ -355,7 +350,6 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.featured, 'third', !showEvents)}
         title="Featured this week"
-        description="A quick pulse of what's active — posts, events, and education getting attention across the network right now."
       >
         {homeTrendingLoading ?
           <ul className="space-y-2" aria-busy="true">
@@ -387,7 +381,6 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.groups, 'third')}
         title="Popular groups"
-        description="Persistent spaces for munches, education, and regional community — join or lurk."
         href="/groups"
         linkLabel="Browse all groups"
       >
@@ -422,7 +415,6 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.orgs, 'third')}
         title="Featured organization"
-        description="Legitimate organizers powering events, conventions, and community infrastructure."
         href="/orgs"
         linkLabel="Browse all organizations"
       >
@@ -463,7 +455,6 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.people, 'third')}
         title="People to discover"
-        description="Members active near you and in scenes you follow. Open a profile to learn more — connecting is up to you."
         href={PEOPLE_DIRECTORY_PATH}
         linkLabel="Open people directory"
       >
@@ -488,7 +479,6 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.vendors, 'third')}
         title="Vendors"
-        description="Shops and makers in the community. Discover them here, then check out on each vendor's own store — kink.social never handles payment."
         href="/vendors"
         linkLabel="Browse all vendors"
       >
@@ -520,7 +510,6 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.education, 'third')}
         title="Education"
-        description="Articles, guides, and workshops from community educators."
         href="/education"
         linkLabel="Open education hub"
       >
@@ -559,7 +548,6 @@ export default function ExploreDashboardPage() {
         layout={panelLayout}
         className={exploreTile(sectionOrders.media, 'third')}
         title="Media"
-        description="Community shows, galleries, and creator channels — listen or watch on linked platforms."
         href="/media"
         linkLabel="Browse all media"
       >
@@ -602,7 +590,6 @@ export default function ExploreDashboardPage() {
       layout={panelLayout}
       className={exploreTile(sectionOrders.suggested, 'full')}
       title="Suggested for you"
-      description="Personalized next steps from your region, connections, and activity — not paid placements."
     >
       {suggested.length === 0 ?
         <p className="text-sm text-dc-muted">Suggestions appear as you participate in events and groups.</p>

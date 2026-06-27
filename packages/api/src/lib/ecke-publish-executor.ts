@@ -31,6 +31,7 @@ import {
   isStandaloneEventEckeEligible,
   resolveStandaloneEventEckeSlug,
 } from './ecke-publish-payload.js'
+import { syncEckePublishTargetMedia } from './ecke-publish-target-store.js'
 
 export type EckePublishJobName =
   | 'publish-article'
@@ -622,6 +623,17 @@ async function markEntityOutcome(input: {
         updatedAt: now,
       })
       .where(where)
+
+    const photos =
+      input.result.ok && 'photosManifest' in input.result ? input.result.photosManifest : undefined
+    if (photos !== undefined) {
+      const [row] = await db
+        .select({ id: schema.eckePublishTargets.id })
+        .from(schema.eckePublishTargets)
+        .where(where)
+        .limit(1)
+      if (row) await syncEckePublishTargetMedia(row.id, photos)
+    }
     return
   }
 

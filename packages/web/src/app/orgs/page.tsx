@@ -174,9 +174,6 @@ export default function OrgsListPage() {
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] text-dc-muted">
-                Filters use best-match heuristics from listed organizations. Sort applies to the current results.
-              </p>
             </div>
           </section>
         }

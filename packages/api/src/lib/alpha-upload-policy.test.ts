@@ -21,3 +21,13 @@ test('profile_photo uploads enabled unless explicitly disabled', () => {
   if (prev === undefined) delete process.env.C2K_ALPHA_DISABLE_PROFILE_PHOTO_UPLOADS
   else process.env.C2K_ALPHA_DISABLE_PROFILE_PHOTO_UPLOADS = prev
 })
+
+test('event_cover uploads enabled unless explicitly disabled', () => {
+  const prev = process.env.C2K_ALPHA_DISABLE_EVENT_COVER_UPLOADS
+  delete process.env.C2K_ALPHA_DISABLE_EVENT_COVER_UPLOADS
+  assert.equal(isAlphaUploadDisabled('event_cover'), false)
+  process.env.C2K_ALPHA_DISABLE_EVENT_COVER_UPLOADS = 'true'
+  assert.equal(isAlphaUploadDisabled('event_cover'), true)
+  if (prev === undefined) delete process.env.C2K_ALPHA_DISABLE_EVENT_COVER_UPLOADS
+  else process.env.C2K_ALPHA_DISABLE_EVENT_COVER_UPLOADS = prev
+})

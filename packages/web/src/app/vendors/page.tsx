@@ -220,7 +220,7 @@ export default function VendorsPage() {
               <p className="mt-1 max-w-2xl text-xs leading-snug text-dc-text-muted sm:text-sm">
                 Discover vendors, makers, educators, and service providers in the community.
               </p>
-              <p className="mt-2 flex max-w-2xl items-start gap-2 text-[11px] leading-relaxed text-dc-muted sm:text-xs">
+              <p className="mt-2 flex max-w-2xl items-start gap-2 text-xs leading-relaxed text-dc-text-muted sm:text-sm">
                 <svg className="mt-0.5 h-4 w-4 shrink-0 text-dc-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path
                     strokeLinecap="round"
@@ -356,8 +356,8 @@ export default function VendorsPage() {
           />
         : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredVendors.map((v, index) => (
-              <VendorDirectoryCard key={String(v.id)} vendor={v} compact={index >= 3} />
+            {filteredVendors.map((v) => (
+              <VendorDirectoryCard key={String(v.id)} vendor={v} />
             ))}
           </div>
         )}

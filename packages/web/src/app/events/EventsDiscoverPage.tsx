@@ -8,6 +8,10 @@ import EventsPagination from '@/components/events/EventsPagination'
 import EventFiltersPanel, { type EventFilterState } from '@/components/events/EventFiltersPanel'
 import EventsAgendaList from '@/components/events/EventsAgendaList'
 import EventsRightRail from '@/components/events/EventsRightRail'
+import EventsDisplayControls, {
+  type EventsSortMode,
+  type EventsViewMode,
+} from '@/components/events/EventsDisplayControls'
 import EventsScopeTabs from '@/components/events/EventsScopeTabs'
 import EmptyState from '@/components/ui/EmptyState'
 import PageHeader from '@/components/shell/PageHeader'
@@ -27,8 +31,8 @@ import {
   paginateEvents,
   type EventsScopeTab,
 } from '@/lib/events-page-utils'
-type ViewMode = 'list' | 'grid'
-type SortMode = 'upcoming' | 'relevance' | 'new'
+type ViewMode = EventsViewMode
+type SortMode = EventsSortMode
 
 const SCOPE_SUMMARY_LABEL: Record<EventsScopeTab, string> = {
   all: 'events',
@@ -121,6 +125,7 @@ function emptyEventFilterDraft(): EventFilterDraft {
 
 export default function EventsDiscoverPage() {
   const searchId = useId()
+  const sortId = useId()
   const [searchParams] = useSearchParams()
   const pastView = searchParams.get('view') === 'past'
 
@@ -415,10 +420,20 @@ export default function EventsDiscoverPage() {
           {...agenda}
         />
       }
-      desktopAside={<EventsRightRail allEvents={eventSource} suggested={filteredEvents} />}
+      desktopAside={
+        <EventsRightRail
+          allEvents={eventSource}
+          suggested={filteredEvents}
+          sortMode={sortMode}
+          onSortModeChange={setSortMode}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          sortId={sortId}
+        />
+      }
       toolbar={
-        <div className="flex flex-col gap-2">
-          <div className="relative min-w-0">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
             <label htmlFor={searchId} className="sr-only">
               Search events
             </label>
@@ -443,39 +458,15 @@ export default function EventsDiscoverPage() {
               className="w-full min-h-11 rounded-xl border border-dc-border bg-[var(--dc-input)] py-2.5 pl-10 pr-4 text-sm text-dc-text placeholder-dc-muted focus:border-dc-accent focus:outline-none focus:ring-1 focus:ring-dc-accent"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 xl:hidden">
             <DirectoryFilterButton activeFilterCount={appliedFilterCount} onClick={openFilterSheet} />
-            <label className="sr-only" htmlFor="events-sort">
-              Sort events
-            </label>
-            <select
-              id="events-sort"
-              value={sortMode}
-              onChange={(e) => setSortMode(e.target.value as SortMode)}
-              className="min-h-11 min-w-0 flex-1 rounded-xl border border-dc-border bg-dc-elevated-solid px-3 text-sm text-dc-text"
-            >
-              <option value="upcoming">Sort: Upcoming</option>
-              <option value="relevance">Sort: Popular</option>
-              <option value="new">Sort: Newest</option>
-            </select>
-            <div className="hidden items-center rounded-xl border border-dc-border bg-dc-elevated-solid p-1 md:inline-flex" role="group" aria-label="View mode">
-              <button
-                type="button"
-                aria-pressed={viewMode === 'grid'}
-                onClick={() => setViewMode('grid')}
-                className={`min-h-11 rounded-lg px-3 text-xs font-medium ${viewMode === 'grid' ? 'bg-dc-accent-muted text-dc-accent' : 'text-dc-muted'}`}
-              >
-                Grid
-              </button>
-              <button
-                type="button"
-                aria-pressed={viewMode === 'list'}
-                onClick={() => setViewMode('list')}
-                className={`min-h-11 rounded-lg px-3 text-xs font-medium ${viewMode === 'list' ? 'bg-dc-accent-muted text-dc-accent' : 'text-dc-muted'}`}
-              >
-                List
-              </button>
-            </div>
+            <EventsDisplayControls
+              sortId={sortId}
+              sortMode={sortMode}
+              onSortModeChange={setSortMode}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
           </div>
         </div>
       }

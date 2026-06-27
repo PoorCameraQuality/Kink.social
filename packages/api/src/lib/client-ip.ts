@@ -1,9 +1,20 @@
 import type { FastifyRequest } from 'fastify'
 
+/** Whether Fastify should treat X-Forwarded-* as client IP (production behind Caddy). */
+export function isTrustProxyEnabled(): boolean {
+  if (process.env.C2K_TRUST_PROXY === 'true') return true
+  if (process.env.C2K_TRUST_PROXY === 'false') return false
+  return process.env.NODE_ENV === 'production' || process.env.C2K_ENV === 'production'
+}
+
+/**
+ * Client IP for rate limits and registration bans.
+ * Never reads X-Forwarded-For directly — uses Fastify's proxy-aware req.ip when trust is enabled.
+ */
 export function getRequestIpRaw(req: FastifyRequest): string {
-  const xff = req.headers['x-forwarded-for']
-  if (typeof xff === 'string' && xff.length > 0) {
-    return xff.split(',')[0]?.trim() ?? '127.0.0.1'
+  if (isTrustProxyEnabled()) {
+    const ip = req.ip?.trim()
+    if (ip && ip.length > 0) return ip
   }
   const addr = req.socket.remoteAddress
   return addr && addr.length > 0 ? addr : '127.0.0.1'

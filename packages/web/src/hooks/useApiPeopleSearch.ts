@@ -150,6 +150,10 @@ export function useApiPeopleSearch(): UseApiPeopleSearchReturn {
             pronouns: string | null
             avatarUrl: string | null
             lastActiveAt: string | null
+            photoCount?: number
+            videoCount?: number
+            writingCount?: number
+            groupsLedCount?: number
           }>
         }
         if (cancelled) return
@@ -171,6 +175,10 @@ export function useApiPeopleSearch(): UseApiPeopleSearchReturn {
             location: row.location ?? undefined,
             bio: row.bio ?? undefined,
             avatarUrl: row.avatarUrl ?? undefined,
+            photoCount: row.photoCount,
+            videoCount: row.videoCount,
+            writingCount: row.writingCount,
+            groupsLedCount: row.groupsLedCount,
           }
         })
         setDbPeople(mapped)

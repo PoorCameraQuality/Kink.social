@@ -223,7 +223,7 @@ export async function promoteQuarantineToScopeBrandingUrl(params: {
   userId: string
   quarantineKey: string
   scopePath: string
-  assetName: 'banner' | 'logo' | 'share' | 'hero' | 'inline'
+  assetName: 'banner' | 'logo' | 'share' | 'hero' | 'inline' | 'cover'
 }): Promise<string> {
   assertQuarantineStorageKeyOwnedByUser(params.userId, params.quarantineKey)
   const extMatch = params.quarantineKey.match(/(\.[a-z0-9]+)$/i)

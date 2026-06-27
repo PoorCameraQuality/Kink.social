@@ -72,10 +72,6 @@ export default function LocalHomeFeed({
   const composerPlaceholder = feedShell
     ? 'What do you want your local kink community to know?'
     : `What's on your mind, ${composerName}?`
-  const composerHint =
-    feedShell ?
-      'Post to your feed now. Group and event-specific posting can come later.'
-    : undefined
 
   const viewerInitial = viewerUsername ? viewerUsername.charAt(0).toUpperCase() : '?'
 
@@ -85,7 +81,6 @@ export default function LocalHomeFeed({
       viewerInitial={viewerInitial}
       useDbComposer={useDbComposer}
       composerPlaceholder={composerPlaceholder}
-      composerHint={composerHint}
       onPosted={onPosted}
       compact={compactComposer}
     />

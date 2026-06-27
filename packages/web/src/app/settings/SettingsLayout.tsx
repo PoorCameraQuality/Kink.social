@@ -108,8 +108,8 @@ function SettingsLayoutInner() {
           </>}
       </div>
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-        <div className="order-2 lg:order-1">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+        <div className="order-2 lg:order-1 lg:sticky lg:top-24 lg:self-start">
           <SettingsTabNav />
         </div>
         <div className="order-1 flex-1 min-w-0 pb-12 lg:order-2">

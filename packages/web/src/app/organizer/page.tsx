@@ -143,7 +143,7 @@ export default function OrganizerHubPage() {
             <div className="flex flex-wrap gap-2">
               <QuickActionLink href="/events?create=event" label="Create event" primary />
               <QuickActionLink href="/orgs/new" label="Create organization" />
-              <QuickActionLink href="/groups?create=group" label="Create group" />
+              <QuickActionLink href="/groups/onboarding" label="Create group" />
               <QuickActionLink href="/orgs" label="Browse organizations" />
             </div>
           </DashboardCard>

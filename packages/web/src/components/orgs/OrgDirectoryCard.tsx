@@ -79,8 +79,14 @@ export default function OrgDirectoryCard({ org, canManage, compact = false }: Pr
         )}
       >
         {org.logoUrl ?
-          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl ring-1 ring-dc-border/60">
-            <img src={org.logoUrl} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dc-surface-muted p-1 ring-1 ring-dc-border/60">
+            <img
+              src={org.logoUrl}
+              alt=""
+              className="max-h-full max-w-full object-contain"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         : <div
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-dc-accent-muted text-sm font-bold text-dc-accent"

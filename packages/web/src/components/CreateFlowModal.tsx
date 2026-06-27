@@ -6,6 +6,7 @@ import Dialog from '@/components/ui/Dialog'
 import FormField from '@/components/ui/FormField'
 import TextInput from '@/components/ui/TextInput'
 import EventCoverPhotoControl from '@/components/events/EventCoverPhotoControl'
+import { attachEventCover } from '@/lib/event-cover-upload'
 import {
   CreateFlowStepper,
   FormatToggle,
@@ -59,6 +60,7 @@ type CreateEventDraft = {
   materialsUrl: string
   eventTimezone: string
   imageUrl: string
+  coverQuarantineKey: string
 }
 
 const EMPTY_CREATE_EVENT_DRAFT: CreateEventDraft = {
@@ -77,6 +79,7 @@ const EMPTY_CREATE_EVENT_DRAFT: CreateEventDraft = {
   materialsUrl: '',
   eventTimezone: '',
   imageUrl: '',
+  coverQuarantineKey: '',
 }
 
 export default function CreateFlowModal() {
@@ -376,8 +379,9 @@ export default function CreateFlowModal() {
         eventFormat,
       }
       if (eventCategory.trim()) eventCreatePayload.category = eventCategory.trim()
+      const coverQuarantine = draft.coverQuarantineKey.trim()
       const cover = draft.imageUrl.trim()
-      if (cover) eventCreatePayload.imageUrl = cover
+      if (cover && !coverQuarantine) eventCreatePayload.imageUrl = cover
       if (eventFormat === 'virtual') {
         eventCreatePayload.virtualSessionStyle = virtualSessionStyle
         if (agenda) eventCreatePayload.virtualAgenda = agenda
@@ -416,6 +420,19 @@ export default function CreateFlowModal() {
       if (!eventId) {
         setEventPublishError('Event was created but the response did not include an id. Check the API or try again.')
         return
+      }
+      if (coverQuarantine) {
+        try {
+          await attachEventCover(eventId, coverQuarantine)
+        } catch (attachErr) {
+          setEventPublishError(
+            attachErr instanceof Error ?
+              `Event created, but cover photo failed: ${attachErr.message}`
+            : 'Event created, but cover photo could not be attached. Add it from organizer tools.',
+          )
+          navigate(`/events/${encodeURIComponent(eventId)}`, { replace: true })
+          return
+        }
       }
       const shellOrg = publishOrgs.find((o) => o.id === publishOrgId)
       if (fullProgram && publishOrgId) {
@@ -565,7 +582,8 @@ export default function CreateFlowModal() {
             .join(' · ')
         : `Virtual · ${virtualSessionStyle}`,
       description: draft.description.trim() || '-',
-      cover: draft.imageUrl.trim() ? 'Cover photo added' : 'No cover photo',
+      cover:
+        draft.imageUrl.trim() || draft.coverQuarantineKey.trim() ? 'Cover photo added' : 'No cover photo',
     }
   }
 
@@ -908,6 +926,7 @@ export default function CreateFlowModal() {
             <EventCoverPhotoControl
               imageUrl={draft.imageUrl.trim() || null}
               onChange={(url) => updateDraft({ imageUrl: url ?? '' })}
+              onQuarantineKeyChange={(key) => updateDraft({ coverQuarantineKey: key ?? '' })}
               canUpload={isAuthenticated}
               disabled={eventPublishing}
             />

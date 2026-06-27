@@ -475,8 +475,16 @@ export default function EventOrganizerPanel({ eventId, orgSlug = '', groupId }: 
           >
             <EventCoverPhotoControl
               compact
+              eventId={isUuid ? eventId : undefined}
               imageUrl={apiEvent.imageUrl ?? null}
-              onChange={(url) => void patchEventCover(url)}
+              onChange={(url) => {
+                if (url) {
+                  setApiEvent((ev) => (ev ? { ...ev, imageUrl: url } : ev))
+                  setCoverMsg('Cover photo updated.')
+                } else {
+                  void patchEventCover(null)
+                }
+              }}
               canUpload={isAuthenticated}
               disabled={coverBusy}
             />

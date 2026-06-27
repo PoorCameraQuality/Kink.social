@@ -6,7 +6,7 @@ const SCOPES = [
   { id: 'following', label: 'Following', href: '/home?mode=following' },
   { id: 'nearby', label: 'Nearby', href: '/people' },
   { id: 'organizers', label: 'Organizers', href: '/events' },
-  { id: 'trending', label: 'Trending', href: EXPLORE_DASHBOARD_PATH },
+  { id: 'trending', label: 'Explore', href: EXPLORE_DASHBOARD_PATH },
 ] as const
 
 type Props = {

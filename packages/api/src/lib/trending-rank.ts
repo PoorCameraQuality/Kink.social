@@ -41,17 +41,56 @@ function plainTextExcerpt(raw: string, maxLen: number): string {
   return stripped.length > maxLen ? `${stripped.slice(0, maxLen)}…` : stripped
 }
 
-function trendingMediaFromAttachments(raw: unknown): { imageUrl: string | null; audioPreviewUrl: string | null } {
+function pickNonEmptyUrl(...candidates: unknown[]): string | null {
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.trim()) return c.trim()
+  }
+  return null
+}
+
+/** First image/audio preview from feed post attachments (legacy + media pipeline). */
+export function trendingMediaFromAttachments(raw: unknown): {
+  imageUrl: string | null
+  audioPreviewUrl: string | null
+} {
   let imageUrl: string | null = null
   let audioPreviewUrl: string | null = null
   if (!Array.isArray(raw)) return { imageUrl, audioPreviewUrl }
+
   for (const x of raw) {
     if (!x || typeof x !== 'object') continue
-    const o = x as { type?: unknown; url?: unknown }
-    if (typeof o.url !== 'string' || !o.url) continue
-    if (o.type === 'image' && !imageUrl) imageUrl = o.url
-    if (o.type === 'audio' && !audioPreviewUrl) audioPreviewUrl = o.url
+    const o = x as {
+      type?: unknown
+      url?: unknown
+      mediaKind?: unknown
+      previewUrl?: unknown
+      blurredPreviewUrl?: unknown
+      posterUrl?: unknown
+    }
+
+    if (o.type === 'image' && !imageUrl) {
+      imageUrl = pickNonEmptyUrl(o.url)
+      continue
+    }
+    if (o.type === 'audio' && !audioPreviewUrl) {
+      audioPreviewUrl = pickNonEmptyUrl(o.url)
+      continue
+    }
+    if (o.type === 'video' && !imageUrl) {
+      imageUrl = pickNonEmptyUrl(o.posterUrl, o.url)
+      continue
+    }
+    if (o.type === 'media') {
+      if (o.mediaKind === 'image' && !imageUrl) {
+        imageUrl = pickNonEmptyUrl(o.previewUrl, o.blurredPreviewUrl)
+      } else if (o.mediaKind === 'audio' && !audioPreviewUrl) {
+        audioPreviewUrl = pickNonEmptyUrl(o.previewUrl, o.url)
+      } else if (o.mediaKind === 'video' && !imageUrl) {
+        imageUrl = pickNonEmptyUrl(o.previewUrl, o.blurredPreviewUrl, o.posterUrl)
+      }
+    }
   }
+
   return { imageUrl, audioPreviewUrl }
 }
 

@@ -70,6 +70,11 @@ export type MockPerson = {
   connectionStatus?: 'connected' | 'pending_outgoing' | 'pending_incoming' | null
   /** When true, allow Message without a connection (privacy / DM settings). */
   canMessageDirectly?: boolean
+  /** Directory card activity counts (API or mock). */
+  photoCount?: number
+  videoCount?: number
+  writingCount?: number
+  groupsLedCount?: number
 }
 
 export type MockEndorsement = {

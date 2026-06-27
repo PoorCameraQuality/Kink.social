@@ -137,9 +137,11 @@ export async function registerAuthRoutes(app: FastifyInstance) {
           .where(eq(schema.profiles.userId, user.id))
           .limit(1)
         if (profile?.updatedAt && profile.updatedAt <= twoYearsAgo) {
-          // Wipe dormant accounts so username can be reused.
-          await db.delete(schema.users).where(eq(schema.users.id, user.id))
-          return reply.status(401).send({ error: 'Account expired. Please sign up again.' })
+          // Dormant accounts are handled by abandoned-account-sweep — never delete on login.
+          return reply.status(403).send({
+            error: 'Account inactive. Contact support or sign up again.',
+            code: 'account_dormant',
+          })
         }
         // Login makes the user active again and restarts the countdown.
         if (!profile) {

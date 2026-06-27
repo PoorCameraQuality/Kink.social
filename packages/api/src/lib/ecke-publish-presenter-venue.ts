@@ -13,6 +13,7 @@ import {
   buildVenueListingPayload,
   hashEckePayload,
 } from './ecke-publish-payload.js'
+import { deliverProfileHeroUrl } from './image-delivery.js'
 import {
   deriveTargetDisplayStatus,
   ensureEckePublishTargetRow,
@@ -58,6 +59,7 @@ async function loadPresenterRow(userId: string) {
       eckePublish: schema.presenterProfiles.eckePublish,
       username: schema.users.username,
       displayName: schema.profiles.displayName,
+      avatarUrl: schema.profiles.avatarUrl,
     })
     .from(schema.presenterProfiles)
     .innerJoin(schema.users, eq(schema.users.id, schema.presenterProfiles.userId))
@@ -112,12 +114,14 @@ function venueEligibility(row: NonNullable<Awaited<ReturnType<typeof loadVenueRo
 
 function buildPresenterContext(row: NonNullable<Awaited<ReturnType<typeof loadPresenterRow>>>) {
   const displayName = row.displayName?.trim() || row.headline?.trim() || row.username
+  const avatarUrl = deliverProfileHeroUrl(row.avatarUrl?.trim() || null) ?? row.avatarUrl?.trim() || null
   const listingPayload = buildPresenterListingPayload({
     username: row.username,
     displayName,
     bioShort: row.bioShort,
     directoryVisibility: row.directoryVisibility,
     eckePublish: row.eckePublish,
+    imageUrl: avatarUrl,
   })
   const contentHash = hashEckePayload(listingPayload)
   const canonicalKinkSocialUrl = `${APP_URL}/presenters/${encodeURIComponent(row.username)}`

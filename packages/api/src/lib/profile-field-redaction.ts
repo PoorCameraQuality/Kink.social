@@ -39,6 +39,10 @@ export type DiscoveryProfileCard = {
   gender: string | null
   avatarUrl: string | null
   lastActiveAt: string | null
+  photoCount?: number
+  videoCount?: number
+  writingCount?: number
+  groupsLedCount?: number
 }
 
 export function toDiscoveryProfileCard(

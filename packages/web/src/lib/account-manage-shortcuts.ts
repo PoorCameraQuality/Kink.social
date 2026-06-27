@@ -51,7 +51,7 @@ export function buildAccountManageShortcuts(
   }
 
   if (managedGroups.length === 0) {
-    links.push({ label: 'Create a group', href: '/groups?create=group' })
+    links.push({ label: 'Create a group', href: '/groups/onboarding' })
   } else {
     for (const group of managedGroups.slice(0, 3)) {
       links.push({

@@ -39,6 +39,13 @@ export function isEckeIngestEnabledFor(entity: EckeIngestEntityFlag): boolean {
   }
 }
 
+/** When true, publish payloads include optional `photos` manifest (additive). */
+export function isEckePhotosPublishEnabled(): boolean {
+  const v = process.env.ECKE_PUBLISH_PHOTOS_ENABLED?.trim().toLowerCase()
+  if (v === 'false' || v === '0' || v === 'no') return false
+  return v === 'true' || v === '1' || v === 'yes'
+}
+
 /** Primary ingest URL when live; listing webhook remains separate legacy transport. */
 export function eckePublishIngestEndpoint(): string | null {
   const url = process.env.ECKE_PUBLISH_ENDPOINT?.trim()

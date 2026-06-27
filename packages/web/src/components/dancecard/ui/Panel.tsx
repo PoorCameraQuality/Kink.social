@@ -1,14 +1,14 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react'
 
+import { cardSurfaceBaseClass, cardSurfacePanelClass, surfaceNestedClass } from '@/lib/card-surface'
+import { cn } from '@/lib/cn'
+
 type PanelVariant = 'default' | 'muted' | 'inset'
 
-const panelChrome =
-  'shadow-[0_18px_54px_rgba(45,38,28,0.12),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-sm'
-
 const variantClass: Record<PanelVariant, string> = {
-  default: `border-dc-border bg-dc-elevated/95 ${panelChrome}`,
-  muted: `border-dc-border bg-dc-elevated-muted/95 ${panelChrome}`,
-  inset: `border-dc-border/80 bg-dc-surface-muted/90 shadow-[0_8px_24px_rgba(45,38,28,0.08)]`,
+  default: cn(cardSurfaceBaseClass, 'dc-card-polish ring-1 ring-inset ring-white/[0.06]'),
+  muted: cn(cardSurfacePanelClass, 'dc-card-polish ring-1 ring-inset ring-white/[0.04]'),
+  inset: cn(surfaceNestedClass, 'shadow-none'),
 }
 
 type Props = HTMLAttributes<HTMLDivElement> & {
@@ -23,7 +23,7 @@ export const Panel = forwardRef<HTMLDivElement, Props>(function Panel(
   return (
     <div
       ref={ref}
-      className={`rounded-2xl border p-4 sm:p-5 ${variantClass[variant]} ${className}`.trim()}
+      className={cn('rounded-2xl p-6 sm:p-7', variantClass[variant], className)}
       {...rest}
     >
       {children}
