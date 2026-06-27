@@ -71,7 +71,7 @@ async function main() {
     `${ownerPrint.json?.slots?.length ?? 0} slots`,
   )
 
-  const ownerEcke = await fetch(`${BASE}/api/v1/organizer/ecke-publish/conventions/${CONV}`, {
+  const ownerEcke = await fetch(`${BASE}/api/v1/conventions/${CONV}/ecke-publish`, {
     headers: { Accept: 'application/json', Cookie: ownerCookie },
   })
   ok('Owner ECKE publish GET 200', ownerEcke.status === 200)
@@ -152,7 +152,7 @@ async function main() {
   })
   ok('Leather scheduler POST /registrants 403', leatherSchedRegPost.status === 403)
 
-  const leatherEcke = await fetch(`${BASE}/api/v1/organizer/ecke-publish/conventions/${CONV}`, {
+  const leatherEcke = await fetch(`${BASE}/api/v1/conventions/${CONV}/ecke-publish`, {
     headers: { Accept: 'application/json', Cookie: leatherCookie },
   })
   ok('Leather ECKE publish GET 403', leatherEcke.status === 403)

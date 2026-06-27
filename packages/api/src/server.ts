@@ -80,7 +80,6 @@ import { registerGroupModerationRoutes } from './routes/group-moderation.js'
 import { registerEventModerationRoutes } from './routes/event-moderation.js'
 import { registerGroupLeadershipRoutes } from './routes/group-leadership-routes.js'
 import { registerOrganizerRoutes } from './routes/organizer-routes.js'
-import { registerEckePublishRoutes } from './routes/ecke-publish-routes.js'
 import { registerEckePublishEntityRoutes } from './routes/ecke-publish-entity-routes.js'
 import { registerEckePublishControlRoutes } from './routes/ecke-publish-control-routes.js'
 import { registerShareRoutes } from './routes/share-routes.js'
@@ -157,7 +156,7 @@ const WS_MAX_SCOPES_PER_SOCKET = 32
 await app.register(websocket)
 app.get('/api/ws', { websocket: true }, (connection, req) => {
   const socket = connection.socket
-  const unsubs: Array<() => void> = []
+  const subsByScope = new Map<string, () => void>()
   const sendEvent = (event: unknown) => {
     try {
       socket.send(JSON.stringify(event))
@@ -202,23 +201,23 @@ app.get('/api/ws', { websocket: true }, (connection, req) => {
           sendEvent({ type: 'error', code: 'authorize_failed', scope: parsed.scope })
           return
         }
-        if (unsubs.length >= WS_MAX_SCOPES_PER_SOCKET) {
+        if (subsByScope.size >= WS_MAX_SCOPES_PER_SOCKET) {
           sendEvent({ type: 'error', code: 'too_many_subscriptions' })
           return
         }
+        const existingUnsub = subsByScope.get(parsed.scope)
+        if (existingUnsub) existingUnsub()
         const unsub = subscribeToScope(parsed.scope, (event) => sendEvent({ type: 'event', ...event }))
-        unsubs.push(unsub)
+        subsByScope.set(parsed.scope, unsub)
         socket.send(JSON.stringify({ type: 'subscribed', scope: parsed.scope }))
         return
       }
       if (parsed.type === 'unsubscribe' && parsed.scope) {
-        let removed = false
-        for (let i = unsubs.length - 1; i >= 0; i--) {
-          const unsub = unsubs[i]
-          if (!unsub) continue
+        const unsub = subsByScope.get(parsed.scope)
+        const removed = Boolean(unsub)
+        if (unsub) {
           unsub()
-          unsubs.splice(i, 1)
-          removed = true
+          subsByScope.delete(parsed.scope)
         }
         socket.send(JSON.stringify({ type: 'unsubscribed', scope: parsed.scope, removed }))
         return
@@ -228,7 +227,8 @@ app.get('/api/ws', { websocket: true }, (connection, req) => {
     }
   })
   socket.on('close', () => {
-    for (const unsub of unsubs) unsub()
+    for (const unsub of subsByScope.values()) unsub()
+    subsByScope.clear()
   })
 })
 
@@ -309,7 +309,6 @@ await registerGroupModerationRoutes(app)
 await registerEventModerationRoutes(app)
 await registerGroupLeadershipRoutes(app)
 await registerOrganizerRoutes(app)
-await registerEckePublishRoutes(app)
 await registerEckePublishEntityRoutes(app)
 await registerEckePublishControlRoutes(app)
 await registerShareRoutes(app)

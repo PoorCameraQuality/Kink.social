@@ -1094,6 +1094,16 @@ function targetResponse(
 }
 
 export async function registerEckePublishRoutes(app: FastifyInstance) {
+  app.addHook('onRequest', async (req, reply) => {
+    if (req.url.includes('/api/v1/organizer/ecke-publish/')) {
+      reply.header('Deprecation', 'true')
+      reply.header(
+        'Link',
+        '</api/v1/organizations/{slug}/ecke-publish>; rel="successor-version"',
+      )
+    }
+  })
+
   app.get('/api/v1/organizer/ecke-publish/organizations/:slug', async (req, reply) => {
     if (!requireDb(reply)) return
     const user = requireUser(req, reply)

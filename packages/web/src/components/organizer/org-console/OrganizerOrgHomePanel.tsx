@@ -126,17 +126,16 @@ export default function OrganizerOrgHomePanel({
               description="Optional outbound listings on East Coast Kink Events and attendee public pages."
             >
               <p className="mb-3 text-xs text-dc-text-muted">
-                Full publish controls live in{' '}
-                <Link to={`${orgBase}?tab=settings&settingsSection=publish`} className="text-dc-accent hover:underline">
-                  Settings → Publish
+                Full publish controls live in the{' '}
+                <Link to={`${orgBase}?tab=ecke`} className="text-dc-accent hover:underline">
+                  ECKE tab
                 </Link>
-                . Use this summary to check status and build a preview.
+                . This summary reflects outbound publish history for org-linked entities.
               </p>
               <EckeEntityPublishStatus
                 entityLabel={displayName}
-                loadUrl={`/api/v1/organizer/ecke-publish/organizations/${encodeURIComponent(slug)}`}
-                queueUrl={`/api/v1/organizer/ecke-publish/organizations/${encodeURIComponent(slug)}/preview`}
-                syncUrl={`/api/v1/organizer/ecke-publish/organizations/${encodeURIComponent(slug)}/publish`}
+                loadUrl={`/api/v1/organizations/${encodeURIComponent(slug)}/ecke-publish`}
+                controlPlane
               />
             </OrganizerPanel>
           : null}

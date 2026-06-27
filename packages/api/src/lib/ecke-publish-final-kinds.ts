@@ -13,7 +13,8 @@ import {
   unpublishListingToEcke,
 } from './ecke-publish-client.js'
 import { buildEckeEventRowFromListing } from './ecke-directory-sync.js'
-import { executeEckePublishConventionEvent, executeEckeUnpublishConventionEvent } from './ecke-publish-executor.js'
+import { executeEckeUnpublishConventionEvent } from './ecke-publish-executor.js'
+import { requestEckeConventionEventPublish } from './ecke-publish-queue.js'
 import { isEckeEventPublishBridgeConfigured } from './ecke-publish-config.js'
 import {
   getConventionDeferredFields,
@@ -829,10 +830,7 @@ export async function executeConventionEventAnchorPublish(viewer: EckePublishVie
     return { ok: false as const, status: 400, error: preview.result.reason ?? 'Not eligible' }
   }
 
-  const result = await executeEckePublishConventionEvent(conventionId, viewer.userId)
-  if (!result.ok) {
-    return { ok: false as const, status: 502, error: result.error ?? 'ECKE event publish failed', errorCode: 'ecke_publish_failed' }
-  }
+  await requestEckeConventionEventPublish(conventionId, viewer.userId)
 
   const after = await buildConventionEventAnchorPreview(
     viewer,
@@ -845,8 +843,8 @@ export async function executeConventionEventAnchorPublish(viewer: EckePublishVie
       ok: true,
       sourceKind: 'convention_event_anchor' as const,
       sourceId: conventionId,
-      status: after.ok ? after.result.status : 'published',
-      message: 'Convention event directory row published to ECKE',
+      status: after.ok ? after.result.status : 'draft',
+      message: 'Convention ECKE publish queued',
       preview: after.ok ? after.result : undefined,
     },
   }

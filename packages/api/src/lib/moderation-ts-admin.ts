@@ -28,6 +28,12 @@ import { resolveMediaServingKey } from './media-pipeline.js'
 import { isSiteAdmin } from './platform-staff.js'
 import { getMediaPolicyAdminSnapshot } from './media-policy.js'
 import { resolveModerationCaseContextLinks } from './moderation-case-context.js'
+import {
+  deleteModerationContent,
+  preserveModerationEvidence,
+  resolveContentAuthorUserId,
+  suspendModerationSubject,
+} from './moderation-content-enforcement.js'
 
 export const RESTRICTED_MODERATION_QUEUE = MODERATION_QUEUES.minorSafetyRestricted
 
@@ -43,6 +49,8 @@ export const MODERATION_CASE_EVENT_TYPES = {
   mediaRemoved: 'case.action_media_removed',
   mediaKeptQuarantined: 'case.action_media_kept_quarantined',
   mediaRestored: 'case.action_media_restored',
+  deleteContent: 'case.action_delete_content',
+  suspendSubject: 'case.action_suspend_subject',
   actionUnsupported: 'case.action_unsupported',
 } as const
 
@@ -485,12 +493,17 @@ export type CaseActionType =
   | 'close_duplicate'
   | 'escalate'
   | 'hide_content'
+  | 'delete_content'
+  | 'suspend_subject'
   | 'keep_quarantined'
   | 'remove_media'
   | 'restore_media'
 
 const CASE_ACTION_STATUS: Record<
-  Exclude<CaseActionType, 'hide_content' | 'keep_quarantined' | 'remove_media' | 'restore_media'>,
+  Exclude<
+    CaseActionType,
+    'hide_content' | 'delete_content' | 'suspend_subject' | 'keep_quarantined' | 'remove_media' | 'restore_media'
+  >,
   ModerationCaseStatus
 > = {
   mark_no_violation: MODERATION_CASE_STATUSES.closedNoViolation,
@@ -499,7 +512,10 @@ const CASE_ACTION_STATUS: Record<
 }
 
 const CASE_ACTION_EVENT: Record<
-  Exclude<CaseActionType, 'hide_content' | 'keep_quarantined' | 'remove_media' | 'restore_media'>,
+  Exclude<
+    CaseActionType,
+    'hide_content' | 'delete_content' | 'suspend_subject' | 'keep_quarantined' | 'remove_media' | 'restore_media'
+  >,
   string
 > = {
   mark_no_violation: MODERATION_CASE_EVENT_TYPES.markNoViolation,
@@ -545,7 +561,8 @@ export async function executeModerationCaseAction(
   userId: string,
   caseId: string,
   action: CaseActionType,
-  note?: string
+  note?: string,
+  opts?: { hardDelete?: boolean; suspendPermanent?: boolean }
 ) {
   const existing = await loadCaseOrThrow(caseId)
   await assertCaseQueueAccess(userId, existing.queue)
@@ -693,6 +710,124 @@ export async function executeModerationCaseAction(
     await closeModerationQueueItemsForCase(caseId)
 
     return { ok: true as const, case: updated, moderationActionId: actionRow.id }
+  }
+
+  if (action === 'delete_content') {
+    if (!note?.trim()) throw new Error('Reason required for delete_content')
+
+    await preserveModerationEvidence({
+      actorUserId: userId,
+      targetType: existing.targetContentType,
+      targetId: existing.targetContentId,
+      caseId,
+      note: note.trim(),
+    })
+
+    const deleteResult = await deleteModerationContent({
+      actorUserId: userId,
+      targetType: existing.targetContentType,
+      targetId: existing.targetContentId,
+      hardDelete: opts?.hardDelete,
+      reason: note.trim(),
+    })
+    if (!deleteResult.ok) {
+      await recordModerationCaseEvent({
+        caseId,
+        actorUserId: userId,
+        eventType: MODERATION_CASE_EVENT_TYPES.actionUnsupported,
+        payload: {
+          action,
+          targetContentType: existing.targetContentType,
+          targetContentId: existing.targetContentId,
+          note: note ?? null,
+          error: deleteResult.error,
+        },
+      })
+      return {
+        ok: false as const,
+        unsupported: true,
+        error: deleteResult.error,
+      }
+    }
+
+    const [updated] = await db
+      .update(schema.moderationCases)
+      .set({
+        status: MODERATION_CASE_STATUSES.actioned,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.moderationCases.id, caseId))
+      .returning()
+
+    await recordModerationCaseEvent({
+      caseId,
+      actorUserId: userId,
+      eventType: MODERATION_CASE_EVENT_TYPES.deleteContent,
+      payload: {
+        action,
+        mode: deleteResult.mode,
+        targetContentType: existing.targetContentType,
+        note: note ?? null,
+      },
+    })
+
+    await closeModerationQueueItemsForCase(caseId)
+    const { notifyCaseReportersReviewed } = await import('./moderation-notify.js')
+    await notifyCaseReportersReviewed(caseId).catch(() => {})
+
+    return { ok: true as const, case: updated, deleteMode: deleteResult.mode }
+  }
+
+  if (action === 'suspend_subject') {
+    if (!note?.trim()) throw new Error('Reason required for suspend_subject')
+    if (opts?.suspendPermanent && !(await isSiteAdmin(userId))) {
+      throw new ModerationCaseAccessError('Permanent suspension requires site admin access')
+    }
+
+    const subjectUserId =
+      existing.targetUserId ??
+      (await resolveContentAuthorUserId(existing.targetContentType, existing.targetContentId))
+    if (!subjectUserId) {
+      return {
+        ok: false as const,
+        unsupported: true,
+        error: 'Could not resolve subject user for this case',
+      }
+    }
+
+    await suspendModerationSubject({
+      actorUserId: userId,
+      subjectUserId,
+      reason: note.trim(),
+      permanent: opts?.suspendPermanent,
+    })
+
+    const [updated] = await db
+      .update(schema.moderationCases)
+      .set({
+        status: MODERATION_CASE_STATUSES.actioned,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.moderationCases.id, caseId))
+      .returning()
+
+    await recordModerationCaseEvent({
+      caseId,
+      actorUserId: userId,
+      eventType: MODERATION_CASE_EVENT_TYPES.suspendSubject,
+      payload: {
+        action,
+        subjectUserId,
+        permanent: Boolean(opts?.suspendPermanent),
+        note: note ?? null,
+      },
+    })
+
+    await closeModerationQueueItemsForCase(caseId)
+    const { notifyCaseReportersReviewed } = await import('./moderation-notify.js')
+    await notifyCaseReportersReviewed(caseId).catch(() => {})
+
+    return { ok: true as const, case: updated, subjectUserId }
   }
 
   const nextStatus = CASE_ACTION_STATUS[action]

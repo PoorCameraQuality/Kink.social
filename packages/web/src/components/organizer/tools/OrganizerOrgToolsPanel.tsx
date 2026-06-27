@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { parseEckeControlPlaneSummary } from '@/lib/ecke-control-plane-summary'
 import ComingSoonPaymentsCard from '@/components/organizer/tools/ComingSoonPaymentsCard'
 import ExternalPublishingSection from '@/components/organizer/tools/ExternalPublishingSection'
 import ProgramExportsSection from '@/components/organizer/tools/ProgramExportsSection'
@@ -74,7 +75,7 @@ export default function OrganizerOrgToolsPanel({
           const o = (await orgRes.json()) as { organization?: { community?: { welcomeHtml?: string | null } } }
           setHasWelcomeContent(Boolean(o.organization?.community?.welcomeHtml?.trim()))
         }
-        const r = await fetch(`/api/v1/organizer/ecke-publish/organizations/${encodeURIComponent(orgSlug)}`, {
+        const r = await fetch(`/api/v1/organizations/${encodeURIComponent(orgSlug)}/ecke-publish`, {
           credentials: 'include',
         })
         if (cancelled) return
@@ -89,23 +90,13 @@ export default function OrganizerOrgToolsPanel({
           })
           return
         }
-        const d = (await r.json()) as {
-          bridgeConnected: boolean
-          targets?: {
-            targetKind: string
-            status: EckePublishSummary['listingStatus']
-            externalSlug: string
-            lastPublishedAt: string | null
-            lastPreviewAt: string | null
-          }[]
-        }
-        const listing = d.targets?.find((t) => t.targetKind === 'ecke_listing')
+        const summary = parseEckeControlPlaneSummary(await r.json())
         setEcke({
-          bridgeConnected: d.bridgeConnected,
-          listingStatus: listing?.status ?? null,
-          externalSlug: listing?.externalSlug ?? null,
-          lastPublishedAt: listing?.lastPublishedAt ?? null,
-          lastPreviewAt: listing?.lastPreviewAt ?? null,
+          bridgeConnected: summary.bridgeConnected,
+          listingStatus: summary.aggregateStatus,
+          externalSlug: summary.externalSlug,
+          lastPublishedAt: summary.lastPublishedAt,
+          lastPreviewAt: summary.lastPreviewAt,
           loadError: null,
         })
       } catch {

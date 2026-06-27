@@ -336,7 +336,7 @@ Per-route **user experience** (forward/back navigation, staff/moderator clarity,
 
 **Hub extensions** (`convention-hub-ext-routes.ts`): `GET/POST/PATCH/DELETE .../gallery`; `POST .../gallery/upload`, `.../attendee-upload`, `.../submit`, `PATCH .../:imageId/moderation`; `POST/DELETE .../pin`; `GET /api/v1/me/convention-pins`; `POST .../channels/:channelId/mark-read`.
 
-**ECKE publish** (`ecke-publish-routes.ts` + entity routes): `GET/POST .../organizer/ecke-publish/organizations/:slug` (**preview**, **publish**); conventions/:slug (**preview**, **publish**); **groups/:groupId** (**GET**, **preview**, **publish**). Article/vendor: `ecke-publish-entity-routes.ts`.
+**ECKE publish (control plane — `ecke-publish-control-routes.ts` + entity routes):** Scoped `GET/POST .../ecke-publish` on **organizations/:orgKey**, **groups/:groupId**, **conventions/:conventionKey** (overview, preview, publish, sync, unpublish). Global **`/api/v1/ecke-publish/*`** for education, vendor, presenter, venue. Legacy **`/api/v1/organizer/ecke-publish/*`** removed from runtime (file retained for reference). Article/vendor queue: `ecke-publish-entity-routes.ts` + BullMQ `c2k-ecke-publish` worker.
 
 **Ecosystem-stubs extras:** `GET /api/v1/groups/nearby`; `GET /api/v1/connections/suggested`; `GET /api/v1/me/reports`.
 

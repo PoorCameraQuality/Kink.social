@@ -7,16 +7,12 @@ import { Panel } from '@/components/dancecard/ui/Panel'
 import { isTabAllowed } from '@/lib/dancecard/commandBridgeNavPermissions'
 import type { ProgramSlotRow } from '@/lib/dancecard/organizerProgramSlotDto'
 import { computeProgramSlotStats } from '@/lib/dancecard/programSlotStats'
+import { parseEckeControlPlaneSummary } from '@/lib/ecke-control-plane-summary'
 import { cn } from '@/lib/cn'
 
 type PublishTarget = {
   targetKind: 'ecke_listing' | 'dancecard_event' | 'ecke_event'
   status: 'never' | 'draft' | 'published' | 'error' | 'stale'
-}
-
-type PublishResponse = {
-  bridgeConnected: boolean
-  targets: PublishTarget[]
 }
 
 const TARGET_LABELS: Record<string, string> = {
@@ -67,16 +63,15 @@ export function DashboardAttendeeSurfaces({
   onOpenIntegrations: () => void
   onOpenExports?: () => void
 }) {
-  const [publish, setPublish] = useState<PublishResponse | null>(null)
+  const [publish, setPublish] = useState<ReturnType<typeof parseEckeControlPlaneSummary> | null>(null)
 
   const load = useCallback(async () => {
     try {
-      const r = await fetch(
-        `/api/v1/organizer/ecke-publish/conventions/${encodeURIComponent(eventSlug)}`,
-        { credentials: 'include' },
-      )
+      const r = await fetch(`/api/v1/conventions/${encodeURIComponent(eventSlug)}/ecke-publish`, {
+        credentials: 'include',
+      })
       if (!r.ok) return
-      setPublish((await r.json()) as PublishResponse)
+      setPublish(parseEckeControlPlaneSummary(await r.json()))
     } catch {
       /* optional */
     }
@@ -86,8 +81,7 @@ export function DashboardAttendeeSurfaces({
     void load()
   }, [load])
 
-  const dancecard = publish?.targets.find((t) => t.targetKind === 'dancecard_event')
-  const ecke = publish?.targets.find((t) => t.targetKind === 'ecke_listing' || t.targetKind === 'ecke_event')
+  const eckeStatus = publish?.aggregateStatus ?? (publish?.bridgeConnected ? 'never' : 'unknown')
   const eventPagePublished = event?.status === 'published'
   const slotStats = useMemo(() => computeProgramSlotStats(slots), [slots])
   const canAccessIntegrations = permissions.isFullAdmin || isTabAllowed('integrations', permissions)
@@ -99,11 +93,11 @@ export function DashboardAttendeeSurfaces({
     },
     {
       label: TARGET_LABELS.ecke_event,
-      status: ecke?.status ?? (publish?.bridgeConnected ? 'never' : 'unknown'),
+      status: eckeStatus,
     },
     {
       label: TARGET_LABELS.dancecard_event,
-      status: dancecard?.status ?? 'unknown',
+      status: 'unknown' as const,
     },
     {
       label: 'Program visibility (kink.social)',

@@ -93,9 +93,16 @@ export type ModerationTsCaseAction =
   | 'close_duplicate'
   | 'escalate'
   | 'hide_content'
+  | 'delete_content'
+  | 'suspend_subject'
   | 'keep_quarantined'
   | 'remove_media'
   | 'restore_media'
+
+export type ModerationTsCaseActionOptions = {
+  hardDelete?: boolean
+  suspendPermanent?: boolean
+}
 
 export function viewMediaContentUrl(caseId: string): string {
   return `/api/v1/moderation/cases/${encodeURIComponent(caseId)}/media-content`
@@ -480,13 +487,13 @@ export function useApiModerationTsCaseDetail(enabled: boolean, caseId: string | 
   }, [caseId, reload])
 
   const postAction = useCallback(
-    async (action: ModerationTsCaseAction, note?: string) => {
+    async (action: ModerationTsCaseAction, note?: string, opts?: ModerationTsCaseActionOptions) => {
       if (!caseId) throw new Error('Missing case id')
       const r = await fetch(`/api/v1/moderation/cases/${encodeURIComponent(caseId)}/actions`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, note }),
+        body: JSON.stringify({ action, note, ...opts }),
       })
       if (!r.ok) throw new Error(await parseError(r, 'Action failed'))
       await reload()

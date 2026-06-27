@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { getViewerUserId } from '../auth/viewer-user-id.js'
 import { resolveViewerFromRequest } from '../auth/resolve-viewer.js'
-import { isPlatformModeratorUser, isSiteAdmin } from './platform-staff.js'
+import { isPlatformModeratorUser, isSiteAdmin, isTrustSafetyAdmin } from './platform-staff.js'
 import { isUserIdentityBanned } from './peer-reputation.js'
 
 export function requireDb(reply: FastifyReply): boolean {
@@ -58,3 +58,14 @@ export async function requireSiteOwner(userId: string, reply: FastifyReply): Pro
   }
   return true
 }
+
+/** Destructive enforcement (delete/suspend) — not general triage moderators. */
+export async function requireTrustSafetyAdmin(userId: string, reply: FastifyReply): Promise<boolean> {
+  if (!(await isTrustSafetyAdmin(userId))) {
+    reply.status(403).send({ error: 'Forbidden. Trust & safety admin access required' })
+    return false
+  }
+  return true
+}
+
+export const DESTRUCTIVE_MODERATION_CASE_ACTIONS = new Set(['delete_content', 'suspend_subject'])

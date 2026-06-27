@@ -25,7 +25,9 @@ import { getMediaPolicyAdminSnapshot } from '../lib/media-policy.js'
 import { readMediaScannerStartupConfig } from '@c2k/shared'
 import {
   requireDb,
+  DESTRUCTIVE_MODERATION_CASE_ACTIONS,
   requirePlatformModerator,
+  requireTrustSafetyAdmin,
   requireUser,
 } from '../lib/moderation-route-auth.js'
 
@@ -48,11 +50,15 @@ const caseActionBody = z.object({
     'close_duplicate',
     'escalate',
     'hide_content',
+    'delete_content',
+    'suspend_subject',
     'keep_quarantined',
     'remove_media',
     'restore_media',
   ]),
   note: z.string().max(8000).optional(),
+  hardDelete: z.boolean().optional(),
+  suspendPermanent: z.boolean().optional(),
 })
 
 export async function registerModerationTsAdminRoutes(app: FastifyInstance) {
@@ -253,12 +259,23 @@ export async function registerModerationTsAdminRoutes(app: FastifyInstance) {
     const parsed = caseActionBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
 
+    if (
+      DESTRUCTIVE_MODERATION_CASE_ACTIONS.has(parsed.data.action) &&
+      !(await requireTrustSafetyAdmin(user.userId, reply))
+    ) {
+      return
+    }
+
     try {
       const result = await executeModerationCaseAction(
         user.userId,
         caseId,
         parsed.data.action,
-        parsed.data.note
+        parsed.data.note,
+        {
+          hardDelete: parsed.data.hardDelete,
+          suspendPermanent: parsed.data.suspendPermanent,
+        },
       )
       if (!result.ok) {
         return reply.status(422).send({

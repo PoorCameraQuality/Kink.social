@@ -2,6 +2,8 @@ import { eq } from 'drizzle-orm'
 import { MODERATION_AUDIT_VERBS } from '@c2k/shared'
 import { db, schema } from '../db/index.js'
 import { recordModerationAudit } from './moderation-audit.js'
+import { suspendModerationSubject } from './moderation-content-enforcement.js'
+import { isSiteAdmin } from './platform-staff.js'
 
 type ActionRow = typeof schema.moderationActions.$inferSelect
 
@@ -141,15 +143,41 @@ export async function executeModerationAction(
       break
     }
     case 'SUSPEND_USER': {
-      await recordModerationAudit({
+      const reason =
+        typeof payload.reason === 'string' && payload.reason.trim() ?
+          payload.reason.trim()
+        : 'platform_moderation'
+      const permanent = payload.permanent === true
+      if (permanent && !(await isSiteAdmin(actorUserId))) {
+        throw new Error('Permanent suspension requires site admin access')
+      }
+      await suspendModerationSubject({
         actorUserId,
-        scopeType: 'platform',
-        scopeId: null,
-        verb: MODERATION_AUDIT_VERBS.userSuspended,
-        targetType: 'user',
-        targetId: action.targetId,
-        payload,
+        subjectUserId: action.targetId,
+        reason,
+        permanent: payload.permanent === true,
       })
+      break
+    }
+    case 'DELETE_CONTENT': {
+      const { deleteModerationContent } = await import('./moderation-content-enforcement.js')
+      const contentKind = payload.contentKind as string | undefined
+      const targetType =
+        typeof payload.targetContentType === 'string' ? payload.targetContentType
+        : contentKind === 'forum_post' || action.targetType === 'forum_post' ? 'org_forum_post'
+        : contentKind === 'org_channel_message' || action.targetType === 'org_channel_message' ?
+          'org_channel_message'
+        : action.targetType
+      const result = await deleteModerationContent({
+        actorUserId,
+        targetType,
+        targetId: action.targetId,
+        hardDelete: payload.hardDelete === true,
+        reason: typeof payload.reason === 'string' ? payload.reason : 'platform_moderation',
+      })
+      if (!result.ok) {
+        throw new Error(result.error)
+      }
       break
     }
     default:

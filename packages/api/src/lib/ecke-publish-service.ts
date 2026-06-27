@@ -51,12 +51,14 @@ import {
 } from './ecke-publish-client.js'
 import { buildEckeVendorRow } from './ecke-directory-sync.js'
 import {
-  executeEckePublishArticle,
-  executeEckePublishStandaloneEvent,
-  executeEckePublishVendor,
   executeEckeUnpublishEducationArticleWithTargetUpdate,
   executeEckeUnpublishVendorWithTargetUpdate,
 } from './ecke-publish-executor.js'
+import {
+  requestEckeArticlePublish,
+  requestEckeStandaloneEventPublish,
+  requestEckeVendorPublish,
+} from './ecke-publish-queue.js'
 import {
   buildGroupListingPayload,
   buildStandaloneEventListingPayload,
@@ -2092,30 +2094,11 @@ async function executeEventListingPublish(
     contentHash: previewResult.result.contentHash ?? '',
   })
 
-  const publishResult = await executeEckePublishStandaloneEvent(eventId, viewer.userId)
+  await requestEckeStandaloneEventPublish(eventId, viewer.userId)
   const row = await loadEckePublishTarget(scope, 'ecke_event')
   const status = deriveTargetDisplayStatus(previewResult.result.contentHash ?? '', row)
 
-  if (publishResult.ok && row && !row.eckePublicUrl) {
-    await db
-      .update(schema.eckePublishTargets)
-      .set({
-        eckePublicUrl: resolveEckePublicEventUrl(previewResult.result.externalSlug ?? row.externalSlug),
-        updatedAt: new Date(),
-      })
-      .where(eq(schema.eckePublishTargets.id, row.id))
-  }
-
   const preview = await buildEventListingPreview(viewer, eventId, getRegistryEntry('event_listing')!)
-
-  if (!publishResult.ok) {
-    return {
-      ok: false,
-      status: 502,
-      error: publishResult.error,
-      errorCode: 'ecke_publish_failed',
-    }
-  }
 
   return {
     ok: true,
@@ -2123,8 +2106,8 @@ async function executeEventListingPublish(
       ok: true,
       sourceKind: 'event_listing',
       sourceId: eventId,
-      status,
-      message: 'Event listing published to ECKE',
+      status: preview.ok ? preview.result.status : status,
+      message: 'Event publish queued for ECKE',
       preview: preview.ok ? preview.result : undefined,
     },
   }
@@ -2254,17 +2237,8 @@ async function executeEducationArticlePublish(
     return { ok: false, status: 503, error: 'ECKE ingest API is not configured' }
   }
 
-  const publishResult = await executeEckePublishArticle(articleId, viewer.userId)
+  await requestEckeArticlePublish(articleId, viewer.userId)
   const preview = await buildEducationArticlePreview(viewer, articleId, getRegistryEntry('education_article')!)
-
-  if (!publishResult.ok) {
-    return {
-      ok: false,
-      status: 502,
-      error: publishResult.error,
-      errorCode: 'ecke_publish_failed',
-    }
-  }
 
   return {
     ok: true,
@@ -2272,8 +2246,8 @@ async function executeEducationArticlePublish(
       ok: true,
       sourceKind: 'education_article',
       sourceId: articleId,
-      status: preview.ok ? preview.result.status : 'published',
-      message: 'Education article published to ECKE',
+      status: preview.ok ? preview.result.status : 'draft',
+      message: 'Education article publish queued for ECKE',
       preview: preview.ok ? preview.result : undefined,
     },
   }
@@ -2408,17 +2382,8 @@ async function executeVendorProfilePublish(
     return { ok: false, status: 503, error: 'ECKE publish bridge is not configured' }
   }
 
-  const publishResult = await executeEckePublishVendor(vendorProfileId, viewer.userId)
+  await requestEckeVendorPublish(vendorProfileId, viewer.userId)
   const preview = await buildVendorProfilePreview(viewer, vendorProfileId, getRegistryEntry('vendor_profile')!)
-
-  if (!publishResult.ok) {
-    return {
-      ok: false,
-      status: 502,
-      error: publishResult.error,
-      errorCode: 'ecke_publish_failed',
-    }
-  }
 
   return {
     ok: true,
@@ -2426,8 +2391,8 @@ async function executeVendorProfilePublish(
       ok: true,
       sourceKind: 'vendor_profile',
       sourceId: vendorProfileId,
-      status: preview.ok ? preview.result.status : 'published',
-      message: 'Vendor profile published to ECKE',
+      status: preview.ok ? preview.result.status : 'draft',
+      message: 'Vendor profile publish queued for ECKE',
       preview: preview.ok ? preview.result : undefined,
     },
   }

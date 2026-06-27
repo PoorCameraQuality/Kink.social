@@ -508,15 +508,22 @@ describe('Wave 7 CI DB integration smokes', { skip: !runDbIntegration }, () => {
       })
 
       const app = await buildCookieApp(async (a) => {
-        const { registerEckePublishRoutes } = await import('../routes/ecke-publish-routes.js')
-        await registerEckePublishRoutes(a)
+        const { registerEckePublishControlRoutes } = await import('../routes/ecke-publish-control-routes.js')
+        await registerEckePublishControlRoutes(a)
       })
 
       try {
         const res = await app.inject({
           method: 'POST',
-          url: `/api/v1/organizer/ecke-publish/conventions/${slug}/publish`,
-          headers: cookieHeader(adminId, admin.username),
+          url: `/api/v1/conventions/${slug}/ecke-publish/publish`,
+          headers: {
+            ...cookieHeader(adminId, admin.username),
+            'content-type': 'application/json',
+          },
+          payload: {
+            sourceKind: 'convention_event_anchor',
+            sourceId: convId,
+          },
         })
         assert.equal(res.statusCode, 503)
         assert.match(res.json().error ?? '', /not configured/i)

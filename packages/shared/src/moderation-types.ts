@@ -276,6 +276,7 @@ export const moderationCaseStatusSchema = z.enum([
 /** Platform moderation action types (Tier 1 proposals). */
 export const MODERATION_ACTION_TYPES = {
   hideContent: 'HIDE_CONTENT',
+  deleteContent: 'DELETE_CONTENT',
   lockThread: 'LOCK_THREAD',
   scopeBan: 'SCOPE_BAN',
   resolveReport: 'RESOLVE_REPORT',
@@ -310,6 +311,8 @@ export const MODERATION_AUDIT_VERBS = {
   reportCreated: 'report.created',
   reportTriaged: 'report.triaged',
   contentHidden: 'content.hidden',
+  contentDeleted: 'content.deleted',
+  evidencePreserved: 'evidence.preserved',
   threadLocked: 'thread.locked',
   threadPinned: 'thread.pinned',
   scopeBanCreated: 'scope_ban.created',

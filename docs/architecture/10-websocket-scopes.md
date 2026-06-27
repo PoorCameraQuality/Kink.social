@@ -20,7 +20,7 @@ Server:
 4. On failure: `{ "type": "error", "code": "forbidden", "scope": "…" }`
 5. On authorize exception: `{ "type": "error", "code": "authorize_failed", "scope": "…" }`
 
-**Unsubscribe:** `{ "type": "unsubscribe", "scope" }` — removes **all** listeners on the socket (not scope-filtered); replies `{ "type": "unsubscribed", "scope", "removed" }`.
+**Unsubscribe:** `{ "type": "unsubscribe", "scope" }` — removes the listener for that scope only; replies `{ "type": "unsubscribed", "scope", "removed" }`.
 
 **Ping:** `ping` or `{"type":"ping"}` → `{ "type": "pong" }`
 

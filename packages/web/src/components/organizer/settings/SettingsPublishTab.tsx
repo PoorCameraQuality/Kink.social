@@ -1,4 +1,4 @@
-import EckePublishStub from '@/components/organizer/EckePublishStub'
+import OrganizerOrgEckePanel from '@/components/organizer/OrganizerOrgEckePanel'
 import {
   PublishReadinessCard,
   SettingsSection,
@@ -12,7 +12,7 @@ type Props = {
   checks: { label: string; done: boolean }[]
 }
 
-export default function SettingsPublishTab({ orgSlug, displayName, settingsBase, checks }: Props) {
+export default function SettingsPublishTab({ orgSlug, checks }: Props) {
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(260px,300px)]">
       <div className="space-y-5">
@@ -49,14 +49,7 @@ export default function SettingsPublishTab({ orgSlug, displayName, settingsBase,
           </ol>
         </SettingsSection>
 
-        <EckePublishStub
-          scopeLabel={displayName}
-          scopeType="organization"
-          scopeSlug={orgSlug}
-          organizerSettingsHref={`${settingsBase}&settingsSection=publish`}
-          settingsLinkLabel="Manage listing settings"
-          variant="settings"
-        />
+        <OrganizerOrgEckePanel orgSlug={orgSlug} />
       </div>
 
       <aside>

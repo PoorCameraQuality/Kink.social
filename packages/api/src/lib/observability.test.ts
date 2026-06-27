@@ -4,11 +4,11 @@ import { eckeHealthDiagnostic } from './health-ecke.js'
 import { isErrorTrackingTestRouteAllowed, scrubSentryEvent } from './error-tracking.js'
 
 describe('eckeHealthDiagnostic', () => {
-  test('returns disabled when ECKE publish is off', () => {
+  test('returns disabled when ECKE publish is off', async () => {
     const prev = process.env.ECKE_PUBLISH_ENABLED
     process.env.ECKE_PUBLISH_ENABLED = 'false'
     try {
-      const result = eckeHealthDiagnostic()
+      const result = await eckeHealthDiagnostic()
       assert.equal(result.enabled, false)
       assert.equal(result.mode, 'disabled')
       assert.equal(result.ok, true)

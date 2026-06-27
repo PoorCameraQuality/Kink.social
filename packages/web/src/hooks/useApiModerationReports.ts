@@ -118,5 +118,31 @@ export function useApiModerationReports(enabled: boolean, filters: ListFilters) 
     return data.report ?? null
   }, [])
 
-  return { status, items, summary, error, reload, patchReport, loadDetail }
+  const postReportAction = useCallback(
+    async (
+      reportId: string,
+      body: {
+        action: 'delete_content' | 'suspend_subject' | 'delete_and_suspend'
+        note: string
+        preserveEvidence?: boolean
+        hardDelete?: boolean
+        suspendPermanent?: boolean
+      },
+    ) => {
+      const r = await fetch(`/api/v1/moderation/reports/${encodeURIComponent(reportId)}/actions`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!r.ok) {
+        const j = (await r.json().catch(() => ({}))) as { error?: string }
+        throw new Error(j.error ?? `Action failed (${r.status})`)
+      }
+      await reload()
+    },
+    [reload],
+  )
+
+  return { status, items, summary, error, reload, patchReport, loadDetail, postReportAction }
 }

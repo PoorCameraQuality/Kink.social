@@ -225,7 +225,7 @@ async function main() {
   results.push(
     await probe(
       cookie,
-      `${BASE}/api/v1/organizer/ecke-publish/conventions/${CONV}`,
+      `${BASE}/api/v1/conventions/${CONV}/ecke-publish`,
       'ecke-publish GET',
     ),
   )

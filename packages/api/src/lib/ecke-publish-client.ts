@@ -6,6 +6,7 @@ import type {
   KinkSocialUnpublishEnvelope,
 } from '@c2k/shared'
 import type { EckeDancecardEventPayload, EckeListingPayload } from './ecke-publish-payload.js'
+import { buildEckeOutboundAuthHeaders, readEckePublishHmacSecret } from './ecke-ingest-auth.js'
 import { enrichEckeListingPayloadWithPhotos } from './ecke-photo-manifest.js'
 import type { EckeArticleRow, EckeDungeonRow, EckeEventRow, EckeVendorRow } from './ecke-directory-sync.js'
 import {
@@ -30,6 +31,7 @@ export type EckeIngestApiConfig = {
   publishEndpoint: string
   unpublishEndpoint: string
   publishSecret: string
+  hmacSecret?: string
   publicBaseUrl: string
 }
 
@@ -96,6 +98,7 @@ export function loadEckeIngestApiConfig(): EckeIngestApiConfig | null {
     publishEndpoint,
     unpublishEndpoint,
     publishSecret,
+    hmacSecret: readEckePublishHmacSecret(),
     publicBaseUrl,
   }
 }
@@ -129,13 +132,15 @@ async function postEckeIngestEnvelope(
   body: KinkSocialPublicIngestEnvelope | KinkSocialUnpublishEnvelope,
 ): Promise<EckeIngestApiResult> {
   try {
+    const serialized = JSON.stringify(body)
     const res = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${cfg.publishSecret}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+      headers: buildEckeOutboundAuthHeaders(serialized, {
+        bearerSecret: cfg.publishSecret,
+        hmacSecret: cfg.hmacSecret,
+        idempotencyKey: 'idempotencyKey' in body ? body.idempotencyKey : undefined,
+      }),
+      body: serialized,
     })
 
     let parsed: KinkSocialIngestResponse | null = null
@@ -536,23 +541,32 @@ export async function publishListingToEcke(
   }
 
   try {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (cfg.listingWebhookSecret) headers.Authorization = `Bearer ${cfg.listingWebhookSecret}`
-
     const enrichedPayload = await enrichEckeListingPayloadWithPhotos(payload)
+
+    const webhookBody = JSON.stringify({
+      kind: 'ecke_listing',
+      action: 'upsert',
+      entityType: meta?.entityType ?? 'group',
+      sourceSystem: meta?.sourceSystem ?? 'kink.social',
+      sourceId: meta?.sourceId,
+      canonicalKinkSocialUrl: meta?.canonicalKinkSocialUrl,
+      payload: enrichedPayload,
+    })
+
+    const listingHmacSecret =
+      process.env.ECKE_PUBLISH_LISTING_HMAC_SECRET?.trim() || readEckePublishHmacSecret()
 
     const res = await fetch(cfg.listingWebhookUrl, {
       method: 'POST',
-      headers,
-      body: JSON.stringify({
-        kind: 'ecke_listing',
-        action: 'upsert',
-        entityType: meta?.entityType ?? 'group',
-        sourceSystem: meta?.sourceSystem ?? 'kink.social',
-        sourceId: meta?.sourceId,
-        canonicalKinkSocialUrl: meta?.canonicalKinkSocialUrl,
-        payload: enrichedPayload,
+      headers: buildEckeOutboundAuthHeaders(webhookBody, {
+        bearerSecret: cfg.listingWebhookSecret,
+        hmacSecret: listingHmacSecret,
+        idempotencyKey:
+          meta?.sourceId ?
+            `kink.social:${meta.entityType ?? 'group'}:${meta.sourceId}`
+          : undefined,
       }),
+      body: webhookBody,
     })
 
     const text = await res.text()
@@ -593,20 +607,29 @@ export async function unpublishListingToEcke(
   }
 
   try {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (cfg.listingWebhookSecret) headers.Authorization = `Bearer ${cfg.listingWebhookSecret}`
+    const webhookBody = JSON.stringify({
+      kind: 'ecke_listing',
+      action: 'unpublish',
+      entityType: input.entityType ?? 'group',
+      sourceSystem: 'kink.social',
+      sourceId: input.sourceId,
+      payload: { slug: input.slug, visibility: 'hidden' },
+    })
+
+    const listingHmacSecret =
+      process.env.ECKE_PUBLISH_LISTING_HMAC_SECRET?.trim() || readEckePublishHmacSecret()
 
     const res = await fetch(cfg.listingWebhookUrl, {
       method: 'POST',
-      headers,
-      body: JSON.stringify({
-        kind: 'ecke_listing',
-        action: 'unpublish',
-        entityType: input.entityType ?? 'group',
-        sourceSystem: 'kink.social',
-        sourceId: input.sourceId,
-        payload: { slug: input.slug, visibility: 'hidden' },
+      headers: buildEckeOutboundAuthHeaders(webhookBody, {
+        bearerSecret: cfg.listingWebhookSecret,
+        hmacSecret: listingHmacSecret,
+        idempotencyKey:
+          input.sourceId ?
+            `kink.social:${input.entityType ?? 'group'}:${input.sourceId}:unpublish`
+          : undefined,
       }),
+      body: webhookBody,
     })
 
     const text = await res.text()

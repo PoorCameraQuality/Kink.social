@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { parseEckeControlPlaneSummary } from '@/lib/ecke-control-plane-summary'
 
 export type EckePublishStatus = 'never' | 'draft' | 'published' | 'error' | 'stale'
 
@@ -12,8 +13,10 @@ export type EckeEntityTarget = {
 type Props = {
   entityLabel: string
   loadUrl: string
-  queueUrl: string
+  queueUrl?: string
   syncUrl?: string
+  /** Read-only summary from `/api/v1/.../ecke-publish` control-plane overview. */
+  controlPlane?: boolean
   enabled?: boolean
 }
 
@@ -43,6 +46,7 @@ export default function EckeEntityPublishStatus({
   loadUrl,
   queueUrl,
   syncUrl,
+  controlPlane = false,
   enabled = true,
 }: Props) {
   const [bridgeConnected, setBridgeConnected] = useState(false)
@@ -67,23 +71,35 @@ export default function EckeEntityPublishStatus({
         bridgeConnected?: boolean
         targets?: EckeEntityTarget[] | null
         target?: EckeEntityTarget | null
+        history?: unknown[]
+        cards?: unknown[]
       }
       setBridgeConnected(Boolean(j.bridgeConnected))
-      const firstTarget = j.targets?.[0] ?? j.target ?? null
-      if (firstTarget) {
+      if (controlPlane) {
+        const summary = parseEckeControlPlaneSummary(j)
         setTarget({
-          status: firstTarget.status ?? 'never',
-          externalSlug: firstTarget.externalSlug ?? '',
-          lastPublishedAt: firstTarget.lastPublishedAt ?? null,
-          lastError: firstTarget.lastError ?? null,
+          status: summary.aggregateStatus ?? 'never',
+          externalSlug: summary.externalSlug ?? '',
+          lastPublishedAt: summary.lastPublishedAt,
+          lastError: summary.lastError,
         })
       } else {
-        setTarget({
-          status: 'never',
-          externalSlug: '',
-          lastPublishedAt: null,
-          lastError: null,
-        })
+        const firstTarget = j.targets?.[0] ?? j.target ?? null
+        if (firstTarget) {
+          setTarget({
+            status: firstTarget.status ?? 'never',
+            externalSlug: firstTarget.externalSlug ?? '',
+            lastPublishedAt: firstTarget.lastPublishedAt ?? null,
+            lastError: firstTarget.lastError ?? null,
+          })
+        } else {
+          setTarget({
+            status: 'never',
+            externalSlug: '',
+            lastPublishedAt: null,
+            lastError: null,
+          })
+        }
       }
     } catch {
       setLoadError('Network error loading publish status.')
@@ -91,7 +107,7 @@ export default function EckeEntityPublishStatus({
     } finally {
       setLoadAttempted(true)
     }
-  }, [enabled, loadUrl])
+  }, [enabled, loadUrl, controlPlane])
 
   useEffect(() => {
     if (enabled) void loadStatus()
@@ -106,9 +122,10 @@ export default function EckeEntityPublishStatus({
     return () => window.clearTimeout(timer)
   }, [message, messageKind])
 
-  const isPreviewAction = queueUrl.endsWith('/preview')
+  const isPreviewAction = Boolean(queueUrl?.endsWith('/preview'))
 
   async function runQueue() {
+    if (!queueUrl) return
     setBusy(true)
     setMessage(null)
     setMessageKind(null)
@@ -210,26 +227,32 @@ export default function EckeEntityPublishStatus({
         </p>
       : null}
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled={busy || !!loadError || (!isPreviewAction && !bridgeConnected)}
-          onClick={() => void runQueue()}
-          className="rounded-lg border border-teal-500/40 bg-teal-900/40 px-3 py-1.5 text-xs font-medium text-dc-text hover:bg-teal-800/50 disabled:opacity-50"
-        >
-          {busy ? 'Working…' : isPreviewAction ? 'Build preview' : 'Queue publish'}
-        </button>
-        {syncUrl ?
+      {!controlPlane ?
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            disabled={busy || !!loadError || !bridgeConnected}
-            onClick={() => void runSync()}
-            className="rounded-lg bg-dc-accent px-3 py-1.5 text-xs font-medium text-dc-accent-foreground hover:bg-dc-accent-hover disabled:opacity-50"
+            disabled={busy || !!loadError || !queueUrl || (!isPreviewAction && !bridgeConnected)}
+            onClick={() => void runQueue()}
+            className="rounded-lg border border-teal-500/40 bg-teal-900/40 px-3 py-1.5 text-xs font-medium text-dc-text hover:bg-teal-800/50 disabled:opacity-50"
           >
-            {busy ? 'Working…' : 'Publish to ECKE'}
+            {busy ? 'Working…' : isPreviewAction ? 'Build preview' : 'Queue publish'}
           </button>
-        : null}
-      </div>
+          {syncUrl ?
+            <button
+              type="button"
+              disabled={busy || !!loadError || !bridgeConnected}
+              onClick={() => void runSync()}
+              className="rounded-lg bg-dc-accent px-3 py-1.5 text-xs font-medium text-dc-accent-foreground hover:bg-dc-accent-hover disabled:opacity-50"
+            >
+              {busy ? 'Working…' : 'Publish to ECKE'}
+            </button>
+          : null}
+        </div>
+      : (
+        <p className="text-[11px] text-dc-muted">
+          Open the ECKE tab for per-entity preview and publish controls.
+        </p>
+      )}
 
       {message ?
         <p

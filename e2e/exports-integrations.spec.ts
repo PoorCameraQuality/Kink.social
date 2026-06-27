@@ -26,7 +26,7 @@ test.describe('exports and integrations', () => {
 
   test('ECKE publish status reports bridgeConnected field', async ({ request }) => {
     const res = await request.get(
-      `/api/v1/organizer/ecke-publish/conventions/${encodeURIComponent(SEED.convSlug)}`,
+      `/api/v1/conventions/${encodeURIComponent(SEED.convSlug)}/ecke-publish`,
     )
     test.skip(!res.ok(), 'ECKE status route unavailable')
     const body = (await res.json()) as { bridgeConnected?: boolean }

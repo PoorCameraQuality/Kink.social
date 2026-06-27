@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import EckePublishStub from '@/components/organizer/EckePublishStub'
+import OrganizerGroupEckePanel from '@/components/organizer/OrganizerGroupEckePanel'
 import GroupSettingsPanel from '@/components/organizer/admin/GroupSettingsPanel'
 import ScopeBrandingPanel from '@/components/organizer/ScopeBrandingPanel'
 import PaymentsPlaceholder from '@/components/organizer/PaymentsPlaceholder'
@@ -182,12 +182,7 @@ export default function OrganizerGroupSettingsPanel({ groupId, groupName, onGrou
             <ScopeEmailBroadcastPanel scopeType="group" scopeKey={groupId} canManage />
           </SettingsSection>
 
-          <EckePublishStub
-            scopeLabel={displayName}
-            scopeType="group"
-            scopeSlug={groupId}
-            variant="settings"
-          />
+          <OrganizerGroupEckePanel groupId={groupId} />
 
           <PaymentsPlaceholder />
         </>

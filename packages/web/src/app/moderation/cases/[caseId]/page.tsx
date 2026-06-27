@@ -1010,6 +1010,27 @@ export default function ModerationCaseDetailPage() {
 
           : null}
 
+          {!showMediaActions ?
+            <>
+              <button
+                type="button"
+                disabled={busy !== null}
+                onClick={() => void handleAction('delete_content', true)}
+                className="px-3 py-1.5 rounded-lg border border-red-500/40 text-xs text-red-200 hover:bg-red-950/30 disabled:opacity-40"
+              >
+                Delete content
+              </button>
+              <button
+                type="button"
+                disabled={busy !== null}
+                onClick={() => void handleAction('suspend_subject', true)}
+                className="px-3 py-1.5 rounded-lg border border-amber-500/40 text-xs text-amber-100 hover:bg-amber-950/30 disabled:opacity-40"
+              >
+                Suspend subject
+              </button>
+            </>
+          : null}
+
           {(['mark_no_violation', 'close_duplicate', 'escalate'] as const).map((action) => (
 
             <button

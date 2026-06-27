@@ -4,8 +4,13 @@ import { z } from 'zod'
 import { db, schema } from '../db/index.js'
 import { resolveModerationReportContext } from '../lib/moderation-report-context.js'
 import {
+  executeModerationReportAction,
+  ReportActionError,
+} from '../lib/moderation-report-actions.js'
+import {
   requireDb,
   requirePlatformModerator,
+  requireTrustSafetyAdmin,
   requireUser,
 } from '../lib/moderation-route-auth.js'
 
@@ -166,5 +171,42 @@ export async function registerModerationReportsRoutes(app: FastifyInstance) {
       .returning()
 
     return reply.send({ report: updated })
+  })
+
+  const reportActionBody = z.object({
+    action: z.enum(['delete_content', 'suspend_subject', 'delete_and_suspend']),
+    note: z.string().trim().min(1).max(8000),
+    preserveEvidence: z.boolean().optional(),
+    hardDelete: z.boolean().optional(),
+    suspendPermanent: z.boolean().optional(),
+  })
+
+  app.post('/api/v1/moderation/reports/:reportId/actions', async (req, reply) => {
+    if (!requireDb(reply)) return
+    const user = requireUser(req, reply)
+    if (!user) return
+    if (!(await requireTrustSafetyAdmin(user.userId, reply))) return
+
+    const { reportId } = req.params as { reportId: string }
+    const parsed = reportActionBody.safeParse(req.body)
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+
+    try {
+      const result = await executeModerationReportAction({
+        actorUserId: user.userId,
+        reportId,
+        action: parsed.data.action,
+        note: parsed.data.note,
+        preserveEvidence: parsed.data.preserveEvidence,
+        hardDelete: parsed.data.hardDelete,
+        suspendPermanent: parsed.data.suspendPermanent,
+      })
+      return reply.send(result)
+    } catch (err) {
+      if (err instanceof ReportActionError) {
+        return reply.status(err.statusCode).send({ error: err.message })
+      }
+      throw err
+    }
   })
 }

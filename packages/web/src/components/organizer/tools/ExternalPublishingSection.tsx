@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import EckePublishStub from '@/components/organizer/EckePublishStub'
+import OrganizerOrgEckePanel from '@/components/organizer/OrganizerOrgEckePanel'
 import { ToolsSection, ToolsSubsectionHeader } from '@/components/organizer/tools/tools-ui'
 
 type Props = {
@@ -12,8 +12,6 @@ type Props = {
 
 export default function ExternalPublishingSection({
   orgSlug,
-  displayName,
-  publishHref,
   scheduleHref,
   showPublishActions,
 }: Props) {
@@ -40,14 +38,7 @@ export default function ExternalPublishingSection({
       </dl>
 
       {showPublishActions ?
-        <EckePublishStub
-          scopeLabel={displayName}
-          scopeType="organization"
-          scopeSlug={orgSlug}
-          organizerSettingsHref={publishHref}
-          settingsLinkLabel="Edit publish settings"
-          variant="settings"
-        />
+        <OrganizerOrgEckePanel orgSlug={orgSlug} />
       : (
         <p className="rounded-xl border border-dc-border bg-dc-surface/30 px-4 py-3 text-sm text-dc-text-muted">
           Organization publishing settings are available to owners and admins.{' '}

@@ -6,7 +6,7 @@ import { db, schema } from '../db/index.js'
 import { executeModerationAction } from '../lib/moderation-action-execute.js'
 import { recordModerationAudit } from '../lib/moderation-audit.js'
 import { notifyModerationActionPending } from '../lib/moderation-notify.js'
-import { isSiteAdmin } from '../lib/platform-staff.js'
+import { isSiteAdmin, isTrustSafetyAdmin } from '../lib/platform-staff.js'
 import {
   requireDb,
   requirePlatformModerator,
@@ -104,9 +104,13 @@ export async function registerModerationActionsRoutes(app: FastifyInstance) {
     const parsed = proposeBody.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
 
-    const adminOnly = ['IDENTITY_BAN', 'FREEZE_ORG', 'SUSPEND_USER']
-    if (adminOnly.includes(parsed.data.actionType) && !(await isSiteAdmin(user.userId))) {
+    const siteAdminOnly = ['IDENTITY_BAN', 'FREEZE_ORG']
+    const trustSafetyOnly = ['SUSPEND_USER', 'DELETE_CONTENT']
+    if (siteAdminOnly.includes(parsed.data.actionType) && !(await isSiteAdmin(user.userId))) {
       return reply.status(403).send({ error: 'Site admin only for this action type' })
+    }
+    if (trustSafetyOnly.includes(parsed.data.actionType) && !(await isTrustSafetyAdmin(user.userId))) {
+      return reply.status(403).send({ error: 'Trust & safety admin only for this action type' })
     }
 
     const [row] = await db
@@ -145,6 +149,15 @@ export async function registerModerationActionsRoutes(app: FastifyInstance) {
     const { reportId } = req.params as { reportId: string }
     const parsed = proposeBody.omit({ reportId: true }).safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: 'Invalid body' })
+
+    const siteAdminOnly = ['IDENTITY_BAN', 'FREEZE_ORG']
+    const trustSafetyOnly = ['SUSPEND_USER', 'DELETE_CONTENT']
+    if (siteAdminOnly.includes(parsed.data.actionType) && !(await isSiteAdmin(user.userId))) {
+      return reply.status(403).send({ error: 'Site admin only for this action type' })
+    }
+    if (trustSafetyOnly.includes(parsed.data.actionType) && !(await isTrustSafetyAdmin(user.userId))) {
+      return reply.status(403).send({ error: 'Trust & safety admin only for this action type' })
+    }
 
     const [row] = await db
       .insert(schema.moderationActions)

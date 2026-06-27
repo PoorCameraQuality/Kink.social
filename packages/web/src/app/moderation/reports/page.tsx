@@ -23,6 +23,7 @@ function ReportRowCard({
   note,
   onNoteChange,
   onStatus,
+  onEnforcement,
   busy,
 }: {
   row: ModerationReportRow
@@ -31,6 +32,7 @@ function ReportRowCard({
   note: string
   onNoteChange: (v: string) => void
   onStatus: (status: string) => void
+  onEnforcement: (action: 'delete_content' | 'suspend_subject' | 'delete_and_suspend') => void
   busy: boolean
 }) {
   const ctx = row.context
@@ -90,10 +92,36 @@ function ReportRowCard({
           <textarea
             value={note}
             onChange={(e) => onNoteChange(e.target.value)}
-            placeholder="Optional moderator note (stored on report)"
+            placeholder="Reason / moderator note (required for enforcement actions)"
             rows={2}
             className="w-full px-3 py-2 rounded-xl bg-dc-surface-muted border border-dc-border text-sm text-dc-text placeholder-dc-muted"
           />
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onEnforcement('delete_content')}
+              className="px-3 py-1.5 rounded-lg border border-red-500/40 text-xs text-red-200 hover:bg-red-950/30 disabled:opacity-40"
+            >
+              Delete content now
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onEnforcement('suspend_subject')}
+              className="px-3 py-1.5 rounded-lg border border-amber-500/40 text-xs text-amber-100 hover:bg-amber-950/30 disabled:opacity-40"
+            >
+              Suspend subject
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onEnforcement('delete_and_suspend')}
+              className="px-3 py-1.5 rounded-lg border border-red-500/50 text-xs text-red-100 hover:bg-red-950/40 disabled:opacity-40"
+            >
+              Delete + suspend
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             {STATUS_OPTIONS.filter((s) => s.value !== 'ALL').map((opt) => (
               <button
@@ -126,7 +154,10 @@ export default function ModerationReportsPage() {
     [statusFilter, targetFilter]
   )
 
-  const { status, items, error, reload, patchReport, loadDetail } = useApiModerationReports(true, filters)
+  const { status, items, error, reload, patchReport, loadDetail, postReportAction } = useApiModerationReports(
+    true,
+    filters,
+  )
   const [detailCache, setDetailCache] = useState<Record<string, ModerationReportRow>>({})
 
   const rows = items.map((row) => detailCache[row.id] ?? row)
@@ -153,6 +184,32 @@ export default function ModerationReportsPage() {
       setExpandedId(null)
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Update failed')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const applyEnforcement = async (
+    id: string,
+    action: 'delete_content' | 'suspend_subject' | 'delete_and_suspend',
+  ) => {
+    const note = notes[id]?.trim()
+    if (!note) {
+      alert('Enter a reason in the note field before taking enforcement action.')
+      return
+    }
+    const label =
+      action === 'delete_content' ? 'delete this content immediately'
+      : action === 'suspend_subject' ? 'suspend the subject account (ends active sessions)'
+      : 'delete content and suspend the subject'
+    if (!window.confirm(`Confirm: ${label}?`)) return
+
+    setBusyId(id)
+    try {
+      await postReportAction(id, { action, note, preserveEvidence: true })
+      setExpandedId(null)
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Enforcement failed')
     } finally {
       setBusyId(null)
     }
@@ -249,6 +306,7 @@ export default function ModerationReportsPage() {
               note={notes[row.id] ?? ''}
               onNoteChange={(v) => setNotes((m) => ({ ...m, [row.id]: v }))}
               onStatus={(s) => void applyStatus(row.id, s)}
+              onEnforcement={(action) => void applyEnforcement(row.id, action)}
               busy={busyId === row.id}
             />
           ))}
